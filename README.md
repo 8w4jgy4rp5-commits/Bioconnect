@@ -5,6 +5,15 @@
 製品名は **Bioconnect**。旧フォルダ名の Ecosystem Puzzle は同じゲームを指す。
 今後の開発はこのフォルダで行う。旧フォルダは移行前の控えとして残している。
 
+リモート: https://github.com/8w4jgy4rp5-commits/Bioconnect （Public、ブランチは `main`）。
+2026-09-26に作成し、移行後の全ファイルを最初のコミットとして入れた。
+公開しているのはコードと検討用の画像だけで、`shared/supabase-config.js` に入っているのは
+ブラウザに配られる anon / publishable キーのみ。service_role キーはここに置かない。
+
+遊べるURLはまだ移していない。本番は旧リポジトリ（App-Sharing）のGitHub Pagesが配信しており、
+このリポジトリではPagesを有効にしていない。ゲームの変更を実際に遊べる場所へ届けるには、
+今のところ旧フォルダ側にも反映してpushする必要がある。
+
 ## 次の会話を始めるとき
 「`C:\Users\tians\Bioconnect\README.md` を読んで、Bioconnectの続きをしてください。」で再開する。
 担当AIは README → AGENTS → PROGRESS → DEVELOPMENT の順に読み、`git status` を確認し、今回触るコード・画像の説明を読む。
