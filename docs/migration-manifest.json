@@ -1,0 +1,445 @@
+{
+  "date": "2026-09-26",
+  "note": "Hashes verified immediately after copying; index.html and DEVELOPMENT.md were subsequently adapted. Original DEVELOPMENT preserved in history.",
+  "files": [
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\audio.js",
+      "destination": "audio.js",
+      "sha256": "28e8e2027a6ea6caf46ca4f44f6c3809a121843d52b533affd182b0541a61fec"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\all-8-at-44px.png",
+      "destination": "concepts/animal-art-v1/all-8-at-44px.png",
+      "sha256": "ae40161db41372d78688384adda4a309f8010661be27b5591a843f896f0419b5"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\all-8-review.png",
+      "destination": "concepts/animal-art-v1/all-8-review.png",
+      "sha256": "dbaa13ce29aefe9edb0ce3a83992b1e77326794f50b470b8c700125470a665d7"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\bear-brave-parent-cub-v2.png",
+      "destination": "concepts/animal-art-v1/bear-brave-parent-cub-v2.png",
+      "sha256": "cf2620b47bff58b2df7190ed1cbb78ca9d3e461f8dccf31d418211178274a0fd"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\bear-crop-check.png",
+      "destination": "concepts/animal-art-v1/bear-crop-check.png",
+      "sha256": "32f2cf6ac6459a5e5edc84820f8880d8f72fb10b481be1d4e15d5e07c39770ef"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\bear-rig-preview.png",
+      "destination": "concepts/animal-art-v1/bear-rig-preview.png",
+      "sha256": "d083e1913c3e07d49a5c531a86a698bc1b7accd3ce6bc7985d0496c608ca0538"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\bear-size-check.png",
+      "destination": "concepts/animal-art-v1/bear-size-check.png",
+      "sha256": "8532423f5e3ba68439c355c4e8a88e252c5401b708bb18472b25772c9a68c52f"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\bear.png",
+      "destination": "concepts/animal-art-v1/bear.png",
+      "sha256": "3d3714b99363522db2175bf1010a2f5e97e2e4495f67649d7d905194a5bff5cd"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\buffalo-game-transparent-v4.png",
+      "destination": "concepts/animal-art-v1/buffalo-game-transparent-v4.png",
+      "sha256": "8e5b146ea93163a02e0e892cb375c48f121e2d817e44eb272f4b2d346355f45c"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\buffalo-long-lashes-v3.png",
+      "destination": "concepts/animal-art-v1/buffalo-long-lashes-v3.png",
+      "sha256": "dc3383b6c34ee3db72bb5ade764adf27b75cf40b4405a4c93176678c876a1941"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\buffalo-makeup-fur-v2.png",
+      "destination": "concepts/animal-art-v1/buffalo-makeup-fur-v2.png",
+      "sha256": "593498eca541ecd5068b4de8ea79f56a38330351f3a381dce76f65761a97e74a"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\buffalo-makeup-v1.png",
+      "destination": "concepts/animal-art-v1/buffalo-makeup-v1.png",
+      "sha256": "c5857965d1bd55aeb2fe44cfa88c48063ce377ebf77c16e5a3e1f9790ce4a640"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\buffalo.png",
+      "destination": "concepts/animal-art-v1/buffalo.png",
+      "sha256": "09efc905741acf523f556ec97c5ba8fe7143e344ce254b0afd525120a6de55dd"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\deer.png",
+      "destination": "concepts/animal-art-v1/deer.png",
+      "sha256": "37d49a8ec228923cdb8976eeae9da32c8eb71a3b2cf68f8177f355eacf8fd736"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\elephant-latest.png",
+      "destination": "concepts/animal-art-v1/elephant-latest.png",
+      "sha256": "f02691f1efa120f1b244ad68cffc2a9b9207704b38d484c7ab21d7a5942b95de"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\elephant-muscle.png",
+      "destination": "concepts/animal-art-v1/elephant-muscle.png",
+      "sha256": "ff322d47197d06249729178da4ad1fb310d829c8c3d872c202f5ebbdec60557d"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\elephant-ultra-muscle.png",
+      "destination": "concepts/animal-art-v1/elephant-ultra-muscle.png",
+      "sha256": "97acde7d8ef8bbb628428165865f1738f8f748dff0321d7368371591140b85a3"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\elephant.png",
+      "destination": "concepts/animal-art-v1/elephant.png",
+      "sha256": "8d438de3ee389a8297edc6e232e9a065fc5380c3f98a4125b244064d715eb1e9"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\lion-crown-yawn-gemini-v1.jpg",
+      "destination": "concepts/animal-art-v1/lion-crown-yawn-gemini-v1.jpg",
+      "sha256": "8478d540a3c0d5118ab6a2fdcbe6cd17dd792bdd9ce286b364316a291987963c"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\lion.png",
+      "destination": "concepts/animal-art-v1/lion.png",
+      "sha256": "9e868da1de3d18b671f81f9deb51eeb8ebcbaf466c0e680ad691b51662c174da"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\make-game-asset.py",
+      "destination": "concepts/animal-art-v1/make-game-asset.py",
+      "sha256": "0ece5db1155e84747df33e16346b61c230e269abf3155d9a98f4a64354baf62f"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\README.md",
+      "destination": "concepts/animal-art-v1/README.md",
+      "sha256": "3418d8849c6dc8bf39dda96e1e27a487bd7d1eff019ba628ac20aaba596b3077"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\tiger-bold-face-v1.png",
+      "destination": "concepts/animal-art-v1/tiger-bold-face-v1.png",
+      "sha256": "d27f9ccc89dcc7971b997de1ce50957be651e44c35d8a4536bda6d5027a2a402"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\tiger-face-aura-v4.png",
+      "destination": "concepts/animal-art-v1/tiger-face-aura-v4.png",
+      "sha256": "0e7f6fa5230e905a17f51c6b680b546bb6801b4f666851da172e4e7462aa2c83"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\tiger-gekiga-face-v2.png",
+      "destination": "concepts/animal-art-v1/tiger-gekiga-face-v2.png",
+      "sha256": "446f4e438c4e24f8cabc8ddaf3e3a5d2beccf26c14d446bd3c90dcb83504e34a"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\tiger-shakiin-aura-v3.png",
+      "destination": "concepts/animal-art-v1/tiger-shakiin-aura-v3.png",
+      "sha256": "21cd6b9d9d815dd28d0ba8716563bb26464dc07c68f891ede5838bd23282e36b"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\tiger.png",
+      "destination": "concepts/animal-art-v1/tiger.png",
+      "sha256": "bc3cb18fa8dc729f9c97626f2ef71c732721d2b528ac97222f32a24bec02f2b3"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\wolf.png",
+      "destination": "concepts/animal-art-v1/wolf.png",
+      "sha256": "f57b55c3e2c0f2c62ba5939eb11d2573b99332d9d3c67ee344f857e21884c95c"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\animal-art-v1\\zebra.png",
+      "destination": "concepts/animal-art-v1/zebra.png",
+      "sha256": "ee47fb52a6c006e9b686d4c765b43302b8774d27304f96731d6277481b709c74"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\_sprites.part",
+      "destination": "concepts/start-screen-v1/_sprites.part",
+      "sha256": "c12f11a829fc7e36d87aef9d52b7be463471692a373c5b0df485fd12df502658"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\a-meadow-poster.html",
+      "destination": "concepts/start-screen-v1/a-meadow-poster.html",
+      "sha256": "939cb7b08a5d9463e6e344d46f6351c8d679f20336fa8db05a9d70c92ec1b474"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\b-nightfall.html",
+      "destination": "concepts/start-screen-v1/b-nightfall.html",
+      "sha256": "147b140a16c227d0c94512b3b7f2f4ec1a8914b6c356eaba4a71c9033aa17afd"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\c-living-board.html",
+      "destination": "concepts/start-screen-v1/c-living-board.html",
+      "sha256": "712297fe57741c92e6acc9b96834779ec697597be65b8721ba5defbe136a2583"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\index.html",
+      "destination": "concepts/start-screen-v1/index.html",
+      "sha256": "51c664f3326f20193427ea7865da502edf06951a76ff95a2ba38c9cfe3ab9cc3"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\concepts\\start-screen-v1\\README.md",
+      "destination": "concepts/start-screen-v1/README.md",
+      "sha256": "1dd3d78f92650c4ba586902f42e7162c8455cc0980fb0f300a2f02437ca69667"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\DEVELOPMENT.md",
+      "destination": "DEVELOPMENT.md",
+      "sha256": "d6e534ef68726852017463ba3f59c7d96eda3822678c3145c3baa9e62b43ccca"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\bear-whole.png",
+      "destination": "img/bear-whole.png",
+      "sha256": "c7b99268d7620feda836ec833a8b17f08eba7e4adfa45b4f675643445eefc89c"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-body.png",
+      "destination": "img/fox-body.png",
+      "sha256": "0927a1f1c245e769fe2ba0878adeb1d8886edcb80125760d1594c59ec4216178"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-head-calm.png",
+      "destination": "img/fox-head-calm.png",
+      "sha256": "3baac11b26de98d6b2d72b97ddf3dd09d72a897e115f344cb843d64c6f56e950"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-head-hunt.png",
+      "destination": "img/fox-head-hunt.png",
+      "sha256": "a7b84a62c3648d3d798450373ca0c5575b602dd5cbb21506c77ce05deccbb170"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-head-sulk.png",
+      "destination": "img/fox-head-sulk.png",
+      "sha256": "34f8f1e3b7bed69e0a1205d413d57d2d6c387ce194039b991ec025d9b904c07f"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-leg-front.png",
+      "destination": "img/fox-leg-front.png",
+      "sha256": "80e5b8d74b3d68a5292aa62044e4f0685fc17a8bf1290edc2a578062d9035524"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-leg-hind.png",
+      "destination": "img/fox-leg-hind.png",
+      "sha256": "a3b9b82d6c5b0a34baae80511ddf94dead3b47839f326c9cbfe3f595cbbbf601"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\fox-tail.png",
+      "destination": "img/fox-tail.png",
+      "sha256": "45c5b34adf78eec40cf179acff89050cd92303f92f0dbc6b826f87877539484e"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-body.png",
+      "destination": "img/rabbit-body.png",
+      "sha256": "6dea8f50dd48eba2b5cdd0298e40ffe4d2c844ef8a13ef0d0fa754376bee172b"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-ear.png",
+      "destination": "img/rabbit-ear.png",
+      "sha256": "a91ad3750ddaf026d5eba4dcf3f5fcb68b45e4db1dbd102b63c41c0ddf24bd1b"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-head-calm.png",
+      "destination": "img/rabbit-head-calm.png",
+      "sha256": "922ce93bb833f8454dfb1b755dd4165c8441d911ba9e492ade3cf741c06cf306"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-head-eat.png",
+      "destination": "img/rabbit-head-eat.png",
+      "sha256": "a84e1b0937019cf5f9acc6576bab1bc36340cf20d328825f862b7dd908fae2e4"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-head-happy.png",
+      "destination": "img/rabbit-head-happy.png",
+      "sha256": "32e420b85b3c9b08b173af8ef6709fb336d47959025940027c81fd4028e06f6b"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-head-panic.png",
+      "destination": "img/rabbit-head-panic.png",
+      "sha256": "e27e4072bc33740e5f92f0d675dd5b43bf9703c610c8833be5ad99c2ce441997"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-leg-front.png",
+      "destination": "img/rabbit-leg-front.png",
+      "sha256": "624b21e9d381277bd2d0d8c7cafe5fb0ec942d81c5cdd087f0650980f2153419"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-leg-hind.png",
+      "destination": "img/rabbit-leg-hind.png",
+      "sha256": "40f4ceaf1966f112c201b957c8eff212065ab12087e106774342a989067583b5"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\rabbit-tail.png",
+      "destination": "img/rabbit-tail.png",
+      "sha256": "bc2a53bfef05b3044d7df4e37b9b61da5b8ce7e1d17402bc6a54465d13e093fe"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\ref\\fox-ear-unused.png",
+      "destination": "img/ref/fox-ear-unused.png",
+      "sha256": "05ed4c7af276b27084ab8df810615be67500074c1ef8ea7330019c6a4ee885fa"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\ref\\fox-reference.jpg",
+      "destination": "img/ref/fox-reference.jpg",
+      "sha256": "00cfeeef49d2f55c99a4edb873faa968b845cdb5993aae1c8aabba6837a89583"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\ref\\parts-sheet.jpg",
+      "destination": "img/ref/parts-sheet.jpg",
+      "sha256": "bc27494622fb72ab6815a1805548408ceae58b68c8bfafc118263bad0aabbba8"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\ref\\rabbit-reference.jpg",
+      "destination": "img/ref/rabbit-reference.jpg",
+      "sha256": "1ca712f571779cbf1edcf3d47a3f4955932217aa2a28688438eaa40c7ac95563"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\img\\wolf-whole.png",
+      "destination": "img/wolf-whole.png",
+      "sha256": "41e2d7e976e0971dc14fdb14c4e1bf1e9ad4b12a0fb0a6adb32f8ce855b45e70"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\index.html",
+      "destination": "index.html",
+      "sha256": "e90f409529a7e865e816cbc335d2c944554268de422f7f1625643d1f34a5a9cd"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\rules.test.js",
+      "destination": "rules.test.js",
+      "sha256": "380737c2442b47192aa8af8972e72f6cc51cc928038898e238981177df390ac6"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\script.js",
+      "destination": "script.js",
+      "sha256": "44fcde835d22a59324b085c1e58bd0504bbd552fbe37d977266be694e29c4350"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\sim.js",
+      "destination": "sim.js",
+      "sha256": "33328d12ee62f8701ed5bf1d254d1604a0599ecd21247d76f7dcb70d48995717"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\style.css",
+      "destination": "style.css",
+      "sha256": "46d975322d60eb6d8418214bdee79a17c4a158659f4f076fbad0ba9df0f65ef7"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\app-sync.js",
+      "destination": "shared/app-sync.js",
+      "sha256": "4bde6f3901a5ec43facb46bab4ba10eb999c4c2362dae739922556f76676621b"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\supabase-config.js",
+      "destination": "shared/supabase-config.js",
+      "sha256": "2067a8e6a80365946827d0d18ef1d2f93f056abd7bb79fff60c44fccd85c0245"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\app-footer.css",
+      "destination": "shared/app-footer.css",
+      "sha256": "305a4b20f1a955ed7bcb142b029ea75080f222b8c8720a60be0ed7d89831b093"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\lang-detect.js",
+      "destination": "shared/lang-detect.js",
+      "sha256": "fe17112d325b658e14d8fcde73c662d535f8f6905b4940b3108e14d838ba5926"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\animal-illustrations\\deer-timid-20260923-prompt.txt",
+      "destination": "concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923-prompt.txt",
+      "sha256": "0467ddae6445153eec6add34826b1abdaddef73764f53ab243e7cccadb189845"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\animal-illustrations\\deer-timid-20260923.png",
+      "destination": "concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923.png",
+      "sha256": "09e9f712513dab7e3b6702cc1e3fe2d037ea6653ed23ec253d2c8feb654ea8c9"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\01-guardian.png",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/01-guardian.png",
+      "sha256": "ee164b77651b8cbb94010bf7b62d171b14dd02cb69da74f59edf43e95d916f70"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\02-brave-leader-v2-prompt.md",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/02-brave-leader-v2-prompt.md",
+      "sha256": "a7912de86ea605744e8e4a1129cff8d9d112b3ffeb2df359cd9f8d751a3c8ec4"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\02-brave-leader-v2-shy-cub.png",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/02-brave-leader-v2-shy-cub.png",
+      "sha256": "cf2620b47bff58b2df7190ed1cbb78ca9d3e461f8dccf31d418211178274a0fd"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\02-brave-leader.png",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/02-brave-leader.png",
+      "sha256": "0b8cffb224f1178a7b39f1373661890a562025c0b818693176372656c2c688de"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\03-warm-parent.png",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/03-warm-parent.png",
+      "sha256": "b058cdb22416ba36a58ec9a44c3d2ccd2e7e0dfc8344754aeccae894ed720e7f"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\output\\bear-concepts-v1\\prompts.md",
+      "destination": "concepts/imported-from-chatgpt/bear-concepts-v1/prompts.md",
+      "sha256": "407877936c4103e7a7a5490cd7b646139e64dd0390e645b1081078a6526e18bf"
+    },
+    {
+      "source": "C:\\Users\\tians\\OneDrive\\ドキュメント\\ChatGPT\\Bioconnect\\zebra-yellow-scarf-selected.png",
+      "destination": "concepts/imported-from-chatgpt/zebra-yellow-scarf-selected.png",
+      "sha256": "ac4796b8605be28119d9724c7d1e4342cb059c368dd7bda682e20aaebd115a05"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\PROGRESS.md",
+      "destination": "docs/history/mini-app-platform-PROGRESS.md",
+      "sha256": "149c5bbfde25cfe5390a8be1f77780cf54548e62330d0ced5a3cccb9020e634d"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\AGENTS.md",
+      "destination": "docs/history/mini-app-platform-AGENTS.md",
+      "sha256": "bd3debe705053b91bcb913d3d0ff4c593e3a994b6966f968883ed7d0c6986c98"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\apps\\ecosystem-puzzle\\DEVELOPMENT.md",
+      "destination": "docs/history/ecosystem-puzzle-DEVELOPMENT.md",
+      "sha256": "d6e534ef68726852017463ba3f59c7d96eda3822678c3145c3baa9e62b43ccca"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\platform-rules\\SKILL.md",
+      "destination": "docs/history/legacy-skills/platform-rules/SKILL.md",
+      "sha256": "200d1722893277599954435dcb8d14d32fbb620ca209be5b4ee0c167238e35fc"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\beginner-guide\\SKILL.md",
+      "destination": "docs/history/legacy-skills/beginner-guide/SKILL.md",
+      "sha256": "73d3d5bc57b24d21df807cec8bcd194116100e1f3215eb9038080ec535742afe"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\token-optimizer\\SKILL.md",
+      "destination": "docs/history/legacy-skills/token-optimizer/SKILL.md",
+      "sha256": "b48be76e03ed106f8b2b5d775c0d2511c3d42d75635e928a957649f07ead186c"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\mini-app-builder\\SKILL.md",
+      "destination": "docs/history/legacy-skills/mini-app-builder/SKILL.md",
+      "sha256": "9d3dce298dc51b5cfea51eab4f11a069de62f62e6ac26caaf5a750b2487eb8b0"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\ui-guidelines\\SKILL.md",
+      "destination": "docs/history/legacy-skills/ui-guidelines/SKILL.md",
+      "sha256": "3ca4cd661163f3b316b9a4f26ba8c760240472cd58d5eccf72a2547b3905df54"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\ui-format\\SKILL.md",
+      "destination": "docs/history/legacy-skills/ui-format/SKILL.md",
+      "sha256": "a612fcb73def0b8c496add06ab3ad1fa0a7fe0d934fd4fb4062d5542d83587b0"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\app-template\\SKILL.md",
+      "destination": "docs/history/legacy-skills/app-template/SKILL.md",
+      "sha256": "0bab8754640e0ade8d090ac72e5f0bbce7570dcf0413c5e05605b34bcec7fe07"
+    },
+    {
+      "source": "C:\\Users\\tians\\mini-app-platform\\.agents\\skills\\debugging\\SKILL.md",
+      "destination": "docs/history/legacy-skills/debugging/SKILL.md",
+      "sha256": "656711ec180a5443576cba2474da2abd00e7c7b63fb66fea1747af20cc4aab98"
+    }
+  ],
+  "final_refresh_files": [
+    "concepts/animal-art-v1/README.md"
+  ],
+  "image_count": 54
+}

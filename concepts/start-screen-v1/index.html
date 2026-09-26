@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bioconnect — start screen concepts</title>
+<style>
+:root{
+  --ink:#3c4a36; --ink-soft:#6d7a66; --ink-faint:#9aa593;
+  --paper:#f7f9f0; --card:#fff; --line:#d3e0be; --green:#5a9e4b;
+  --font:"Hiragino Sans","Noto Sans JP",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:32px 16px 56px;font-family:var(--font);color:var(--ink);
+  background:radial-gradient(1200px 400px at 50% -80px,#eef6e2,rgba(238,246,226,0) 70%),var(--paper)}
+header{max-width:1100px;margin:0 auto 28px;text-align:center}
+h1{margin:0 0 8px;font-size:1.6rem;letter-spacing:-.02em}
+header p{margin:0;color:var(--ink-soft);font-size:.9rem}
+.grid{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;max-width:1200px;margin:0 auto}
+.item{width:340px}
+.frame{width:340px;height:660px;padding:10px;border-radius:38px;background:#2c3329;
+  box-shadow:0 20px 44px rgba(60,74,54,.24)}
+.frame iframe{width:100%;height:100%;border:0;border-radius:29px;background:#fff;display:block}
+h2{margin:16px 0 4px;font-size:1.02rem}
+h2 b{color:var(--green)}
+.item p{margin:0 0 8px;color:var(--ink-soft);font-size:.84rem;line-height:1.6}
+.item a{display:inline-block;margin-top:2px;color:var(--green);font-size:.8rem;font-weight:700;text-decoration:none;
+  border-bottom:1px solid rgba(90,158,75,.4)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{padding:3px 9px;border-radius:999px;background:#eef6e2;border:1px solid var(--line);
+  color:var(--ink-soft);font-size:.7rem;font-weight:700}
+@media (max-width:760px){.item,.frame{width:min(100%,340px)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bioconnect — opening screen, three directions</h1>
+  <p>Same content in all three: title, one line of promise, best score, Play, how-to-play and sound. Only the staging differs.</p>
+</header>
+
+<div class="grid">
+  <div class="item">
+    <div class="frame"><iframe src="a-meadow-poster.html" title="Sample A"></iframe></div>
+    <h2><b>A.</b> Meadow poster</h2>
+    <div class="tags"><span class="tag">Friendliest</span><span class="tag">Casual puzzle</span><span class="tag">Light</span></div>
+    <p>A painted meadow with animals grazing, a chunky outlined wordmark and a chunky pressable PLAY. The most "App Store minigame" of the three, and the one that says "easy, cute, free" fastest.</p>
+    <a href="a-meadow-poster.html">Open full screen</a>
+  </div>
+
+  <div class="item">
+    <div class="frame"><iframe src="b-nightfall.html" title="Sample B"></iframe></div>
+    <h2><b>B.</b> Nightfall</h2>
+    <div class="tags"><span class="tag">Premium</span><span class="tag">Dark</span><span class="tag">Shows the goal</span></div>
+    <p>The meadow after dark, with the chain drawn as a lit arc from sprout to elephant. Calm and indie-premium; it also teaches the goal before the first tap. Least like the game's own light UI.</p>
+    <a href="b-nightfall.html">Open full screen</a>
+  </div>
+
+  <div class="item">
+    <div class="frame"><iframe src="c-living-board.html" title="Sample C"></iframe></div>
+    <h2><b>C.</b> Living board</h2>
+    <div class="tags"><span class="tag">Honest</span><span class="tag">No new art</span><span class="tag">Light</span></div>
+    <p>The real board plays itself behind a paper scrim; the start card sits on it like a lid. Closest to the game as it already looks, and the cheapest to maintain — it reuses the board, not a separate illustration.</p>
+    <a href="c-living-board.html">Open full screen</a>
+  </div>
+</div>
+</body>
+</html>

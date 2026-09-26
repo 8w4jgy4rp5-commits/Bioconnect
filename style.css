@@ -1,0 +1,1397 @@
+/* ============================================================
+   Ecosystem Puzzle
+   A meadow read from above: paper-pale ground, soft green ink,
+   and one warm accent that only the animals are allowed to use.
+   ============================================================ */
+
+:root {
+  --ink: #3c4a36;
+  --ink-soft: #6d7a66;
+  --ink-faint: #9aa593;
+
+  --paper: #f7f9f0;
+  --card: #ffffff;
+  --ground: #e9f0dc;
+  --ground-deep: #dde8cc;
+  --line: #d3e0be;
+
+  --green: #5a9e4b;
+  --green-bright: #7ec05c;
+  --green-deep: #41773a;
+  --warm: #e08a4a;
+  --bone: #cfc8b3;
+
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgba(60, 74, 54, .08), 0 6px 18px rgba(60, 74, 54, .07);
+
+  --font: "Hiragino Sans", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 16px 8px;
+  font-family: var(--font);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 400px at 50% -80px, #eef6e2 0%, rgba(238, 246, 226, 0) 70%),
+    var(--paper);
+  -webkit-text-size-adjust: 100%;
+}
+
+body.is-modal { overflow: hidden; }
+
+.sprite-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+.wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-block: 20px 8px;
+}
+
+/* ---------- Title ---------- */
+
+.topbar { text-align: center; margin-bottom: 18px; }
+
+.title {
+  position: relative;
+  display: inline-block;
+  margin: 0;
+  padding-bottom: 12px;
+  font-size: clamp(1.55rem, 7vw, 2.1rem);
+  line-height: 1.05;
+  letter-spacing: -.015em;
+  font-weight: 700;
+}
+
+.title-word { color: var(--ink); }
+
+/* the second word is lifted a touch and a sprout pushes up between the
+   two, so the name itself looks like something growing out of a field */
+.title-word--2 {
+  position: relative;
+  margin-left: .34em;
+  color: var(--green);
+}
+
+.title-sprout {
+  position: absolute;
+  left: -.58em;
+  bottom: -.02em;   /* its stem has to reach the field line, or it reads
+                       as a stray mark rather than something growing */
+  width: .7em;
+  height: .92em;
+  overflow: visible;
+}
+
+.title-field {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: 0;
+  width: 108%;
+  height: 12px;
+}
+
+.tagline {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: .92rem;
+}
+
+/* ---------- Scores ---------- */
+
+.scorebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.score {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  box-shadow: var(--shadow);
+}
+
+.score-label {
+  display: block;
+  font-size: .7rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.score-value {
+  display: block;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.score--best .score-value { color: var(--ink-soft); }
+
+/* ---------- The rung ----------
+   One accent per level, walking the same path the meadow does: bare
+   ground, then green, then green with some age on it, and the warm
+   accent — the one otherwise reserved for animals — at the top, where
+   almost nobody is. The bar behind the words is the difficulty curve;
+   it fills in a couple of turns on Lv 1 and barely moves on Lv 6. */
+.level {
+  flex: 1 0 100%;
+  --rung: var(--ink-faint);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 8px 14px 10px;
+  box-shadow: var(--shadow);
+}
+
+.level[data-level="2"] { --rung: var(--green-bright); }
+.level[data-level="3"] { --rung: var(--green); }
+.level[data-level="4"] { --rung: #4a8c3e; }
+.level[data-level="5"] { --rung: #35702f; }
+.level[data-level="6"] { --rung: var(--warm); }
+
+.level-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-bottom: 7px;
+}
+
+.level-num {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--rung);
+  border-radius: 999px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.level-name {
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--rung);
+}
+
+/* Pushed to the far end so the eye reads name first, cost second. */
+.level-next {
+  margin-left: auto;
+  font-size: .72rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.level-track {
+  display: block;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ground-deep);
+  overflow: hidden;
+}
+
+.level-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--rung) 0%, var(--rung) 65%, #fff8 100%);
+  transition: width .45s cubic-bezier(.2, .8, .3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-fill { transition: none; }
+}
+
+/* ---------- Hand ---------- */
+
+.handbar {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+
+.hand-slot { text-align: center; }
+
+.hand-tiles {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+/* .tile is declared further down with the same specificity, so this has
+   to out-rank it rather than merely follow it.
+
+   Big, because this is the one thing you have to read before every tap:
+   at the old 38px a sprout and a patch of grass were the same green
+   smudge, and telling them apart is the whole decision. The pale fill
+   under the art is the same one a taken square gets, so a tile in hand
+   already looks like a tile on the board. */
+.tile.hand-tile {
+  width: 52px;
+  height: 52px;
+  border-width: 2px;
+  background: rgba(255, 255, 255, .72);
+}
+
+/* An empty slot has to read as a slot, not as a gap in the layout, or
+   the hand looks like it shrank rather than emptied. */
+.hand-tile.is-empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--line);
+  opacity: .75;
+}
+
+.refill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.refill-track {
+  /* a span, so it has to be told to be a box: on narrow screens .refill
+     stops being a flex container and an inline track collapses to
+     nothing — which took the whole meter off the phone layout, the one
+     place it is most needed. */
+  display: block;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ground);
+  overflow: hidden;
+}
+
+.refill-fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: 2px;
+  background: var(--green);
+  transition: width .18s linear;
+}
+
+.refill-word {
+  font-size: .6rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.pause-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: .78rem;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* The board reads as out of reach while the hand is empty, so a tap that
+   cannot do anything looks like it cannot rather than like a bug. */
+.board--spent { opacity: .82; }
+
+/* ...and if the tap happens anyway, the hand answers for the board. An
+   empty hand is the only refusal in the game that looks exactly like a
+   dead button: the square was empty, the tap was legal, and nothing
+   moved. So the hand flinches and the meter lights up, which puts your
+   eyes on the thing that is actually running out. */
+@keyframes hand-nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  45% { transform: translateX(4px); }
+  70% { transform: translateX(-2px); }
+}
+
+.hand-slot--nudge .hand-tiles { animation: hand-nudge .38s ease; }
+
+.hand-slot--nudge .hand-tile.is-empty {
+  border-color: var(--green);
+  opacity: 1;
+}
+
+.hand-slot--nudge .refill-track { box-shadow: 0 0 0 2px rgba(90, 158, 75, .35); }
+.hand-slot--nudge .refill-fill { background: var(--green-bright); }
+.hand-slot--nudge .refill-word { color: var(--green); }
+
+.btn--speed[aria-pressed="true"] {
+  border-color: var(--green);
+  color: var(--ink);
+}
+
+.hand-label {
+  display: block;
+  font-size: .64rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 2px;
+}
+
+.tile {
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: var(--radius-sm);
+  background: var(--ground);
+  border: 1px solid var(--line);
+}
+
+/* Still quieter than the hand — it is not yours yet — but no longer so
+   faint that you cannot tell which tile is coming. */
+.tile--next {
+  width: 42px;
+  height: 42px;
+  opacity: .88;
+  margin-top: 6px;
+}
+
+.tile-art { display: block; width: 100%; height: 100%; }
+
+/* the standing instruction: what the board is one step away from */
+.goal {
+  grid-column: 3;
+  align-self: center;
+  margin: 0;
+  padding-left: 2px;
+  font-size: .88rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--green);
+}
+
+/* and under it, what just happened */
+.ticker {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding-top: 2px;
+  min-height: 2.4em;
+  font-size: .82rem;
+  line-height: 1.35;
+  color: var(--ink-faint);
+}
+
+/* ---------- Season ---------- */
+
+.season {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin-bottom: 10px;
+  padding: 9px 14px 12px;
+  border: 1px solid var(--season-line, var(--line));
+  border-radius: var(--radius);
+  background: var(--season-bg, #fff);
+  overflow: hidden;
+  transition: background .4s ease, border-color .4s ease;
+}
+
+.season-name {
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--season-ink, var(--green));
+}
+
+.season-note {
+  font-size: .76rem;
+  line-height: 1.3;
+  color: var(--ink-soft);
+}
+
+.season-mult {
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--season-ink, var(--green));
+}
+
+/* how far through this season the run is */
+.season-track {
+  grid-column: 1 / -1;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(90, 110, 80, .1);
+}
+
+.season-fill {
+  display: block;
+  height: 100%;
+  background: var(--season-ink, var(--green));
+  opacity: .55;
+  transition: width .25s ease;
+}
+
+/* Each season repaints the strip, so the run visibly moves through the
+   year rather than just getting harder for no stated reason. */
+.season[data-season="0"] { --season-bg: #f2f9ea; --season-line: #cfe4bb; --season-ink: #5a9e4b; }
+.season[data-season="1"] { --season-bg: #f6fbe6; --season-line: #d9e6ae; --season-ink: #7a9b32; }
+.season[data-season="2"] { --season-bg: #fdf4e6; --season-line: #ecd3ac; --season-ink: #c47f34; }
+.season[data-season="3"] { --season-bg: #eef2f6; --season-line: #ccd7e0; --season-ink: #5b7890; }
+
+/* ---------- Board ---------- */
+
+.board-frame { position: relative; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 7px;
+  padding: 9px;
+  background: linear-gradient(160deg, var(--ground) 0%, var(--ground-deep) 100%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), var(--shadow);
+}
+
+.cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  min-width: 0;
+  padding: 0;
+  border: 1px solid rgba(120, 150, 100, .18);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .42);
+  font: inherit;
+  cursor: pointer;
+  transition: background .12s ease, transform .12s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cell:not(:disabled):hover { background: rgba(255, 255, 255, .8); }
+.cell:not(:disabled):active { transform: scale(.95); }
+
+.cell:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.cell--taken {
+  background: rgba(255, 255, 255, .72);
+  cursor: default;
+}
+
+.cell--bones,
+.cell--scrub,
+.cell--stone {
+  background: rgba(206, 198, 178, .38);
+  border-color: rgba(150, 142, 120, .3);
+}
+
+/* anything alive carries a meter, so it sits high in the square */
+.cell .tile-art {
+  position: absolute;
+  inset: 2% 4% 16%;
+  width: 92%;
+  height: 82%;
+}
+
+/* dead ground has no clock, so it gets the whole square */
+.cell--bones .tile-art,
+.cell--scrub .tile-art,
+.cell--stone .tile-art { inset: 7%; width: 86%; height: 86%; }
+
+/* a tile in its last turns loses a little colour */
+.cell--fading .tile-art { opacity: .72; }
+
+/* raised by a merge, and therefore the only thing an elephant will eat.
+   A small notch in the top-left corner rather than a word: it has to be
+   readable on twenty-five tiles at once without competing with the
+   hunger meter, and it only appears at all from the tiger onward. */
+.cell--raised::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #6b4a86;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .75);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* within reach of a hungry mouth next turn: a dashed warm ring, so the
+   shape of an animal's reach is something you can see and build around */
+.cell--inreach {
+  border-color: transparent;
+  box-shadow: inset 0 0 0 2px var(--warm);
+  background: rgba(224, 138, 74, .12);
+}
+
+.cell--inreach::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1.5px dashed rgba(224, 138, 74, .55);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* ---------- Hunger meter ---------- */
+
+.meter {
+  position: absolute;
+  left: 16%;
+  right: 16%;
+  bottom: 7%;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(90, 110, 80, .18);
+  overflow: hidden;
+}
+
+.meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--green-bright);
+  transition: width .18s ease;
+}
+
+.meter-fill.is-mid { background: #e8c057; }
+.meter-fill.is-low { background: #dd6a52; }
+
+/* ---------- Turn feedback ---------- */
+
+@keyframes grew {
+  0% { transform: scale(.6); }
+  60% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+@keyframes eaten {
+  0% { background: rgba(224, 138, 74, .5); }
+  100% { background: rgba(255, 255, 255, .42); }
+}
+@keyframes died {
+  0%, 40% { background: rgba(196, 150, 84, .38); }
+  100% { background: rgba(206, 198, 178, .38); }
+}
+
+.cell--grew { animation: grew .28s ease-out; }
+.cell--eaten { animation: eaten .5s ease-out; }
+.cell--died { animation: died .6s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--grew, .cell--eaten, .cell--died { animation: none; }
+  .cell:not(:disabled):active { transform: none; }
+  /* the colour half of the nudge still lands, so the message is not lost
+     with the movement */
+  .hand-slot--nudge .hand-tiles { animation: none; }
+}
+
+/* ---------- Game over ---------- */
+
+/* both overlays set `display`, which outranks the browser's own rule for
+   [hidden] — without this they are never actually hidden */
+.modal[hidden],
+.gameover[hidden] { display: none; }
+
+.start-screen[hidden] { display: none; }
+
+/* A painted meadow the player looks at once before the first tap: sky,
+   two hills, four animals out of the chain, and the wordmark standing
+   in the grass like a sign. The board waits behind it, already dealt. */
+
+.start-screen {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(#e8f4fb 0%, #f2f9e8 38%, #e7f2d3 100%);
+}
+
+/* the poster keeps a phone-shaped column on a wide screen; the sky
+   behind it is the same gradient, so the edges do not show */
+.start-stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: min(100%, 560px);
+  height: 100%;
+  overflow: hidden;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 16px) 20px
+    calc(env(safe-area-inset-bottom, 0px) + 22px);
+}
+
+/* ---- the scene ---- */
+
+.start-scene { position: absolute; inset: 0; pointer-events: none; }
+
+.start-sun {
+  position: absolute;
+  top: 8%;
+  right: 12%;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0%, #ffe9a8 55%, rgba(255, 233, 168, 0) 72%);
+}
+
+.start-cloud {
+  position: absolute;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  opacity: .75;
+  box-shadow: 22px 6px 0 -3px #fff, -20px 5px 0 -4px #fff;
+}
+
+.start-cloud--1 { top: 11%; left: 8%; width: 66px; animation: start-drift 34s linear infinite; }
+.start-cloud--2 { top: 19%; left: 52%; width: 46px; opacity: .6; animation: start-drift 46s linear infinite; }
+
+.start-hills { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 52%; }
+.start-tufts { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 16%; }
+
+/* the grass fades into the controls so the buttons stay readable
+   wherever an animal happens to stand */
+.start-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  background: linear-gradient(rgba(231, 242, 211, 0), rgba(231, 242, 211, .72) 42%, rgba(231, 242, 211, .94) 100%);
+}
+
+.start-critter {
+  position: absolute;
+  width: var(--start-size, 68px);
+  height: var(--start-size, 68px);
+  filter: drop-shadow(0 6px 10px rgba(60, 74, 54, .16));
+  animation: start-bob 4.6s ease-in-out infinite;
+  animation-delay: var(--start-delay, 0s);
+}
+
+.start-critter--elephant { --start-size: 122px; right: -4px; bottom: 25%; }
+.start-critter--deer { --start-size: 80px; left: 1%; bottom: 32%; }
+.start-critter--rabbit { --start-size: 50px; left: 41%; bottom: 27%; }
+.start-critter--fox { --start-size: 58px; left: 20%; bottom: 23%; }
+
+/* ---- top line ---- */
+
+.start-topline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.start-kicker {
+  margin: 0;
+  color: var(--green);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.start-best {
+  margin: 0;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 0 rgba(60, 74, 54, .08);
+  color: var(--ink-soft);
+  font-size: .74rem;
+  font-weight: 700;
+}
+
+.start-best span { color: var(--ink); font-size: .92rem; }
+
+/* ---- the wordmark ---- */
+
+.start-hero {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.start-logo {
+  position: relative;
+  margin: 0;
+  color: #fffdf4;
+  font-size: clamp(3rem, 20vw, 4.6rem);
+  letter-spacing: -.045em;
+  line-height: .86;
+  -webkit-text-stroke: 5px var(--green-deep);
+  paint-order: stroke fill;
+  text-shadow: 0 7px 0 rgba(65, 119, 58, .32), 0 16px 26px rgba(60, 74, 54, .2);
+  transform: rotate(-2.2deg);
+  animation: start-rise .8s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.start-logo span { display: block; }
+.start-logo-2 { margin-top: .02em; font-size: .82em; }
+
+.start-sprout {
+  width: .42em;
+  height: .52em;
+  margin-right: .02em;
+  vertical-align: -.04em;
+  transform-origin: 50% 100%;
+  animation: start-sway 5s ease-in-out infinite;
+}
+
+.start-tagline {
+  margin: 16px 0 0;
+  padding: 7px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .72);
+  color: var(--ink-soft);
+  font-size: .86rem;
+  font-weight: 600;
+  animation: start-rise .8s .12s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+/* ---- controls ---- */
+
+.start-controls {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  animation: start-rise .8s .2s cubic-bezier(.2, .9, .25, 1) both;
+}
+
+.start-play {
+  width: min(100%, 330px);
+  min-height: 62px;
+  border: 0;
+  border-radius: 18px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.22rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  cursor: pointer;
+  background: linear-gradient(var(--green-bright), var(--green));
+  box-shadow: 0 6px 0 var(--green-deep), 0 14px 24px rgba(65, 119, 58, .3);
+  transition: transform .12s, box-shadow .12s;
+}
+
+.start-play:active {
+  transform: translateY(5px);
+  box-shadow: 0 1px 0 var(--green-deep), 0 6px 12px rgba(65, 119, 58, .26);
+}
+
+.start-play:focus-visible { outline: 3px solid var(--warm); outline-offset: 3px; }
+
+.start-minor { display: flex; gap: 10px; }
+
+.start-icon {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, .85);
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 3px 0 rgba(60, 74, 54, .1);
+}
+
+.start-icon:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(60, 74, 54, .1); }
+.start-icon:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+
+.start-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the speaker wears a slash until sound is switched on */
+.start-icon .start-wave { display: none; }
+.start-icon[aria-pressed="true"] { color: var(--green); }
+.start-icon[aria-pressed="true"] .start-wave { display: inline; }
+.start-icon[aria-pressed="true"] .start-slash { display: none; }
+
+.start-foot { margin: 2px 0 0; color: var(--ink-soft); font-size: .7rem; }
+
+@keyframes start-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@keyframes start-drift {
+  from { transform: translateX(-12vw); }
+  to { transform: translateX(112vw); }
+}
+
+@keyframes start-sway {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+@keyframes start-rise {
+  from { opacity: 0; transform: translateY(16px) rotate(-2.2deg); }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .start-cloud, .start-critter, .start-sprout,
+  .start-logo, .start-tagline, .start-controls { animation: none; }
+}
+
+.gameover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(247, 249, 240, .88);
+  backdrop-filter: blur(2px);
+}
+
+.gameover-card {
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  box-shadow: var(--shadow);
+}
+
+.gameover-card h2 { margin: 0 0 6px; font-size: 1.15rem; }
+
+.go-score {
+  margin: 0 0 10px;
+  color: var(--ink-soft);
+  font-size: .85rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.go-level {
+  margin: 0 0 12px;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--green);
+}
+
+.go-score strong {
+  display: block;
+  font-size: 2rem;
+  color: var(--ink);
+  letter-spacing: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+.go-note {
+  margin: 0 0 16px;
+  font-size: .86rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* ---------- Buttons ---------- */
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 14px 0 20px;
+}
+
+.btn {
+  flex: 1;
+  padding: 11px 14px;
+  font: inherit;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background .12s ease, border-color .12s ease;
+}
+
+.btn:hover { background: #f2f7e9; }
+.btn:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.btn--primary {
+  width: 100%;
+  color: #fff;
+  background: var(--green);
+  border-color: var(--green);
+}
+.btn--primary:hover { background: #4f8e42; }
+
+.btn--armed {
+  color: var(--warm);
+  border-color: var(--warm);
+  background: #fdf4ec;
+}
+
+/* ---------- Food chain reference ---------- */
+
+.chain {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 10px 14px;
+  box-shadow: var(--shadow);
+}
+
+.chain-head {
+  margin: 0 0 10px;
+  text-align: center;
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.chain-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  /* five rungs is one more than the row was built for, so let it wrap
+     rather than squeeze the tiles on a narrow phone */
+  flex-wrap: wrap;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chain-step {
+  flex: 0 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.tile--mini {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 4px;
+}
+
+.chain-name {
+  display: block;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.chain-eats {
+  display: block;
+  font-size: .62rem;
+  color: var(--ink-faint);
+  line-height: 1.25;
+}
+
+.chain-note {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: .66rem;
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
+.chain-arrow {
+  align-self: center;
+  padding: 0 2px 14px;
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+/* ---------- How to play ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: end center;
+  padding: 0;
+  background: rgba(45, 56, 40, .42);
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--card);
+  border-radius: 20px 20px 0 0;
+  padding: 22px 18px 24px;
+}
+
+.modal-card h2 { margin: 0 0 4px; font-size: 1.2rem; }
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.modal-close:hover { background: #f1f5e9; }
+
+.guide {
+  margin: 14px 0 18px;
+  padding: 0;
+  list-style: none;
+}
+
+.guide-step {
+  padding: 14px 0;
+  border-top: 1px solid #eef2e6;
+}
+.guide-step:first-child { border-top: 0; padding-top: 0; }
+
+.guide-step h3 {
+  margin: 0 0 8px;
+  font-size: .95rem;
+  color: var(--green);
+}
+
+.guide-step p {
+  margin: 8px 0 0;
+  font-size: .87rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.guide-art {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  height: auto;
+}
+
+.ga-grid rect {
+  fill: #eef4e4;
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+.ga-grid rect.ga-empty { fill: #f7faf1; stroke-dasharray: 3 3; }
+.ga-grid rect.ga-dead { fill: #eae5d6; stroke: #d6cfba; }
+
+.ga-arrow { stroke: #c3d6ac; stroke-width: 2.4; stroke-linecap: round; fill: none; }
+.ga-head { fill: #c3d6ac; }
+.ga-tap { fill: rgba(90, 158, 75, .3); }
+.ga-ring { fill: none; stroke: var(--green); stroke-width: 1.6; stroke-dasharray: 4 4; }
+.ga-spark { fill: var(--green-bright); }
+
+.ga-pts {
+  fill: var(--warm);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-cap {
+  fill: var(--ink-faint);
+  font-family: var(--font);
+  font-size: 10px;
+  text-anchor: middle;
+}
+
+.ga-meter-bg { fill: rgba(90, 110, 80, .18); }
+.ga-meter-mid { fill: #e8c057; }
+.ga-meter-low { fill: #dd6a52; }
+
+.ga-season rect { stroke-width: 1.2; }
+
+.ga-seasonname text {
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-seasonmult text {
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.ga-stones circle { fill: #b9b7ad; }
+
+.modal-done { margin-top: 4px; }
+
+/* ---------- Footer ---------- */
+
+.app-footer {
+  margin-top: 18px;
+  text-align: center;
+  font-size: .76rem;
+  color: var(--ink-faint);
+}
+.app-footer p { margin: 0; }
+
+/* ---------- Narrow screens ---------- */
+
+@media (max-width: 380px) {
+  .board { gap: 5px; padding: 7px; }
+  .tile { width: 40px; height: 40px; }
+  .tile--next { width: 36px; height: 36px; }
+  /* three hand slots plus the next tile is the widest row on the page.
+     It used to be the hand that gave way, down to 32px — but a phone is
+     where this game is actually played, so the sentence beside it moves
+     to its own line instead and the tiles stay readable. The word stays
+     — it is the half of the meter that can actually be read aloud —
+     and the meter drops under it. */
+  .tile.hand-tile { width: 46px; height: 46px; }
+  .hand-tiles { gap: 5px; }
+  .goal { grid-column: 1 / -1; padding-left: 0; }
+  .refill { display: block; }
+  .refill-track { width: 100%; }
+  .refill-word { white-space: normal; font-size: .56rem; }
+  .tile--mini { width: 32px; height: 32px; }
+  .chain-eats { display: none; }
+  .chain-arrow { padding-bottom: 8px; }
+  /* the name and the multiplier are the part that matters; the sentence
+     wraps to two lines down here and is spelled out in the guide anyway */
+  .season-note { display: none; }
+  .season { grid-template-columns: auto 1fr; }
+}
+
+/* ---------- Wide screens ---------- */
+
+@media (min-width: 700px) {
+  .modal { place-items: center; padding: 24px; }
+  .modal-card { border-radius: 20px; max-height: 86vh; }
+}
+
+/* ---------- The effects layer ---------- */
+/* Decoration only. It sits over the board, never takes a tap, and holds
+   nothing the game reads back. The pops leave from the square that
+   earned them, so the number and the move are one event. */
+
+.fx {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 18px;
+  z-index: 3;
+}
+
+.pop {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: .95rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--green);
+  /* A pop spends its first third of a second directly over the animal
+     that earned it, so the halo has to be thick enough to read against
+     fur rather than merely against the ground. */
+  text-shadow:
+    0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff,
+    0 0 10px rgba(255, 255, 255, .95), 0 1px 0 rgba(255, 255, 255, .9);
+  white-space: nowrap;
+  animation: pop-rise 1.05s cubic-bezier(.2, .8, .3, 1) forwards;
+}
+
+/* Bigger prey, bigger number, louder pop — the sizes are the score
+   ladder, so a wolf's meal never reads like a sprout's. */
+.pop--rabbit { font-size: 1.05rem; }
+.pop--fox { font-size: 1.2rem; color: var(--warm); }
+.pop--wolf { font-size: 1.35rem; color: #8b5cf6; }
+
+@keyframes pop-rise {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(.7); }
+  18% { opacity: 1; transform: translate(-50%, -55%) scale(1.15); }
+  32% { transform: translate(-50%, -58%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -155%) scale(1); }
+}
+
+.fx-chain {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--warm);
+  color: #fff;
+  font-size: .8rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  box-shadow: 0 4px 14px rgba(224, 138, 74, .45);
+  animation: chain-in 1.15s ease forwards;
+}
+
+@keyframes chain-in {
+  0% { opacity: 0; transform: translateX(-50%) scale(.6); }
+  15% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  28% { transform: translateX(-50%) scale(1); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(1); }
+}
+
+/* The first rabbit, the first fox, the first wolf. Once per run each —
+   a fuss that happens every time stops being a fuss. */
+.first {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(82%, 260px);
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 16px 16px 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 30px rgba(60, 74, 54, .22);
+  animation: first-in 1.85s cubic-bezier(.2, .8, .3, 1) forwards;
+}
+
+.first-art {
+  width: 54px;
+  height: 54px;
+  animation: first-art-in 1.85s cubic-bezier(.2, .8, .3, 1) forwards;
+}
+
+.first strong { font-size: 1.05rem; }
+.first span { font-size: .8rem; color: var(--ink-soft); line-height: 1.35; }
+
+.first--fox { border-color: var(--warm); }
+.first--wolf { border-color: #8b5cf6; }
+
+@keyframes first-in {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.75); }
+  10% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+  18% { transform: translate(-50%, -50%) scale(1); }
+  82% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -62%) scale(.96); }
+}
+
+@keyframes first-art-in {
+  0% { transform: scale(.4) rotate(-12deg); }
+  22% { transform: scale(1.12) rotate(4deg); }
+  34% { transform: scale(1) rotate(0); }
+}
+
+/* Motion is the whole point of this layer, so when it is unwelcome the
+   effects still SAY what happened — they just appear and go. */
+@media (prefers-reduced-motion: reduce) {
+  .pop, .fx-chain, .first, .first-art {
+    animation: none;
+    opacity: 1;
+  }
+  .pop { transform: translate(-50%, -140%); }
+}
+
+/* A touch-friendly preview: no hover or extra tap is needed. */
+.cell--merge-ready { box-shadow: inset 0 0 0 2px #679844; }
+.merge-preview { color: #345824; font-size: clamp(9px, 2.5vw, 13px); font-weight: 700; pointer-events: none; }
+
+.first--bear { border-color: #a57550; background: #fff6df; box-shadow: 0 8px 36px #80563d38; }
+/* The bear carries her weight from one side to the other.
+   Deliberately the opposite of the rabbit: where the rabbit ticks at
+   2.6s and never settles, the bear takes 4.2s and is always settled.
+   The pivot is at her feet, so the lean reads as a weight shift rather
+   than a wobble, and the small rise at the half-beat is the moment the
+   weight is on neither side. Under a degree of rotation, because two
+   things share this tile and a bigger swing would swim the cub across
+   her chest. */
+.cell--bear .tile-art {
+  transform-origin: center bottom;
+  animation: bear-sway 4.2s ease-in-out infinite;
+}
+.cell--bear:nth-child(3n+2) .tile-art { animation-delay: -1.4s; }
+.cell--bear:nth-child(3n+3) .tile-art { animation-delay: -2.8s; }
+
+@keyframes bear-sway {
+  0%, 100% { transform: rotate(-.9deg); }
+  25%, 75% { transform: translateY(-.5px) rotate(0deg); }
+  50%      { transform: rotate(.9deg); }
+}
+
+/* the arrival takes the tile over for its third of a second; the sway
+   comes back on the next render */
+.cell--bear.cell--grew .tile-art { animation: bear-arrive .35s ease-out; }
+
+@keyframes bear-arrive { 0% { transform: scale(.6); } 65% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .cell--bear .tile-art, .cell--bear.cell--grew .tile-art { animation: none; } }
+
+/* The rabbit never quite settles.
+   Kept deliberately small and slow: motion on this board already MEANS
+   something (a merge, a meal, a death), and those read as big, fast and
+   once. A character idle has to stay under that ceiling or it drowns
+   out the signals the player actually needs.
+   The offsets stop a row of rabbits breathing in unison, which looks
+   less alive than one rabbit does. Negative delays start them
+   mid-cycle, so nothing waits to begin. */
+.cell--rabbit .tile-art {
+  transform-origin: center bottom;
+  animation: rabbit-idle 2.6s ease-in-out infinite;
+}
+.cell--rabbit:nth-child(4n+2) .tile-art { animation-delay: -.6s; }
+.cell--rabbit:nth-child(4n+3) .tile-art { animation-delay: -1.3s; }
+.cell--rabbit:nth-child(4n+4) .tile-art { animation-delay: -2s; }
+
+@keyframes rabbit-idle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-1.6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--rabbit .tile-art { animation: none; }
+}
+
+.audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
+.first--elephant { border:3px solid #c6983b; background:#fff9df; }

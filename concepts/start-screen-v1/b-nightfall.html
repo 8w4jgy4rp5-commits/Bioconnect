@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Bioconnect — Start B (Nightfall)</title>
+<style>
+/* ============================================================
+   Sample B — "Nightfall"
+   The meadow after dark. Fireflies, a silhouetted treeline, and the
+   twelve steps of the chain drawn as a glowing arc so the player sees
+   the goal before the first tap. Quiet, premium, one warm light source.
+   ============================================================ */
+:root{
+  --night:#141f16; --night-2:#1d2b1e; --mist:#2b3c2b;
+  --paper:#f3f6ea; --soft:#b7c6b0; --faint:#7d8f7b;
+  --green:#7ec05c; --warm:#e8a765; --gold:#f0c98a;
+  --font:"Hiragino Sans","Noto Sans JP",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--paper);background:var(--night);overflow:hidden}
+.sprite-defs{position:absolute;width:0;height:0;overflow:hidden}
+
+.screen{
+  position:relative;height:100%;min-height:100svh;overflow:hidden;
+  display:grid;grid-template-rows:auto 1fr auto;gap:10px;
+  padding:calc(env(safe-area-inset-top,0px) + 18px) 20px calc(env(safe-area-inset-bottom,0px) + 24px);
+  background:
+    radial-gradient(90% 60% at 50% 34%,rgba(232,167,101,.16),rgba(232,167,101,0) 70%),
+    radial-gradient(120% 90% at 50% 120%,#24351f 0%,rgba(36,53,31,0) 60%),
+    linear-gradient(#101a12 0%,#1a2719 58%,#22321f 100%);
+}
+.vignette{position:absolute;inset:0;pointer-events:none;
+  box-shadow:inset 0 0 120px 40px rgba(8,14,9,.72)}
+.treeline{position:absolute;left:0;right:0;bottom:0;width:100%;height:15%;opacity:.85;pointer-events:none;z-index:0}
+.fly{position:absolute;width:5px;height:5px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 10px 3px rgba(240,201,138,.5);opacity:0;
+  animation:glow var(--t,7s) ease-in-out infinite;animation-delay:var(--d,0s)}
+
+/* ---- top ---- */
+.topline{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between}
+.brand{margin:0;color:var(--faint);font-size:.66rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase}
+.best{color:var(--soft);font-size:.72rem;letter-spacing:.06em}
+.best b{color:var(--gold);font-weight:700}
+
+/* ---- hero ---- */
+.hero{position:relative;z-index:2;display:grid;align-content:center;justify-items:center;gap:26px;text-align:center}
+.kicker{margin:0;color:var(--warm);font-size:.68rem;font-weight:700;letter-spacing:.34em;text-transform:uppercase;
+  animation:fade 1s .1s both}
+.logo{margin:0;font-size:clamp(2.5rem,15vw,3.9rem);font-weight:300;letter-spacing:.02em;line-height:1;
+  animation:fade 1.2s .2s both}
+.logo b{font-weight:700}
+.logo .glow{color:var(--gold);text-shadow:0 0 26px rgba(240,201,138,.45)}
+.rule{width:132px;height:1px;background:linear-gradient(90deg,transparent,var(--warm),transparent);
+  animation:fade 1.2s .4s both}
+.copy{margin:0;max-width:26ch;color:var(--soft);font-size:.88rem;line-height:1.65;animation:fade 1.2s .5s both}
+
+/* the chain, drawn as an arc of lit animals */
+.arc{position:relative;width:min(100%,340px);height:96px;animation:fade 1.4s .6s both}
+.arc svg.path{position:absolute;inset:0;width:100%;height:100%}
+.node{position:absolute;top:var(--y);left:var(--x);width:40px;height:40px;margin:-20px 0 0 -20px;
+  display:grid;place-items:center;border-radius:50%;
+  background:radial-gradient(circle at 50% 30%,#2f4230,#1b281b);
+  border:1px solid rgba(240,201,138,.22);box-shadow:0 0 18px rgba(240,201,138,.1);
+  transform:scale(var(--sc,1));
+  animation:lantern 5.5s ease-in-out infinite;animation-delay:var(--d,0s)}
+.node svg{width:74%;height:74%;filter:saturate(.72) brightness(.92)}
+.node--goal{width:54px;height:54px;margin:-27px 0 0 -27px;border-color:rgba(240,201,138,.5);
+  box-shadow:0 0 30px rgba(240,201,138,.3)}
+
+/* ---- controls ---- */
+.controls{position:relative;z-index:2;display:grid;gap:14px;justify-items:center;animation:fade 1.4s .8s both}
+.play{width:min(100%,320px);min-height:56px;border-radius:999px;cursor:pointer;font-family:inherit;
+  font-size:1.02rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#18240f;
+  background:linear-gradient(#f2cf94,#e8a765);border:0;
+  box-shadow:0 0 40px rgba(232,167,101,.28),0 10px 24px rgba(0,0,0,.4);
+  transition:transform .14s,box-shadow .14s}
+.play:hover{transform:translateY(-1px);box-shadow:0 0 54px rgba(232,167,101,.4),0 12px 28px rgba(0,0,0,.44)}
+.play:active{transform:translateY(1px)}
+.play:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
+.links{display:flex;gap:22px}
+.link{padding:6px 2px;border:0;background:none;cursor:pointer;font-family:inherit;font-size:.78rem;
+  font-weight:600;letter-spacing:.06em;color:var(--soft);border-bottom:1px solid rgba(183,198,176,.28)}
+.link:hover{color:var(--gold);border-color:rgba(240,201,138,.5)}
+.link:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+@keyframes glow{0%,100%{opacity:0;transform:translateY(0)}45%{opacity:.9}70%{opacity:.2;transform:translateY(-14px)}}
+@keyframes lantern{0%,100%{box-shadow:0 0 14px rgba(240,201,138,.08)}50%{box-shadow:0 0 26px rgba(240,201,138,.22)}}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<svg class="sprite-defs" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="artSprout" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="32" rx="7.5" ry="2" fill="#000" opacity=".07"/>
+      <path d="M20 31v-9" stroke="#5a9e4b" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+      <path d="M20 25.5c-4.6 0-7.4-3.3-7.9-7.7 4.6.3 7.5 3.3 7.9 7.7z" fill="#6fbb56"/>
+      <path d="M20 24c.5-4.4 3.3-7.4 7.9-7.7-.4 4.4-3.3 7.7-7.9 7.7z" fill="#83cc66"/>
+    </symbol>
+
+    <symbol id="artGrass" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="32.4" rx="11" ry="2.2" fill="#000" opacity=".07"/>
+      <path d="M12 32c-1-6 0-11 2-14 .6 4.6.4 9.6-.4 14z" fill="#6fbb56"/>
+      <path d="M16.5 32c-1.4-7-.2-12.4 2-16 .8 5.4.4 11-.6 16z" fill="#84cc68"/>
+      <path d="M20 32c-1.6-8 0-14 2.6-18 .8 6 .4 12.4-.6 18z" fill="#5aa847"/>
+      <path d="M24.5 32c-1.2-6.4-.2-11.4 1.8-14.6.7 4.9.4 10-.5 14.6z" fill="#67b551"/>
+      <path d="M28 32c-.8-6 .2-10.6 2-13.4.6 4.4.4 9.2-.4 13.4z" fill="#7cc45f"/>
+    </symbol>
+
+    <symbol id="artStone" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="30.5" rx="11" ry="2.4" fill="#000" opacity=".08"/>
+      <path d="M9.5 29.5c-1.6-3.4-1-7.4 2-10.6 3.4-3.6 8.8-4.6 13.4-2.6 4 1.7 6.2 5.2 5.8 8.8-.3 2.6-1.8 4.4-3.6 4.4z" fill="#b9b7ad"/>
+      <path d="M12.6 18.8c3.4-3.6 8.8-4.6 13.4-2.6 2.3 1 3.9 2.5 4.8 4.3-3-1.4-7-1.6-10.8-.3-3.3 1.1-5.9 3-7.4 5.2-.8-2.4-.5-4.8 0-6.6z" fill="#d0cec4"/>
+      <path d="M22.6 27.8c2.6-1.4 5.4-1.6 7.9-.7-.2 1.6-1 2.8-2 3.4z" fill="#a5a299"/>
+    </symbol>
+
+    <symbol id="artScrub" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="32.4" rx="11" ry="2.2" fill="#000" opacity=".05"/>
+      <path d="M12.5 32c-2.2-4.6-2.4-8.6-1.4-11.4 2 3.4 3.2 7.4 3.4 11.4z" fill="#c3b48c"/>
+      <path d="M20 32c-3.4-5.4-4-10-2.8-13.6 2.4 4.2 3.8 9 4 13.6z" fill="#b5a578"/>
+      <path d="M24.6 32c1-5 3-8.6 5.6-10.6-.6 3.8-2.2 7.6-4.2 10.6z" fill="#cbbd97"/>
+      <path d="M18.4 32c1.4-4.4 3.6-7.6 6.2-9.4-1 3.4-2.8 6.8-4.8 9.4z" fill="#c3b48c"/>
+      <path d="M9.4 32c.6-3.6 2-6.2 4-7.6-.6 2.8-1.6 5.6-2.8 7.6z" fill="#cbbd97"/>
+    </symbol>
+
+    <symbol id="artBones" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="31" rx="10" ry="2.2" fill="#000" opacity=".06"/>
+      <g fill="#e2ddcc" stroke="#c9c2ab" stroke-width="1.2" stroke-linejoin="round">
+        <path d="M11 15.5a3 3 0 1 1 4.2 2.8l9 5.2a3 3 0 1 1-1.6 2.8l-9-5.2A3 3 0 0 1 11 15.5z"/>
+        <path d="M28.4 14.6a3 3 0 1 1 1.4 3.9l-9.2 5.3a3 3 0 1 1-2.2-2.4z"/>
+      </g>
+    </symbol>
+
+    <symbol id="artRabbit" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="32" rx="11" ry="2.2" fill="#000" opacity=".08"/>
+      <circle cx="8.5" cy="23" r="3.4" fill="#fbf6ef"/>
+      <ellipse cx="16.5" cy="24" rx="9.5" ry="7.5" fill="#f0e7dc"/>
+      <ellipse cx="24" cy="10.5" rx="2.2" ry="5.6" fill="#f0e7dc"/>
+      <ellipse cx="28.6" cy="11" rx="2.2" ry="5.6" fill="#f0e7dc"/>
+      <ellipse cx="24" cy="11" rx="1" ry="3.4" fill="#f2c3c8"/>
+      <ellipse cx="28.6" cy="11.5" rx="1" ry="3.4" fill="#f2c3c8"/>
+      <circle cx="26" cy="19.5" r="6.3" fill="#f6efe6"/>
+      <circle cx="24.6" cy="19" r="1.1" fill="#4a3f38"/>
+      <circle cx="29.2" cy="19" r="1.1" fill="#4a3f38"/>
+      <path d="M26.2 21.6h1.6l-.8 1.2z" fill="#e2929c"/>
+    </symbol>
+
+    <symbol id="artFox" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="32" rx="11" ry="2.2" fill="#000" opacity=".08"/>
+      <path d="M13 27c-5 1.5-9-1-8.5-5.5C8 19 12 21 13 24z" fill="#f0a869"/>
+      <ellipse cx="17.5" cy="24.5" rx="9.5" ry="6.8" fill="#e28b47"/>
+      <path d="M22.5 14.2l-1.6-5 4.6 2.6zm7.6.4l2.4-4.6-4.8 1.6z" fill="#e28b47"/>
+      <circle cx="26.5" cy="19.5" r="6.4" fill="#ef9c58"/>
+      <path d="M26.5 13.2a6.4 6.4 0 0 1 6.3 6.7c-2 1-4.2 1.4-6.3 1.4z" fill="#f7b478" opacity=".65"/>
+      <circle cx="24.3" cy="19" r="1.1" fill="#4a3326"/>
+      <circle cx="29" cy="19" r="1.1" fill="#4a3326"/>
+      <path d="M26.6 22h1.5l-.75 1.1z" fill="#4a3326"/>
+      <path d="M24 25.6c1.6.9 3.4.9 5 0" stroke="#fdf3e6" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <!-- the wolf is the fox one rung up, and reads as one on purpose:
+         same canid build, but grey instead of orange, heavier in the
+         shoulder, with a thick short brush where the fox has a long
+         one and small round ears where the fox has tall points. -->
+    <symbol id="artWolf" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="33" rx="13" ry="2.4" fill="#000" opacity=".1"/>
+      <path d="M11 26c-4.2 2.2-7.6.4-7.2-3.4C7 21 10 22.4 11.2 24.4z" fill="#8a94a6"/>
+      <ellipse cx="17" cy="24.6" rx="11" ry="7.4" fill="#79839a"/>
+      <path d="M8.5 29.5c.6 2.4 1 3.4 1 3.4M15 31c.3 1.6.5 2.4.5 2.4" stroke="#5f6980" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M22.6 14.6l-1.2-5.2 4.6 2.9zm8.2.2l2-4.9-4.9 1.9z" fill="#79839a"/>
+      <circle cx="22.9" cy="12.6" r="1.7" fill="#5f6980"/>
+      <circle cx="29.6" cy="12.4" r="1.7" fill="#5f6980"/>
+      <circle cx="26.4" cy="19.8" r="6.9" fill="#8a94a6"/>
+      <path d="M26.4 13a6.9 6.9 0 0 1 6.8 7.2c-2.2 1.1-4.5 1.5-6.8 1.5z" fill="#aab3c2" opacity=".6"/>
+      <path d="M24.6 23.2h3.8l-1.9 3z" fill="#cfd6e0"/>
+      <circle cx="23.9" cy="19.2" r="1.15" fill="#2f3542"/>
+      <circle cx="29" cy="19.2" r="1.15" fill="#2f3542"/>
+      <path d="M26.4 22.4h1.6l-.8 1.15z" fill="#2f3542"/>
+      <path d="M23.6 26c1.8 1 3.8 1 5.6 0" stroke="#f2f5f9" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </symbol>
+
+    <symbol id="artBear" viewBox="0 0 40 40">
+      <ellipse cx="20" cy="34" rx="15" ry="2.5" fill="#000" opacity=".09"/>
+      <ellipse cx="17" cy="24" rx="13" ry="9" fill="#80563d"/>
+      <path d="M7 27v6q3 3 6 0v-6M21 27v6q3 3 6 0v-6" fill="#68442f"/>
+      <circle cx="21" cy="12" r="4.4" fill="#80563d"/><circle cx="32" cy="12" r="4.4" fill="#80563d"/>
+      <circle cx="21" cy="12" r="2.3" fill="#c99e75"/><circle cx="32" cy="12" r="2.3" fill="#c99e75"/>
+      <ellipse cx="26" cy="21" rx="10" ry="10.5" fill="#a57550"/>
+      <path d="M18 16q6-5 13-1" fill="none" stroke="#bb8c61" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="27" cy="25.5" rx="5.5" ry="4" fill="#e0bd91"/>
+      <circle cx="22" cy="20.5" r="1.3" fill="#30281f"/><circle cx="30.5" cy="20.5" r="1.3" fill="#30281f"/>
+      <ellipse cx="27" cy="24" rx="2" ry="1.4" fill="#30281f"/>
+      <path d="M27 25v2m-2 0q2 2 4 0" fill="none" stroke="#694832" stroke-width=".9" stroke-linecap="round"/>
+    </symbol>
+<symbol id="artDeer" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#be8958"/><path d="M9 27v7m13-7v7" stroke="#be8958" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#be8958"/><circle cx="32" cy="12" r="3" fill="#be8958"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#be8958"/><path d="M25 14V3m0 5-4-3m4 5 4-5m2 9V4m0 4 4-3" stroke="#6a513c" stroke-width="1.6" fill="none"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+<symbol id="artZebra" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#e9e6dc"/><path d="M9 27v7m13-7v7" stroke="#e9e6dc" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#e9e6dc"/><circle cx="32" cy="12" r="3" fill="#e9e6dc"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#e9e6dc"/><path d="M8 18l3 12m4-14 3 15m4-14 3 10m1-13 4 5m-6 2 5 3" stroke="#3d433c" stroke-width="2.4" fill="none"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+<symbol id="artBuffalo" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#645443"/><path d="M9 27v7m13-7v7" stroke="#645443" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#645443"/><circle cx="32" cy="12" r="3" fill="#645443"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#645443"/><path d="M22 15Q12 15 16 7M31 15Q40 15 35 7" stroke="#d8cfb4" stroke-width="3" fill="none"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+<symbol id="artLion" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#dcaa52"/><path d="M9 27v7m13-7v7" stroke="#dcaa52" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#dcaa52"/><circle cx="32" cy="12" r="3" fill="#dcaa52"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#dcaa52"/><circle cx="28" cy="20" r="11" fill="#97603a"/><circle cx="28" cy="20" r="7.5" fill="#e2b569"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+<symbol id="artTiger" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#e89c43"/><path d="M9 27v7m13-7v7" stroke="#e89c43" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#e89c43"/><circle cx="32" cy="12" r="3" fill="#e89c43"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#e89c43"/><path d="M8 18l4 11m3-12 3 13m4-16 3 5m8-5-3 5m-9 3 5 2m9-2-4 2" stroke="#49382e" stroke-width="2.3" fill="none"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+<symbol id="artElephant" viewBox="0 0 40 40"><ellipse cx="20" cy="35" rx="15" ry="2" fill="#000" opacity=".08"/><ellipse cx="17" cy="24" rx="12" ry="8" fill="#98acb1"/><path d="M9 27v7m13-7v7" stroke="#98acb1" stroke-width="5" stroke-linecap="round"/><circle cx="24" cy="12" r="3" fill="#98acb1"/><circle cx="32" cy="12" r="3" fill="#98acb1"/><ellipse cx="28" cy="21" rx="8" ry="10" fill="#98acb1"/><ellipse cx="22" cy="20" rx="7" ry="10" fill="#788f98"/><ellipse cx="22" cy="20" rx="4" ry="7" fill="#b4c2c0"/><path d="M33 21v10q0 7-6 2" stroke="#98acb1" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M30 26l-2 5" stroke="#fff5dc" stroke-width="2"/><circle cx="29" cy="19" r="1.1" fill="#34302b"/></symbol>
+  </defs>
+</svg>
+
+<div class="screen">
+  <div class="fly" style="--x:0;top:26%;left:14%;--t:6.5s;--d:.2s" aria-hidden="true"></div>
+  <div class="fly" style="top:38%;left:82%;--t:8s;--d:1.6s" aria-hidden="true"></div>
+  <div class="fly" style="top:58%;left:26%;--t:7.2s;--d:3.1s" aria-hidden="true"></div>
+  <div class="fly" style="top:18%;left:62%;--t:9s;--d:4.4s" aria-hidden="true"></div>
+  <div class="fly" style="top:70%;left:70%;--t:6.8s;--d:5.5s" aria-hidden="true"></div>
+
+  <div class="topline">
+    <p class="brand">CobbleWorks</p>
+    <p class="best">Best <b>1,240</b></p>
+  </div>
+
+  <div class="hero">
+    <p class="kicker">A living puzzle</p>
+    <h1 class="logo">Bio<b class="glow">connect</b></h1>
+    <div class="rule"></div>
+    <p class="copy">One chain, from a sprout to an elephant. Grow it, then keep it fed.</p>
+
+    <div class="arc" aria-hidden="true">
+      <svg class="path" viewBox="0 0 340 96" preserveAspectRatio="none">
+        <path d="M20 70Q170 10 320 70" fill="none" stroke="rgba(240,201,138,.3)"
+              stroke-width="1.4" stroke-dasharray="3 7" stroke-linecap="round"/>
+      </svg>
+      <span class="node" style="--x:9%;--y:72%;--sc:.8;--d:0s"><svg><use href="#artSprout"/></svg></span>
+      <span class="node" style="--x:24%;--y:47%;--d:.6s"><svg><use href="#artRabbit"/></svg></span>
+      <span class="node" style="--x:42%;--y:33%;--d:1.2s"><svg><use href="#artDeer"/></svg></span>
+      <span class="node" style="--x:58%;--y:33%;--d:1.8s"><svg><use href="#artWolf"/></svg></span>
+      <span class="node" style="--x:76%;--y:47%;--d:2.4s"><svg><use href="#artLion"/></svg></span>
+      <span class="node node--goal" style="--x:91%;--y:72%;--d:3s"><svg><use href="#artElephant"/></svg></span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="play" type="button">Begin</button>
+    <div class="links">
+      <button class="link" type="button">How to play</button>
+      <button class="link" type="button">Sound: off</button>
+    </div>
+  </div>
+
+  <svg class="treeline" viewBox="0 0 300 60" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 60V36c10-2 14-10 20-10s10 8 18 9 12-9 19-9 11 9 18 9 13-11 21-11 12 11 20 11 12-8 19-8 12 8 19 8 13-10 21-10 13 10 21 10 13-7 20-7 12 7 20 7 15-9 24-9v34z" fill="#0d150e" opacity=".9"/>
+    <path d="M6 60c-1-9 0-15 3-19 2 8 1 14-1 19zM52 60c-1-7 0-12 3-16 2 7 1 12-1 16zM118 60c-1-9 0-15 3-19 2 8 1 14-1 19zM188 60c-1-7 0-12 3-16 2 7 1 12-1 16zM258 60c-1-9 0-15 3-19 2 8 1 14-1 19z" fill="#16231600" stroke="rgba(126,192,92,.22)" stroke-width="1.2"/>
+  </svg>
+  <div class="vignette" aria-hidden="true"></div>
+</div>
+</body>
+</html>

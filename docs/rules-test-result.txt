@@ -1,0 +1,195 @@
+
+who eats what
+  ok   a wolf beside a rabbit and a fox takes the rabbit — cheapest first
+  ok   a wolf with only a fox beside it takes the fox
+  ok   and that meal is worth a fox
+  ok   a fox beside grass and a rabbit takes the rabbit
+  ok   a fox with no rabbit falls back to grass
+  ok   and a mouthful of grass is worth grass, not a fox
+  ok   a hungry fox does not eat another fox — a rung never eats its own
+
+grass is safe ground
+  ok   a starving wolf ringed by grass eats nothing
+  ok   and the grass is all still standing
+
+hunger is the trigger, not adjacency
+  ok   a wolf one turn short of hungry leaves the fox alone
+  ok   so a fox may be built beside a fed wolf in safety
+
+order of settling
+  ok   the wolf takes the rabbit before that rabbit can strip the grass
+
+the ladder
+  ok   a fox grows into a deer
+  ok   two foxes make a deer
+  ok   two wolves grow into a bear
+  ok   elephant is the final rung
+  ok   every diet entry is a real rung below its eater
+  ok   the animals a rung can take widen as the ladder climbs, never narrow
+  ok   the higher the rung, the less it can scrape by on plants
+  ok   every meal on every diet has a price
+
+a life is always one tap away
+  ok   a starving rabbit can be saved with a tile the hand actually deals
+  ok   ...including the one it always has — a sprout
+  ok   a starving fox can be saved with a tile the hand actually deals
+  ok   ...including the one it always has — a sprout
+  ok   a starving rabbit will take a bare sprout
+  ok   and the rabbit is fed, not merely fewer sprouts
+  ok   given both, it takes the grass and leaves the sprout standing
+  ok   sprouts are still safe to build beside a rabbit that is not red yet
+  ok   panicking costs score — a sprout pays less per tap than grass does
+  ok   the wolf keeps its short menu — an apex saved by a sprout is not one
+
+the red bar means what it says
+  ok   a rabbit is already red the turn it reaches out
+  ok   a just-fed rabbit is not red
+  ok   a rabbit that reaches out has at least one turn left to be answered in
+  ok   a fox is already red the turn it reaches out
+  ok   a just-fed fox is not red
+  ok   a fox that reaches out has at least one turn left to be answered in
+  ok   a deer is already red the turn it reaches out
+  ok   a just-fed deer is not red
+  ok   a deer that reaches out has at least one turn left to be answered in
+  ok   a zebra is already red the turn it reaches out
+  ok   a just-fed zebra is not red
+  ok   a zebra that reaches out has at least one turn left to be answered in
+  ok   a buffalo is already red the turn it reaches out
+  ok   a just-fed buffalo is not red
+  ok   a buffalo that reaches out has at least one turn left to be answered in
+  ok   a wolf is already red the turn it reaches out
+  ok   a just-fed wolf is not red
+  ok   a wolf that reaches out has at least one turn left to be answered in
+  ok   a bear is already red the turn it reaches out
+  ok   a just-fed bear is not red
+  ok   a bear that reaches out has at least one turn left to be answered in
+  ok   a lion is already red the turn it reaches out
+  ok   a just-fed lion is not red
+  ok   a lion that reaches out has at least one turn left to be answered in
+  ok   a tiger is already red the turn it reaches out
+  ok   a just-fed tiger is not red
+  ok   a tiger that reaches out has at least one turn left to be answered in
+  ok   a elephant is already red the turn it reaches out
+  ok   a just-fed elephant is not red
+  ok   a elephant that reaches out has at least one turn left to be answered in
+
+your move costs the world nothing
+  ok   placing does not advance the world clock
+  ok   placing does not age anything already on the board
+  ok   placing immediately replaces the tile
+  ok   the first queued tile is planted
+  ok   a whole hand can be spent between two ticks
+  ok   an empty hand places nothing
+  ok   the world ages the board with no placement at all
+  ok   and the world clock did advance
+  ok   a tick deals a tile into an empty hand
+  ok   and the hand never exceeds HAND_MAX
+  ok   a two-step chain creates a rabbit
+  ok   the chain clears all three neighboring blockers
+  ok   the hand advances in order and appends the preview
+  ok   preview leaves all live state unchanged
+  ok   preview predicts three growths ending at the original rabbit
+  ok   the chain reaches a fox without leaving gaps between rungs
+  ok   ambiguous merges use the left existing tile consistently
+  ok   wolves merge into a bear on the existing square
+  ok   bear growth awards 1500 base points
+  ok   creating a bear does not end the run
+  ok   bear prefers grass over rabbits
+  ok   bear can eat rabbits when grass is absent
+  ok   bear leaves wolves, foxes and sprouts alone
+  ok   unfed bear leaves bones
+  ok   sprout pair reaches grass
+  ok   grass produces finite positive growth points
+  ok   grass pair reaches rabbit
+  ok   rabbit produces finite positive growth points
+  ok   rabbit pair reaches fox
+  ok   fox produces finite positive growth points
+  ok   fox pair reaches deer
+  ok   deer produces finite positive growth points
+  ok   deer pair reaches zebra
+  ok   zebra produces finite positive growth points
+  ok   zebra pair reaches buffalo
+  ok   buffalo produces finite positive growth points
+  ok   buffalo pair reaches wolf
+  ok   wolf produces finite positive growth points
+  ok   wolf pair reaches bear
+  ok   bear produces finite positive growth points
+  ok   bear pair reaches lion
+  ok   lion produces finite positive growth points
+  ok   lion pair reaches tiger
+  ok   tiger produces finite positive growth points
+  ok   tiger pair reaches elephant
+  ok   elephant produces finite positive growth points
+  ok   rabbit eats grass
+  ok   rabbit eats sprout
+  ok   fox eats rabbit
+  ok   fox eats grass
+  ok   fox eats sprout
+  ok   deer eats grass
+  ok   deer eats sprout
+  ok   zebra eats grass
+  ok   zebra eats sprout
+  ok   buffalo eats grass
+  ok   buffalo eats sprout
+  ok   wolf eats rabbit
+  ok   wolf eats fox
+  ok   wolf eats deer
+  ok   wolf eats zebra
+  ok   bear eats grass
+  ok   bear eats rabbit
+  ok   bear eats deer
+  ok   lion eats deer
+  ok   lion eats zebra
+  ok   lion eats buffalo
+  ok   lion eats wolf
+  ok   lion eats bear
+  ok   tiger eats deer
+  ok   tiger eats zebra
+  ok   tiger eats buffalo
+  ok   tiger eats wolf
+  ok   tiger eats bear
+  ok   tiger eats lion
+  ok   elephant eats rabbit
+  ok   elephant eats fox
+  ok   elephant eats deer
+  ok   elephant eats zebra
+  ok   elephant eats buffalo
+  ok   elephant eats wolf
+  ok   elephant eats bear
+  ok   elephant eats lion
+  ok   elephant eats tiger
+  ok   no discovery ever deals above the wolf
+  ok   ...and the wolf itself is still dealt
+  ok   the hand never skips beyond what you have discovered
+
+the ground keeps clear of animals
+  ok   200 stones, none of them beside the rabbit
+  ok   with nowhere else left, the stone still lands
+
+the elephant
+  ok   an elephant will not touch grass or sprouts
+  ok   ...and the plants are still standing
+  ok   an elephant will not eat wild animals, however many are beside it
+  ok   an elephant eats a raised animal beside it
+  ok   ...and the meal pays ELEPHANT_MEAL_PCT of the prey
+  ok   ...which is the highest meal in the game
+  ok   an elephant beside two raised animals takes the cheaper one — same rule as every predator
+  ok   a wild rabbit does not shield a raised tiger — the elephant skips past it
+  ok   a fed elephant eats nothing — the red bar rule still holds
+  ok   the elephant is hungry two to three times faster than its base pace
+  ok   ...which makes it the shortest-lived animal on the top half of the ladder
+  ok   and it still dies before it can eat again
+  ok   an unfed elephant starves like anything else
+  ok   ...and leaves bones on its square
+  ok   two tigers grow into an elephant
+  ok   ...and a merge marks what it leaves behind as raised
+  ok   a rabbit the player just merged is food, one turn old
+  ok   a hungry elephant that found nothing is reported as refused
+  ok   ...and the board can tell "wrong food" from "no food"
+  ok   an elephant alone is "no food" instead
+  ok   the larder counts raised animals only
+  ok   the about-to-be-eaten ring marks the raised deer
+  ok   ...and leaves the wild one alone
+
+172 passed, 0 failed
+

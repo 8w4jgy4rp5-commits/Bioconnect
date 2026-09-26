@@ -1,0 +1,24 @@
+/* ミニアプリの末尾に置く、CobbleWorksへ戻るリンク。
+   アプリごとに配色が違うので、色は指定せず body の文字色を薄めて使う
+   （明るいテーマにも暗いテーマにも馴染ませるため）。
+   tools/seo.js が各アプリのHTMLにこのファイルを読み込ませる。 */
+
+.cw-footer {
+  margin: 48px auto 24px;
+  padding: 0 16px;
+  max-width: 720px;
+  text-align: center;
+  font: 400 13px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.cw-footer a {
+  color: inherit;
+  opacity: 0.6;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cw-footer a:hover,
+.cw-footer a:focus-visible {
+  opacity: 1;
+}
