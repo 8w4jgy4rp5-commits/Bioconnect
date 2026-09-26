@@ -38,6 +38,9 @@ window.BioAudio = (() => {
     effect(kind, count = 1) {
       if (!sfx || document.hidden) return;
       if (kind === 'place') note(60, 0, .08, .025);
+      // the two-beat intro: a questioning pair, then a bright fanfare
+      else if (kind === 'ready') { note(67, 0, .18, .05); note(67, .17, .26, .05); }
+      else if (kind === 'go') { note(72, 0, .14, .06); note(76, .07, .14, .06); note(79, .14, .45, .06); note(91, .14, .3, .02); }
       else if (kind === 'eat') { note(55,0,.12); note(62,.08,.16); }
       else { const notes = kind === 'finish' ? [60,64,67,72,76,79,84] : [64,67,72].slice(0,Math.min(3,Math.max(1,count))); notes.forEach((n,i) => note(n,i*.09,.3)); }
     }

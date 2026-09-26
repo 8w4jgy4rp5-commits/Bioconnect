@@ -1949,6 +1949,43 @@ function closeHow() {
   (howOpener || el.howBtn).focus();
 }
 
+// A short "Ready?? / Go!!" beat stands between the button and the first
+// move, so the meadow does not begin ticking under the player's thumb.
+// The title screen lifts at once — the board is already dealt — but the
+// clock stays paused, and the overlay swallows taps, until Go clears.
+let counting = false;
+const countTimers = [];
+
+function playIntro() {
+  el.startScreen.hidden = true;
+  document.body.classList.remove('is-modal');
+  counting = true;
+  showWord('Ready??', '');
+  if (window.BioAudio) window.BioAudio.effect('ready');
+  countTimers.push(setTimeout(function () {
+    showWord('Go!!', ' countdown-word--go');
+    if (window.BioAudio) window.BioAudio.effect('go');
+  }, 900));
+  countTimers.push(setTimeout(endIntro, 1520));
+}
+
+function showWord(text, cls) {
+  el.countdown.hidden = false;
+  el.countdownWord.className = 'countdown-word' + cls;
+  el.countdownWord.textContent = text;
+}
+
+function endIntro() {
+  if (!counting) return;
+  counting = false;
+  for (const t of countTimers) clearTimeout(t);
+  countTimers.length = 0;
+  el.countdown.hidden = true;
+  el.countdownWord.className = 'countdown-word';
+  el.countdownWord.textContent = '';
+  startRun();
+}
+
 function startRun() {
   el.startScreen.hidden = true;
   document.body.classList.remove('is-modal');
@@ -1988,7 +2025,7 @@ async function init() {
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
     'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
-    'startHowBtn', 'startSoundBtn'];
+    'startHowBtn', 'startSoundBtn', 'countdown', 'countdownWord'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
@@ -2013,7 +2050,7 @@ async function init() {
   // the meadow also stays still while the title screen is up
   const resume = function () {
     closeHow();
-    setPaused(document.hidden || !el.startScreen.hidden);
+    setPaused(document.hidden || !el.startScreen.hidden || counting);
   };
   el.howClose.addEventListener('click', resume);
   el.howDone.addEventListener('click', resume);
@@ -2024,7 +2061,7 @@ async function init() {
     if (e.key === 'Escape' && !el.howModal.hidden) resume();
   });
   document.addEventListener('visibilitychange', function () {
-    setPaused(document.hidden || !el.howModal.hidden);
+    setPaused(document.hidden || !el.howModal.hidden || counting);
   });
 
   // The title screen carries the guide and the sound switch, so both are
@@ -2055,10 +2092,7 @@ async function init() {
   newGame();
   el.startBest.textContent = displayScore(state.best).toLocaleString();
   document.body.classList.add('is-modal');
-  el.startBtn.addEventListener('click', function () {
-    if (window.BioAudio) window.BioAudio.effect('start');
-    startRun();
-  });
+  el.startBtn.addEventListener('click', playIntro);
   el.startBtn.focus();
 
   try {
