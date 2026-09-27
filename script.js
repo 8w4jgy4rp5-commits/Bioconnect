@@ -1307,7 +1307,9 @@ const SPRITE_FILES = {
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png',
   wolfWhole: 'wolf-whole.png',
-  bearWhole: 'bear-whole.png'
+  bearWhole: 'bear-whole.png',
+  elephantCalm: 'elephant-calm.png',
+  elephantHungry: 'elephant-hungry.png'
 };
 
 // Where each part sits and how wide it is drawn, in units measured from
@@ -1410,6 +1412,20 @@ const RIG = {
       ['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'bearWhole', hungry: 'bearWhole' }
+  },
+  // The muscled elephant is the first whole-body painting with a real
+  // second face: a smirk when fed, a snorting glare when hungry. Both
+  // were cut from one shared box, so the body stays put and only the
+  // face (and the steam from the trunk) changes on the swap. Sized like
+  // the bear: drawn wider than the tile and pushed left, so the tail
+  // drops off the edge and the trunk stays in. Measured at 84% of the
+  // tile's height to the bear's 80% -- the top of the ladder looks it.
+  elephant: {
+    fit: { span: 38, ox: 2.6, oy: 1.8 },
+    parts: [
+      ['@head', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'elephantCalm', hungry: 'elephantHungry' }
   }
 };
 
