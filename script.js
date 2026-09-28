@@ -1289,6 +1289,7 @@ const SPRITE_FILES = {
   bearWhole: 'bear-whole.png',
   buffaloWhole: 'buffalo-whole.png',
   deerWhole: 'deer-whole.png',
+  tigerWhole: 'tiger-whole.png',
   elephantCalm: 'elephant-calm.png',
   elephantHungry: 'elephant-hungry.png'
 };
@@ -1455,6 +1456,42 @@ const RIG = {
       ['@head', { w: 20, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'deerWhole', hungry: 'deerWhole' }
+  },
+  // THE TIGER IS THE FACE, AND THE FACE IS NOT SHOUTING.
+  //
+  // One painting, same reasoning as the wolf and the deer. What this
+  // one has that none of the others do is an aura: four gold spikes
+  // struck around the head. The wide soft glow they were drawn inside
+  // was transparent and did not survive the crop, which is the outcome
+  // we wanted -- at 44px a haze is dirt on the screen, while the spikes
+  // stay four clean marks and say the same thing.
+  //
+  // `w` 51 puts it at 134.2% of the tile's width and 82.4% of its
+  // height. Height is not the ladder here and never has been -- the
+  // deer stands tallest of all at 88.3% and is fifth of twelve --
+  // because a portrait painting fills a square differently from a
+  // cropped one. What 82.4% buys is a tiger just over the wolf's 81.4%
+  // and just under the elephant's 84.0%, so the two animals it is
+  // drawn between read as its neighbours. Width is what says eleventh:
+  // 134.2% is wider than anything else on the board, the bear's 123.7%
+  // and the buffalo's 131.6% included, because those two are cropped to
+  // head and shoulder and the tiger is drawn full length.
+  //
+  // `ox` 5 spends the overflow on purpose. Centred, the tile cuts 17%
+  // off each side and takes the aura with it. Pushed left, the right
+  // edge loses 3.9% -- the outer tips of two spikes -- and the tail
+  // pays for the rest. The tail is the one part of this animal that
+  // carries nothing. The face is the character, and the face is whole.
+  //
+  // `oy` 1.7 is the same solve as everywhere else: paws at 95.7% of the
+  // tile, the wolf and buffalo baseline, which leaves the 1.1 units of
+  // `sag` somewhere to go when it starves.
+  tiger: {
+    fit: { span: 38, ox: 5, oy: 1.7 },
+    parts: [
+      ['@head', { w: 51, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'tigerWhole', hungry: 'tigerWhole' }
   },
   // The muscled elephant is the first whole-body painting with a real
   // second face: a smirk when fed, a snorting glare when hungry. Both

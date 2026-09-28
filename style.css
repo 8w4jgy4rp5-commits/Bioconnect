@@ -1580,5 +1580,45 @@ body.is-modal { overflow: hidden; }
   .cell--deer .tile-art { animation: none; }
 }
 
+/* The tiger is the one that does not move, and that is the whole idea.
+   Everything else on this board is busy: the rabbit ticks at 2.6s and
+   never settles, the bear shifts its weight at 4.2s, the buffalo takes
+   6.4s to put its head down, the deer cannot stop shaking. The tiger
+   takes 7.2s to breathe once and does nothing else. Set next to the
+   deer it is the other half of the same sentence -- one animal that
+   cannot keep still, one that has no reason to move.
+
+   The only moving part is scaleY, 0.6% of the art's height, which at
+   44px is about a quarter of a pixel at the shoulder. That is under
+   every other idle here by a wide margin, and it is meant to be: the
+   player should not be able to say whether this tile is animated. The
+   pivot is at the paws, so the chest rises and the feet stay planted.
+
+   Held at both ends (0-22% and 78-100%) because breathing is not a
+   sine wave -- an animal at rest pauses full and pauses empty, and the
+   pause is most of it.
+
+   No arrival animation, unlike the bear and the buffalo. `.cell--grew`
+   already flashes the square when a merge lands one here, and this
+   animal does not need a second entrance on top of it.
+
+   Offsets keep two tigers off the same breath. */
+.cell--tiger .tile-art {
+  transform-origin: center bottom;
+  animation: tiger-breath 7.2s ease-in-out infinite;
+}
+.cell--tiger:nth-child(3n+2) .tile-art { animation-delay: -2.4s; }
+.cell--tiger:nth-child(3n+3) .tile-art { animation-delay: -4.8s; }
+
+@keyframes tiger-breath {
+  0%, 22%   { transform: scaleY(1); }
+  50%       { transform: scaleY(1.006); }
+  78%, 100% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--tiger .tile-art { animation: none; }
+}
+
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
