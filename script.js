@@ -1289,6 +1289,8 @@ const SPRITE_FILES = {
   bearWhole: 'bear-whole.png',
   buffaloWhole: 'buffalo-whole.png',
   deerWhole: 'deer-whole.png',
+  zebraWhole: 'zebra-whole.png',
+  lionWhole: 'lion-whole.png',
   tigerWhole: 'tiger-whole.png',
   elephantCalm: 'elephant-calm.png',
   elephantHungry: 'elephant-hungry.png'
@@ -1456,6 +1458,84 @@ const RIG = {
       ['@head', { w: 20, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'deerWhole', hungry: 'deerWhole' }
+  },
+  // THE ZEBRA IS THE DEER'S PROBLEM AGAIN, AND THE SCARF IS THE ANSWER.
+  //
+  // 220x407 -- narrower even than the deer's 220x369, because this one
+  // stands square on all four legs instead of in profile, so the body
+  // is drawn end-on and almost nothing of it is width. Two portrait
+  // animals on neighbouring rungs was the risk worth checking before
+  // anything else: at 44px a tall thin brown thing beside a tall thin
+  // striped thing is two of the same tile.
+  //
+  // It is not, and the reason is not the stripes. The stripes do
+  // survive -- four or five of them read across the flank -- but what
+  // separates the two tiles at a glance is the yellow scarf, the one
+  // saturated colour anywhere on this half of the ladder. The deer is
+  // brown on cream; the zebra is brown on cream with a gold knot at the
+  // throat. That is the tile's signature, and it is legible before the
+  // animal under it is.
+  //
+  // `w` 19 puts it 92.5% of the tile tall and 50.0% wide, against the
+  // deer's 88.3% and 52.6%: taller by four points, a shade narrower,
+  // and the same bounding box within a rounding error. Equal boxes are
+  // not equal animals -- the deer is four sticks and a neck with the
+  // square's air showing through it, while the zebra fills its box with
+  // a solid barrel of a body, so it reads as the heavier of the two
+  // without being drawn bigger. `w` 20 was the other candidate and is
+  // the reason 19 shipped: it stands 97.4%, which puts the tips of the
+  // mane through the top edge of the tile.
+  //
+  // `oy` -0.218 is solved, not nudged: hooves at 95.7%, the wolf and
+  // buffalo and deer baseline, with the 1.1 units of `sag` still
+  // somewhere to go. It is the only negative `oy` on the board, which
+  // is only to say this is the tallest painting here -- the art starts
+  // higher in its own box than anything else does.
+  zebra: {
+    fit: { span: 38, ox: 0, oy: -0.218 },
+    parts: [
+      ['@head', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'zebraWhole', hungry: 'zebraWhole' }
+  },
+  // THE LION IS LYING DOWN, AND IT IS STILL THE SECOND BIGGEST THING HERE.
+  //
+  // The painting is a king mid-yawn with a tear in one eye: crowned,
+  // jaws wide, front paws thrown out, flat on the ground. It came in as
+  // a JPEG on cream paper with no alpha at all, so it went through
+  // `cutout-bg.py` before `make-game-asset.py` could see it -- the one
+  // animal here that needed lifting off its own background.
+  //
+  // Sizing it is the bear's problem in a third form. The mane and the
+  // raised head make this a tall picture of a low animal: fitted so
+  // that its height sat between the bear's 79.3% and the tiger's 82.4%,
+  // the way the tiger was fitted between the wolf and the elephant, it
+  // came out 92.1% wide and read as the SMALLEST of the three big
+  // carnivores. Height is the wrong axis for an animal that is lying
+  // down.
+  //
+  // So it is solved on area instead. `w` 39 gives 90.5% tall by 102.6%
+  // wide -- a painted box of 9285 against the bear's 9143 and the
+  // tiger's 11058, which is the order the ladder asks for and the order
+  // the eye reports. It is taller than the tiger and it does not read
+  // as bigger than the tiger, because the tiger is half again as wide;
+  // width is what mass looks like on this board, and the crown is what
+  // rank looks like.
+  //
+  // The overflow is 2.6%, 1.3% off each side: the last hair of the tail
+  // on the left, the tip of one front paw on the right. `ox` stays 0
+  // because the painting is already centred on its own mass and there
+  // is nothing here worth spending the overflow on -- the face is in
+  // the middle, not at an edge, which is what makes this different from
+  // the tiger.
+  //
+  // `oy` 0.16 is solved like the rest: paws at 95.7%, sag intact.
+  lion: {
+    fit: { span: 38, ox: 0, oy: 0.16 },
+    parts: [
+      ['@head', { w: 39, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'lionWhole', hungry: 'lionWhole' }
   },
   // THE TIGER IS THE FACE, AND THE FACE IS NOT SHOUTING.
   //

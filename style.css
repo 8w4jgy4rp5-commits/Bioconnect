@@ -1620,5 +1620,72 @@ body.is-modal { overflow: hidden; }
   .cell--tiger .tile-art { animation: none; }
 }
 
+/* The zebra parks its weight and leaves it there.
+   Four animals already move on this board and each of them owns a
+   shape: the rabbit ticks, the bear rocks from side to side at 4.2s,
+   the buffalo puts its head down, the deer cannot stop shaking. The
+   zebra is drawn standing square on all four legs, facing us, and a
+   rotation on that pose reads as the bear's rock with stripes on -- so
+   there is no rotation in here at all.
+
+   What is left is the thing a standing horse actually does: it takes
+   the weight off one side, stands like that for a while, and later
+   takes it off the other. So the whole movement is .3px sideways and
+   .4% of height, and 4 of the 5.8 seconds are spent holding one end or
+   the other. The eye catches the change of posture, never the moving.
+
+   Pivot at the hooves, so the body leans and the feet stay planted. */
+.cell--zebra .tile-art {
+  transform-origin: center bottom;
+  animation: zebra-settle 5.8s ease-in-out infinite;
+}
+.cell--zebra:nth-child(3n+2) .tile-art { animation-delay: -1.9s; }
+.cell--zebra:nth-child(3n+3) .tile-art { animation-delay: -3.9s; }
+
+@keyframes zebra-settle {
+  0%, 34%   { transform: translateX(-.3px) scaleY(1); }
+  50%       { transform: translateX(0) scaleY(1.004); }
+  66%, 100% { transform: translateX(.3px) scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--zebra .tile-art { animation: none; }
+}
+
+/* The lion is mid-yawn in the painting, so the tile finishes the yawn.
+   The chest fills, holds a moment at the top, then empties past where
+   it started and sags there -- a sigh, not a breath. That is the
+   difference from the tiger one rung up: the tiger breathes .6% of its
+   height and is trying not to be seen doing it, while this one moves
+   1.4% up and .5% down and does not care who notices. One is the
+   animal that is watching you. This one has decided you are not worth
+   getting up for.
+
+   Still under the ceiling every idle here keeps to, because motion on
+   this board means something and an idle must not compete with a merge
+   or a death. 6.6s, slower than the bear and the buffalo, faster than
+   the tiger: the pace is the character.
+
+   Pivot at the paws, which are thrown out in front on the ground, so
+   the ribcage is what moves and the animal stays lying down. */
+.cell--lion .tile-art {
+  transform-origin: center bottom;
+  animation: lion-sigh 6.6s ease-in-out infinite;
+}
+.cell--lion:nth-child(3n+2) .tile-art { animation-delay: -2.2s; }
+.cell--lion:nth-child(3n+3) .tile-art { animation-delay: -4.4s; }
+
+@keyframes lion-sigh {
+  0%, 100% { transform: scaleY(1); }
+  26%      { transform: scaleY(1.014); }
+  38%      { transform: scaleY(1.012); }
+  64%      { transform: scaleY(.995); }
+  82%      { transform: scaleY(.997); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--lion .tile-art { animation: none; }
+}
+
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
