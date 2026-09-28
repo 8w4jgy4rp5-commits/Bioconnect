@@ -427,7 +427,16 @@ body.is-modal { overflow: hidden; }
   color: var(--season-ink, var(--green));
 }
 
-/* how far through this season the run is */
+.season-mult { white-space: nowrap; justify-self: end; }
+.season-next {
+  grid-column: 1 / -1;
+  font-size: .72rem;
+  line-height: 1.4;
+  color: var(--season-ink, var(--green));
+  font-variant-numeric: tabular-nums;
+}
+
+/* how far through this difficulty stage the run is */
 .season-track {
   grid-column: 1 / -1;
   position: absolute;
@@ -1478,6 +1487,40 @@ body.is-modal { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .cell--rabbit .tile-art { animation: none; }
 }
+
+/* The buffalo grazes, and grazing is the slowest thing on this board.
+   The rabbit ticks at 2.6s and never settles; the bear takes 4.2s and
+   is always settled. The buffalo takes 6.4s, slower than either,
+   because the one thing a player should read off this tile is WEIGHT.
+
+   The pivot is at the rump end -- the hind legs, off the left edge --
+   so a positive rotation drops the head rather than rocking the body.
+   That turns one degree of rotation into a head going down to the
+   grass and coming back up, which is the only thing a still painting
+   of a buffalo can be doing. Held long at the bottom (the 45-65%
+   stretch) because the animal is eating there, not passing through.
+
+   Kept under the bear's swing for the same reason the bear is kept
+   under the rabbit's: motion on this board MEANS something, and an
+   idle that competes with a merge or a death drowns out the signal. */
+.cell--buffalo .tile-art {
+  transform-origin: 12% bottom;
+  animation: buffalo-graze 6.4s ease-in-out infinite;
+}
+.cell--buffalo:nth-child(3n+2) .tile-art { animation-delay: -2.1s; }
+.cell--buffalo:nth-child(3n+3) .tile-art { animation-delay: -4.2s; }
+
+@keyframes buffalo-graze {
+  0%, 100%  { transform: rotate(0deg); }
+  45%, 65%  { transform: translateY(.4px) rotate(1.1deg); }
+}
+
+/* the arrival owns the tile for a third of a second, then the graze
+   picks up again on the next render -- same handover as the bear */
+.cell--buffalo.cell--grew .tile-art { animation: buffalo-arrive .35s ease-out; }
+
+@keyframes buffalo-arrive { 0% { transform: scale(.6); } 65% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .cell--buffalo .tile-art, .cell--buffalo.cell--grew .tile-art { animation: none; } }
 
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }

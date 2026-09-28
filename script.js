@@ -232,16 +232,10 @@ function growValue(kind) {
 const SPROUT_WITHER_AT = 14;
 const GRASS_WITHER_AT = 18;
 
-// Percent of the hand dealt as grass rather than sprouts. Grass shows up
-// often enough that a run can get off the ground; any more and sprouts
-// stop mattering.
-//
-// 22 was tuned when grass cost three sprouts, which made ready-made
-// grass a large windfall. At two it is a smaller one, so the share can
-// rise without swamping the bottom rung: swept against 15, 22 and 30
-// alongside MERGE_SPROUT=2, thirty is where the first rabbit lands on
-// tick 3 instead of 5 and the wolf clears 60%.
-const GRASS_IN_HAND = 30;
+// A fixed half-sprout, half-grass supply keeps every animal earned.
+// More grass offsets the removed animal windfalls without skipping the
+// bottom of the ladder. Neither time nor discoveries change these odds.
+const GRASS_IN_HAND = 50;
 
 const LADDER = ["sprout", "grass", "rabbit", "fox", "deer", "zebra", "buffalo", "wolf", "bear", "lion", "tiger", "elephant"];
 const MERGE_AT = Object.fromEntries(LADDER.slice(0, -1).map(k => [k, 2]));
@@ -444,55 +438,52 @@ const BLOCKERS = ['scrub', 'bones', 'stone'];
 const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
 
 // ---------- The year ----------
-//
-// A run is one year, and the meadow hardens as it goes. Spring gives the
-// stones a long gap and the plants a long life, which is the room a new
-// player needs to find the ladder at all; by winter the ground is pushing
-// back twice as fast and nothing keeps. Meals are worth more each season,
-// so surviving into the hard part is where a score is actually made
-// rather than merely accumulated.
-//
-// The animals' own clocks deliberately do NOT ramp. "An animal eats only
-// when its bar is red" is the one rule the player has to be able to trust
-// at a glance, and a rule that quietly changes underneath them is worse
-// than a hard one.
-const SEASON_LENGTH = 25;       // turns per season
-const SEASONS = 4;              // spring, summer, autumn, winter — winter then stays
-
-const STONE_EVERY_FIRST = 12;    // spring: a stone every this many turns
-const STONE_EVERY_LAST = 2;     // ...winter
-const WITHER_BONUS_FIRST = 30;   // spring: plants live this many turns longer
-const WITHER_BONUS_LAST = 0;    // ...winter
-const SCORE_PER_SEASON = 1;     // meals multiply by 1, 2, 3, 4 across the year
+// Supply stays small throughout a run. Pressure and rewards, rather than
+// larger dealt animals, rise with the independent world clock.
+const SEASON_LENGTH = 25;       // world ticks per difficulty stage
+const SEASONS = 4;
+const DIFFICULTY_STAGES = 8;    // spring, summer, autumn, then five winters
+const STONE_EVERY_FIRST = 12;
+const STONE_EVERY_LAST = 6;     // first winter; later winters approach the floor
+const STONE_EVERY_MIN = 2;
+const WITHER_BONUS_FIRST = 30;
+const WITHER_BONUS_LAST = 0;
+const SCORE_PER_SEASON = 1;     // growth AND meals: x1 through x8
 
 const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
-// One line each — the strip is one line tall, and the multiplier is
-// already on it, so none of these need to restate it.
 const SEASON_NOTES = [
-  'Stones are rare and growth keeps.',
-  'The ground starts to push back.',
-  'Stones come faster, growth fades.',
-  'Hard ground. Nothing keeps for long.'
+  'Room to grow. Start small.',
+  'More stones. Keep space open.',
+  'Plants fade sooner. Plan a chain.',
+  'Winter deepens. Keep your meadow fed.'
 ];
 
-// 0 in spring, SEASONS-1 from winter on.
-function season() {
-  return Math.min(SEASONS - 1, Math.floor(state.ticks / SEASON_LENGTH));
+function difficultyStage() {
+  return Math.min(DIFFICULTY_STAGES - 1, Math.floor(state.ticks / SEASON_LENGTH));
 }
-
-// Walks `from` to `to` across the year, rounded to whole turns.
-function seasonal(from, to) {
-  if (SEASONS < 2) return to;
-  return Math.round(from + (to - from) * (season() / (SEASONS - 1)));
+function season() { return Math.min(SEASONS - 1, difficultyStage()); }
+function seasonLabel() {
+  const s = season();
+  return SEASON_NAMES[s] + (s === SEASONS - 1 ? ' ' + (difficultyStage() - s + 1) : '');
 }
-
-function stoneEvery() { return Math.max(1, seasonal(STONE_EVERY_FIRST, STONE_EVERY_LAST)); }
-function witherBonus() { return seasonal(WITHER_BONUS_FIRST, WITHER_BONUS_LAST); }
-function scoreMultiplier() { return 1 + season() * SCORE_PER_SEASON; }
-
-// A plant's whole life this season. Used by the wither check and by the
-// meter, so the bar always means what it looks like it means.
+function stoneEvery() {
+  const s = season();
+  const firstYear = SEASONS < 2 ? STONE_EVERY_LAST : Math.round(
+    STONE_EVERY_FIRST + (STONE_EVERY_LAST - STONE_EVERY_FIRST) * s / (SEASONS - 1));
+  return Math.max(STONE_EVERY_MIN, firstYear - Math.max(0, difficultyStage() - (SEASONS - 1)));
+}
+function witherBonus() {
+  // Gradual shortening avoids the old ten-tick lifespan loss at a season
+  // boundary. The plant meter and wither check share this same limit.
+  const progress = Math.min(1, state.ticks / (SEASON_LENGTH * (DIFFICULTY_STAGES - 1)));
+  return Math.round(WITHER_BONUS_FIRST + (WITHER_BONUS_LAST - WITHER_BONUS_FIRST) * progress);
+}
+function scoreMultiplier() { return 1 + difficultyStage() * SCORE_PER_SEASON; }
 function plantLimit(kind) { return PLANTS[kind].witherAt + witherBonus(); }
+function nextDifficultySeconds() {
+  const left = SEASON_LENGTH - state.ticks % SEASON_LENGTH;
+  return Math.ceil(left * TICK_MS * (state.relaxed ? RELAXED_SCALE : 1) / 1000);
+}
 
 const HAND_ODDS = [
   { kind: 'sprout', weight: 100 - GRASS_IN_HAND },
@@ -527,7 +518,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 15;
+const RULES_VERSION = 16;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -708,25 +699,9 @@ function vitality(cell) {
   return Math.max(0, 1 - cell.clock / limit);
 }
 
-// How high the deal is ever allowed to reach, as a LADDER index, and how
-// often the deal is a grown animal rather than a sprout or grass.
-//
-// The ceiling is the difficulty knob. Without one the deal tracked the
-// top discovery the whole way up, so every new discovery made the next
-// one cheaper and the elephant arrived on its own -- reached in 57% of
-// casual runs. Capped at the wolf, the last four rungs are earned only by
-// merging, the way the big fruit in a drop-and-merge puzzle is.
-const HAND_CEILING = 7;   // LADDER index of the wolf
-const HAND_HIGH_PCT = 65;
-
+// The same plant mix at every time and discovery. Every animal must be
+// raised by merging; discovering one never changes the supply.
 function rollHand() {
-  // Later discoveries lift supply, never dealing the next undiscovered
-  // animal and never anything above the ceiling.
-  const top = rank(state.topKind);
-  if (top >= 4 && Math.random() < HAND_HIGH_PCT / 100) {
-    const high = Math.min(HAND_CEILING, top - 1);
-    return LADDER[Math.max(2, high - (Math.random() < 0.2 ? 1 : 0))];
-  }
   let total = 0;
   for (const o of HAND_ODDS) total += o.weight;
   let r = Math.random() * total;
@@ -1182,7 +1157,7 @@ function setRelaxed(on) {
 function endRun() {
   state.over = true;
   syncClock();
-  el.goTitle.textContent = 'The meadow filled in ' + SEASON_NAMES[season()];
+  el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
   const lv = levelAt(displayScore(state.score));
   el.goScore.textContent = displayScore(state.score).toLocaleString();
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
@@ -1308,6 +1283,8 @@ const SPRITE_FILES = {
   foxTail: 'fox-tail.png',
   wolfWhole: 'wolf-whole.png',
   bearWhole: 'bear-whole.png',
+  buffaloWhole: 'buffalo-whole.png',
+  deerWhole: 'deer-whole.png',
   elephantCalm: 'elephant-calm.png',
   elephantHungry: 'elephant-hungry.png'
 };
@@ -1412,6 +1389,68 @@ const RIG = {
       ['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
     head: { calm: 'bearWhole', hungry: 'bearWhole' }
+  },
+  // THE BUFFALO IS LONG WHERE EVERYTHING ELSE IS TALL.
+  //
+  // One painting, same reasoning as the wolf and the bear. The new
+  // problem is the shape of the animal: the art is 220x122, an aspect
+  // of 0.55 against the wolf's 0.84. Fitted inside the tile by its
+  // width it stands 54% of the tile's height to the wolf's 72% -- a
+  // rung BELOW the wolf, so smaller is right, but not by that much.
+  // Three sizes were rendered against the wolf at 44px before this one
+  // was picked; at w 54 the front legs were already falling off the
+  // right edge.
+  //
+  // So this rig follows the bear: wider than the tile (w 50 against a
+  // span of 38) and pushed left (`ox` 2.5), so the rump and the black
+  // tail tuft run off the left edge and what stays in the square is the
+  // head, the horns, the hump and all four legs. Measured, not guessed:
+  // 64% of the tile's height against the wolf's 72%, on the same
+  // baseline, which is what the ladder asks for.
+  //
+  // `oy` 6.7 is not a guess either -- it is the number that puts the
+  // hooves on the wolf's baseline, solved for rather than nudged, and
+  // it leaves room under them for `sag` when the meter runs red.
+  buffalo: {
+    fit: { span: 38, ox: 2.5, oy: 6.7 },
+    parts: [
+      ['@head', { w: 50, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'buffaloWhole', hungry: 'buffaloWhole' }
+  },
+  // THE DEER IS THE NARROW ONE, AND NARROW IS NOT SMALL.
+  //
+  // One painting, same reasoning as the wolf. What is new is the shape
+  // of the picture: 220x369, the only portrait art on the board, where
+  // every other animal is wider than it is tall. Fitted to the tile by
+  // its width the way the wolf is, it would stand 45% of the tile and
+  // sit in the middle of an empty square looking like something that
+  // had wandered in by mistake.
+  //
+  // So it is sized to be read instead of to be contained. At `w` 20 it
+  // stands 88.3% of the tile and covers 52.6% of its width -- the
+  // tallest animal after the rabbit and by far the thinnest, against
+  // the wolf's 95.6% width and the bear's 115.3%. It does not read as
+  // the biggest animal, because height is not what mass looks like: it
+  // reads as the leggy one, which is what a frightened deer is. The
+  // antlers and the stick legs both survive 44px; at `w` 18 they do
+  // too, but the whole animal goes meek and the side margin widens.
+  //
+  // `oy` 0.58 is solved, not nudged. It puts the hooves at 95.7% of the
+  // tile -- the wolf and the buffalo baseline -- which is the number
+  // that leaves the 1.1 units of `sag` somewhere to go, so a starving
+  // deer sinks without losing its hooves off the bottom edge.
+  //
+  // `ox` is 0 because nothing needs to run off the side here. The bear
+  // and the buffalo are pushed left to crop a wide painting down to its
+  // head and shoulder; the deer fits whole, and the air either side of
+  // it is what a narrow animal looks like in a square.
+  deer: {
+    fit: { span: 38, ox: 0, oy: 0.58 },
+    parts: [
+      ['@head', { w: 20, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+    ],
+    head: { calm: 'deerWhole', hungry: 'deerWhole' }
   },
   // The muscled elephant is the first whole-body painting with a real
   // second face: a smirk when fed, a snorting glare when hungry. Both
@@ -1790,16 +1829,9 @@ function showChain(steps) {
 // Once per kind per run: a thing that happens every time is wallpaper,
 // and the point of a milestone is that it does not.
 const FIRST_LINE = Object.fromEntries(LADDER.slice(2).map(k => [k, k === 'elephant' ? 'Your elephant has arrived!' : 'Welcome, ' + k + '!']));
-// Past the ceiling the second sentence would be a lie: the hand has
-// stopped growing, and saying so is the moment the player learns that
-// the rest of the ladder is theirs to build.
 const FIRST_NOTE = Object.fromEntries(LADDER.slice(2).map(function (k) {
-  const step = LADDER.indexOf(k);
-  if (!GROWS_INTO[k]) return [k, 'All ten animals discovered. Keep the food chain thriving!'];
-  const note = step <= HAND_CEILING
-    ? ' Your hand grows with your discoveries.'
-    : ' The deal stops at the wolf — everything above it is yours to merge.';
-  return [k, 'Two together bring a ' + GROWS_INTO[k] + '.' + note];
+  if (!GROWS_INTO[k]) return [k, 'All ten animals raised from plants. Keep the food chain thriving!'];
+  return [k, 'Two together bring a ' + GROWS_INTO[k] + '. Every animal grows from plants.'];
 }));
 
 function announceFirsts(grew) {
@@ -1852,13 +1884,17 @@ function renderHand() {
 }
 
 function renderSeason() {
-  const s = season();
-  el.seasonBar.dataset.season = String(s);
-  el.seasonName.textContent = SEASON_NAMES[s] || SEASON_NAMES[SEASON_NAMES.length - 1];
-  el.seasonNote.textContent = SEASON_NOTES[s] || '';
-  el.seasonMult.textContent = '×' + scoreMultiplier();
-  // winter is the last one, so the track sits full rather than restarting
-  const within = s >= SEASONS - 1 ? 1 : (state.ticks % SEASON_LENGTH) / SEASON_LENGTH;
+  const stage = difficultyStage();
+  const finalStage = stage >= DIFFICULTY_STAGES - 1;
+  el.seasonBar.dataset.season = String(season());
+  el.seasonName.textContent = seasonLabel();
+  el.seasonNote.textContent = SEASON_NOTES[season()];
+  el.seasonMult.textContent = 'Points ×' + scoreMultiplier();
+  el.seasonMult.title = 'Multiplier for growth and meals, before the score scale';
+  el.seasonNext.textContent = finalStage ? 'Maximum pressure · keep growing'
+    : 'Next challenge in ' + nextDifficultySeconds() + 's · Points ×' + (scoreMultiplier() + SCORE_PER_SEASON);
+  el.seasonNext.title = 'Time advances only while the meadow is running';
+  const within = finalStage ? 1 : (state.ticks % SEASON_LENGTH) / SEASON_LENGTH;
   el.seasonFill.style.width = Math.round(within * 100) + '%';
 }
 
@@ -2038,7 +2074,7 @@ async function init() {
   const ids = ['board', 'hand', 'nextTile', 'refillFill', 'refillWord', 'pauseNote',
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
-    'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill',
+    'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
     'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'startSoundBtn', 'countdown', 'countdownWord'];

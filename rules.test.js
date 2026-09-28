@@ -17,7 +17,7 @@ const path = require('path');
 function load() {
   const code = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8');
   const ctx = {
-    console, Math, Number, Set, Array, JSON,
+    console, Math: Object.create(Math), Number, Set, Array, JSON,
     setTimeout: () => 0,
     clearTimeout: () => {},
     requestAnimationFrame: () => {},
@@ -29,7 +29,7 @@ function load() {
   vm.runInContext(
     code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX,'
          + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER,'
-         + ' HAND_CEILING };',
+         + ' SEASON_LENGTH, DIFFICULTY_STAGES, GRASS_IN_HAND, RULES_VERSION, el };',
     ctx
   );
   ctx.render = function () {};
@@ -341,25 +341,85 @@ for (const k of Object.keys(X.ANIMALS)) {
     ok(k + ' eats ' + food, meals.length === 1 && Number.isFinite(meals[0].points));
   }
 }
-// The hand has a ceiling, and the difficulty of the whole game rests on
-// it. Without one the deal tracked the top discovery, so reaching the
-// tiger handed you lions and the elephant finished itself. Roll it at
-// every discovery, the last ones included: that is where it used to slip.
-const ceilingKind = X.LADDER[X.HAND_CEILING];
-let worstDealt = 'sprout', dealtAhead = false;
+// The entire deal distribution must be identical across discoveries/time.
+// Exhaust the random input deterministically rather than hoping samples
+// hit the old 65% branch, and test the real placement/refill paths too.
+const originalRandom = X.ctx.Math.random;
+let fixedDeal = true;
 for (const top of X.LADDER) {
-  S.topKind = top;
-  for (let n = 0; n < 2000; n++) {
-    const dealt = X.ctx.rollHand();
-    if (rank(dealt) > rank(worstDealt)) worstDealt = dealt;
-    // Grass is dealt from the first tile on, so it is never "ahead".
-    if (rank(dealt) > Math.max(1, rank(top))) dealtAhead = true;
+  for (const ticks of [0, 24, 25, 75, 175, 10000]) {
+    S.topKind = top; S.ticks = ticks;
+    let grass = 0;
+    for (let n = 0; n < 1000; n++) {
+      X.ctx.Math.random = () => (n + 0.5) / 1000;
+      const dealt = X.ctx.rollHand();
+      if (dealt === 'grass') grass++;
+      else if (dealt !== 'sprout') fixedDeal = false;
+    }
+    if (grass !== X.GRASS_IN_HAND * 10) fixedDeal = false;
   }
 }
-S.topKind = 'sprout';
-ok('no discovery ever deals above the ' + ceilingKind, rank(worstDealt) <= X.HAND_CEILING, worstDealt);
-ok('...and the ' + ceilingKind + ' itself is still dealt', worstDealt === ceilingKind, worstDealt);
-ok('the hand never skips beyond what you have discovered', !dealtAhead);
+ok('every discovery and elapsed time deal exactly the same plant mix', fixedDeal);
+board([]); S.topKind = 'elephant'; S.ticks = 10000; S.over = false;
+S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass';
+X.ctx.Math.random = () => 0.99;
+X.ctx.placeTile(at(2, 2));
+ok('late placement refills with plants and keeps the queue order',
+   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'grass');
+S.stock = []; S.refill = 0; S.next = 'sprout';
+X.ctx.refillHand();
+ok('late fallback refill also deals only plants', S.stock[0] === 'sprout' && S.next === 'grass');
+X.el.gameover = {};
+X.ctx.newGame();
+ok('restart resets difficulty and deals plants', S.ticks === 0 && X.ctx.scoreMultiplier() === 1
+   && S.stock.length === X.HAND_MAX && S.stock.every(k => k === 'grass' || k === 'sprout'));
+X.ctx.Math.random = originalRandom;
+
+console.log('time pressure and rewards');
+let monotonic = true, gradual = true;
+let prevStone = Infinity, prevLife = Infinity, prevMultiplier = 0;
+for (let ticks = 0; ticks <= 1000; ticks++) {
+  S.ticks = ticks;
+  const stone = X.ctx.stoneEvery(), life = X.ctx.plantLimit('sprout'), mult = X.ctx.scoreMultiplier();
+  if (stone > prevStone || life > prevLife || mult < prevMultiplier) monotonic = false;
+  if (ticks && prevLife - life > 1) gradual = false;
+  prevStone = stone; prevLife = life; prevMultiplier = mult;
+}
+ok('pressure and rewards never fall with elapsed world time', monotonic);
+ok('plant lifetime never drops by more than one tick at a time', gradual);
+const intervals = [12, 10, 8, 6, 5, 4, 3, 2];
+for (let stage = 0; stage < X.DIFFICULTY_STAGES; stage++) {
+  S.ticks = stage * X.SEASON_LENGTH; S.score = 0;
+  ok('stage ' + stage + ' has its intended stone pressure', X.ctx.stoneEvery() === intervals[stage]);
+  ok('stage ' + stage + ' multiplies both growth and meals',
+    X.ctx.scoreGrowth([{ kind: 'rabbit' }]) === 50 * (stage + 1)
+    && X.ctx.scoreMeals([{ points: 100 }]) === 100 * (stage + 1));
+  if (stage) {
+    S.ticks--;
+    ok('reward changes at the boundary, not one tick early (' + stage + ')', X.ctx.scoreMultiplier() === stage);
+  }
+}
+S.ticks = 10000;
+ok('endless play has bounded positive pressure and rewards', X.ctx.stoneEvery() === 2
+   && X.ctx.plantLimit('sprout') === 14 && X.ctx.scoreMultiplier() === 8);
+S.ticks = 25; S.relaxed = false;
+ok('normal challenge countdown uses world time', X.ctx.nextDifficultySeconds() === 45);
+S.relaxed = true;
+ok('relaxed countdown gives twice the thinking time', X.ctx.nextDifficultySeconds() === 90);
+S.relaxed = false; S.ticks = 24; S.paused = true; S.score = 0; board([]);
+X.ctx.worldTick();
+ok('pause freezes the stage and earns no passive score', S.ticks === 24 && S.score === 0);
+S.paused = false;
+X.ctx.worldTick();
+ok('world time advances difficulty without granting passive score', S.ticks === 25
+   && X.ctx.scoreMultiplier() === 2 && S.score === 0);
+ok('scores from the old easier supply use a different rules version', X.RULES_VERSION === 16);
+vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
+ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
+vm.runInContext('scoreStore = { get: () => ({ rules: 16, best: 15000 }) };', X.ctx);
+ok('current-rule records still load normally', X.ctx.readBest() === 15000);
+vm.runInContext('scoreStore = null;', X.ctx);
+S.topKind = 'sprout'; S.ticks = 0;
 
 // ---------- the ground keeps clear of animals ----------
 //
