@@ -1,48 +1,105 @@
-// Original synthesized music and effects, no external audio assets.
+// Audio is opt-in, with separate music/effect switches. No network assets.
 window.BioAudio = (() => {
-  let ctx, sfx = false, music = false, paused = false, timer = 0, beat = 0;
-  const melody = [60,64,67,72,67,64,62,67,59,62,67,71,67,62,60,64];
+  let ctx, synth, sfx = false, music = false, paused = true;
+  let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
+
   function context() {
-    try { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ctx = ctx || new AC(); ctx.resume().catch(() => {}); return ctx; } catch (_) { return null; }
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC || !window.BioSound) return null;
+      if (!ctx) { ctx = new AC(); synth = window.BioSound.create(ctx); ctx.onstatechange = sync; }
+      if (ctx.state !== 'running') ctx.resume().then(sync).catch(() => {});
+      return ctx;
+    } catch (_) { return null; }
   }
-  function note(midi, delay = 0, length = .22, volume = .045) {
+
+  function schedule() {
     if (!ctx || ctx.state !== 'running') return;
-    const t = ctx.currentTime + delay, osc = ctx.createOscillator(), gain = ctx.createGain();
-    osc.type = 'sine'; osc.frequency.value = 440 * Math.pow(2, (midi - 69) / 12);
-    gain.gain.setValueAtTime(0, t); gain.gain.linearRampToValueAtTime(volume, t + .015);
-    gain.gain.exponentialRampToValueAtTime(.0001, t + length);
-    osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t + length + .02);
-    osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+    // A stalled tab skips silence rather than bursting through missed notes.
+    if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + .035;
+    while (nextTime < ctx.currentTime + .16) {
+      synth.musicBeat(beat, nextTime);
+      beat = (beat + 1) % window.BioSound.BEATS;
+      nextTime += window.BioSound.BEAT;
+    }
   }
+
   function sync() {
-    clearInterval(timer); timer = 0;
-    if (!music || paused || document.hidden) return;
-    timer = setInterval(() => { if (paused || document.hidden) return; note(melody[beat % melody.length], 0, .48, .025); if (beat % 4 === 0) note(48, 0, .9, .018); beat++; }, 420);
+    const active = music && !paused && !document.hidden && ctx && ctx.state === 'running';
+    if (active && !timer) {
+      nextTime = ctx.currentTime + .04;
+      schedule(); timer = setInterval(schedule, 50);
+    } else if (!active && timer) {
+      clearInterval(timer); timer = 0;
+      synth.cancel('music');
+    }
   }
-  document.addEventListener('visibilitychange', () => { sync(); if (ctx && document.hidden) ctx.suspend().catch(() => {}); else if (ctx && (sfx || music)) ctx.resume().catch(() => {}); });
-  document.addEventListener('DOMContentLoaded', () => {
-    for (const type of ['sound','music']) {
+
+  function showButtons() {
+    for (const type of ['sound', 'music']) {
       const button = document.getElementById(type + 'Toggle');
-      button.addEventListener('click', () => {
-        if (!context()) { button.textContent = 'Audio unavailable'; return; }
-        if (type === 'sound') sfx = !sfx; else music = !music;
-        const on = type === 'sound' ? sfx : music;
-        button.textContent = (type === 'sound' ? 'Sound' : 'Music') + ': ' + (on ? 'On' : 'Off');
-        button.setAttribute('aria-pressed', String(on)); sync();
-        if (type === 'sound' && on) note(72);
-      });
+      if (!button) continue;
+      const on = type === 'sound' ? sfx : music;
+      button.textContent = (type === 'sound' ? 'Sound' : 'Music') + ': ' + (on ? 'On' : 'Off');
+      button.setAttribute('aria-pressed', String(on));
+    }
+    const titleButton = document.getElementById('startSoundBtn');
+    if (titleButton) {
+      titleButton.setAttribute('aria-pressed', String(sfx));
+      titleButton.setAttribute('aria-label', 'Sound: ' + (sfx ? 'on' : 'off'));
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (synth) synth.cancel();
+      sync();
+      if (ctx) ctx.suspend().catch(() => {});
+    } else if (ctx && (sfx || music)) {
+      ctx.resume().then(sync).catch(() => {});
     }
   });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    for (const type of ['sound', 'music']) {
+      const button = document.getElementById(type + 'Toggle');
+      if (!button) continue;
+      button.addEventListener('click', () => {
+        if (!context()) { button.textContent = 'Audio unavailable'; return; }
+        if (type === 'sound') {
+          sfx = !sfx;
+          if (!sfx) synth.cancel('effects');
+          else ctx.resume().then(() => { if (sfx && !document.hidden) synth.effect('preview'); }).catch(() => {});
+        } else {
+          music = !music;
+          if (!music) synth.cancel('music');
+        }
+        showButtons(); sync();
+      });
+    }
+    showButtons();
+  });
+
   return {
-    pause(on) { paused = on; sync(); },
+    pause(on) {
+      if (paused === on) return;
+      paused = on;
+      if (on && synth) synth.cancel();
+      sync();
+    },
+    reset() {
+      if (synth) synth.cancel();
+      clearInterval(timer); timer = 0; beat = 0; lastEffect = -1;
+      sync();
+    },
     effect(kind, count = 1) {
-      if (!sfx || document.hidden) return;
-      if (kind === 'place') note(60, 0, .08, .025);
-      // the two-beat intro: a questioning pair, then a bright fanfare
-      else if (kind === 'ready') { note(67, 0, .18, .05); note(67, .17, .26, .05); }
-      else if (kind === 'go') { note(72, 0, .14, .06); note(76, .07, .14, .06); note(79, .14, .45, .06); note(91, .14, .3, .02); }
-      else if (kind === 'eat') { note(55,0,.12); note(62,.08,.16); }
-      else { const notes = kind === 'finish' ? [60,64,67,72,76,79,84] : [64,67,72].slice(0,Math.min(3,Math.max(1,count))); notes.forEach((n,i) => note(n,i*.09,.3)); }
+      if (!sfx || document.hidden || !ctx || ctx.state !== 'running') return;
+      if (paused && kind !== 'ready' && kind !== 'go') return;
+      // Replace the preceding move's queued pops on a rapid new placement.
+      if (kind === 'place') { synth.cancel('effects'); lastEffect = ctx.currentTime; }
+      if (kind === 'eat' && ctx.currentTime - lastEffect < .45) return;
+      if (kind === 'merge' || kind === 'finish') lastEffect = ctx.currentTime + Math.min(11, count) * .145;
+      synth.effect(kind, count);
     }
   };
 })();

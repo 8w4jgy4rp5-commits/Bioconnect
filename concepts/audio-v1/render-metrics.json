@@ -1,0 +1,47 @@
+[
+  {
+    "name": "meadow-steps",
+    "length": 1764000,
+    "sampleRate": 44100,
+    "finite": true,
+    "peak": 0.18510819971561432,
+    "rms": 0.016516530026366542,
+    "seamJump": 3.7580321077257395e-8
+  },
+  {
+    "name": "grass-plant",
+    "length": 44100,
+    "sampleRate": 44100,
+    "finite": true,
+    "peak": 0.19997595250606537,
+    "rms": 0.011053530947135268,
+    "seamJump": null
+  },
+  {
+    "name": "animal-chain",
+    "length": 88200,
+    "sampleRate": 44100,
+    "finite": true,
+    "peak": 0.19997595250606537,
+    "rms": 0.022084174197985074,
+    "seamJump": null
+  },
+  {
+    "name": "gameplay-mix",
+    "length": 529200,
+    "sampleRate": 44100,
+    "finite": true,
+    "peak": 0.2555549442768097,
+    "rms": 0.02089229468713676,
+    "seamJump": null
+  },
+  {
+    "name": "stress",
+    "length": 220500,
+    "sampleRate": 44100,
+    "finite": true,
+    "peak": 0.27261725068092346,
+    "rms": 0.030567373064856483,
+    "seamJump": null
+  }
+]

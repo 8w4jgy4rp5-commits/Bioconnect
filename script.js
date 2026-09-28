@@ -722,6 +722,7 @@ function neighbours(i) {
 }
 
 function newGame() {
+  if (window.BioAudio) window.BioAudio.reset();
   state.cells = new Array(CELLS).fill(null);
   state.topKind = 'sprout';
   // Start with a full hand. The first thing a new player does is look at
@@ -774,7 +775,10 @@ function placeTile(i) {
   // What the player is told is what the scale actually moved. Late in a
   // run the same chain is worth less, and this is where they see that.
   const gained = displayScore(state.score) - displayScore(before);
-  if (window.BioAudio) window.BioAudio.effect(grew.length ? (grew.some(g => g.kind === "elephant") ? "finish" : "merge") : "place", grew.length);
+  if (window.BioAudio) {
+    window.BioAudio.effect("place");
+    if (grew.length) window.BioAudio.effect(grew.some(g => g.kind === "elephant") ? "finish" : "merge", grew.length);
+  }
   bankScore();
 
   if (state.cells.every(function (c) { return c; })) endRun();
@@ -2113,7 +2117,7 @@ async function init() {
     if (e.key === 'Escape' && !el.howModal.hidden) resume();
   });
   document.addEventListener('visibilitychange', function () {
-    setPaused(document.hidden || !el.howModal.hidden || counting);
+    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || counting);
   });
 
   // The title screen carries the guide and the sound switch, so both are
