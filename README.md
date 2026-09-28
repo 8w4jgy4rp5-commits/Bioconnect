@@ -10,9 +10,11 @@
 公開しているのはコードと検討用の画像だけで、`shared/supabase-config.js` に入っているのは
 ブラウザに配られる anon / publishable キーのみ。service_role キーはここに置かない。
 
-遊べるURLはまだ移していない。本番は旧リポジトリ（App-Sharing）のGitHub Pagesが配信しており、
-このリポジトリではPagesを有効にしていない。ゲームの変更を実際に遊べる場所へ届けるには、
-今のところ旧フォルダ側にも反映してpushする必要がある。
+本番URL: https://8w4jgy4rp5-commits.github.io/Bioconnect/ 。
+この Bioconnect リポジトリの main へのpushを、GitHub Pagesが自動でビルド・公開する。
+旧 App-Sharing-/apps/ecosystem-puzzle/ は新URLへの移転案内・自動転送になっている。
+Bioconnectの変更を旧mini-app-platformへコピーしてpushする必要はない。
+2026-09-28に公開処理の成功と、今回のBGM・効果音の配信を実URLで確認済み。
 
 ## 次の会話を始めるとき
 「`C:\Users\tians\Bioconnect\README.md` を読んで、Bioconnectの続きをしてください。」で再開する。
@@ -70,6 +72,6 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 クラウド同期のコードと公開用Supabase設定はそのまま引き継いだ。新しいURLではブラウザ保存とログイン状態は自動では移らない。
 今回移したのはファイルであり、ブラウザ内のベスト記録やログイン状態ではない。
 同期はログインと通信がある場合のみ。通信不可時は既存のブラウザ保存への切替を使う。
-本番は移行していない。HTMLのcanonical・共有用URL・解析設定は既存公開版のものを維持。将来の公開先が決まったら見直す。
-独立したGit管理を初期化済み。まだコミット・リモート登録・pushはしていない。旧Git履歴は元リポジトリに残る。
+本番は上記の独立URLへ移行済み。HTMLのcanonical・og:url・構造化データも独立URLを参照する。公開状況はREADMEだけで断定せず、GitHub Pagesの実行結果と配信ファイルを確認する。
+独立したGit管理・origin登録・mainへのpushを実施済み。旧Git履歴は元リポジトリに残る。
 この場所はOneDrive外。PC間の共有・外部バックアップは別途必要。
