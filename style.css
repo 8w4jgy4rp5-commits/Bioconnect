@@ -1522,5 +1522,63 @@ body.is-modal { overflow: hidden; }
 @keyframes buffalo-arrive { 0% { transform: scale(.6); } 65% { transform: scale(1.1); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .cell--buffalo .tile-art, .cell--buffalo.cell--grew .tile-art { animation: none; } }
 
+/* The deer is the frightened one, and fright is not a big movement --
+   it is a small one that never stops. The painting already says so:
+   it is the only animal drawn with shake lines around its legs. The
+   idle is there to make those lines true.
+
+   Two animations run at once on SEPARATE properties, `translate` and
+   `rotate`, so they compose instead of the second one wiping out the
+   first. That buys two rhythms out of one element: a 0.28s shiver that
+   never lets up, and one flinch every 5.6s. A single @keyframes cannot
+   hold two beats, and the alternative -- forty hand-written stops on
+   one `transform` -- is not something anyone should have to read.
+
+   The shiver is the smallest motion on the board: 0.15px against the
+   rabbit's 1.6px breath, at a tenth of its period. Small enough that at
+   44px it reads as a buzz and not as a slide, which is the difference
+   between a nervous animal and a broken one.
+
+   The flinch pivots at the hooves and goes negative, which lifts the
+   nose (everything faces right): a head snapping up at a noise, then
+   nearly two seconds of settling back down. The scaleY at the top is
+   the spine straightening with it. It is the one moment this tile asks
+   to be looked at, so it stays under a degree -- the ceiling the bear
+   and the buffalo keep to, because motion on this board MEANS something
+   and an idle must never compete with a merge or a death.
+
+   `.cell--grew` animates the cell itself, not the art, so a deer that
+   has just been merged into keeps shivering through its arrival. That
+   is correct for this animal: the deer is the one that does not get a
+   confident entrance.
+
+   The offsets stagger the herd -- one deer flinching at a time is an
+   animal reacting, five flinching together is a screensaver. Negative
+   delays start them mid-cycle so nothing waits to begin. */
+.cell--deer .tile-art {
+  transform-origin: center bottom;
+  animation: deer-shiver .28s linear infinite, deer-flinch 5.6s ease-in-out infinite;
+}
+.cell--deer:nth-child(3n+2) .tile-art { animation-delay: -.09s, -1.9s; }
+.cell--deer:nth-child(3n+3) .tile-art { animation-delay: -.18s, -3.7s; }
+
+@keyframes deer-shiver {
+  0%, 100% { translate: -.15px 0; }
+  50%      { translate: .15px 0; }
+}
+
+@keyframes deer-flinch {
+  0%, 62% { rotate: 0deg; scale: 1 1; }
+  65%     { rotate: -.75deg; scale: 1 1.012; }
+  70%     { rotate: -.6deg; }
+  78%     { rotate: -.45deg; }
+  88%     { rotate: -.2deg; }
+  100%    { rotate: 0deg; scale: 1 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cell--deer .tile-art { animation: none; }
+}
+
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
