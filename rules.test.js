@@ -543,5 +543,80 @@ const reach = X.ctx.inReach();
 ok('the about-to-be-eaten ring marks the raised deer', reach.has(at(3, 2)));
 ok('...and leaves the wild one alone', !reach.has(at(1, 2)));
 
+// ---------- the elephant is 2x2 ----------
+//
+// It is the only tile that does not fit in a square, and every rule that
+// walks the board once per animal has to be told so. The tests that
+// matter are the ones where "four squares" could quietly become "four
+// animals": one clock, one meal, one skeleton.
+console.log('\nthe elephant takes four squares');
+
+// Standing an elephant by hand, the way the game does: one tile written
+// into all four squares, with `big` naming the top-left one.
+function bigElephant(x, y, clock) {
+  const home = at(x, y);
+  const tile = { kind: 'elephant', clock: clock || 0, born: RAISED, big: home };
+  for (const i of [home, home + 1, home + X.SIZE, home + X.SIZE + 1]) S.cells[i] = tile;
+  return home;
+}
+
+board([[1, 2, 'tiger'], [2, 2, 'tiger']]);
+grew = X.ctx.growFrom(at(2, 2));
+let block4 = [grew[0].at, grew[0].at + 1, grew[0].at + X.SIZE, grew[0].at + X.SIZE + 1];
+ok('a new elephant stands on four squares',
+   block4.every(function (i) { return S.cells[i] && S.cells[i].kind === 'elephant'; }),
+   JSON.stringify(block4.map(function (i) { return S.cells[i] && S.cells[i].kind; })));
+ok('...all four of them naming one home square',
+   block4.every(function (i) { return S.cells[i].big === grew[0].at; }));
+ok('...and the block covers the square the merge landed on', block4.indexOf(at(1, 2)) >= 0);
+ok('...so the board counts one elephant, not four', X.ctx.countKind('elephant') === 1,
+   String(X.ctx.countKind('elephant')));
+
+// One animal, one clock. Four squares sharing a tile used to mean four
+// turns of hunger in one tick, which starved it in a quarter of the time.
+bigElephant(1, 1, 0);
+X.ctx.bumpClocks();
+ok('it gets hungry once a turn, not four times', cell(1, 1).clock === 1, String(cell(1, 1).clock));
+
+// ...and one meal. The same bug on the other side: eaten four times over,
+// it cleared four raised animals a tick and paid four times the points.
+board([[0, 0, 'deer', 0, RAISED], [3, 1, 'deer', 0, RAISED]]);
+bigElephant(1, 1, eleHungry);
+m = X.ctx.feedEveryone();
+ok('it eats once a turn, however many squares it stands on',
+   m.filter(function (x) { return x.kind === 'elephant'; }).length === 1, show(m));
+
+// Eight squares touch a 2x2 block, and all eight are within reach. This
+// deer touches only the bottom-right square of the block.
+board([[3, 2, 'deer', 0, RAISED]]);
+bigElephant(1, 1, eleHungry);
+m = X.ctx.feedEveryone();
+ok('anything touching any of its four squares is within reach',
+   m.length === 1 && m[0].ateKind === 'deer', show(m));
+
+// Nothing can refuse it a place: it comes down on whatever is there.
+board([[1, 2, 'tiger'], [2, 2, 'tiger'], [1, 1, 'grass'], [2, 1, 'sprout'],
+       [1, 3, 'stone'], [2, 3, 'stone'], [3, 2, 'stone'], [3, 3, 'stone']]);
+grew = X.ctx.growFrom(at(2, 2));
+ok('it arrives even with no room, flattening what it lands on',
+   grew.length === 1 && grew[0].kind === 'elephant' && grew[0].trampled.length > 0,
+   JSON.stringify(grew));
+ok('...and takes the block that flattens the least', grew[0].trampled.length === 1,
+   JSON.stringify(grew[0].trampled));
+ok('...and breaks a tie by reading order, topmost then leftmost',
+   grew[0].at === at(0, 1) && grew[0].trampled[0] === at(1, 1),
+   grew[0].at + ' ' + JSON.stringify(grew[0].trampled));
+
+// One skeleton, not four. Four dead squares out of twenty-five would end
+// most runs on the spot.
+board([]);
+let home = bigElephant(1, 1, X.ANIMALS.elephant.starveAt);
+d = X.ctx.collectDeaths();
+ok('a starved elephant leaves one skeleton', d.length === 1 && cell(1, 1).kind === 'bones',
+   JSON.stringify(d));
+ok('...and gives the other three squares back', !S.cells[home + 1] && !S.cells[home + X.SIZE]
+   && !S.cells[home + X.SIZE + 1]);
+
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

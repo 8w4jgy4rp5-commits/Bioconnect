@@ -524,6 +524,18 @@ body.is-modal { overflow: hidden; }
 .cell--scrub .tile-art,
 .cell--stone .tile-art { inset: 7%; width: 86%; height: 86%; }
 
+/* The one tile that does not fit in a square. It is four squares of the
+   twenty-five, so it does not need decoration to be noticed — it needs a
+   rim and a shadow that say it is standing ON the meadow rather than in
+   it, and art with room to breathe now that the square is that big. */
+.cell--big {
+  border-color: rgba(120, 150, 100, .38);
+  box-shadow: 0 4px 14px rgba(60, 80, 45, .22), inset 0 1px 0 rgba(255, 255, 255, .8);
+  z-index: 1;
+}
+
+.cell--big .tile-art { inset: 4% 6% 14%; width: 88%; height: 82%; }
+
 /* a tile in its last turns loses a little colour */
 .cell--fading .tile-art { opacity: .72; }
 

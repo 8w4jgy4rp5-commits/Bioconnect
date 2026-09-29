@@ -607,6 +607,13 @@ function levelAt(shown) {
 
 let scoreStore = null;
 
+// Kinds the player has already been introduced to, on any run. The
+// welcome card is there to teach; once it has taught, a second showing
+// is only an interruption, so this outlives the board instead of being
+// reset with it.
+let metStore = null;
+const met = new Set();
+
 // Fallback for when app-sync.js fails to load. localStorage only, no sync.
 async function openStore(slug, key, opts) {
   try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
@@ -639,6 +646,18 @@ function readBest() {
 function writeBest(n) {
   if (!scoreStore) return;
   scoreStore.set({ best: Math.floor(n), rules: RULES_VERSION })
+    .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
+}
+
+function readMet() {
+  const v = metStore ? metStore.get() : null;
+  const list = v && Array.isArray(v.kinds) ? v.kinds : [];
+  for (const k of list) if (typeof k === 'string') met.add(k);
+}
+
+function writeMet() {
+  if (!metStore) return;
+  metStore.set({ kinds: Array.from(met) })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
@@ -719,6 +738,105 @@ function neighbours(i) {
   if (y > 0) out.push(i - SIZE);
   if (y < SIZE - 1) out.push(i + SIZE);
   return out;
+}
+
+// ---------- Big tiles ----------
+//
+// The elephant is the one rung that does not fit in a square. It stands
+// on a 2x2 block — four squares out of twenty-five — and that weight is
+// the point: the meadow has to make room for it.
+//
+// A big tile is written into all four of its squares. The top-left one
+// is its HOME and holds the real tile: clock, born, everything. The
+// other three are shadows, there so the board reads as full where the
+// animal is standing. Every rule that acts once per animal skips them,
+// or a 2x2 elephant ages four times a turn and eats four meals.
+//
+// "big" stores the home INDEX rather than relying on the four squares
+// sharing one object, because both the merge preview and the sim
+// harness copy the board, and a copy would quietly break identity.
+const BIG = { elephant: 2 };    // kind -> side of its block, in squares
+
+function bigSide(kind) { return BIG[kind] || 1; }
+
+function blockAt(home, side) {
+  const out = [];
+  for (let dy = 0; dy < side; dy++) {
+    for (let dx = 0; dx < side; dx++) out.push(home + dy * SIZE + dx);
+  }
+  return out;
+}
+
+// Every square a tile stands on, given any one of them.
+function footprint(cells, i) {
+  const c = cells[i];
+  if (!c || c.big == null) return [i];
+  return blockAt(c.big, bigSide(c.kind));
+}
+
+// Occupied, but not where the tile lives.
+function isShadow(cells, i) {
+  const c = cells[i];
+  return !!c && c.big != null && c.big !== i;
+}
+
+// Everything touching a tile, however many squares it stands on. A 2x2
+// block touches eight, which is why a hungry elephant reaches so much
+// further than anything else on the board.
+function tileNeighbours(cells, i) {
+  const own = footprint(cells, i);
+  if (own.length === 1) return neighbours(i);
+  const mine = new Set(own), seen = new Set(), out = [];
+  for (const o of own) {
+    for (const n of neighbours(o)) {
+      if (mine.has(n) || seen.has(n)) continue;
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
+}
+
+// Clear these squares, and the whole of any big tile they belong to —
+// half an elephant is not a thing the board can hold. Returns what it
+// actually emptied.
+function clearCells(cells, list) {
+  const gone = [];
+  for (const i of list) {
+    if (!cells[i]) continue;
+    for (const f of footprint(cells, i)) {
+      if (!cells[f]) continue;
+      cells[f] = null;
+      gone.push(f);
+    }
+  }
+  return gone;
+}
+
+// Where a big tile just born at `at` should stand. Its block has to
+// cover `at` and fit on the board, which leaves up to four choices.
+// Take the one that flattens the least, and on a tie the topmost then
+// leftmost — the same reading order every other tie in this game uses.
+// Standing on another elephant costs far more than standing on grass,
+// so that block is only ever chosen when there is no other one.
+function pickBlock(cells, at, side) {
+  const x = at % SIZE, y = (at / SIZE) | 0;
+  let best = null, bestCost = Infinity;
+  for (let dy = 0; dy < side; dy++) {
+    for (let dx = 0; dx < side; dx++) {
+      const hx = x - dx, hy = y - dy;
+      if (hx < 0 || hy < 0 || hx + side > SIZE || hy + side > SIZE) continue;
+      const home = hy * SIZE + hx;
+      let cost = 0;
+      for (const b of blockAt(home, side)) {
+        const c = cells[b];
+        if (c) cost += c.big != null ? CELLS : 1;
+      }
+      // Reading order on a tie, like every other tie in this game.
+      if (cost < bestCost || (cost === bestCost && home < best)) { bestCost = cost; best = home; }
+    }
+  }
+  return best;
 }
 
 function newGame() {
@@ -914,11 +1032,29 @@ function growFrom(i, cells = state.cells, preview = false) {
       .sort(function (a, b) { return a - b; })[0];
     for (const g of group) cells[g] = null;
     i = destination;
+
     // The one place in the game that makes a raised tile.
-    cells[i] = makeTile(up, 'raised');
+    const tile = makeTile(up, 'raised');
+    const side = bigSide(up);
+    let trampled = [];
+    if (side > 1) {
+      // It arrives at full size, so it arrives on top of whatever was
+      // standing there. Nothing can refuse it a place, and that is
+      // deliberate: a merge that could fail for want of room would put
+      // the last rung of the ladder behind a puzzle the player cannot
+      // see coming.
+      const home = pickBlock(cells, i, side);
+      const block = blockAt(home, side);
+      trampled = clearCells(cells, block);
+      tile.big = home;
+      for (const b of block) cells[b] = tile;
+      i = home;
+    } else {
+      cells[i] = tile;
+    }
 
     if (!preview && rank(up) > rank(state.topKind)) state.topKind = up;
-    events.push({ at: i, kind: up, size: group.length, bones: cleared });
+    events.push({ at: i, kind: up, size: group.length, bones: cleared, trampled: trampled });
   }
   return events;
 }
@@ -949,7 +1085,9 @@ function previewGrowth(i) {
 }
 
 function bumpClocks() {
-  for (const c of state.cells) {
+  for (let i = 0; i < CELLS; i++) {
+    if (isShadow(state.cells, i)) continue;
+    const c = state.cells[i];
     if (c && (isAnimal(c.kind) || isPlant(c.kind))) c.clock += 1;
   }
 }
@@ -969,11 +1107,12 @@ function feedEveryone() {
     for (let i = 0; i < CELLS; i++) {
       const me = state.cells[i];
       if (!me || me.kind !== kind || me.clock < cfg.eatAt) continue;
+      if (isShadow(state.cells, i)) continue;
 
       const meal = pickMeal(i, cfg);
       if (!meal) { refused.push({ at: i, kind: kind }); continue; }
 
-      state.cells[meal.at] = null;
+      clearCells(state.cells, [meal.at]);
       me.clock = 0;
       // A meal is worth what was eaten, except for the one mouth that
       // carries a `mealPct`. See ELEPHANT_MEAL_PCT.
@@ -995,7 +1134,7 @@ function feedEveryone() {
 function pickMeal(i, cfg) {
   for (const want of cfg.diet) {
     let target = -1, worst = -1;
-    for (const n of neighbours(i)) {
+    for (const n of tileNeighbours(state.cells, i)) {
       const p = state.cells[n];
       if (!edible(cfg, p, want)) continue;
       if (p.clock > worst) { worst = p.clock; target = n; }
@@ -1020,7 +1159,12 @@ function collectDeaths() {
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
     if (!c || !isAnimal(c.kind) || c.clock < ANIMALS[c.kind].starveAt) continue;
+    if (isShadow(state.cells, i)) continue;
     dead.push({ at: i, kind: c.kind });
+    // A big animal leaves one skeleton, not four. Four dead squares out
+    // of twenty-five would end most runs where they stand, and losing
+    // the elephant is punishment enough on its own.
+    clearCells(state.cells, [i]);
     state.cells[i] = makeTile('bones');
   }
   return dead;
@@ -1177,6 +1321,11 @@ function endNote() {
 // What your own move did: what grew, what the chain was worth, and the
 // empty hand — the one thing that stops the next move and is worth
 // saying out loud.
+// 'elephant' is the only rung that starts with a vowel, and the game has
+// been saying "A elephant" at the one moment it most wants to sound
+// like an occasion.
+function an(kind) { return ('aeiou'.indexOf(kind[0]) >= 0 ? 'An ' : 'A ') + kind; }
+
 function placeMessage(grew, gained) {
   const bits = [];
 
@@ -1185,10 +1334,14 @@ function placeMessage(grew, gained) {
     if (grew.length > 1) {
       bits.push('A chain of ' + grew.length + ' — one square did all of that.');
     }
-    bits.push('A ' + last.kind + ' joined the meadow.');
+    bits.push(an(last.kind) + ' joined the meadow.');
     if (gained) bits.push('+' + Math.round(gained).toLocaleString() + '.');
     const bones = grew.reduce(function (n, g) { return n + g.bones.length; }, 0);
     if (bones) bits.push(bones === 1 ? 'One dead square came back.' : bones + ' dead squares came back.');
+    // Only the elephant can do this, and when it does it is the loudest
+    // thing that happened, so it is said last and in its own sentence.
+    const flat = grew.reduce(function (n, g) { return n + (g.trampled ? g.trampled.length : 0); }, 0);
+    if (flat) bits.push(flat === 1 ? 'It flattened the square it came down on.' : 'It came down on ' + flat + ' squares and flattened them.');
   } else {
     bits.push('Planted.');
   }
@@ -1217,7 +1370,7 @@ function tickMessage(meals, deaths, withered, stone, gained, dealt) {
 
   if (deaths.length) {
     bits.push(deaths.length === 1
-      ? 'A ' + deaths[0].kind + ' starved.'
+      ? an(deaths[0].kind) + ' starved.'
       : deaths.length + ' animals starved.');
   }
 
@@ -1733,6 +1886,14 @@ function paintTile(node, kind, fed) {
   }
 }
 
+// A square sits where its index says, and covers `side` of them when a
+// big tile is standing on it.
+function setSpan(node, i, side) {
+  const span = side > 1 ? ' / span ' + side : '';
+  node.style.gridColumn = ((i % SIZE) + 1) + span;
+  node.style.gridRow = (((i / SIZE) | 0) + 1) + span;
+}
+
 function buildBoard() {
   el.board.textContent = '';
   cellNodes = [];
@@ -1741,6 +1902,10 @@ function buildBoard() {
     btn.type = 'button';
     btn.className = 'cell';
     btn.dataset.i = String(i);
+    // Every square is placed explicitly. Left to flow, hiding the three
+    // squares under an elephant would shuffle the whole rest of the
+    // meadow up one place.
+    setSpan(btn, i, 1);
     el.board.appendChild(btn);
     cellNodes.push(btn);
   }
@@ -1764,10 +1929,10 @@ function inReach() {
   const risk = new Set();
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
-    if (!c || !isAnimal(c.kind)) continue;
+    if (!c || !isAnimal(c.kind) || isShadow(state.cells, i)) continue;
     const cfg = ANIMALS[c.kind];
     if (c.clock + 1 < cfg.eatAt) continue;
-    for (const n of neighbours(i)) {
+    for (const n of tileNeighbours(state.cells, i)) {
       const p = state.cells[n];
       if (p && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) risk.add(n);
     }
@@ -1784,6 +1949,14 @@ function render(grew, meals, deaths) {
   for (let i = 0; i < CELLS; i++) {
     const node = cellNodes[i];
     const cell = state.cells[i];
+
+    // The three squares a big tile leans on draw nothing: its home
+    // square is stretched over them instead.
+    if (isShadow(state.cells, i)) { node.hidden = true; continue; }
+    node.hidden = false;
+    const side = cell && cell.big != null ? bigSide(cell.kind) : 1;
+    setSpan(node, i, side);
+
     node.className = 'cell';
     node.textContent = '';
     node.disabled = state.over || !!cell;
@@ -1807,11 +1980,13 @@ function render(grew, meals, deaths) {
     }
 
     node.classList.add('cell--taken', 'cell--' + cell.kind);
+    if (side > 1) node.classList.add('cell--big');
 
     const art = tileArt(cell.kind);
     node.appendChild(art);
 
     let label = KIND_LABEL[cell.kind];
+    if (side > 1) label += ', standing on ' + side + ' by ' + side + ' squares';
 
     // Which animals are elephant food. Hidden until the tiger is
     // discovered, because before that the mark answers a question
@@ -1947,19 +2122,25 @@ function showChain(steps) {
 // the run is actually about, and before this they arrived as one more
 // line in the ticker — the same weight as a sprout withering.
 //
-// Once per kind per run: a thing that happens every time is wallpaper,
+// Once per kind, ever: a thing that happens every time is wallpaper,
 // and the point of a milestone is that it does not.
 const FIRST_LINE = Object.fromEntries(LADDER.slice(2).map(k => [k, k === 'elephant' ? 'Your elephant has arrived!' : 'Welcome, ' + k + '!']));
 const FIRST_NOTE = Object.fromEntries(LADDER.slice(2).map(function (k) {
-  if (!GROWS_INTO[k]) return [k, 'All ten animals raised from plants. Keep the food chain thriving!'];
+  if (!GROWS_INTO[k]) return [k, 'It stands on four squares and flattens what it lands on. All ten animals raised from plants!'];
   return [k, 'Two together bring a ' + GROWS_INTO[k] + '. Every animal grows from plants.'];
 }));
 
 function announceFirsts(grew) {
   if (!el.fx || state.over) return;
+  let fresh = false;
   for (const g of grew) {
     if (!FIRST_LINE[g.kind] || state.seen[g.kind]) continue;
     state.seen[g.kind] = true;
+    // Already welcomed on an earlier run. The discovery still counts; it
+    // just does not stop the board to say so again.
+    if (met.has(g.kind)) continue;
+    met.add(g.kind);
+    fresh = true;
 
     const card = document.createElement('div');
     card.className = 'first first--' + g.kind;
@@ -1977,6 +2158,7 @@ function announceFirsts(grew) {
     card.appendChild(note);
     fxAdd(card, g.kind === 'elephant' ? 4500 : 2200);
   }
+  if (fresh) writeMet();
 }
 
 // The hand is HAND_MAX slots, filled oldest-first, with the empty ones
@@ -2021,7 +2203,10 @@ function renderSeason() {
 
 function countKind(kind) {
   let n = 0;
-  for (const c of state.cells) if (c && c.kind === kind) n += 1;
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (c && c.kind === kind && !isShadow(state.cells, i)) n += 1;
+  }
   return n;
 }
 
@@ -2035,6 +2220,7 @@ function goingHungry(kind) {
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
     if (!c || c.kind !== kind || c.clock < cfg.eatAt - 2) continue;
+    if (isShadow(state.cells, i)) continue;
     if (!pickMeal(i, cfg)) return i;
   }
   return -1;
@@ -2047,8 +2233,8 @@ function nearElephant() {
   const cfg = ANIMALS.elephant;
   for (let i = 0; i < CELLS; i++) {
     const c = state.cells[i];
-    if (!c || c.kind !== 'elephant') continue;
-    for (const n of neighbours(i)) {
+    if (!c || c.kind !== 'elephant' || isShadow(state.cells, i)) continue;
+    for (const n of tileNeighbours(state.cells, i)) {
       const p = state.cells[n];
       if (p && cfg.diet.indexOf(p.kind) >= 0 && !isRaised(p)) return true;
     }
@@ -2062,7 +2248,10 @@ function nearElephant() {
 function elephantLarder() {
   const cfg = ANIMALS.elephant;
   let n = 0;
-  for (const c of state.cells) if (c && isRaised(c) && cfg.diet.indexOf(c.kind) >= 0) n += 1;
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (c && isRaised(c) && cfg.diet.indexOf(c.kind) >= 0 && !isShadow(state.cells, i)) n += 1;
+  }
   return n;
 }
 
@@ -2280,6 +2469,14 @@ async function init() {
     }
   } catch (e) {
     console.error('Ecosystem Puzzle: store unavailable', e);
+  }
+
+  try {
+    metStore = await openStore(SLUG, 'met', { version: 1, default: { kinds: [] } });
+    readMet();
+    if (metStore.subscribe) metStore.subscribe(readMet);
+  } catch (e) {
+    console.error('Ecosystem Puzzle: met store unavailable', e);
   }
 }
 

@@ -108,6 +108,20 @@ function checkBoard(tag) {
     if (GROWS_INTO[c.kind] && ctx.sameGroup(i, c.kind).length >= MERGE_AT[c.kind]) {
       throw new Error(tag + ': unmerged ' + c.kind + ' group still touching');
     }
+    // A big tile stands on every square of its block or on none of them.
+    // Half an elephant would leave a square that looks occupied with
+    // nothing in it, and nothing else on the board would notice.
+    if (c.big != null) {
+      const side = ctx.bigSide(c.kind);
+      const hx = c.big % SIZE, hy = (c.big / SIZE) | 0;
+      if (hx + side > SIZE || hy + side > SIZE) throw new Error(tag + ': ' + c.kind + ' block runs off the board at ' + c.big);
+      for (const b of ctx.blockAt(c.big, side)) {
+        const o = state.cells[b];
+        if (!o || o.kind !== c.kind || o.big !== c.big) {
+          throw new Error(tag + ': broken ' + c.kind + ' block at ' + c.big + ', square ' + b + ' holds ' + JSON.stringify(o));
+        }
+      }
+    }
   }
 }
 
@@ -412,10 +426,19 @@ function dump(tag) {
   }
 }
 
-function count(kind) {
+// A 2x2 elephant sits in four squares. Counting squares would report
+// four of it, so count only the square a big tile calls home.
+function heads(test) {
   let n = 0;
-  for (const c of state.cells) if (c && c.kind === kind) n += 1;
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (c && !ctx.isShadow(state.cells, i) && test(c)) n += 1;
+  }
   return n;
+}
+
+function count(kind) {
+  return heads((c) => c.kind === kind);
 }
 
 // `bot` is either a placement chooser (spend everything) or, for the
@@ -434,10 +457,10 @@ function playMany(bot, runs, ownPolicy) {
     spend('run ' + r + ' opening');
     while (!state.over && state.ticks < TICK_CAP) {
       if (++guard > 4000) { dump('run ' + r + ' never ended'); throw new Error('never ended'); }
-      const before = state.cells.filter((c) => c && ANIMALS[c.kind]).length;
+      const before = heads((c) => ANIMALS[c.kind]);
       ctx.worldTick();
       checkBoard('run ' + r + ' tick ' + state.ticks);
-      const after = state.cells.filter((c) => c && ANIMALS[c.kind]).length;
+      const after = heads((c) => ANIMALS[c.kind]);
       aliveSum += after; aliveN += 1;
       void before;
       if (state.over) break;
