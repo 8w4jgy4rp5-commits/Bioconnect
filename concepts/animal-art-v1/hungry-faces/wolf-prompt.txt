@@ -1,0 +1,64 @@
+オオカミ・1回目。
+
+方針を変えた理由:
+  hungry-faces/README.md の当初案は「低く構える（クラウチング）」だったが、シマウマで
+  「体が動く変更はAIが失敗する／位置合わせが崩れる」ことが分かった。この絵を見ると、
+  尻尾が左に大きく水平に張り出していて、シマウマのスカーフと同じ役割を果たせる——
+  シルエットの端にある、大きくて目立つ形。落とせば44pxで確実に読める。
+  脚・胴・ひづめには触らせない。
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\animal-art-v1\wolf.png
+  （1374x1145・透過PNG・採用版の高解像度原画）
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+Edit this image. This is the same wolf, in the same place, in a worse
+state. Keep the four legs, the paws, the chest and the belly EXACTLY
+where they are and at exactly the size they are. Keep the canvas size.
+
+Change these four things, all of which are at the edge of the shape:
+
+1. THE TAIL DROPS. It is currently held out behind him, horizontal and
+   high. Bring it down so it hangs limp and close to the hind legs,
+   almost tucked. Same tail, same fur, just hanging.
+2. THE HEAD LOWERS. Bring it down so the top of his skull sits at or
+   just below the line of his shoulders, nose angled toward the ground.
+   Right now the head is the highest point of the animal; it should not
+   be any more.
+3. THE HACKLES RISE. The fur along the top of his back and neck stands
+   up in a rough, spiky ridge instead of lying smooth.
+4. THE EARS GO BACK. Flat and swept backward against the skull, not
+   upright.
+
+The mouth stays closed. Do not bare the teeth, and do not make him look
+angry — he is starving, not attacking.
+
+Do NOT change: the legs, the paws, their spacing, the chest, the belly,
+the body colours, the canvas size.
+
+Keep the existing style: thin dark reddish-brown outline, simple flat
+colour, subtle pale shading, soft hand-painted edges. Side profile
+facing right. Transparent background — no scene, no text, no frame, no
+floor, no cast shadow. Output a PNG with alpha at the same size as the
+input.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the four legs, the paws
+and the belly line do not move.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  wolf-hungry-src.png
+という名前で置く。
+
+シマウマと違う点（こちら側の作業が増える）:
+  - `img/wolf-whole.png` は透明画素バグ時代の古い緩い切り抜き（220x184 の中で
+    可視範囲が 4,8-220,170）。新方式の共通枠で切り直すと枠が変わるので、
+    **リグの測り直しが要る**。measure-rig.py で高さ71.7%・足元95.6%に解き直す。
+  - オオカミの足元95.6%は、バッファロー・シカ・シマウマ・ライオン・トラが基準にした線。
+    ただしあれはタイルに対する%なので、オオカミを同じ%に戻せば他は動かない。
+  - 色の加工は無し。オオカミは灰色で、抜く彩度がない。この動物の武器はシルエットだけ。

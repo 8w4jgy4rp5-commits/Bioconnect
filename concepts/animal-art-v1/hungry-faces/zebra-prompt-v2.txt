@@ -1,0 +1,49 @@
+2回目。1回目の反省:
+  - 生成AIに「ほどく」「耳を伏せる」「色を変える」を一度に頼んで、できないと言われた。
+  - 色はこちらでPillowで確実にやる。AIには「形」だけ頼む。
+  - 元絵は1回目の出力（zebra-yellow-scarf-undone-candidate.png）。体が完全に一致している
+    ことを重ね図で確認済みなので、スカーフだけを伸ばせば位置合わせは崩れない。
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\animal-art-v1\hungry-faces\zebra-yellow-scarf-undone-candidate.png
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+This is a local edit, not a redraw. Change ONE region of this image and
+leave every other pixel alone.
+
+The region: the two loose yellow scarf panels hanging at the zebra's neck.
+
+Make them LONGER and LIMP:
+- Each panel hangs straight down past the chest and ends around the
+  height of the front knee — roughly twice as long as they are now.
+- They are narrow and slack, like cloth with no body left in it. The
+  bottom ends are uneven and softly curled, not cut straight across.
+- They hang dead vertical. No lift, no wave, no folds that suggest wind.
+
+Do NOT change anything else. The head, ears, mane, neck, back, belly,
+all four legs, the hooves and the tail stay exactly where they are, at
+exactly the size they are. The canvas size stays the same.
+
+Keep the existing style: thin dark reddish-brown outline, simple flat
+colour, subtle pale shading, soft hand-painted edges. Keep the scarf the
+same yellow it already is — do not recolour it. Transparent background,
+no scene, no text, no frame, no floor, no cast shadow. Output a PNG with
+alpha at the same size as the input.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the legs, hooves, tail
+and body outline do not move.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  zebra-hungry-v2.png
+という名前で置く。
+
+そのあとこちら側でやること:
+  1. 重ね図で体が動いていないか再確認
+  2. 黄色い画素だけを彩度↓・明度↓（くすんだ黄土色へ）。44pxを見ながら強さを決める
+  3. make-face-pair.py で共通枠に書き出し、SPRITE_FILES / RIG へ配線

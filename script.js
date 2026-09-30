@@ -1438,11 +1438,17 @@ const SPRITE_FILES = {
   foxLegHind: 'fox-leg-hind.png',
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png',
-  wolfWhole: 'wolf-whole.png',
+  wolfCalm: 'wolf-calm.png',
+  wolfHungry: 'wolf-hungry.png',
   bearWhole: 'bear-whole.png',
   buffaloWhole: 'buffalo-whole.png',
   deerWhole: 'deer-whole.png',
-  zebraWhole: 'zebra-whole.png',
+  // The second animal after the elephant to own a hungry painting, and
+  // the first whose hunger is told by a prop rather than a face. Both
+  // files are cut on one shared frame (make-face-pair.py), so the swap
+  // moves the scarf and nothing else.
+  zebraCalm: 'zebra-calm.png',
+  zebraHungry: 'zebra-hungry.png',
   lionWhole: 'lion-whole.png',
   tigerWhole: 'tiger-whole.png',
   elephantCalm: 'elephant-calm.png',
@@ -1506,11 +1512,27 @@ const RIG = {
   // once and held (see paintAnimal), the walk lives on the tile in CSS,
   // and the far legs are already painted into the picture.
   //
-  // So `calm` and `hungry` are the same file for now, and hunger reads
-  // through `sag` and the meter alone. The day a hungry wolf face gets
-  // drawn, split the head off then -- with both faces in hand the cut
-  // can follow the neck fur outline and the two silhouettes can be made
-  // to agree.
+  // The hungry wolf, when it came, did not need that cut after all. It
+  // is a second whole painting, like the elephant and the zebra, and the
+  // splitting note above stands only as the reason it WOULD have been
+  // worth doing if the two faces had ever had to share a body.
+  //
+  // WHAT A STARVING WOLF CHANGES IS ITS OUTLINE, IN FOUR PLACES.
+  //
+  // The tail comes down off the horizontal and hangs by the hind legs;
+  // the head drops until the skull is no longer the highest point of the
+  // animal; the fur along the back stands up into a spiky ridge; the
+  // ears go flat and back. The mouth stays shut on purpose -- a snarl is
+  // an animal that intends to do something about it, and this one has
+  // run out of the means. The legs, the paws and the belly do not move
+  // at all, which is the whole reason the swap is invisible: 71% of the
+  // two silhouettes is shared, and all of it is the half holding the
+  // wolf up (concepts/animal-art-v1/hungry-faces/wolf-overlay.png).
+  //
+  // Nothing about the FACE carries this. At 44px the head is four pixels
+  // across. What the player reads is a long grey animal going short and
+  // spiky, and the tail -- the one silhouette landmark this painting
+  // has -- dropping out of the left side of the tile.
   wolf: {
     // Measured against the fox rather than guessed: at w 37 the wolf
     // covers 72% of the tile's height to the fox's 73%, so the bigger
@@ -1518,11 +1540,22 @@ const RIG = {
     // the two, which is what a wolf should be. `oy` sets the feet just
     // above the bottom edge with room left for `sag`, so a starving
     // wolf sinks without losing its paws off the canvas.
-    fit: { span: 38, ox: 0, oy: 4.2 },
+    //
+    // `oy` moved 4.2 -> 3.71 when the pair shipped, and the wolf did
+    // not. The old single file carried the loose crop from before the
+    // invisible-dust fix (220x184 with the art inside 4,8-220,170); the
+    // pair is cut tight and shared, so the same art now sits in a 220x162
+    // frame and every rig number that was solved against the old padding
+    // had to be re-solved against the new one. 3.71 is the value that
+    // puts the paws back on 95.6% -- the baseline the buffalo, deer,
+    // zebra, lion and tiger were all fitted to. Height 71.7%, top 23.9%,
+    // starving feet 98.5%: the same four numbers as before, which is the
+    // proof that this was a reframing and not a resize.
+    fit: { span: 38, ox: 0, oy: 3.71 },
     parts: [
       ['@head', { w: 37, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'wolfWhole', hungry: 'wolfWhole' }
+    head: { calm: 'wolfCalm', hungry: 'wolfHungry' }
   },
   // THE BEAR IS A MOTHER AND HER CUB, AND THE CUB IS THE WHOLE PROBLEM.
   //
@@ -1644,12 +1677,36 @@ const RIG = {
   // somewhere to go. It is the only negative `oy` on the board, which
   // is only to say this is the tallest painting here -- the art starts
   // higher in its own box than anything else does.
+  //
+  // THE HUNGRY ONE TAKES THE SIGNATURE APART.
+  //
+  // Everything above says the scarf is what this tile is read by, so the
+  // hungry painting is the scarf coming undone: the knot lets go, the two
+  // ends hang dead to the knee, and the gold goes to a dull ochre. At
+  // 44px the tied bow is a bright blob at the throat and the loose one is
+  // a long dark band down the body -- a change of shape AND of value, in
+  // the one place the eye was already looking.
+  //
+  // The face is untouched, and could not have carried this: at 44px a
+  // zebra's head is three pixels across. Only the elephant's steam and
+  // the rabbit's ears have ever worked at this size, and both of them
+  // work for the same reason this does -- they change the silhouette.
+  //
+  // The colour was not drawn, it was computed. The scarf is the only
+  // saturated yellow on the painting, so a hue window selects it and
+  // nothing else; four strengths were rendered on a tile before this one.
+  // See concepts/animal-art-v1/hungry-faces/.
+  //
+  // Nothing in `fit` moved, and that is not luck: both paintings fill
+  // their canvas edge to edge, so the shared frame came out identical to
+  // the old single crop and `zebra-calm.png` is byte-for-byte the file
+  // that used to be `zebra-whole.png`. The rig did not need re-measuring.
   zebra: {
     fit: { span: 38, ox: 0, oy: -0.218 },
     parts: [
       ['@head', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'zebraWhole', hungry: 'zebraWhole' }
+    head: { calm: 'zebraCalm', hungry: 'zebraHungry' }
   },
   // THE LION IS LYING DOWN, AND IT IS STILL THE SECOND BIGGEST THING HERE.
   //

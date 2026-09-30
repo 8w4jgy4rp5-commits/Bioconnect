@@ -8,9 +8,21 @@
 `make-game-asset.py` はそれを避けて切り抜くようになった。詳しくは concepts/animal-art-v1/README.md。
 バッファローは平塗りの `buffalo-makeup-v1.png` が採用版。ファイル名に game とある `buffalo-game-transparent-v4.png` は毛並み版で、輪郭線が無く44pxでつぶれるため不採用。
 `buffalo.png` は脚が欠けており使えない。`buffalo-long-lashes-v3.png` は背景が黒のまま透過されていない。
-オオカミは全身1枚。空腹顔がないため無理にパーツ分割しない。
+オオカミは満腹 `img/wolf-calm.png` と空腹 `img/wolf-hungry.png` の2枚組（2026-09-30）。空腹版は
+`concepts/animal-art-v1/wolf-starving.png`（原画 `wolf.png` を生成AIに編集させたもの。使った指示は
+`wolf-starving-prompt.txt` に保存）。尻尾が垂れ、頭が肩より下がり、背中の毛が逆立ち、耳が後ろへ伏せる。
+口は閉じたまま——牙を剥くと「飢え」ではなく「怒り」になる。脚・足先・腹は1画素も動いていない（シルエットの71%が共通）。
+**頭のパーツ分割はしなかった。** 2枚とも全身1枚で足りる（ゾウ・シマウマと同じ）。
+`img/wolf-whole.png` は差し替え前の1枚版で、古い緩い切り抜き。記録として残すがコードは参照していない。
+**リグは測り直した**（`oy` 4.2 → 3.71）。古い切り抜きは220x184の中に余白があり、新方式の共通枠は220x162。
+絵は同じなので高さ71.7%・足元95.6%・上端23.9%・空腹時98.5%は変更前と同じ値に戻してある。
 ゾウは満腹（ニヤリ顔）と空腹（湯気の怒り顔）の2枚で、一枚絵で初めて顔が切り替わる。共通の枠で切り抜いてあるので差し替えても体がずれない。
-シマウマは `concepts/imported-from-chatgpt/zebra-yellow-scarf-selected.png` の左から3体目（黄色いスカーフ）が採用版。
+シマウマは満腹 `img/zebra-calm.png` と空腹 `img/zebra-hungry.png` の2枚組（2026-09-30）。ゾウに次いで2種目の空腹差分で、
+顔ではなく小物で空腹を伝える最初の例。空腹版はスカーフがほどけて膝まで垂れ、金がくすむ。
+形は `hungry-faces/zebra-yellow-scarf-long-limp.png`（生成AIの編集）、色は `hungry-faces/fade-zebra-scarf.py` で計算。
+2枚は `make-face-pair.py` が共通の枠で切るので入れ替えても体が動かない。
+`img/zebra-whole.png` は差し替え前の1枚版で、`zebra-calm.png` とバイト単位で同一。記録として残す（コードは参照していない）。
+元絵は `concepts/imported-from-chatgpt/zebra-yellow-scarf-selected.png` の左から3体目（黄色いスカーフ）が採用版。
 4体が横に重なっていて空の列が1本もないため、矩形では切り出せない。連結したピクセルだけを塗りつぶしで拾って
 `zebra-yellow-scarf-single.png` として保存し、そこから書き出した。`concepts/animal-art-v1/zebra.png`（平塗り・輪郭線あり）は不採用。
 44pxでシカと見分けられるかが最大の懸念だったが、縞ではなく黄色いスカーフが識別点になって成立した。
@@ -64,6 +76,12 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `concepts/imported-from-chatgpt/bear-concepts-v1/03-warm-parent.png`
 - `concepts/imported-from-chatgpt/zebra-yellow-scarf-selected.png`
 - `concepts/imported-from-chatgpt/zebra-yellow-scarf-single.png`
+- `concepts/animal-art-v1/hungry-faces/zebra-yellow-scarf-undone-candidate.png`（1回目・ほどいただけ。短くて不採用）
+- `concepts/animal-art-v1/hungry-faces/zebra-yellow-scarf-long-limp.png`（2回目・膝まで垂らした。採用版の形）
+- `concepts/animal-art-v1/hungry-faces/zebra-hungry-final.png`（色をくすませた出荷版の元絵）
+- `concepts/animal-art-v1/hungry-faces/zebra-scarf-mask.png`（色を変えた範囲の確認用）
+- `img/zebra-calm.png`
+- `img/zebra-hungry.png`
 - `img/bear-whole.png`
 - `img/buffalo-whole.png`
 - `img/deer-whole.png`
@@ -91,5 +109,10 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `img/ref/parts-sheet.jpg`
 - `img/ref/rabbit-reference.jpg`
 - `img/tiger-whole.png`
-- `img/wolf-whole.png`
+- `img/wolf-whole.png`（差し替え前の1枚版・古い切り抜き）
+- `img/wolf-calm.png`
+- `img/wolf-hungry.png`
+- `concepts/animal-art-v1/wolf-starving.png`（空腹版の原画）
+- `concepts/animal-art-v1/wolf-starving-prompt.txt`（通った指示の記録）
+- `concepts/animal-art-v1/hungry-faces/wolf-overlay.png`（脚が動いていないことの確認図）
 - `img/zebra-whole.png`

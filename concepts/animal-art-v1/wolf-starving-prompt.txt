@@ -1,0 +1,9 @@
+Use case: precise-object-edit. Edit target: the referenced wolf.png, 1374 by 1145 pixels, RGBA. This is an edit of this EXACT existing illustration, not a redraw or a new wolf. Keep the canvas 1374x1145 and all registration unchanged. Output PNG with genuine alpha transparency.
+The same wolf, same place, starving and weakened. Keep ALL FOUR LEGS, ALL FOUR PAWS, their contours, spacing, sizes, and the BELLY LINE EXACTLY at their original pixel positions. Keep the chest and belly geometry, torso placement, body colors, and existing artwork everywhere else. No scaling, recentering, cropping, body reshaping, or moved feet.
+Change ONLY these four silhouette-edge areas:
+1 Tail: lower the existing high horizontally extended tail, bending from its original root, so the same gray and cream furry tail hangs limp down CLOSE to the hind legs, nearly tucked. Do not alter the hind legs to make room.
+2 Head: lower only the head so the top of the skull is at or just below shoulder height, the muzzle angled down toward the ground. The head must no longer be the highest point. Keep the chest and shoulder mass exactly where they are; connect the lowered head naturally without changing the legs, chest or belly.
+3 Hackles: raise the gray fur along the TOP edge of the back and neck into a rough, spiky ridge. Do not change torso thickness or its lower edge.
+4 Ears: lay both ears FLAT and swept BACKWARD against the skull, no upright ears.
+Mouth closed, no teeth, no snarl, no attack expression. Starvation, exhaustion and submission, never anger. Maintain same thin dark reddish-brown outline, simple flat gray and cream color, subtle pale shading, soft hand-painted edges; side profile facing right. No scene, text, frame, floor, cast shadow, background, checkerboard pattern. Transparent background only.
+Highest priority: the four legs, paws, and belly line DO NOT MOVE. Preserve those existing pixels rather than recreating them. Preserve the original canvas size.

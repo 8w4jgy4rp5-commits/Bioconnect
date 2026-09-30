@@ -13,6 +13,7 @@ number in script.js moves it here too.
   python measure-rig.py                      # the table
   python measure-rig.py deer=20,0,0.58       # try a size before shipping it
   python measure-rig.py --sheet out.png rabbit fox wolf buffalo bear deer
+  python measure-rig.py --sheet out.png --hungry wolf zebra   # fed beside starving
 
 Every percentage is of the TILE -- the square paintAnimal paints into,
 whose side is fit.span rig units. That is not the same square as the
@@ -149,13 +150,28 @@ def tile(rig, files, px=66, fed=1, bg=(247, 244, 236, 255)):
     return out.resize((px, px), Image.LANCZOS)
 
 
-def sheet(entries, files, path, px=66, scale=4):
+def sheet(entries, files, path, px=66, scale=4, hungry=False):
+    """One tile per entry, on a shared baseline.
+
+    With `hungry`, each animal is drawn twice -- fed, then starving -- so
+    a new hungry painting can be read against its own calm one rather
+    than against a memory of it. That pairing is the only way to tell
+    whether a hunger cue survives the trip down to tile size: at 44px a
+    face is three or four pixels across, and what actually reads is the
+    outline, which cannot be judged from the full-size art at all.
+    """
     from PIL import ImageDraw
+    if hungry:
+        entries = [(lbl + s, rig, f)
+                   for lbl, rig in entries
+                   for s, f in (('', 1), (' hungry', 0))]
+    else:
+        entries = [(lbl, rig, 1) for lbl, rig in entries]
     pad, cell = 6, px + 12
     img = Image.new('RGBA', (cell * len(entries), cell + 14), (255, 255, 255, 255))
     d = ImageDraw.Draw(img)
-    for i, (label, rig) in enumerate(entries):
-        img.paste(tile(rig, files, px), (i * cell + pad, pad))
+    for i, (label, rig, fed) in enumerate(entries):
+        img.paste(tile(rig, files, px, fed=fed), (i * cell + pad, pad))
         d.text((i * cell + pad, cell + 1), label, fill=(60, 50, 45))
         # one shared baseline, so feet are compared by eye and not by trust
         d.line([(i * cell, pad + px), (i * cell + cell, pad + px)],
@@ -168,6 +184,8 @@ def sheet(entries, files, path, px=66, scale=4):
 def main(argv):
     rigs, files = load_rig()
     out = None
+    hungry = '--hungry' in argv
+    argv = [a for a in argv if a != '--hungry']
     if '--sheet' in argv:
         i = argv.index('--sheet')
         out = argv[i + 1]
@@ -189,7 +207,7 @@ def main(argv):
     for kind in order:
         report(kind, rigs[kind], files)
     if out:
-        sheet([(k, rigs[k]) for k in order], files, out)
+        sheet([(k, rigs[k]) for k in order], files, out, hungry=hungry)
 
 
 if __name__ == '__main__':

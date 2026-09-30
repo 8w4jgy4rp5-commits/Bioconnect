@@ -1,0 +1,33 @@
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\imported-from-chatgpt\zebra-yellow-scarf-single.png
+  （461x853・透過PNG・黄色いスカーフの1体を抜き出したもの）
+
+以下を画像生成AIにそのまま貼る。
+
+----------------------------------------------------------------------
+
+Edit this image. Keep the body, pose, legs, stripes, framing, canvas size
+and colours EXACTLY as they are. The edited result must line up pixel for
+pixel with the original, because the game swaps between the two and any
+shift makes the animal jump.
+
+Change only these two things:
+
+1. The yellow scarf at the throat comes undone. The knot loosens and the
+   two ends hang straight down, limp, instead of sitting tied and neat.
+   Keep the same yellow.
+2. The ears fold back flat against the neck instead of standing up.
+
+Everything else stays identical — same outline, same stripes, same stance,
+same head position, same eye.
+
+Keep the existing style: thin dark reddish-brown outline, simple flat
+colour, subtle pale shading, soft hand-painted edges. Transparent
+background — no scene, no text, no frame, no floor, no cast shadow.
+Output a PNG with alpha at the same size as the input.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  zebra-hungry-src.png
+という名前で置く。
