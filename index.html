@@ -217,41 +217,33 @@
       <span class="score-label">Best</span>
       <strong class="score-value" id="bestValue">0</strong>
     </div>
-    <!-- The rung. Score alone does not say whether a run was any good,
-         and the bar behind it is the difficulty curve you can watch. -->
-    <div class="level" id="level" data-level="1" role="status" aria-live="polite">
-      <span class="level-head">
-        <span class="level-num" id="levelNum">Lv 1</span>
-        <span class="level-name" id="levelName">Bare ground</span>
-        <span class="level-next" id="levelNext">1,000 to Sprouting</span>
-      </span>
-      <span class="level-track"><span class="level-fill" id="levelFill"></span></span>
-    </div>
+
   </section>
 
-  <!-- ---------- Hand ---------- -->
-  <section class="handbar">
-    <!-- The stock, oldest first. Empty slots stay visible: the gaps are
-         how you read whether you can answer a crisis right now. -->
-    <div class="hand-slot" id="hand" aria-label="Hand: 3 of 3 tiles" aria-live="polite">
-      <span class="hand-label">Hand</span>
-      <span class="hand-tiles">
-        <span class="tile hand-tile"></span>
-        <span class="tile hand-tile"></span>
-        <span class="tile hand-tile"></span>
-      </span>
-      <span class="refill">
-        <span class="refill-track"><span class="refill-fill" id="refillFill"></span></span>
-        <span class="refill-word" id="refillWord">Ready — no waiting</span>
-      </span>
+  <!-- Planting order and growth are separate, visible decisions. -->
+  <section class="handbar" aria-label="Planting order, left to right">
+    <div class="hand-slot" id="hand" aria-label="Planting order" aria-live="polite">
+      <div class="hand-tiles">
+        <div class="hand-piece is-now"><span class="hand-step-label">Place now</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+        <span class="hand-arrow" aria-hidden="true">→</span>
+        <div class="hand-piece"><span class="hand-step-label">Next</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+        <span class="hand-arrow" aria-hidden="true">→</span>
+        <div class="hand-piece"><span class="hand-step-label">Then</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+      </div>
+      <span class="refill sr-only"><span class="refill-track"><span class="refill-fill" id="refillFill"></span></span><span class="refill-word" id="refillWord">Ready</span></span>
     </div>
-    <div class="hand-slot hand-slot--next">
-      <span class="hand-label">Next</span>
-      <span class="tile tile--next" id="nextTile"></span>
+    <span class="hand-arrow" aria-hidden="true">→</span>
+    <div class="hand-piece hand-slot--next"><span class="hand-step-label">Later</span><span class="tile tile--next" id="nextTile"></span><span class="hand-kind-name" id="nextKindName"></span></div>
+    <p class="pause-note" id="pauseNote" hidden>Paused</p>
+  </section>
+
+  <section class="growth-summary" aria-label="Growth toward the elephant">
+    <div class="growth-pair">
+      <div class="growth-kind"><span class="growth-label">Reached</span><span class="growth-picture"><span class="tile growth-tile" id="growthCurrentTile"></span><span class="growth-two">×2</span></span><strong id="growthCurrentName">Sprout</strong></div>
+      <span class="growth-arrow" aria-hidden="true">→</span>
+      <div class="growth-kind"><span class="growth-label" id="growthNextLabel">Grow next</span><span class="tile growth-tile" id="growthNextTile"></span><strong id="growthNextName">Grass</strong></div>
     </div>
-    <p class="goal" id="goal">Two sprouts side by side become grass.</p>
-    <p class="ticker" id="ticker" role="status" aria-live="polite">Tap an empty square to plant. The meadow moves on its own.</p>
-    <p class="pause-note" id="pauseNote" hidden>Paused &mdash; the meadow is waiting for you.</p>
+    <div class="growth-goal"><span class="tile growth-tile" id="growthFinalTile"></span><div><span class="growth-label">Final goal</span><strong>Elephant</strong><span id="growthProgress">0/10 animals</span></div></div>
   </section>
 
   <!-- ---------- Season ---------- -->
@@ -264,12 +256,15 @@
     <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
   </div>
 
+  <p class="move-hint" id="moveHint" role="status">Tap to plant · Hold a square to see its path</p>
+
   <!-- ---------- Board ---------- -->
   <div class="board-frame">
     <div class="board" id="board" aria-label="Meadow, 5 by 5"></div>
     <!-- Score pops, chain tags and the first-of-its-kind cards. Purely
          decorative, never read out, and never inside a cell — render()
          rebuilds those from scratch on every tick. -->
+    <div class="preview-layer" id="previewLayer" aria-hidden="true"></div>
     <div class="fx" id="fx" aria-hidden="true"></div>
     <div class="gameover" id="gameover" hidden>
       <div class="gameover-card">
@@ -293,10 +288,23 @@
 
   <!-- ---------- Food chain reference ---------- -->
   <section class="chain" aria-label="Food chain">
-    <h2 class="chain-head">The chain</h2>
-    <ol class="chain-row"><li class="chain-step"><span class="tile tile--mini" data-art="sprout"></span><span class="chain-name">Sprout</span></li><li class="chain-step"><span class="tile tile--mini" data-art="grass"></span><span class="chain-name">Grass</span></li><li class="chain-step"><span class="tile tile--mini" data-art="rabbit"></span><span class="chain-name">Rabbit</span></li><li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span></li><li class="chain-step"><span class="tile tile--mini" data-art="deer"></span><span class="chain-name">Deer</span></li><li class="chain-step"><span class="tile tile--mini" data-art="zebra"></span><span class="chain-name">Zebra</span></li><li class="chain-step"><span class="tile tile--mini" data-art="buffalo"></span><span class="chain-name">Buffalo</span></li><li class="chain-step"><span class="tile tile--mini" data-art="wolf"></span><span class="chain-name">Wolf</span></li><li class="chain-step"><span class="tile tile--mini" data-art="bear"></span><span class="chain-name">Bear</span></li><li class="chain-step"><span class="tile tile--mini" data-art="lion"></span><span class="chain-name">Lion</span></li><li class="chain-step"><span class="tile tile--mini" data-art="tiger"></span><span class="chain-name">Tiger</span></li><li class="chain-step"><span class="tile tile--mini" data-art="elephant"></span><span class="chain-name">Elephant</span></li></ol>
-    <p class="chain-note">Match to grow. Feed to thrive. Wolves hunt; bears prefer grass, then rabbits.</p>
+    <div class="chain-heading"><h2 class="chain-head">The path to the elephant</h2><span>Match 2 to grow →</span></div>
+    <ol class="chain-row" id="growthTrack"><li class="chain-step"><span class="tile tile--mini" data-art="sprout"></span><span class="chain-name">Sprout</span></li><li class="chain-step"><span class="tile tile--mini" data-art="grass"></span><span class="chain-name">Grass</span></li><li class="chain-step"><span class="tile tile--mini" data-art="rabbit"></span><span class="chain-name">Rabbit</span></li><li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span></li><li class="chain-step"><span class="tile tile--mini" data-art="deer"></span><span class="chain-name">Deer</span></li><li class="chain-step"><span class="tile tile--mini" data-art="zebra"></span><span class="chain-name">Zebra</span></li><li class="chain-step"><span class="tile tile--mini" data-art="buffalo"></span><span class="chain-name">Buffalo</span></li><li class="chain-step"><span class="tile tile--mini" data-art="wolf"></span><span class="chain-name">Wolf</span></li><li class="chain-step"><span class="tile tile--mini" data-art="bear"></span><span class="chain-name">Bear</span></li><li class="chain-step"><span class="tile tile--mini" data-art="lion"></span><span class="chain-name">Lion</span></li><li class="chain-step"><span class="tile tile--mini" data-art="tiger"></span><span class="chain-name">Tiger</span></li><li class="chain-step"><span class="tile tile--mini" data-art="elephant"></span><span class="chain-name">Elephant</span></li></ol>
+    <p class="chain-note">Growth order · Animals have different diets. See How to play.</p>
   </section>
+
+  <!-- The rung. Score alone does not say whether a run was any good,
+         and the bar behind it is the difficulty curve you can watch. -->
+    <div class="level" id="level" data-level="1" role="status" aria-live="polite">
+      <span class="level-head">
+        <span class="level-num" id="levelNum">Lv 1</span>
+        <span class="level-name" id="levelName">Bare ground</span>
+        <span class="level-next" id="levelNext">1,000 to Sprouting</span>
+      </span>
+      <span class="level-track"><span class="level-fill" id="levelFill"></span></span>
+    </div>
+
+  <section class="meadow-notes" aria-label="Meadow updates"><p class="goal" id="goal">Two sprouts side by side become grass.</p><p class="ticker" id="ticker" role="status" aria-live="polite">Tap an empty square to plant.</p></section>
 
   <footer class="app-footer">
     <p>Your best score is saved in this browser (and synced when you are logged in).</p>
@@ -383,7 +391,7 @@
     <button class="modal-close" id="howClose" type="button" aria-label="Close">&times;</button>
     <h2 id="howTitle">How to play</h2>
 
-    <ol class="guide-list"><li class="guide-step"><h3>1. Plant without waiting</h3><p>Tap an empty square. Your first tile is placed and immediately replaced.</p></li><li class="guide-step"><h3>2. One path to the elephant</h3><p>Match two: sprout → grass → rabbit → fox → deer → zebra → buffalo → wolf → bear → lion → tiger → elephant. The progression is a discovery path; diets are shown below.</p></li><li class="guide-step"><h3>3. Plan your chain</h3><p>Growth stays on an existing matching tile. Ties use topmost, then leftmost. Merge and Chain labels preview your move. Later chain steps clear all blockers touching the merging group.</p></li><li class="guide-step"><h3>4. Keep the food chain fed</h3><p>Herbivores eat grass or sprouts. Foxes eat rabbits or plants. Wolves hunt rabbits, foxes, deer and zebras. Bears prefer grass, then rabbits or deer. Lions and tigers hunt deer, zebras and buffalo. Animals eat only when hungry. Feeding creates space and scores points.</p></li><li class="guide-step"><h3>5. The elephant is twice the size</h3><p>An elephant stands on a 2×2 block — four squares. It arrives at full size and flattens whatever was standing there, so it always finds room. An elephant ignores plants. It takes animals you grew by merging — marked with a purple dot from the tiger onward. It also gets hungry about two and a half times faster than anything else, and pays four times a normal meal. Reach it with raised animals in reserve, or it leaves bones.</p></li><li class="guide-step"><h3>6. Start small, grow big</h3><p>Your hand always contains sprouts and grass in the same mix. Every animal, from rabbit to elephant, is earned by merging. Discoveries never add bigger tiles to your hand.</p></li><li class="guide-step"><h3>7. Meet the next challenge</h3><p>Over time, stones arrive more often and plants gradually fade sooner. Winter keeps getting harder, up to Winter 5. Growth and meal points rise from ×1 to ×8 before the score scale is applied. Watch the countdown, and merge beside blockers to clear them. A full board ends the run; waiting alone earns no points.</p></li><li class="guide-step"><h3>8. A complete meadow</h3><p>Discover all ten animals to welcome the elephant, then keep playing for a higher score. Chains, simultaneous meals and seasons multiply your points.</p></li><li class="guide-step"><h3>9. Choose your pace and sound</h3><p>Relaxed doubles the time between world updates. The guide and hidden tabs pause the world. Sound and Music start off; turn them on independently.</p></li></ol>
+    <ol class="guide-list"><li class="guide-step"><h3>1. Plant without waiting</h3><p>Tap an empty square. Your first tile is placed and immediately replaced.</p></li><li class="guide-step"><h3>2. One path to the elephant</h3><p>Match two: sprout → grass → rabbit → fox → deer → zebra → buffalo → wolf → bear → lion → tiger → elephant. The progression is a discovery path; diets are shown below.</p></li><li class="guide-step"><h3>3. Plan your chain</h3><p>Growth stays on an existing matching tile. Ties use topmost, then leftmost. Empty squares show what your tile will grow into. Hold a square, hover, or focus it to see the path and final landing square. Release a tap to plant. Later chain steps clear all blockers touching the merging group.</p></li><li class="guide-step"><h3>4. Keep the food chain fed</h3><p>Herbivores eat grass or sprouts. Foxes eat rabbits or plants. Wolves hunt rabbits, foxes, deer and zebras. Bears prefer grass, then rabbits or deer. Lions and tigers hunt deer, zebras and buffalo. Animals eat only when hungry. Feeding creates space and scores points.</p></li><li class="guide-step"><h3>5. The elephant is twice the size</h3><p>An elephant stands on a 2×2 block — four squares. It arrives at full size and flattens whatever was standing there, so it always finds room. An elephant ignores plants. It takes animals you grew by merging — marked with a purple dot from the tiger onward. It also gets hungry about two and a half times faster than anything else, and pays four times a normal meal. Reach it with raised animals in reserve, or it leaves bones.</p></li><li class="guide-step"><h3>6. Start small, grow big</h3><p>Your hand always contains sprouts and grass in the same mix. Every animal, from rabbit to elephant, is earned by merging. Discoveries never add bigger tiles to your hand.</p></li><li class="guide-step"><h3>7. Meet the next challenge</h3><p>Over time, stones arrive more often and plants gradually fade sooner. Winter keeps getting harder, up to Winter 5. Growth and meal points rise from ×1 to ×8 before the score scale is applied. Watch the countdown, and merge beside blockers to clear them. A full board ends the run; waiting alone earns no points.</p></li><li class="guide-step"><h3>8. A complete meadow</h3><p>Discover all ten animals to welcome the elephant, then keep playing for a higher score. Chains, simultaneous meals and seasons multiply your points.</p></li><li class="guide-step"><h3>9. Choose your pace and sound</h3><p>Relaxed doubles the time between world updates. The guide and hidden tabs pause the world. Sound and Music start off; turn them on independently.</p></li></ol>
 
     <button class="btn btn--primary modal-done" id="howDone" type="button">Got it</button>
   </div>

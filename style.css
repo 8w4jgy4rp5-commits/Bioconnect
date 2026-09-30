@@ -1701,3 +1701,120 @@ body.is-modal { overflow: hidden; }
 
 .audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
+
+/* Keep the choices and the whole meadow together on a phone. */
+.sr-only {
+  position: absolute !important; width: 1px !important; height: 1px !important;
+  padding: 0 !important; margin: -1px !important; overflow: hidden !important;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0 !important;
+}
+.wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; padding-top: 12px; }
+.wrap > * { grid-column: 1 / -1; min-width: 0; }
+.topbar { grid-column: 1; align-self: center; margin: 0; text-align: left; }
+.title { font-size: 1.35rem; padding-bottom: 5px; }
+.title-field { height: 6px; }
+.tagline { display: none; }
+.scorebar { grid-column: 2; flex-wrap: nowrap; gap: 6px; margin: 0; }
+.score { padding: 5px 8px; border-radius: 9px; box-shadow: none; }
+.score-label { color: #65735e; font-size: 10px; letter-spacing: .04em; }
+.score-value { font-size: 1.15rem; }
+.scorebar .level { display: none; }
+.handbar { grid-template-columns: minmax(0, 3fr) 12px minmax(0, 1fr); gap: 4px; margin: 0; padding: 6px; box-shadow: none; }
+.hand-slot { min-width: 0; }
+.hand-tiles { display: grid; grid-template-columns: minmax(0, 1fr) 12px minmax(0, 1fr) 12px minmax(0, 1fr); gap: 4px; align-items: center; }
+.hand-piece { display: grid; justify-items: center; gap: 2px; padding: 3px 2px; border-radius: 8px; min-width: 0; }
+.hand-piece.is-now { background: #e9f4de; }
+.hand-step-label { font-size: 10px; line-height: 12px; font-weight: 700; color: #64745b; white-space: nowrap; }
+.hand-piece.is-now .hand-step-label { color: #315f24; }
+.hand-kind-name { color: #45583b; font-size: 11px; font-weight: 600; line-height: 13px; }
+.hand-arrow { text-align: center; color: #748669; font-size: 15px; }
+.tile.hand-tile, .tile.tile--next { width: 42px; height: 42px; margin: 0; opacity: 1; background: #f5f8ee; border: 1px solid #d3dfc3; }
+.is-now .tile.hand-tile { border: 2px solid #5a8f3f; background: #fff; box-shadow: 0 1px 4px #425b2520; }
+.pause-note { font-style: normal; font-weight: 700; text-align: center; padding: 2px; }
+.growth-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.growth-pair { display: flex; align-items: center; gap: 12px; }
+.growth-kind { display: grid; justify-items: center; gap: 1px; }
+.growth-label { display: block; font-size: 10px; line-height: 12px; color: #6a755e; }
+.growth-kind strong, .growth-goal strong { font-size: 11px; line-height: 13px; color: #3d5430; }
+.tile.growth-tile { width: 36px; height: 32px; background: transparent; border: 0; }
+.growth-picture { display: flex; align-items: center; }
+.growth-two { font-size: 11px; font-weight: 700; color: #577544; }
+.growth-arrow { color: #5c8345; font-size: 20px; }
+.growth-goal { display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid #e2e8d7; }
+.growth-goal .growth-tile { width: 46px; height: 45px; }
+.growth-goal strong { display: block; color: #745727; }
+#growthProgress { display: block; font-size: 10px; line-height: 15px; color: #697657; white-space: nowrap; }
+.season { display: flex; align-items: center; gap: 7px; min-height: 29px; margin: 0; padding: 5px 9px 7px; border-radius: 8px; }
+.season-name { font-size: 11px; white-space: nowrap; }
+.season-note { display: none; }
+.season-mult { font-size: 10px; margin-left: auto; white-space: nowrap; }
+.season-next { font-size: 10px; margin: 0; white-space: nowrap; }
+.season-track { height: 3px; }
+.move-hint { color: #586b48; font-size: 11px; line-height: 16px; margin: 0; min-height: 16px; text-align: center; }
+.board-frame { width: 100%; justify-self: center; }
+.board { gap: 5px; padding: 7px; }
+.cell { touch-action: pan-y; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+.cell:not(:disabled):active { transform: none; }
+.cell--merge-ready { background: #f8fbf0; border: 1px dashed #7c9e5d; box-shadow: none; }
+.merge-preview { display: flex; position: absolute; inset: 4px 1px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; pointer-events: none; }
+.tile.merge-preview-art { width: 58%; height: 58%; border: 0; background: transparent; opacity: .78; }
+.cell .merge-preview-art .tile-art { position: static; width: 100%; height: 100%; }
+.merge-preview-label { font-size: clamp(8px, 2.3vw, 10px); line-height: 12px; font-weight: 700; color: #4a6c30; white-space: nowrap; }
+.merge-preview-count { position: absolute; right: 2px; top: 0; padding: 1px 3px; border-radius: 8px; background: #e4efd8; color: #375527; font-size: 9px; line-height: 12px; font-weight: 700; }
+.cell--preview-origin { outline: 3px solid #54923a; outline-offset: -3px; }
+.cell--preview-step { box-shadow: inset 0 0 0 2px #ce9940; }
+.cell--preview-destination { outline: 3px solid #cc8325; outline-offset: -3px; background: #fff1cd; }
+.preview-layer { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.merge-path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; color: #b46c16; }
+.merge-path-line { fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 1px #fff); }
+.merge-path-step { fill: #fff9eb; stroke: #b46c16; stroke-width: 2; }
+.merge-path text { fill: #fff; font-family: var(--font); font-size: 12px; font-weight: 800; stroke: none; }
+.growth-summary.is-complete .growth-two, .growth-summary.is-complete .growth-arrow { display: none; }
+.growth-summary.is-complete #growthNextName { color: #59813c; }
+.growth-summary [hidden] { display: none; }
+.controls { gap: 6px; margin: 0; }
+.controls .btn { min-height: 44px; padding: 8px 4px; font-size: 12px; }
+.chain { margin-top: 6px; padding: 10px; }
+.chain-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.chain-heading .chain-head { font-size: 10px; color: #5b7150; margin: 0; letter-spacing: .03em; text-align: left; }
+.chain-heading > span { font-size: 10px; color: #70845f; }
+.chain-row { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 9px 2px; }
+.chain-step { position: relative; padding: 3px 0; border: 1px solid transparent; border-radius: 8px; }
+.chain-step:not(:nth-child(6n))::after { content: '›'; position: absolute; right: -5px; top: 17px; font-size: 14px; color: #90a080; }
+.chain-step .tile--mini { width: 36px; height: 36px; background: #f5f7ef; border-color: #e5eadb; }
+.chain-step .chain-name { font-size: 9px; }
+.chain-step.is-current { border-color: #7daa57; background: #f0f7e8; }
+.chain-step.is-next { border-style: dashed; border-color: #b69b50; }
+.chain-step.is-reached .chain-name { color: #48712e; }
+.chain-note { color: #667758; font-size: 10px; margin-top: 9px; }
+.meadow-notes { padding: 2px 4px; }
+.meadow-notes .goal { font-size: 12px; line-height: 1.5; padding: 0; }
+.meadow-notes .ticker { font-size: 11px; color: #69775c; padding-top: 6px; }
+.app-footer { margin-top: 4px; }
+@media (max-width: 600px) {
+  body { padding: 0 max(10px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(10px, env(safe-area-inset-left)); }
+  .wrap { padding-top: max(6px, env(safe-area-inset-top)); gap: 6px 10px; }
+  .title { font-size: 1.12rem; }
+  .score { padding: 4px 7px; }
+  .score-value { font-size: 1.05rem; }
+  .board-frame { width: min(100%, max(266px, calc(100svh - 344px))); }
+  .growth-summary { padding: 4px 8px; gap: 4px; }
+  .growth-pair { gap: 7px; }
+  .growth-goal { padding-left: 5px; gap: 0; }
+  .season { gap: 5px; }
+  .season-next { font-size: 9px; }
+  .first { width: min(82%, 240px); padding: 10px; }
+  .first-art { width: 42px; height: 42px; }
+  .first span { font-size: 11px; }
+}
+@media (max-width: 600px) and (max-height: 650px) {
+  .wrap { gap: 4px 8px; }
+  .handbar { padding: 3px 5px; }
+  .hand-piece { padding: 2px 1px; gap: 1px; }
+  .tile.hand-tile, .tile.tile--next { width: 36px; height: 36px; }
+  .growth-summary { padding-block: 3px; }
+  .tile.growth-tile { height: 26px; }
+  .growth-goal .growth-tile { height: 36px; width: 39px; }
+  .board-frame { width: min(100%, max(266px, calc(100svh - 304px))); }
+  .move-hint { font-size: 10px; }
+}

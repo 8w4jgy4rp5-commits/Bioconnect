@@ -840,6 +840,9 @@ function pickBlock(cells, at, side) {
 }
 
 function newGame() {
+  clearMovePreview();
+  pointerGesture = null;
+  cancelledPlacement = false;
   if (window.BioAudio) window.BioAudio.reset();
   state.cells = new Array(CELLS).fill(null);
   state.topKind = 'sprout';
@@ -1908,6 +1911,135 @@ function paintAnimal(canvas, type, fed) {
 
 const el = {};
 let cellNodes = [];
+let previewOrigin = -1;
+let previewMode = '';
+let pointerGesture = null;
+let cancelledPlacement = false;
+
+function kindName(kind) {
+  return kind ? kind[0].toUpperCase() + kind.slice(1) : 'Waiting';
+}
+
+function clearMovePreview() {
+  previewOrigin = -1;
+  previewMode = '';
+  if (el.previewLayer) el.previewLayer.textContent = '';
+  for (const node of cellNodes) {
+    node.classList.remove('cell--preview-origin', 'cell--preview-step', 'cell--preview-destination');
+  }
+  if (el.moveHint) {
+    el.moveHint.classList.remove('is-previewing');
+    el.moveHint.textContent = state.over ? 'Meadow full · try a new game'
+      : state.paused ? 'The meadow is paused'
+      : 'Tap to plant · hold to see the merge path';
+  }
+}
+
+function showMovePreview(i, mode) {
+  if (state.paused || state.over || state.cells[i] || !state.stock.length) return;
+  previewOrigin = i;
+  previewMode = mode;
+  renderMovePreview();
+}
+
+// Recomputed from live state after every render, including world ticks.
+// The overlay has no pointer events; the cell's ordinary click still plants.
+function renderMovePreview() {
+  const origin = previewOrigin;
+  const mode = previewMode;
+  clearMovePreview();
+  // A world tick can put a stone under a finger before pointerup. Cancel
+  // that gesture even if the browser stops dispatching events to the
+  // newly disabled button, so it cannot later plant on another square.
+  if (pointerGesture && (state.paused || state.over || state.cells[pointerGesture.at])) {
+    cancelledPlacement = true;
+    pointerGesture = null;
+  }
+  if (origin < 0 || state.paused || state.over || state.cells[origin] || !state.stock.length) return;
+  previewOrigin = origin;
+  previewMode = mode;
+  const forecast = previewGrowth(origin);
+  const last = forecast.length ? forecast[forecast.length - 1] : { at: origin, kind: state.stock[0] };
+  const lastSide = bigSide(last.kind);
+  cellNodes[origin].classList.add('cell--preview-origin');
+  for (const step of forecast) cellNodes[step.at].classList.add('cell--preview-step');
+  for (const at of blockAt(last.at, lastSide)) cellNodes[at].classList.add('cell--preview-destination');
+  if (el.moveHint) {
+    el.moveHint.classList.add('is-previewing');
+    el.moveHint.textContent = kindName(last.kind)
+      + (lastSide > 1 ? ' · ' + lastSide + '×' + lastSide : '')
+      + (forecast.length ? ' · ' + forecast.length + (forecast.length === 1 ? ' merge' : ' merges') : ' · plant')
+      + ' → row ' + (Math.floor(last.at / SIZE) + 1) + ', col ' + (last.at % SIZE + 1);
+  }
+  if (!el.previewLayer || !forecast.length) return;
+  const frame = el.previewLayer.getBoundingClientRect();
+  if (!frame.width || !frame.height) return;
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svgNode = function (tag, attrs) {
+    const node = document.createElementNS(svgNS, tag);
+    for (const key in attrs) node.setAttribute(key, attrs[key]);
+    return node;
+  };
+  const svg = svgNode('svg', {
+    class: 'merge-path', viewBox: '0 0 ' + frame.width + ' ' + frame.height,
+    width: '100%', height: '100%', 'aria-hidden': 'true'
+  });
+  const defs = svgNode('defs', {});
+  const marker = svgNode('marker', {
+    id: 'mergePreviewArrow', viewBox: '0 0 10 10', refX: '8', refY: '5',
+    markerWidth: '5', markerHeight: '5', orient: 'auto-start-reverse'
+  });
+  marker.appendChild(svgNode('path', { d: 'M 0 0 L 10 5 L 0 10 z', fill: 'currentColor' }));
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+  // Measure from the empty origin's single square. An existing elephant's
+  // home already spans two rows, and its other three DOM cells are hidden;
+  // their rectangles cannot describe a future footprint accurately.
+  const originRect = cellNodes[origin].getBoundingClientRect();
+  const gridStyle = window.getComputedStyle(el.board);
+  const columnGap = parseFloat(gridStyle.columnGap) || 0;
+  const rowGap = parseFloat(gridStyle.rowGap) || 0;
+  const points = [{ at: origin, kind: state.stock[0] }].concat(forecast).map(function (step) {
+    const side = bigSide(step.kind);
+    const width = originRect.width * side + columnGap * (side - 1);
+    const height = originRect.height * side + rowGap * (side - 1);
+    const left = originRect.left - frame.left + (step.at % SIZE - origin % SIZE) * (originRect.width + columnGap);
+    const top = originRect.top - frame.top + (Math.floor(step.at / SIZE) - Math.floor(origin / SIZE)) * (originRect.height + rowGap);
+    return { x: left + width / 2, y: top + height / 2, width: width, height: height };
+  });
+  if (lastSide > 1) {
+    const p = points[points.length - 1];
+    svg.appendChild(svgNode('rect', {
+      class: 'merge-path-footprint', x: p.x - p.width / 2 + 1.5, y: p.y - p.height / 2 + 1.5,
+      width: p.width - 3, height: p.height - 3, rx: '8',
+      fill: 'rgba(255, 210, 120, .12)', stroke: 'currentColor', 'stroke-width': '3'
+    }));
+  }
+  for (let n = 1; n < points.length; n++) {
+    const from = points[n - 1], to = points[n];
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 0.01) continue;
+    const inset = Math.min(14, length / 4);
+    svg.appendChild(svgNode('path', {
+      class: 'merge-path-line',
+      d: 'M ' + (from.x + dx / length * inset) + ' ' + (from.y + dy / length * inset)
+        + ' L ' + (to.x - dx / length * inset) + ' ' + (to.y - dy / length * inset),
+      fill: 'none', stroke: 'currentColor', 'stroke-width': '3',
+      'stroke-linecap': 'round', 'marker-end': 'url(#mergePreviewArrow)'
+    }));
+  }
+  for (let n = 1; n < points.length; n++) {
+    const p = points[n];
+    const group = svgNode('g', { class: 'merge-path-step', transform: 'translate(' + (p.x + p.width / 2 - 11) + ' ' + (p.y - p.height / 2 + 11) + ')' });
+    group.appendChild(svgNode('circle', { r: '9', fill: 'currentColor' }));
+    const number = svgNode('text', { x: '0', y: '0', 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-size': '11', 'font-weight': '700' });
+    number.textContent = String(n);
+    group.appendChild(number);
+    svg.appendChild(group);
+  }
+  el.previewLayer.appendChild(svg);
+}
 
 function tileArt(kind) {
   // plants and bones are the inline symbols; animals get a canvas,
@@ -2006,6 +2138,14 @@ function render(grew, meals, deaths) {
   for (let i = 0; i < CELLS; i++) {
     const node = cellNodes[i];
     const cell = state.cells[i];
+    node.className = 'cell';
+    node.textContent = '';
+    node.removeAttribute('title');
+    delete node.dataset.previewKind;
+    delete node.dataset.previewMerges;
+    delete node.dataset.previewDestination;
+    delete node.dataset.previewSide;
+    node.disabled = state.over || state.paused || !!cell;
 
     // The three squares a big tile leans on draw nothing: its home
     // square is stretched over them instead.
@@ -2013,10 +2153,6 @@ function render(grew, meals, deaths) {
     node.hidden = false;
     const side = cell && cell.big != null ? bigSide(cell.kind) : 1;
     setSpan(node, i, side);
-
-    node.className = 'cell';
-    node.textContent = '';
-    node.disabled = state.over || !!cell;
 
     if (!cell) {
       const forecast = previewGrowth(i);
@@ -2026,11 +2162,29 @@ function render(grew, meals, deaths) {
         node.classList.add('cell--merge-ready');
         const badge = document.createElement('span');
         badge.className = 'merge-preview';
-        badge.textContent = forecast.length > 1 ? 'Chain ' + forecast.length : 'Merge';
+        const result = document.createElement('span');
+        result.className = 'merge-preview-art tile';
+        paintTile(result, last.kind);
+        badge.appendChild(result);
+        const resultLabel = document.createElement('span');
+        resultLabel.className = 'merge-preview-label';
+        resultLabel.textContent = '→ ' + kindName(last.kind);
+        badge.appendChild(resultLabel);
+        if (forecast.length > 1) {
+          const count = document.createElement('span');
+          count.className = 'merge-preview-count';
+          count.textContent = '×' + forecast.length;
+          badge.appendChild(count);
+        }
         node.appendChild(badge);
+        node.dataset.previewKind = last.kind;
+        node.dataset.previewMerges = String(forecast.length);
+        node.dataset.previewDestination = String(last.at);
+        node.dataset.previewSide = String(bigSide(last.kind));
         label += '. ' + forecast.length + ' growths, ' + last.kind + ' at row ' + (Math.floor(last.at / SIZE) + 1) + ' column ' + (last.at % SIZE + 1);
+        if (bigSide(last.kind) > 1) label += ', occupies ' + bigSide(last.kind) + ' by ' + bigSide(last.kind) + ' squares';
         node.title = label;
-      } else node.removeAttribute('title');
+      }
       node.setAttribute('aria-label', label);
       if (eaten.has(i)) node.classList.add('cell--eaten');
       continue;
@@ -2088,6 +2242,7 @@ function render(grew, meals, deaths) {
   }
 
   renderHand();
+  renderGrowth();
   renderSeason();
   el.goal.textContent = nextGoal();
   const shown = displayScore(state.score);
@@ -2097,6 +2252,7 @@ function render(grew, meals, deaths) {
   renderLevel(shown);
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
+  renderMovePreview();
 }
 
 // The rung, and how far along it. The bar is the whole difficulty curve
@@ -2222,14 +2378,56 @@ function announceFirsts(grew) {
 // left visible. Seeing the gaps is what tells you whether you can answer
 // a crisis right now, and how much of one — a number would say the same
 // thing and be read half as fast.
+function renderGrowth() {
+  if (!el.growthCurrentTile) return;
+  const top = state.topKind;
+  const next = GROWS_INTO[top];
+  const summary = el.growthCurrentTile.closest('.growth-summary');
+  if (summary) summary.classList.toggle('is-complete', !next);
+  paintTile(el.growthCurrentTile, top);
+  if (el.growthCurrentName) el.growthCurrentName.textContent = kindName(top);
+  if (el.growthNextTile) {
+    el.growthNextTile.hidden = !next;
+    paintTile(el.growthNextTile, next || null);
+  }
+  if (el.growthNextLabel) el.growthNextLabel.textContent = next ? 'Grow next' : 'All raised';
+  if (el.growthNextName) el.growthNextName.textContent = next ? kindName(next) : 'Complete!';
+  if (el.growthFinalTile) paintTile(el.growthFinalTile, 'elephant');
+  if (el.growthProgress) el.growthProgress.textContent = Math.max(0, rank(top) - 1) + '/10 animals';
+  if (!el.growthTrack) return;
+  for (const node of el.growthTrack.querySelectorAll('.chain-step')) {
+    const art = node.querySelector('[data-art]');
+    const kind = node.dataset.kind || (art && art.dataset.art);
+    if (!kind) continue;
+    const paintVersion = spritesReady ? 'ready' : 'fallback';
+    if (art && art.dataset.paintVersion !== paintVersion) {
+      paintTile(art, kind);
+      art.dataset.paintVersion = paintVersion;
+    }
+    node.classList.toggle('is-reached', rank(kind) <= rank(top));
+    node.classList.toggle('is-current', kind === top);
+    node.classList.toggle('is-next', kind === next);
+    node.setAttribute('aria-label', kindName(kind) + (kind === top ? ', highest reached' : kind === next ? ', next discovery' : rank(kind) < rank(top) ? ', reached' : ', undiscovered'));
+  }
+}
+
 function renderHand() {
   for (let n = 0; n < HAND_MAX; n++) {
     const slot = el.handSlots[n];
     const kind = state.stock[n];
     slot.classList.toggle('is-empty', !kind);
     paintTile(slot, kind || null);
+    const piece = slot.closest('.hand-piece');
+    if (piece) {
+      piece.classList.toggle('is-now', n === 0);
+      piece.classList.toggle('is-empty', !kind);
+      const name = piece.querySelector('.hand-kind-name');
+      if (name) name.textContent = kindName(kind);
+      piece.setAttribute('aria-label', (n === 0 ? 'Place now: ' : 'Next ' + n + ': ') + kindName(kind));
+    }
   }
   paintTile(el.nextTile, state.next);
+  if (el.nextKindName) el.nextKindName.textContent = kindName(state.next);
 
   const left = refillProgress();
   el.refillFill.style.width = Math.round(left * 100) + '%';
@@ -2444,7 +2642,9 @@ async function init() {
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
     'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
-    'startHowBtn', 'startSoundBtn', 'countdown', 'countdownWord'];
+    'startHowBtn', 'startSoundBtn', 'countdown', 'countdownWord',
+    'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
+    'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
@@ -2452,10 +2652,57 @@ async function init() {
 
   el.board.addEventListener('click', function (e) {
     const btn = e.target.closest('.cell');
-    if (!btn || btn.disabled) return;
+    if (!btn || btn.disabled || state.paused) return;
+    if (cancelledPlacement && e.detail !== 0) { cancelledPlacement = false; return; }
+    clearMovePreview();
     disarmNew();
     placeTile(Number(btn.dataset.i));
   });
+  el.board.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+  el.board.addEventListener('pointerover', function (e) {
+    if (e.pointerType !== 'mouse') return;
+    const btn = e.target.closest('.cell');
+    if (btn && !btn.disabled) showMovePreview(Number(btn.dataset.i), 'mouse');
+    else if (previewMode === 'mouse') clearMovePreview();
+  });
+  el.board.addEventListener('pointerleave', function () {
+    if (previewMode === 'mouse') clearMovePreview();
+  });
+  el.board.addEventListener('pointerdown', function (e) {
+    if (e.button !== 0 || e.isPrimary === false) return;
+    cancelledPlacement = false;
+    const btn = e.target.closest('.cell');
+    if (!btn || btn.disabled) return;
+    pointerGesture = { id: e.pointerId, at: Number(btn.dataset.i), x: e.clientX, y: e.clientY, touch: e.pointerType !== 'mouse' };
+    showMovePreview(Number(btn.dataset.i), e.pointerType === 'mouse' ? 'mouse' : 'touch');
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!pointerGesture || pointerGesture.id !== e.pointerId || !pointerGesture.touch) return;
+    if (Math.hypot(e.clientX - pointerGesture.x, e.clientY - pointerGesture.y) > 10) {
+      cancelledPlacement = true;
+      clearMovePreview();
+    }
+  }, { passive: true });
+  document.addEventListener('pointercancel', function (e) {
+    if (!pointerGesture || pointerGesture.id !== e.pointerId) return;
+    cancelledPlacement = true;
+    pointerGesture = null;
+    clearMovePreview();
+  });
+  document.addEventListener('pointerup', function (e) {
+    if (!pointerGesture || pointerGesture.id !== e.pointerId) return;
+    if (pointerGesture.touch) clearMovePreview();
+    pointerGesture = null;
+  });
+  el.board.addEventListener('focusin', function (e) {
+    const btn = e.target.closest('.cell');
+    if (btn && !btn.disabled && !pointerGesture) showMovePreview(Number(btn.dataset.i), 'keyboard');
+  });
+  el.board.addEventListener('focusout', function () {
+    if (previewMode === 'keyboard') clearMovePreview();
+  });
+  window.addEventListener('resize', renderMovePreview);
 
   el.speedBtn.addEventListener('click', function () {
     setRelaxed(!state.relaxed);
