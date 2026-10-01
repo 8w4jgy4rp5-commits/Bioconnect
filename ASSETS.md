@@ -29,9 +29,15 @@
 ライオンは `concepts/animal-art-v1/lion-crown-yawn-gemini-v1.jpg`（王冠＋あくび）が採用版。
 透過のないJPGだったので `cutout-bg.py` で背景を落としてから書き出した（`lion-crown-yawn-cutout.png` が中間ファイル）。
 しっぽの輪の内側に取り残された紙の穴も同時に除去している。`lion.png`（横向きの立ち姿）は不採用。
-トラは `concepts/animal-art-v1/tiger-face-aura-v4.png` が採用版で、2026-09-28に `img/tiger-whole.png` として組込み。
-顔まわりの金のオーラは絵に焼き込まれているため単独では動かせない。広い soft glow は透過だったので切り抜きで消え、
-44pxで残るのは四本のスパイクだけ。v1〜v3 と `tiger.png` は不採用。
+トラは `concepts/animal-art-v1/tiger-face-aura-v4.png` が採用版。広い soft glow は透過だったので切り抜きで消え、
+44pxで残るのはスパイクだけ。v1〜v3 と `tiger.png` は不採用。
+満腹 `img/tiger-calm.png` と空腹 `img/tiger-hungry.png` の2枚組（2026-10-01）。**画像生成AIを使っていない唯一の組**で、
+`hungry-faces/flare-tiger-aura.py` が原画から金を色相で抜き、中身を塗りつぶし、1.50倍まで0.06刻みで重ねた層を
+**体の下に**敷く。顔は1画素も変えていない（牙を剥かせると別人になる）。体は完全に同一で、増えたのはオーラだけ。
+横には伸ばさない（タイル幅134.2%で既に両端が切れており、横に伸ばすと絵全体が縮む）。枠は縦に131画素だけ伸び、
+`RIG.tiger.fit.oy` を 1.7 → -0.6 に測り直した。足元95.7%・幅134.2%は変更前と同じ。
+伸ばす量は `hungry-faces/tiger-spread-choice.png` に44pxで4段階並べてある。
+`img/tiger-whole.png` は差し替え前の1枚版で、記録として残すがコードは参照していない。
 手描きのトラ案は以前に却下・削除済みで、残っている生成画像の候補とは別。
 img/ref が移行元に存在すればコピー済み。元に存在しない原画はこの移行では復元できない。
 詳しい画風・書き出し方法は concepts/animal-art-v1/README.md を読む。
@@ -108,7 +114,16 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `img/ref/fox-reference.jpg`
 - `img/ref/parts-sheet.jpg`
 - `img/ref/rabbit-reference.jpg`
-- `img/tiger-whole.png`
+- `img/tiger-calm.png`
+- `img/tiger-hungry.png`
+- `concepts/animal-art-v1/hungry-faces/flare-tiger-aura.py`（オーラを伸ばす計算。再実行で同じ絵）
+- `concepts/animal-art-v1/hungry-faces/tiger-spread-choice.png`（44pxで4段階を並べた選定表）
+- `concepts/animal-art-v1/hungry-faces/tiger-aura-mask.png`（金として拾った範囲の確認用）
+- `concepts/animal-art-v1/hungry-faces/tiger-overlay.png`（体が動いていないことの確認図）
+- `concepts/animal-art-v1/hungry-faces/tiger-calm-padded.png` / `tiger-hungry-flare.png`
+  （切り抜き前の1536px中間ファイル。`flare-tiger-aura.py` を実行すれば同じものが出るので、
+  容量が気になれば消してよい）
+- `img/tiger-whole.png`（差し替え前の1枚版）
 - `img/wolf-whole.png`（差し替え前の1枚版・古い切り抜き）
 - `img/wolf-calm.png`
 - `img/wolf-hungry.png`

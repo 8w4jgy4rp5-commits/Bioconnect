@@ -1453,7 +1453,12 @@ const SPRITE_FILES = {
   zebraCalm: 'zebra-calm.png',
   zebraHungry: 'zebra-hungry.png',
   lionWhole: 'lion-whole.png',
-  tigerWhole: 'tiger-whole.png',
+  // The only hungry pair on the board made with no image model: the
+  // aura was already painted, so flare-tiger-aura.py lifts the gold out
+  // by hue and scales it outward under the animal. The tiger itself is
+  // byte-for-byte the same in both files.
+  tigerCalm: 'tiger-calm.png',
+  tigerHungry: 'tiger-hungry.png',
   elephantCalm: 'elephant-calm.png',
   elephantHungry: 'elephant-hungry.png'
 };
@@ -1752,12 +1757,21 @@ const RIG = {
   },
   // THE TIGER IS THE FACE, AND THE FACE IS NOT SHOUTING.
   //
-  // One painting, same reasoning as the wolf and the deer. What this
-  // one has that none of the others do is an aura: four gold spikes
-  // struck around the head. The wide soft glow they were drawn inside
-  // was transparent and did not survive the crop, which is the outcome
-  // we wanted -- at 44px a haze is dirt on the screen, while the spikes
-  // stay four clean marks and say the same thing.
+  // Same reasoning as the wolf and the deer. What this one has that
+  // none of the others do is an aura: gold spikes struck around the
+  // head. The wide soft glow they were drawn inside was transparent and
+  // did not survive the crop, which is the outcome we wanted -- at 44px
+  // a haze is dirt on the screen, while the spikes stay clean marks and
+  // say the same thing.
+  //
+  // THE AURA IS THE HUNGER. Starving, the spikes reach half again as
+  // far and stand over the tiger's back; the animal underneath is not
+  // touched, down to the byte. Eight fiercer tigers were drawn and
+  // thrown away before this one, and what carries it is the cold
+  // half-lidded stare -- bare its teeth and it is a different animal.
+  // So this is the one hungry pair made with no image model at all:
+  // hungry-faces/flare-tiger-aura.py lifts the gold out of the painting
+  // by hue and stacks scaled copies of it outward UNDER the body.
   //
   // `w` 51 puts it at 134.2% of the tile's width and 82.4% of its
   // height. Height is not the ladder here and never has been -- the
@@ -1776,15 +1790,20 @@ const RIG = {
   // pays for the rest. The tail is the one part of this animal that
   // carries nothing. The face is the character, and the face is whole.
   //
-  // `oy` 1.7 is the same solve as everywhere else: paws at 95.7% of the
-  // tile, the wolf and buffalo baseline, which leaves the 1.1 units of
-  // `sag` somewhere to go when it starves.
+  // `oy` -0.6 is the same solve as everywhere else: paws at 95.7% of
+  // the tile, the wolf and buffalo baseline, which leaves the 1.1 units
+  // of `sag` somewhere to go when it starves. It moved from 1.7 only
+  // because the shared frame grew 131 source px taller to hold the
+  // flared aura -- the frame did not get WIDER, so `w` is untouched and
+  // the tiger is drawn at the size it always was (134.2% wide; 83.0%
+  // tall against the old 82.4%, which is one row of rounding in the
+  // crop, not a resize).
   tiger: {
-    fit: { span: 38, ox: 5, oy: 1.7 },
+    fit: { span: 38, ox: 5, oy: -0.6 },
     parts: [
       ['@head', { w: 51, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'tigerWhole', hungry: 'tigerWhole' }
+    head: { calm: 'tigerCalm', hungry: 'tigerHungry' }
   },
   // The muscled elephant is the first whole-body painting with a real
   // second face: a smirk when fed, a snorting glare when hungry. Both
