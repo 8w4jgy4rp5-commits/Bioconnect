@@ -1443,7 +1443,13 @@ const SPRITE_FILES = {
   foxTail: 'fox-tail.png',
   wolfCalm: 'wolf-calm.png',
   wolfHungry: 'wolf-hungry.png',
-  bearWhole: 'bear-whole.png',
+  // Hunger told by posture, like the wolf, because this animal is one
+  // flat near-black and has no bright colour to drain. The head drops
+  // below the shoulders, the hump takes over as the highest point, and
+  // the cub turns its face into its mother's leg -- so the silhouette
+  // and the brightest spot on the tile fall together.
+  bearCalm: 'bear-calm.png',
+  bearHungry: 'bear-hungry.png',
   buffaloWhole: 'buffalo-whole.png',
   deerWhole: 'deer-whole.png',
   // The second animal after the elephant to own a hungry painting, and
@@ -1585,11 +1591,22 @@ const RIG = {
   // Nothing is cut from the file. The crop is only where the canvas
   // ends, so the framing is two numbers here and can be moved again.
   bear: {
-    fit: { span: 38, ox: 5.2, oy: 0.8 },
+    //
+    // The pair shipped and the numbers below all moved, because the old
+    // single file was a loose crop from before the invisible-dust fix
+    // (220x153 with the art inside 205x141) and the shared frame is cut
+    // tight (220x149, art 217x149). Same painting, bigger fraction of
+    // the file, so `w` comes down 47 -> 44.48 to keep the bear the size
+    // it was, and `ox` 5.2 -> 4.79 and `oy` 0.8 -> -0.48 put it back in
+    // the same place. Height 79.3%, feet 88.4%, top 9.1%: the same
+    // numbers as before, which is the proof that this was a reframing
+    // and not a resize. 88.4% is still the one baseline on the board
+    // that is not 95.7% -- that was deliberate and it stays.
+    fit: { span: 38, ox: 4.79, oy: -0.48 },
     parts: [
-      ['@head', { w: 47, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ['@head', { w: 44.48, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'bearWhole', hungry: 'bearWhole' }
+    head: { calm: 'bearCalm', hungry: 'bearHungry' }
   },
   // THE BUFFALO IS LONG WHERE EVERYTHING ELSE IS TALL.
   //

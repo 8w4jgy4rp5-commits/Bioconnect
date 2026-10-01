@@ -1,0 +1,88 @@
+クマ・1回目。
+
+方針を変えた理由:
+  README.md の当初案は「親が振り向いて牙を見せ、子グマが脚の後ろに隠れる」だったが、
+  **牙は使わない**。オオカミで確定した原則——飢えと怒りは別物で、牙を剥いた瞬間に
+  「飢えた獣」ではなく「襲ってくる獣」になる——がそのまま当てはまる。
+  この動物は全身が黒く、シマウマのスカーフのような「抜ける色」が無い。44pxで読めるのは
+  シルエットと、クリーム色の3つの点（親の鼻づら・親の胸の三日月・子の鼻づら）だけ。
+  なので**オオカミと同じ姿勢型**にする。輪郭の端だけを動かし、脚・胴・足先は触らせない。
+
+  この絵だけの強みは「いちばん高い所が頭である」こと。頭を肩より下げると、
+  クマ本来の**肩のこぶ**が最高点になり、44pxで最も明るい点（鼻づら）も一緒に下がる。
+  シルエットと明点が同時に動くので、この大きさで二重に読める。
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\animal-art-v1\bear-brave-parent-cub-v2.png
+  （1490x1056・透過PNG・採用版の高解像度原画。
+   imported-from-chatgpt/bear-concepts-v1/02-brave-leader-v2-shy-cub.png と同一ファイル）
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+Edit this image. This is the same mother bear and the same cub, in the
+same place, in a worse state. Keep all eight legs, every paw, the
+mother's belly line and the cub's belly line EXACTLY where they are and
+at exactly the size they are. Keep the canvas size.
+
+Change these four things, all of which are at the edge of the shape:
+
+1. THE MOTHER'S HEAD LOWERS. Right now her head is the highest point of
+   the whole picture. Bring it down so the top of her skull sits at or
+   just below the line of her shoulders, muzzle angled toward the
+   ground. Her head must no longer be the highest point.
+2. THE SHOULDER HUMP RISES. With the head down, the hump of muscle over
+   her shoulders becomes the highest point of the animal. Make it a
+   clear, rounded rise along her back, with the fur over it rough and
+   standing rather than lying smooth.
+3. THE EARS GO BACK. Both bears. Flat and swept backward against the
+   skull, not upright and round.
+4. THE CUB PRESSES IN. The cub turns its head in toward its mother's
+   front leg and lowers it, so its pale muzzle is hidden against her
+   leg instead of showing in profile. The cub's four legs and paws do
+   not move — only its head and neck turn.
+
+Both mouths stay closed. Do not bare any teeth, and do not make either
+bear look angry — they are starving and worn out, not attacking.
+
+Do NOT change: any of the eight legs, any paw, their spacing, either
+belly line, the cream crescent on the mother's chest, the body colours,
+the canvas size.
+
+Keep the existing style: dark reddish-brown outline, flat charcoal fur
+with soft pale shading, cream muzzle and chest markings, soft
+hand-painted edges. Side profile facing right. Transparent background —
+no scene, no text, no frame, no floor, no cast shadow. Output a PNG
+with alpha at the same size as the input.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the eight legs, the
+paws and the two belly lines do not move.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  bear-hungry-src.png
+という名前で置く。
+
+戻ってきたらこちら側でやること:
+  1. python hungry-faces/check-pair.py bear <元絵> <戻り> で重ね図を見る。
+     **脚と足先が灰色かどうかが唯一の本当の検査**。赤青が頭・耳・背中・子の頭だけなら通す。
+  2. python make-face-pair.py bear-brave-parent-cub-v2.png hungry-faces/bear-hungry-src.png \
+         ../../img/bear-calm.png ../../img/bear-hungry.png
+  3. script.js の SPRITE_FILES に bearCalm/bearHungry を足し、RIG.bear.head を差し替える。
+
+オオカミ・トラと同じ注意（こちら側の作業が増える）:
+  - `img/bear-whole.png` は透明画素バグ時代の**古い緩い切り抜き**（220x153 の中に余白があり、
+    可視範囲は 205x141）。新方式の共通枠で切り直すと枠が変わるので、**リグの測り直しが要る**。
+    measure-rig.py で現在の値（高さ79.3%・幅115.3%・足元88.4%）に解き直す。
+  - クマの足元88.4%は他の動物と違う唯一の値。これは意図されたものなので、同じ88.4%に戻す。
+  - 頭が下がるぶん、空腹版は上端が縮む。共通枠は満腹版が決めるので枠は広がらない。
+  - 色の加工は無し。クマは黒一色で、抜く彩度がない。この動物の武器もシルエットだけ。
+
+やらない案（記録）:
+  - 牙を見せる → 飢えではなく怒りになる（オオカミで確定）
+  - 子グマを親の脚の後ろへ移動させる → 子の胴ごと動かすことになり、AIが失敗する型。
+    頭と首だけ向きを変えさせれば、44pxで消えるのは結局「クリーム色の鼻づら」で同じ効果。
+  - クリーム色の三日月を沈ませる（シマウマ型）→ 毛の色が飢えで変わるのは理屈が通らない。
