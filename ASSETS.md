@@ -3,7 +3,16 @@
 移行時点で存在した画像は、Gitに未登録・除外されているものも含めて保存。
 ゲームで使用中の画像は script.js の SPRITE_FILES と RIG が正本。
 実コードではラダー10種すべての画像を使用（ウサギ・キツネ・シカ・シマウマ・バッファロー・オオカミ・クマ・ライオン・トラ・ゾウ）。クマは親子の絵。残る候補は不採用の記録として保管する。
-シカは `concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923.png`（おびえた描き直し）が採用版。
+シカは満腹 `img/deer-calm.png` と空腹 `img/deer-hungry.png` の2枚組（2026-10-01）。元絵は
+`concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923.png`（おびえた描き直し）で、
+空腹版はそれを生成AIに編集させた `hungry-faces/deer-try2-a.png`。首が落ちて頭が背中の線より下にくる、
+角が前へ傾いて最高点から降りる、耳が伏せる、尻尾が垂れる——クマと同じ姿勢型。脚・ひづめ・腹・震え線は
+動いていない（足元のずれ0.0px）。**盤面でいちばん大きいシルエット変化で、44pxで画素の51%が変わる。**
+1回目の生成は画布が横長（1313x1198）で返り体ごと描き直されていたので不採用、記録は
+`hungry-faces/deer-try1-a-redrawn.png` / `-b-redrawn.png`。指示文と測った数値は `hungry-faces/deer-prompt.txt`。
+**リグは測り直した**（`w` 20 → 22.96、`oy` 0.58 → 0.62）。下がった角が鼻先より106px右へ出て共通枠が
+719→825pxに広がったぶんを払い戻したもので、高さ88.2%・幅52.7%・足元95.7%は変更前と同じ値に戻してある。
+`img/deer-whole.png` は差し替え前の1枚版で、コードは参照していない。
 `concepts/animal-art-v1/deer.png` は穏やかな初版で不採用。元画像には目に見えない薄い画素（alpha 1〜7）が散っており、
 `make-game-asset.py` はそれを避けて切り抜くようになった。詳しくは concepts/animal-art-v1/README.md。
 バッファローは平塗りの `buffalo-makeup-v1.png` が採用版。ファイル名に game とある `buffalo-game-transparent-v4.png` は毛並み版で、輪郭線が無く44pxでつぶれるため不採用。
@@ -114,7 +123,20 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `concepts/animal-art-v1/hungry-faces/bear-overlay.png`（脚が動いていないことの確認図）
 - `img/bear-whole.png`（差し替え前の1枚版・古い切り抜き）
 - `img/buffalo-whole.png`
-- `img/deer-whole.png`
+- `img/deer-calm.png`
+- `img/deer-hungry.png`
+- `concepts/animal-art-v1/hungry-faces/deer-prompt.txt`（1回目の失敗と2回目の通った指示、測った数値）
+- `concepts/animal-art-v1/hungry-faces/deer-try2-a.png`（採用。2回目の戻り6枚のうち脚の一致率94.2%）
+- `concepts/animal-art-v1/hungry-faces/deer-try2-b.png`（首は深いが角が縮んだ。不採用）
+- `concepts/animal-art-v1/hungry-faces/deer-try2-c.png`（脚が動いた。不採用）
+- `concepts/animal-art-v1/hungry-faces/deer-try1-a-redrawn.png`（1回目・横長で描き直された。不採用）
+- `concepts/animal-art-v1/hungry-faces/deer-try1-b-redrawn.png`（同上）
+- `concepts/animal-art-v1/hungry-faces/deer-overlay.png`（脚が動いていないことの確認図）
+- `concepts/animal-art-v1/hungry-faces/deer-44px-choice.png`（A/Bを44pxと132pxで並べた比較）
+- `concepts/animal-art-v1/hungry-faces/deer-pair-sheet.png`（満腹と空腹をタイル上に並べた確認図）
+- `concepts/imported-from-chatgpt/animal-illustrations/deer-starving-generation-prompts.txt`（生成側で回した5回の指示）
+- `concepts/imported-from-chatgpt/animal-illustrations/deer-starving-candidate.png`（生成側で選んだ1枚。`deer-try2-c.png` とバイト単位で同一）
+- `img/deer-whole.png`（差し替え前の1枚版）
 - `img/elephant-calm.png`
 - `img/elephant-hungry.png`
 - `img/fox-body.png`

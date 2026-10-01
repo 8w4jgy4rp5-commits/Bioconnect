@@ -1,0 +1,283 @@
+シカ・1回目。
+
+方針を変えた理由:
+  README.md の当初案は「あばらが浮くまで痩せ、首を落として地面を探す。震え線を増やす」だったが、
+  3つのうち**使えるのは首を落とす1つだけ**で、残り2つは実測で落とした。
+
+  1.「あばらが浮く」→ **体の内側の線**。44pxでは消える。ライオンの記録で既に確定した案
+    （lion-prompt.txt の「やらない案」に「あばらを浮かせる → シカの案」として書いてある）。
+  2.「震え線を増やす」→ 実測すると震え線は6本・合計約2,600画素で、**体の0.93%**しかない。
+    44pxに落とすと1〜2画素の茶色い点。原則23（小さいものは主役にしない）。トラのオーラと同じ型に
+    見えるが、トラのオーラは面積が桁違いだった。震え線は**今あるものをそのまま残す**だけにする。
+  3.「首を落として地面を探す」→ 採用。ただし**地面までは落とさない**。理由は下の数値。
+
+  もうひとつ、この動物にだけある落とし穴がある。**満腹版がすでに「おびえた顔」である。**
+  目を見開かせる・震えを強くする方向は、この絵では「もっと怖がっている」にしかならず、
+  飢えに読み替わらない。牙の代わりにこちらで気をつけるのはそこ（原則7の変形）。
+
+  採る理由は**クマと同じ二重の合図**（原則18）。この絵は
+    - シルエットの最高点が角＝頭
+    - いちばん明るいクリーム色（鼻づら＋喉から胸）の**61%が背中の線より上**
+  なので、首を落とすと**天辺といちばん明るい面が一緒に下がる**。一色で目印の無いクマで効いた型が、
+  オレンジ1色＋白斑のこの動物にもそのまま効く。
+
+採用する案: **首が落ちて頭が背中の線より下にくる。角が前へ傾いて最高点から降りる。耳が後ろへ伏せる。
+尻尾が垂れて左へ張り出さなくなる。** 体・脚・腹・背中・尻の白斑は1画素も動かさない。
+
+44pxで読めるもの（他は読めないので足さない）:
+  - 背の高いものが低くなる ＝ シルエット（オオカミ・クマと同じ型）
+  - 明るいクリーム色が上半分から消える ＝ 明点の移動（クマと同じ）
+  目・口は描き替えない。44pxで目は1画素（トラで確定）。
+
+測った数値（`deer-timid-20260923.png`、1198x1313・透過。`img/deer-whole.png` 220x369 の元絵）:
+  シルエット     x 351..1069 / y 41..1244（719 x 1204）
+  背中（尻の上端） y 624。**頭と角は背中より583px上＝絵の高さの48%**がまるごと頭部
+  角の塊         y400より上は x 589..1007。**右端(x1069=鼻先)より62px内側**、左端(x351=尻尾)より238px内側
+  左右の端        左端 x351 は尻尾の先、右端 x1069 は鼻先（y506..512）
+  クリーム色     背中の線より上に 23,370画素（クリーム全体の61%）
+  震え線         6本・合計約2,600画素（体の0.93%）
+  盤面では 高さ88.3%・幅52.6%・足元95.7%。**盤面で唯一の縦長の絵。**
+
+  → 枠が広がる唯一の経路は「角が前へ傾いて鼻先(x1069)より右へ出ること」。62pxしか余裕が無いので、
+    指示文で名指しで禁じてある（原則22）。それさえ守られれば輪郭は内側にしか動かず、
+    リグは1つも触らずに済む見込み（原則21）。
+
+強さについて（原則15: 強さは実物の44pxで並べて選ぶ）:
+  満腹は44pxで高さ38.8px。空腹版は共通枠の中で低くなる。
+    採用案（頭が背中の線より下、角の先は背中より上に残る）→ 約25px（-35%）
+    強い案（角の先も背中より下まで下ろす）         → 約20px（-48%）。読みは最強だが、
+      **「縦長＝シカ」という盤面での識別が空腹のあいだ消える**ので最初からは採らない。
+  まず採用案で1回出す。44pxで弱ければ、下の英文2の末尾に次の1文を足して2回目を回す:
+    `The antler tips must not rise above the line of the back.`
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\imported-from-chatgpt\animal-illustrations\deer-timid-20260923.png
+  （1198x1313・透過PNG・採用版の高解像度原画。`img/deer-whole.png` はこれを切り出したもの）
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+Edit this image. This is the same deer, in the same place, in a worse
+state. Keep all four legs, every hoof, the gap between the legs, the
+belly line, the chest, the back, the rump and its white spots EXACTLY
+where they are and at exactly the size they are. Keep the canvas size.
+
+Change these four things. All four are at the edge of the shape.
+
+1. THE NECK DROPS. Right now the head is carried high and the antlers
+   are the highest point of the whole picture. Let the neck sag forward
+   and down, as if the head were too heavy to hold up, until the head
+   hangs LOWER than the line of the back, with the muzzle pointing down
+   toward the ground. Only the neck and the head move. The line of the
+   back, the chest and the belly stay exactly as they are.
+2. THE ANTLERS COME DOWN WITH IT. They tilt forward and down with the
+   skull, sweeping forward over the lowered head instead of standing up
+   over the back, and they must no longer be the highest point of the
+   picture. Keep both antlers whole and instantly readable as antlers --
+   same size, same shape, same number of points. They must NOT stick out
+   further to the right than the nose does now, and must not cross the
+   left or the bottom edge of the picture.
+3. THE EARS GO BACK. Swept back and down along the neck, not upright.
+4. THE TAIL DROPS. The raised fluffy tail falls and lies flat against
+   the hindquarters, so it no longer juts out to the left.
+
+This deer is starving, weak and worn out. It is NOT angrier and NOT more
+frightened than before: do not widen the eyes, do not add tears, sweat
+drops, motion lines or any other effect. The mouth stays closed. The
+eyes stay open but heavy and dull, at the size they are now.
+
+Keep the small trembling marks that are already in the picture roughly
+as they are, and do not add new ones. The ribs may show as faint soft
+shading on the flank, but do not change the outline of the body to show
+them.
+
+Do NOT change: any leg, any hoof, the spacing between the legs, the
+belly line, the chest, the back, the rump, the white spots, the body
+colours, the canvas size.
+
+Keep the existing style: thin dark reddish-brown outline, flat
+orange-brown colour with soft pale shading, cream muzzle, throat and
+underside, white spots on the rump, soft hand-painted edges. Side view
+facing right. Transparent background -- no scene, no text, no frame, no
+floor, no cast shadow. Output a PNG with alpha at the same size as the
+input.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the four legs, the
+hooves, the belly line and the back do not move.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  deer-hungry-src.png
+という名前で置く。
+
+戻ってきたらこちら側でやること:
+  1. 本物の背景色の上で合成して見る（原則17）。黒地で見ると alpha が1〜7の画素が
+     「光っている」ように見えて判断を誤る。この元絵は**その薄い画素が実際に散っている**
+     （ASSETS.md に記録あり）ので、特に効く。
+  2. 画布が元絵と違っていたら捨てずに戻す（原則16）。脚の帯だけでIoUを最大化する倍率と位置を
+     総当たりで探して元の画布に貼り直す。クマ0.985倍/99.0%、ライオン0.815倍/99.3%。
+  3. python hungry-faces/check-pair.py deer <元絵> <戻り>
+     **脚・ひづめ・腹・背中・尻が灰色かどうかが唯一の本当の検査**。
+     赤（満腹だけ）が首・頭・角・尻尾に出て、青（空腹だけ）が首から下の前方だけなら通す。
+  4. python make-face-pair.py deer-timid-20260923.png hungry-faces/deer-hungry-src.png \
+         ../../img/deer-calm.png ../../img/deer-hungry.png
+  5. script.js の SPRITE_FILES に deerCalm/deerHungry を足し、RIG.deer.head を差し替える。
+  6. python measure-rig.py → **シカは変更前と同じ値のまま出るはず**（下記）。
+  7. node rules.test.js と、実ブラウザで満腹・空腹を44pxで並べて見る。
+
+リグについて（たぶん測り直しは要らない）:
+  - `img/deer-whole.png` は 220x369 で、可視範囲が枠いっぱい（x0..219 / y0..368）。
+    2026-09-27、透明画素の問題を直した**後**に切り直した新方式の切り抜きなので、
+    オオカミ・クマのような古い緩い枠ではない。
+  - 4つの変更はどれも輪郭を**内側へ**動かす。共通枠は満腹版が決めるので枠は広がらない。
+    → `fit.span` 38 / `ox` 0 / `oy` 0.58 / `w` 20 はどれも触らずに済む見込み。
+    **ただし measure-rig.py で必ず確認する**（高さ88.3%・幅52.6%・足元95.7%）。
+  - 枠が広がる唯一の経路は角が鼻先より右へ出ること。指示文で禁じてあるが、戻ってきたら
+    必ず右端の x を測って確認する（原則14・22）。
+
+やらない案（記録）:
+  - あばらを浮かせる → 体の内側の線。44pxで消える（ライオンで確定）
+  - 震え線を増やす・Pythonで拡大する（トラ型）→ 実測0.93%、44pxで1〜2画素（原則23）
+  - 目を見開かせる・涙を足す → 44pxで目は1画素。しかも満腹版がすでに「おびえた顔」なので、
+    怖がりを強めても飢えには読み替わらない
+  - 腹を抉る・脚を細くして痩せさせる → 腹の線と脚が動く。オオカミで確定した失敗型（原則8）
+  - 角を折る・落とす → 44pxでシカだと分かる唯一の形。消すと別の動物になる
+  - 地面に顔をつけて草を探させる → 空腹の合図としては最強だが、縦長という識別が消える。
+    採用案が44pxで弱かったときの第2案として残す（上の「強さについて」）
+
+======================================================================
+1回目の結果（2026-10-01・不採用）
+======================================================================
+
+戻りは2枚: `deer-try1-a-redrawn.png` / `deer-try1-b-redrawn.png`。
+**どちらも編集ではなく描き直し。** 測った数値:
+
+                元絵(満腹)      1枚目          2枚目
+  画布          1198x1313      1313x1198      1313x1198   ← 縦横が入れ替わった横長
+  シルエット    719x1204       1063x666       1073x590
+  縦/横          1.67           0.63           0.55
+  足元の帯の幅  シルエットの46%  69%            68%        ← 脚が開いて別の立ち方
+
+首が下がったのではなく、**四本の脚の位置・太さ・立ち方が別物**になっている。
+画布が入力の縦横ちょうど入れ替わりなので、ツールが元絵を編集せず
+「横長の新規イラスト」として描き直したと見られる。盤面で差し替えると体が跳ぶので使えない。
+
+絵そのものの出来で見ると:
+  - 2枚目の**頭だけは方針どおり**（半眼で疲れた目、角が前へ傾き、口は閉じている）
+  - 1枚目は口が笑っていて飢えに見えない
+  - どちらも**痩せ・おびえが消えて**体が丸くなっている。あばらは縞模様として描かれたが
+    44pxでは消える（元から不採用にしていた要素）
+
+次（2回目）に変えること:
+  1. 冒頭で「新規イラストではなく添付画像の修整」だと明示する
+  2. **画布は縦長 1198x1313 と数字で指定**する（横長で返ってきたのが最大の失敗）
+  3. 脚・立ち方・体の太さを「入力からそのまま写せ」と書く。動かしてよいのは
+     首・頭・角・耳・尻尾だけだと先に宣言する
+  4. この絵の性格（極端に痩せた・細い棒のような脚）を**保てと明記**する。
+     前回は「worse state」から勝手に健康な体型に描き直された
+  5. できれば**編集（inpaint / image edit）ができるツール**で回す。クマ・ライオンが
+     一発で通ったのと同じ経路かどうかを確認する
+
+2回目に貼る文は下の「2回目」の欄。
+
+----------------------------------------------------------------------
+2回目に貼る文
+----------------------------------------------------------------------
+
+This is a RETOUCH of the attached picture, not a new illustration. Do
+not redraw the deer. Start from the attached image and change only the
+parts listed below, leaving everything else exactly as it is.
+
+CANVAS: the output must be PORTRAIT, 1198 wide by 1313 tall, the same
+as the input. Do NOT output a landscape or square image.
+
+THE BODY DOES NOT MOVE. Copy the four legs, the hooves, the belly, the
+chest, the back, the rump and its white spots straight from the input,
+in the same places and at the same size. The deer keeps standing the
+way it stands now: narrow, with its thin stick-like legs close together
+and its knees turned slightly inward. Do NOT spread the legs apart, do
+NOT widen the stance, and do NOT make the body rounder or heavier. This
+deer is extremely skinny and timid -- that is the character of the
+picture and it must survive.
+
+Change only these four things, all at the edge of the shape:
+
+1. THE NECK DROPS. The head is carried high and the antlers are the
+   highest point of the whole picture. Let the neck sag forward and
+   down, as if the head were too heavy to hold up, until the head hangs
+   LOWER than the line of the back, with the muzzle pointing down
+   toward the ground. Only the neck and the head move.
+2. THE ANTLERS COME DOWN WITH IT. They tilt forward and down with the
+   skull and must no longer be the highest point of the picture. Keep
+   both antlers whole and instantly readable as antlers -- same size,
+   same shape, same number of points. They must NOT stick out further
+   to the right than the nose does now, and must not cross the left or
+   the bottom edge of the picture.
+3. THE EARS GO BACK. Swept back and down along the neck, not upright.
+4. THE TAIL DROPS. The raised fluffy tail falls and lies flat against
+   the hindquarters, so it no longer juts out to the left.
+
+This deer is starving, weak and worn out. The mouth stays closed and
+does NOT smile. The eyes stay the size they are, open but heavy and
+half-lidded. It is NOT angrier and NOT more frightened than before: no
+widened eyes, no tears, no sweat drops, no motion lines, no effects.
+Keep the small trembling marks that are already in the picture and do
+not add new ones. Do not draw stripes or hatching on the flank for the
+ribs; faint soft shading only, and never change the body outline.
+
+Keep the existing style exactly: thin dark reddish-brown outline, flat
+orange-brown colour with soft pale shading, cream muzzle, throat and
+underside, white spots on the rump, soft hand-painted edges. Side view
+facing right. Transparent background -- no scene, no text, no frame, no
+floor, no cast shadow. Output a PNG with alpha, 1198 x 1313.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the four legs, the
+hooves, the belly line and the back are unchanged and in the same
+place, on a portrait canvas of the same size as the input.
+
+======================================================================
+2回目の結果（2026-10-01・採用）
+======================================================================
+
+6枚戻ってきて、画布は**6枚とも 1198x1313 の縦長**。画布を数字で指定したのが効いた。
+選別は脚だけで機械的にできた（画布が同じなので倍率・位置の総当たりすら不要）:
+
+  候補            脚の帯のIoU   頭の天辺    44pxの高さ   判定
+  A 53f31155        94.2%       y315        39→30px     採用
+  B 0482f27c        86.4%       y510        39→24px     角が縮んで団子状
+  C 57f8b3d8        67.8%       y560        39→22px     脚が動いた
+  他3枚            9〜15%        —           —          体が別物
+
+Aを採用。角が元のまま残っているのが決め手。44pxでシカだと分かる形は角だけなので、
+Bのように角が縮むとその手がかりを失う。AとBは**44pxでの変化量が51%で同じ**だったので、
+強さでは差がつかなかった（`deer-44px-choice.png`）。
+
+検査と組み込みの結果:
+  check-pair.py  足元 -3px（-0.23%）。共通53.4% / 満腹だけ27.2% / 空腹だけ19.4%。
+                 重ね図は脚・ひづめ・腹・尻尾・震え線まで全部グレー（`deer-overlay.png`）
+  make-face-pair 共通枠 825x1205 → 220x321。**足元のずれ 0.0px**
+  リグ           `w` 20 → **22.96**、`oy` 0.58 → **0.62**、`ox` は0のまま
+  measure-rig    高さ88.2% / 幅52.7% / 足元95.7% / 空腹時98.6%。他9種は1行も変わらず
+  テスト         node rules.test.js 218 passed、node --check 成功
+  ブラウザ       127.0.0.1:8779 で deer-calm/deer-hungry とも200、コンソールエラーなし、
+                 44pxと132pxで満腹・空腹を並べて目視
+
+ここで分かったこと（残りのバッファローに効く）:
+
+**24. 「編集ではなく描き直し」は画布の縦横で見分けられる。** 1回目の戻りは入力 1198x1313 に対して
+   1313x1198——ちょうど入れ替わった横長だった。ツールが元画像を編集せず、プリセットの比率で
+   新規に描いたときの署名。**指示文に画布を数値で書く**（"PORTRAIT, 1198 wide by 1313 tall"）と
+   2回目は6枚とも直った。「同じ画布で」という言い方では足りない。
+
+**25. 候補が複数戻ったら、脚の帯のIoUだけで選別できる。** 画布が同じなら変換を探す必要すらない。
+   今回は 94.2 / 86.4 / 67.8 / 9〜15% と綺麗に分かれ、目で見る前に半分を落とせた。
+
+**26. 枠が広がっても、横に余裕がある動物なら `w` で払い戻せる。** 角が鼻先より106px右へ出て
+   共通枠は719→825pxになったが、シカはタイル幅の52.7%しか使っていない。`w` を 20→22.96 に
+   上げると**元の見た目の大きさに戻る**（88.2/52.7/95.7 は変更前と0.1%差）。
+   トラは134.2%で余裕が無かったので高さで払った。**枠が広がること自体は代償ではない。
+   代償になるのは、タイルに空きが無いときだけ。**

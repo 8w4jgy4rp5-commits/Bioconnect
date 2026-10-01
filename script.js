@@ -1451,7 +1451,8 @@ const SPRITE_FILES = {
   bearCalm: 'bear-calm.png',
   bearHungry: 'bear-hungry.png',
   buffaloWhole: 'buffalo-whole.png',
-  deerWhole: 'deer-whole.png',
+  deerCalm: 'deer-calm.png',
+  deerHungry: 'deer-hungry.png',
   // The second animal after the elephant to own a hungry painting, and
   // the first whose hunger is told by a prop rather than a face. Both
   // files are cut on one shared frame (make-face-pair.py), so the swap
@@ -1644,41 +1645,60 @@ const RIG = {
   },
   // THE DEER IS THE NARROW ONE, AND NARROW IS NOT SMALL.
   //
-  // One painting, same reasoning as the wolf. What is new is the shape
-  // of the picture: 220x369, the only portrait art on the board, where
-  // every other animal is wider than it is tall. Fitted to the tile by
-  // its width the way the wolf is, it would stand 45% of the tile and
-  // sit in the middle of an empty square looking like something that
-  // had wandered in by mistake.
+  // A pair now, calm and hungry, cut with one frame. What is new is the
+  // shape of the picture: 220x321, the only portrait art on the board,
+  // where every other animal is wider than it is tall. Fitted to the
+  // tile by its width the way the wolf is, it would stand 45% of the
+  // tile and sit in the middle of an empty square looking like
+  // something that had wandered in by mistake.
   //
-  // So it is sized to be read instead of to be contained. At `w` 20 it
-  // stands 88.3% of the tile and covers 52.6% of its width -- the
-  // tallest animal after the rabbit and by far the thinnest, against
-  // the wolf's 95.6% width and the bear's 115.3%. It does not read as
-  // the biggest animal, because height is not what mass looks like: it
-  // reads as the leggy one, which is what a frightened deer is. The
-  // antlers and the stick legs both survive 44px; at `w` 18 they do
-  // too, but the whole animal goes meek and the side margin widens.
+  // So it is sized to be read instead of to be contained. At `w` 22.96
+  // the calm deer stands 88.2% of the tile and covers 52.7% of its
+  // width -- the tallest animal after the rabbit and by far the
+  // thinnest, against the wolf's 96.5% width and the bear's 115.5%. It
+  // does not read as the biggest animal, because height is not what
+  // mass looks like: it reads as the leggy one, which is what a
+  // frightened deer is. The antlers and the stick legs both survive
+  // 44px.
   //
-  // `oy` 0.58 is solved, not nudged. It puts the hooves at 95.7% of the
-  // tile -- the wolf and the buffalo baseline -- which is the number
-  // that leaves the 1.1 units of `sag` somewhere to go, so a starving
-  // deer sinks without losing its hooves off the bottom edge.
+  // `w` was 20 while this was one painting, 220x369. The hungry deer
+  // drops its head, and the antlers swing forward past where the nose
+  // used to be, so the shared frame grew 106 source px to the right and
+  // the art inside it came out proportionally smaller. `w` 22.96 pays
+  // that back: 88.2% / 52.7% / 95.7% are the numbers the single
+  // painting had, to a tenth of a percent. Nothing on screen changed
+  // size -- only the rectangle around it did. The deer had the side air
+  // to spend on that; the tiger did not, which is why the tiger paid in
+  // height instead.
+  //
+  // `oy` 0.62 is solved, not nudged (0.58 before the reframe). It puts
+  // the hooves at 95.7% of the tile -- the wolf and the buffalo
+  // baseline -- which is the number that leaves the 1.1 units of `sag`
+  // somewhere to go, so a starving deer sinks without losing its hooves
+  // off the bottom edge.
   //
   // `ox` is 0 because nothing needs to run off the side here. The bear
   // and the buffalo are pushed left to crop a wide painting down to its
   // head and shoulder; the deer fits whole, and the air either side of
   // it is what a narrow animal looks like in a square.
+  //
+  // The hungry painting is the biggest silhouette change on the board:
+  // the neck sags, the head hangs below the line of the back and the
+  // antlers come down with it, so the tall one stops being tall and
+  // about half the painted pixels at 44px differ from the calm side.
+  // Head, antlers, ears and tail move. The legs, the hooves, the belly
+  // and the three sets of trembling marks do not -- the feet agree to
+  // 0.0px, which is why the pair can be swapped mid-tile.
   deer: {
-    fit: { span: 38, ox: 0, oy: 0.58 },
+    fit: { span: 38, ox: 0, oy: 0.62 },
     parts: [
-      ['@head', { w: 20, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ['@head', { w: 22.96, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'deerWhole', hungry: 'deerWhole' }
+    head: { calm: 'deerCalm', hungry: 'deerHungry' }
   },
   // THE ZEBRA IS THE DEER'S PROBLEM AGAIN, AND THE SCARF IS THE ANSWER.
   //
-  // 220x407 -- narrower even than the deer's 220x369, because this one
+  // 220x407 -- narrower even than the deer's 220x321, because this one
   // stands square on all four legs instead of in profile, so the body
   // is drawn end-on and almost nothing of it is width. Two portrait
   // animals on neighbouring rungs was the risk worth checking before
