@@ -35,7 +35,8 @@
 - 検証: `node --check` 成功、`node rules.test.js` 218 passed / 0 failed。
   実ブラウザ（127.0.0.1:8779）で `deer-calm.png`／`deer-hungry.png` とも200、コンソールエラーなし、
   44pxと132pxで満腹・空腹を並べて目視確認。
-- **未実施**: コミット・push（依頼待ち）。スマホ実機・Safari。空腹の閾値は変更なし。
+- **公開**: `5e594ca` としてコミットし main へpush済み。GitHub Pagesの自動ビルドで本番URLへ出る。
+- **未実施**: スマホ実機・Safari。空腹の閾値は変更なし。
   盤面で実際に空腹になったシカの入れ替わりは未確認（足元のずれ0.0pxと共通枠で担保している）。
 
 **残り: 空腹の絵はバッファロー1種。** 方針は `hungry-faces/README.md` にある。
