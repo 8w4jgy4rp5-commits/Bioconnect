@@ -1,0 +1,135 @@
+ライオン・1回目。
+
+方針を変えた理由:
+  README.md の当初案は「起き上がる。あくびが本物の唸りになり、王冠が傾いてずれる」だったが、
+  **前半2つは両方とも使えない**。
+
+  1.「起き上がる」→ 伏せから半身を起こすのは**体ごと動かす変更**で、オオカミで確定した失敗型
+    （原則8の裏側）。AIが失敗するうえ、成功しても脚と接地線が動くのでリグが跳ねる。
+  2.「あくびが本物の唸りになる」→ **この絵は満腹版ですでに口を全開にして牙を全部見せている**。
+    唸らせる余地が無いどころか、これ以上強めると飢えではなく怒りになる（原則7）。
+
+  代わりに、この絵にしか無い2つの特異点を使う。
+
+  (a) **盤面で唯一、満腹版で口が開いている動物。** 他の9種は空腹で何かを足して伝えるが、
+      この1種だけは**引き算**で伝えられる。44pxの実物を見ると、たてがみの暗い塊に食い込む
+      クリーム色＋ピンクのくさびが顔の中でいちばん大きな面積を持っている。これが消えるのは
+      この大きさで起きる変化としてかなり大きい。おまけに「口を閉じさせる」指示は
+      牙を剥く方向への事故を**構造的に防ぐ**（原則7が自動的に守られる）。
+
+  (b) **王冠がシルエットの最高点。** 実測した（`check` は下の数値欄）。絵の最上段7行は
+      王冠の玉だけでできていて、たてがみの頂点はその下にある。しかも王冠の金は x461..544 にしか
+      無く、シルエットの左右の端（x100 / x957）には一切かかっていない。
+      つまり**王冠を下ろすとシルエットの天辺が変わるのに、枠は横に1画素も広がらない**
+      （トラの原則14で払わされた代償が、この動物では発生しない）。
+      金は絵の中で唯一の高彩度の点でもあるので、天辺から消えるだけで2つぶん読める。
+
+採用する案: **あくびが閉じる。たてがみがしぼんで輪郭が内側へ寄る。王冠が前へずり落ちて
+最高点でなくなる。あくびの涙が消える。** 4つとも頭の中だけで完結し、体は1画素も動かさない。
+
+44pxで読めるもの（他は読めないので足さない）:
+  - たてがみの丸い塊がしぼむ ＝ シルエット（クマ・オオカミと同じ型）
+  - 口のくさびが消える ＝ 顔の中でいちばん広い面積の増減
+  - 金の点が天辺から降りる ＝ 高彩度の一点（シマウマの型）
+  目の形は変えない。44pxで目は1画素で、やっても誰も見ない（トラで確定）。
+
+測った数値（`lion-crown-yawn-cutout.png`、1219x864・透過）:
+  シルエット     x 100..957 / y 66..823（857 x 757）
+  王冠の金       x 461..544 / y 73..165（2848画素）
+  最上段7行(y66..72) は王冠の玉のみ。金はシルエットの左右の端から 361px / 413px 内側。
+  盤面では 高さ90.5%・幅102.6%・足元95.7%・上端5.2%。
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\animal-art-v1\lion-crown-yawn-cutout.png
+  （1219x864・透過PNG・採用版。`lion-crown-yawn-gemini-v1.jpg` から背景を落としたもので、
+   `img/lion-whole.png` はこれを切り出したもの）
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+Edit this image. This is the same lion, in the same place, in a worse
+state. Keep both front legs, every toe, the hind leg, the haunch, the
+line of the back, the belly where it meets the ground, and the tail
+with its tuft EXACTLY where they are and at exactly the size they are.
+Keep the canvas size.
+
+Change these four things. All four are in the head.
+
+1. THE YAWN CLOSES. His mouth is stretched wide open in a yawn. Close
+   it. The jaw comes up and the mouth becomes a short, flat, tired
+   line. No teeth, no tongue, no open gap. He is starving and worn
+   out -- he is NOT snarling, growling or angry.
+2. THE MANE GOES THIN. Right now the mane is a thick round halo around
+   his head. Let it hang: the fur separates into thin, lank, drooping
+   strands and the halo loses its volume, so the OUTLINE of the mane
+   moves inward toward the skull -- most of all under the jaw and at
+   the back of the neck. The mane must not grow in any direction.
+3. THE CROWN SLIPS. The crown sits upright on top of his head and is
+   the highest point of the whole picture. Slide it forward and tip it
+   over, so it hangs crooked and low across his brow, or catches on one
+   ear. It must no longer be the highest point of the picture, and it
+   must not stick out past the lion's left or right edge.
+4. THE TEAR GOES. The small blue tear below his eye belongs to the
+   yawn. Remove it. Both eyes stay closed.
+
+Do NOT change: either front leg, any toe, the hind leg, the haunch, the
+back, the tail or its tuft, the belly line where it meets the ground,
+the body colours, the canvas size.
+
+Keep the existing style: thin dark reddish-brown outline, flat colour
+with soft pale shading, orange-gold body, dark reddish-brown mane,
+cream muzzle and paws. Side view facing right, lying down. Transparent
+background -- no scene, no text, no frame, no floor, no cast shadow.
+Output a PNG with alpha at the same size as the input.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirement is that the legs, the toes, the
+tail, the back and the belly line do not move.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  lion-hungry-src.png
+という名前で置く。
+
+戻ってきたらこちら側でやること:
+  1. 本物の背景色の上で合成して見る（原則17）。黒地で見ると透明度のほぼ無い画素が
+     「光っている」ように見えて判断を誤る。
+  2. 画布が元絵と違っていたら捨てずに戻す（原則16）。脚の帯だけでIoUを最大化する
+     倍率と位置を総当たりで探し、元の画布に貼り直す。クマは0.985倍・下に28pxで99.0%だった。
+  3. python hungry-faces/check-pair.py lion <元絵> <戻り>
+     **脚・指・尻尾・背中が灰色かどうかが唯一の本当の検査**。
+     赤青が「たてがみの外周・口・王冠」だけなら通す。
+  4. python make-face-pair.py lion-crown-yawn-cutout.png hungry-faces/lion-hungry-src.png \
+         ../../img/lion-calm.png ../../img/lion-hungry.png
+  5. script.js の SPRITE_FILES に lionCalm/lionHungry を足し、RIG.lion.head を差し替える。
+  6. python measure-rig.py → **ライオンは変更前と同じ値のまま出るはず**（下記）。
+  7. node rules.test.js と、実ブラウザで満腹・空腹を44pxで並べて見る。
+
+リグについて（クマ・オオカミと違い、たぶん測り直しは要らない）:
+  - `img/lion-whole.png` は 220x194 で、可視範囲が枠いっぱい（0,0,220,194）。2026-09-28、
+    透明画素バグを直した**後**に切った新方式の切り抜きなので、クマ・オオカミのような
+    古い緩い枠ではない。
+  - 4つの変更はどれも輪郭を**内側へ**動かす。共通枠は満腹版が決めるので枠は広がらない。
+    → `w` も `ox` も `oy` も触らずに済む見込み。**ただし measure-rig.py で必ず確認する。**
+  - 枠が広がる唯一の経路は「王冠が左右の端より外へ出る」こと。指示文で禁じてあるが、
+    戻ってきたら x の端を測って確認する（原則14）。
+
+王冠の金を沈ませるか（第2段階・やるかどうかは44pxを見てから決める）:
+  - 形だけAIに頼み、色はこちらでPillowで計算する（原則1）。`fade-zebra-scarf.py` を流用する。
+  - 色域は hue 38..58 / sat >= 0.45 / val >= 0.75 で王冠の金2848画素を拾える。
+    **ただし体のオレンジが hue 34 で近い**（33978画素）。必ず位置でも絞り、
+    `lion-crown-mask.png` を書き出して拾った範囲を目で確認してから使う。
+  - 王冠は44pxで4x4画素しかない。シマウマのスカーフと違って面積が小さいので、
+    **色を沈ませても主たる合図にはならない**。主たる合図はあくまでシルエット。
+    44pxで見て効いていなければやらない。
+
+やらない案（記録）:
+  - 起き上がる・半身を起こす → 体ごと動かす変更。オオカミで確定した失敗型。接地線が動く
+  - あくびを唸りに変える → 満腹版ですでに牙が全開。強めると怒りになる（原則7）
+  - 目を半眼にする → 44pxで目は1画素（トラで確定）
+  - 王冠が頭から落ちて地面に転がる → 読みとしては最強（金が天辺から最下段へ動く）だが、
+    足元がすでにタイルの95.7%にあって**下に場所が無い**。接地線に転がった小物を置くと
+    盤面のタイルと見分けがつかなくなる。頭の上に残したまま傾ける方を採る
+  - あばらを浮かせる → シカの案。体の内側の線なので44pxで消える。ライオンでは使わない

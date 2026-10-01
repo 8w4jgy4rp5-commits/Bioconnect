@@ -1458,7 +1458,13 @@ const SPRITE_FILES = {
   // moves the scarf and nothing else.
   zebraCalm: 'zebra-calm.png',
   zebraHungry: 'zebra-hungry.png',
-  lionWhole: 'lion-whole.png',
+  // The only animal whose mouth is already open when it is fed, so it
+  // is the only one whose hunger is told by SUBTRACTION: the yawn
+  // closes, the mane deflates inward, the crown slides off the top of
+  // the head. Nothing is added, and lion-calm.png is byte-for-byte the
+  // old single file -- the shared frame landed on the existing crop.
+  lionCalm: 'lion-calm.png',
+  lionHungry: 'lion-hungry.png',
   // The only hungry pair on the board made with no image model: the
   // aura was already painted, so flare-tiger-aura.py lifts the gold out
   // by hue and scales it outward under the animal. The tiger itself is
@@ -1765,12 +1771,19 @@ const RIG = {
   // the tiger.
   //
   // `oy` 0.16 is solved like the rest: paws at 95.7%, sag intact.
+  //
+  // The hungry painting cost this rig nothing. Every change in it --
+  // the yawn closing, the mane deflating, the crown tipping off the
+  // top -- pulls the outline INWARD, so the shared frame is decided by
+  // the fed painting alone and comes out as the crop that was already
+  // there. lion-calm.png is byte-for-byte the old lion-whole.png, and
+  // all four numbers below are untouched. Only the zebra did this too.
   lion: {
     fit: { span: 38, ox: 0, oy: 0.16 },
     parts: [
       ['@head', { w: 39, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'lionWhole', hungry: 'lionWhole' }
+    head: { calm: 'lionCalm', hungry: 'lionHungry' }
   },
   // THE TIGER IS THE FACE, AND THE FACE IS NOT SHOUTING.
   //

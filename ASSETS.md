@@ -40,6 +40,14 @@
 ライオンは `concepts/animal-art-v1/lion-crown-yawn-gemini-v1.jpg`（王冠＋あくび）が採用版。
 透過のないJPGだったので `cutout-bg.py` で背景を落としてから書き出した（`lion-crown-yawn-cutout.png` が中間ファイル）。
 しっぽの輪の内側に取り残された紙の穴も同時に除去している。`lion.png`（横向きの立ち姿）は不採用。
+満腹 `img/lion-calm.png` と空腹 `img/lion-hungry.png` の2枚組（2026-10-01）。**盤面で唯一、満腹版で口が開いている動物**なので、
+空腹を**引き算**で伝えられる1種。あくびが閉じ、たてがみがしぼんで輪郭が内側へ寄り、王冠が前へずり落ちて最高点でなくなり、あくびの涙が消える。
+王冠はシルエットの最高点だった（最上段7行は王冠の玉だけ）が、金は左右の端から361px/413px内側なので、下ろしても枠は横に広がらない。
+指示文は `hungry-faces/lion-prompt.txt`、戻ってきた絵は `hungry-faces/lion-hungry-src.png`（画布が1490x1056で違ったので、
+脚だけを手がかりに0.815倍で元の画布へ貼り直した。脚の一致率99.3%）。体・脚・尻尾・背中は1画素も動いていない。
+**リグは1つも触っていない。** 4つの変更がどれも輪郭を内側へ動かすので共通枠が既存の切り抜きと一致し、
+`img/lion-calm.png` は旧 `img/lion-whole.png` と**バイト単位で同一**。シマウマに次いで2例目。
+`img/lion-whole.png` は差し替え前の1枚版で、記録として残すがコードは参照していない。
 トラは `concepts/animal-art-v1/tiger-face-aura-v4.png` が採用版。広い soft glow は透過だったので切り抜きで消え、
 44pxで残るのはスパイクだけ。v1〜v3 と `tiger.png` は不採用。
 満腹 `img/tiger-calm.png` と空腹 `img/tiger-hungry.png` の2枚組（2026-10-01）。**画像生成AIを使っていない唯一の組**で、
@@ -116,7 +124,12 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `img/fox-leg-front.png`
 - `img/fox-leg-hind.png`
 - `img/fox-tail.png`
-- `img/lion-whole.png`
+- `img/lion-calm.png`
+- `img/lion-hungry.png`
+- `concepts/animal-art-v1/hungry-faces/lion-prompt.txt`（通った指示の記録）
+- `concepts/animal-art-v1/hungry-faces/lion-hungry-src.png`（戻ってきた絵を元の画布へ貼り直したもの）
+- `concepts/animal-art-v1/hungry-faces/lion-overlay.png`（体が動いていないことの確認図）
+- `img/lion-whole.png`（差し替え前の1枚版・新方式の切り抜きと同一）
 - `img/rabbit-body.png`
 - `img/rabbit-ear.png`
 - `img/rabbit-head-calm.png`
