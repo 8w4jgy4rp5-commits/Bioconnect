@@ -1450,7 +1450,8 @@ const SPRITE_FILES = {
   // and the brightest spot on the tile fall together.
   bearCalm: 'bear-calm.png',
   bearHungry: 'bear-hungry.png',
-  buffaloWhole: 'buffalo-whole.png',
+  buffaloCalm: 'buffalo-calm.png',
+  buffaloHungry: 'buffalo-hungry.png',
   deerCalm: 'deer-calm.png',
   deerHungry: 'deer-hungry.png',
   // The second animal after the elephant to own a hungry painting, and
@@ -1617,31 +1618,42 @@ const RIG = {
   },
   // THE BUFFALO IS LONG WHERE EVERYTHING ELSE IS TALL.
   //
-  // One painting, same reasoning as the wolf and the bear. The new
-  // problem is the shape of the animal: the art is 220x122, an aspect
-  // of 0.55 against the wolf's 0.84. Fitted inside the tile by its
-  // width it stands 54% of the tile's height to the wolf's 72% -- a
+  // A pair now, calm and hungry, cut with one frame. The shape of the
+  // animal is still what governs the rig: the art is 220x115, an aspect
+  // of 0.52 against the wolf's 0.84. Fitted inside the tile by its
+  // width it would stand half the tile's height to the wolf's 72% -- a
   // rung BELOW the wolf, so smaller is right, but not by that much.
-  // Three sizes were rendered against the wolf at 44px before this one
-  // was picked; at w 54 the front legs were already falling off the
-  // right edge.
   //
-  // So this rig follows the bear: wider than the tile (w 50 against a
-  // span of 38) and pushed left (`ox` 2.5), so the rump and the black
-  // tail tuft run off the left edge and what stays in the square is the
-  // head, the horns, the hump and all four legs. Measured, not guessed:
-  // 64% of the tile's height against the wolf's 72%, on the same
-  // baseline, which is what the ladder asks for.
+  // So this rig follows the bear: wider than the tile (w 46.95 against
+  // a span of 38) and pushed left (`ox` 1.88), so the rump and the
+  // black tail tuft run off the left edge and what stays in the square
+  // is the head, the horns, the hump and all four legs. 64.6% of the
+  // tile's height, hooves on the 95.7% baseline the wolf and the deer
+  // stand on, with room left under them for `sag`.
   //
-  // `oy` 6.7 is not a guess either -- it is the number that puts the
-  // hooves on the wolf's baseline, solved for rather than nudged, and
-  // it leaves room under them for `sag` when the meter runs red.
+  // THE HUNGER CUE IS THE HEAD, AND IT HAD TO BE. Every other trick on
+  // this board is unavailable here: ribs are an inside line and vanish
+  // at 44px, a dropped tail is already off the left edge, the pink
+  // cheek is 0.69% of the body, and dust or a pawed hoof would move the
+  // feet. What this painting does have is the horns -- the highest
+  // point of the silhouette AND its brightest mass at once -- so
+  // letting the head hang drops the top line onto the shoulder hump and
+  // carries the one bright shape down with it. Two cues from one
+  // change, the same deal the bear and the deer took.
+  //
+  // The hungry head swings the horns 36px further right than the calm
+  // nose, which widens the shared frame from 1319 to 1355 source px.
+  // That is only a cost if the tile has no room to give it back: here
+  // `w` went 50 -> 46.95 and `oy` 6.7 -> 5.09 against the new crop and
+  // every measured number came back to where it was, so it cost
+  // nothing. See concepts/animal-art-v1/hungry-faces/buffalo-ox-check.png,
+  // which is the two framings that were compared before this one stayed.
   buffalo: {
-    fit: { span: 38, ox: 2.5, oy: 6.7 },
+    fit: { span: 38, ox: 1.88, oy: 5.09 },
     parts: [
-      ['@head', { w: 50, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ['@head', { w: 46.95, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'buffaloWhole', hungry: 'buffaloWhole' }
+    head: { calm: 'buffaloCalm', hungry: 'buffaloHungry' }
   },
   // THE DEER IS THE NARROW ONE, AND NARROW IS NOT SMALL.
   //

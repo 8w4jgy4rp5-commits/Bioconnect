@@ -1,0 +1,65 @@
+ATTEMPT 1
+This is a RETOUCH of the attached picture, not a new illustration. Do not redraw the buffalo. Start from the attached image and change only the parts listed below, leaving everything else exactly as it is.
+
+CANVAS: the output must be LANDSCAPE, 1536 wide by 1024 tall, the same as the input. Do NOT change the canvas size or re-centre the animal.
+
+THE BODY DOES NOT MOVE. Copy the four legs, the hooves, the gaps between them, the belly line, the chest, the rump and the tail straight from the input, in the same places and at the same size. The buffalo keeps standing exactly where it stands.
+
+NOTHING MAY GET WIDER. The picture must not grow to the right, the left or the bottom. The horns already reach almost as far right as the nose, so as the head comes down the muzzle drops and pulls back toward the chest, and the horns swing down into the space the muzzle leaves. No part of the horns may end up further right than the nose is now.
+
+Change these four things:
+
+1. THE HEAD DROPS. Right now the horns are the highest point of the whole picture. Let the neck sink and the head hang, muzzle angled down toward the ground, until the horns are LOWER than the line of the back. Keep both horns whole, the same size, the same sweep and the same pale ivory colour -- they rotate with the skull, they do not shrink. This is an exhausted animal letting its head fall, NOT a bull lowering its horns to charge.
+2. THE HUMP BECOMES THE TOP, AND GOES HOLLOW. With the head down, the hump of muscle over the shoulders is the highest point of the animal. Let the fat come off it: the top line of the back sinks and hollows between the hump and the hips, and the hip bone shows as a soft rise. This line may only move DOWNWARD and INWARD. The belly, the chest, the legs and the hooves do not move at all.
+3. THE EARS DROOP. Hanging down and back beside the lowered jaw, not out to the side.
+4. THE SMILE CLOSES. The small pink smiling mouth becomes a short, flat, tired line. No teeth, no open mouth, no snarl.
+
+This buffalo is starving, weak and worn out. It is NOT angry and NOT charging: no flared nostrils, no snorting, no dust, no stamping, no motion lines, no effects of any kind. The eyes stay the size they are, with the same lashes, but heavy and dull. Keep the pink cheek, the makeup lashes and all body colours exactly as they are.
+
+Do NOT change: any leg, any hoof, the spacing between the legs, the belly line, the chest, the rump, the tail, the body colours, the canvas size.
+
+Keep the existing style exactly: clean dark outline, flat brown colour with soft pale shading, pale ivory horns, lighter belly band, dark hooves and tail tuft. Side view facing right. Transparent background -- no scene, no text, no frame, no floor, no cast shadow. Output a PNG with alpha, 1536 x 1024.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the image anyway. The only hard requirements are that the four legs, the hooves and the belly line are unchanged and in the same place, and that the picture does not get any wider.
+
+ATTEMPT 2
+RETOUCH only. Image 1 is the original buffalo with the exact fixed body. Image 2 is the current starving edit to correct. Keep 1536x1024 LANDSCAPE RGBA and absolute registration. Do NOT translate/recenter/resize the animal.
+Keep the four legs, all four hooves, leg gaps, belly outline, chest, rump and tail in the SAME original Image 1 places and sizes. These areas are LOCKED. Do not redraw or move them.
+Correct these failures in Image 2:
+1. RIGHT WIDTH: the lowered horns protrude further right than the original nose. The entire buffalo silhouette including BOTH WHOLE ivory horns must stay within ORIGINAL visible bounds x=123 through x=1441 and y<=890. Rotate the horns farther DOWN and INWARD with the skull into the vacated original muzzle space. Draw the exhausted head pulled BACK toward the chest, nose down. Do NOT shrink either horn or cut off its tip; keep same sweep and size. Do NOT shift the whole buffalo left to fit. Only the head/neck/horn group can move inward.
+2. CLOSED MOUTH: remove all pink mouth interior and lip gap. Draw only a SHORT FLAT TIRED LINE, completely closed. Preserve pink cheek and makeup lashes. Same-size open heavy dull eye, no anger, no charging.
+3. BACK: retain the hollow top line between hip and shoulder, but any change relative to original Image 1 may move ONLY DOWN AND INWARD. Never raise the hip or shoulder silhouette beyond its original outline. Shoulder hump remains the highest part, both horns BELOW the hump/back height. The chest and belly remain fixed.
+4. TRANSPARENCY: outside the buffalo silhouette must be completely clear alpha=0. Remove the diffuse brown halo/cloud behind the animal and ALL cast shadows, floor or ambient vignette. No colored haze on the transparent canvas. Preserve soft hand-painted antialiasing only at the animal's immediate outline.
+Same original clean dark outline, flat brown and soft pale shading, ivory horns, light belly band, dark hooves/tail tuft. Side view facing right. No scene, text, effects, dust, sweat, tears or teeth.
+Highest priority: FIXED FOUR LEGS/HOOVES/BELLY and NO INCREASE IN LEFT/RIGHT/BOTTOM SILHOUETTE. Keep canvas 1536x1024; output PNG with real alpha.
+
+ATTEMPT 3
+This is a RETOUCH of the attached picture, not a new illustration. Do not redraw the buffalo. Start from the attached image and change only the parts listed below, leaving everything else exactly as it is.
+
+CANVAS: the output must be LANDSCAPE, 1536 wide by 1024 tall, the same as the input. Do NOT change the canvas size or re-centre the animal.
+
+THE BODY DOES NOT MOVE. Copy the four legs, the hooves, the gaps between them, the belly line, the chest, the rump and the tail straight from the input, in the same places and at the same size. The buffalo keeps standing exactly where it stands.
+
+NOTHING MAY GET WIDER. The picture must not grow to the right, the left or the bottom. The horns already reach almost as far right as the nose, so as the head comes down the muzzle drops and pulls back toward the chest, and the horns swing down into the space the muzzle leaves. No part of the horns may end up further right than the nose is now.
+
+Change these four things:
+
+1. THE HEAD DROPS. Right now the horns are the highest point of the whole picture. Let the neck sink and the head hang, muzzle angled down toward the ground, until the horns are LOWER than the line of the back. Keep both horns whole, the same size, the same sweep and the same pale ivory colour -- they rotate with the skull, they do not shrink. This is an exhausted animal letting its head fall, NOT a bull lowering its horns to charge.
+2. THE HUMP BECOMES THE TOP, AND GOES HOLLOW. With the head down, the hump of muscle over the shoulders is the highest point of the animal. Let the fat come off it: the top line of the back sinks and hollows between the hump and the hips, and the hip bone shows as a soft rise. This line may only move DOWNWARD and INWARD. The belly, the chest, the legs and the hooves do not move at all.
+3. THE EARS DROOP. Hanging down and back beside the lowered jaw, not out to the side.
+4. THE SMILE CLOSES. The small pink smiling mouth becomes a short, flat, tired line. No teeth, no open mouth, no snarl.
+
+This buffalo is starving, weak and worn out. It is NOT angry and NOT charging: no flared nostrils, no snorting, no dust, no stamping, no motion lines, no effects of any kind. The eyes stay the size they are, with the same lashes, but heavy and dull. Keep the pink cheek, the makeup lashes and all body colours exactly as they are.
+
+Do NOT change: any leg, any hoof, the spacing between the legs, the belly line, the chest, the rump, the tail, the body colours, the canvas size.
+
+Keep the existing style exactly: clean dark outline, flat brown colour with soft pale shading, pale ivory horns, lighter belly band, dark hooves and tail tuft. Side view facing right. Transparent background -- no scene, no text, no frame, no floor, no cast shadow. Output a PNG with alpha, 1536 x 1024.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the image anyway. The only hard requirements are that the four legs, the hooves and the belly line are unchanged and in the same place, and that the picture does not get any wider.
+
+Precise correction priorities for this edit of the ORIGINAL IMAGE:
+- DO NOT recenter/translate/scale the body; preserve its original legs/hooves/belly pixels.
+- Lower the head AND horns as one unit, rotating them clockwise roughly 35–45 degrees and pulling that unit approximately 100 pixels LEFT toward the chest while lowering it. Preserve each horn's full length, sweep and ivory color. The right horn tip must remain at or LEFT OF x=1441. Every visible body pixel must stay within original left edge x=123 and bottom edge y=890. There is room for the lowered muzzle ahead of the existing front legs; move it inward, NOT the body.
+- Keep the original shoulder hump's top at approximately y=218. Do not raise it. Make its prominence come from the HEAD being lower and from a shallow hollow in the back BEHIND it. The existing mid-back near x=650,y=280 sinks to around y=320–340, never rises. Original hip outline near x=450,y=295 must never rise above that original contour.
+- Both horns must sit lower than the fixed hump/back top; no charging angle, strained eyes or snarl. Preserve tired makeup eye and pink cheek. The mouth is a short horizontal closed line, zero pink gap.
+- Transparency must be real alpha, with no painted backdrop. RGBA 1536x1024 landscape exactly.

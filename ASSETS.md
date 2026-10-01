@@ -17,6 +17,13 @@
 `make-game-asset.py` はそれを避けて切り抜くようになった。詳しくは concepts/animal-art-v1/README.md。
 バッファローは平塗りの `buffalo-makeup-v1.png` が採用版。ファイル名に game とある `buffalo-game-transparent-v4.png` は毛並み版で、輪郭線が無く44pxでつぶれるため不採用。
 `buffalo.png` は脚が欠けており使えない。`buffalo-long-lashes-v3.png` は背景が黒のまま透過されていない。
+バッファローも満腹 `img/buffalo-calm.png` と空腹 `img/buffalo-hungry.png` の2枚組になった（2026-10-01）。
+空腹版は `buffalo-makeup-v1.png` を生成AIに編集させた `hungry-faces/buffalo-hungry-src.png`。頭が落ちて角が
+背中の線より下がり、こぶが最高点になって背中がくぼむ、耳が垂れる、笑った口が平らな線になる——クマ・シカと同じ姿勢型。
+脚・ひづめ・腹・尻尾は動いていない（足元のずれ0.0px、シルエットの77.8%が共通）。**リグは測り直した**
+（`w` 50 → 46.95、`oy` 6.7 → 5.09、`ox` 2.5 → 1.88）。下がった角が鼻先より36px右へ出て共通枠が
+1319→1355pxに広がったぶんの払い戻しで、高さ64.6%・足元95.7%・上端31.1%は変更前と同じ値に戻してある
+（幅だけ119.6→120.7%。古い切り抜きとの差）。`img/buffalo-whole.png` は差し替え前の1枚版で、コードは参照していない。
 オオカミは満腹 `img/wolf-calm.png` と空腹 `img/wolf-hungry.png` の2枚組（2026-09-30）。空腹版は
 `concepts/animal-art-v1/wolf-starving.png`（原画 `wolf.png` を生成AIに編集させたもの。使った指示は
 `wolf-starving-prompt.txt` に保存）。尻尾が垂れ、頭が肩より下がり、背中の毛が逆立ち、耳が後ろへ伏せる。
@@ -122,7 +129,17 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `concepts/animal-art-v1/hungry-faces/bear-hungry-src.png`（戻ってきた絵を元の画布へ貼り直したもの）
 - `concepts/animal-art-v1/hungry-faces/bear-overlay.png`（脚が動いていないことの確認図）
 - `img/bear-whole.png`（差し替え前の1枚版・古い切り抜き）
-- `img/buffalo-whole.png`
+- `img/buffalo-calm.png`
+- `img/buffalo-hungry.png`
+- `concepts/animal-art-v1/hungry-faces/buffalo-prompt.txt`（方針の差し替えと測った数値、通った指示）
+- `concepts/animal-art-v1/hungry-faces/buffalo-attempts.txt`（生成側で回した3回の指示）
+- `concepts/animal-art-v1/hungry-faces/buffalo-hungry-src.png`（採用。戻ってきた1枚）
+- `concepts/animal-art-v1/hungry-faces/buffalo-window.png`（生成側に渡した切り出し）
+- `concepts/animal-art-v1/hungry-faces/buffalo-overlay.png`（脚が動いていないことの確認図）
+- `concepts/animal-art-v1/hungry-faces/buffalo-ox-check.png`（横位置AとCを44pxで並べた比較）
+- `concepts/animal-art-v1/hungry-faces/buffalo-44px-choice.png`（満腹と空腹を実寸44pxと6倍で並べた確認図）
+- `concepts/animal-art-v1/hungry-faces/buffalo-pair-sheet.png`（満腹と空腹をオオカミと並べた確認図）
+- `img/buffalo-whole.png`（差し替え前の1枚版・古い切り抜き）
 - `img/deer-calm.png`
 - `img/deer-hungry.png`
 - `concepts/animal-art-v1/hungry-faces/deer-prompt.txt`（1回目の失敗と2回目の通った指示、測った数値）

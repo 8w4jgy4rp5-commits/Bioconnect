@@ -1,0 +1,145 @@
+バッファロー・1回目。
+
+方針を変えた理由:
+  README.md の当初案は「頭を下げて角を前に構え、前足で地面を掻いて土煙を上げる」だったが、
+  **3つとも使えない。**
+
+  1.「角を前に構える」→ これは**突進の構え**で、飢えではなく怒り・攻撃になる（原則7）。
+    オオカミの牙、ライオンの唸りと同じ失敗型。
+  2.「前足で地面を掻く」→ **脚が動く**。脚・ひづめ・その間隔は動かしてはいけないもの
+    そのもので、オオカミで確定した失敗型（原則8）。足元が動けば共通枠も接地線も崩れる。
+  3.「土煙」→ ゾウの湯気と同じ型にしたかったが、**この動物には横の余地が無い**。
+    バッファローはタイル幅の119.6%で描かれていて、鼻先はすでに右端ぎりぎり、尻と尻尾は
+    枠の外に落ちている。横に何かを足すと共通枠が広がり、絵全体がタイルの中で縮む
+    （トラの原則14、シカの原則26の裏側）。足元の土煙はまさに横と下に出る。
+
+  **この絵で唯一効く型は、クマ・シカと同じ姿勢型。** 理由は実測で出た。
+  角（クリーム色・41,976画素）は**シルエットの最高点であり、同時に絵の中でいちばん明るい塊**。
+  頭を下げればその2つが一緒に下がる（原則18の二重の合図）。
+  44pxでこの動物から読めるのは「茶色い長い塊」と「その上の明るいクリーム色」だけなので、
+  明るい塊が背中より下に落ちるのは、この大きさで起こせる最大の変化になる。
+
+採用する案: **頭が下がって角が背中の線より下がり、肩のこぶが最高点になる／こぶの脂が落ちて
+背中の線がくぼむ／耳が垂れる／笑っている口が閉じて平らな線になる。**
+体・脚・ひづめ・腹の線は1画素も動かさない。
+
+44pxで読めるもの:
+  - いちばん明るいクリーム色の塊（角）が背中より下に落ちる ＝ 明点の移動
+  - シルエットの天辺が角から肩のこぶへ移り、背中がくぼむ ＝ 輪郭（クマと同じ）
+  口を閉じるのは44pxでは見えない。それでも入れるのは、**閉じる方向の指示が「怒り顔への事故」を
+  構造的に防ぐ**から（ライオンの原則20と同じ使い方）。
+  頬のピンクを沈ませる案は**やらない**: 実測で頬と口のピンクは3,708画素＝体の0.69%しかなく、
+  44pxでは1画素未満（原則23）。
+
+測った数値（`buffalo-makeup-v1.png`、1536x1024・透過。`img/buffalo-whole.png` の元絵）:
+  シルエット     x 123..1441 / y 185..890（1319 x 706）
+  最高点         y185 は **x914..1045 ＝ 角**。背中（こぶ）の天辺は y276（x386..649）で、角より91px下
+  角（クリーム）  41,976画素 / bbox x 878..1432 / y 194..447
+  **右端の余裕は9pxしかない**（角の右端1432 対 シルエット右端1441＝鼻先）
+  頬と口のピンク  3,708画素（体の0.69%）/ x1142..1354 / y378..571
+  盤面では 高さ64.6%・幅119.6%・足元95.7%・上端31.1%・空腹時98.6%
+
+  → **枠が広がる経路は右だけで、しかも余裕がほぼ無い。** 頭を下げると角は前（右）へ回る。
+    逃げ道は「鼻づらが下がって空けた場所へ角が入る」こと。指示文はそう書いてある。
+    尻尾と尻はタイルの外（`ox` 2.5 で左へ押し出してある）なので、**尻尾を垂らす案は無駄**。
+    オオカミ・シカでは効いた手がこの動物では1画素も見えない。
+
+添付する元絵:
+  C:\Users\tians\Bioconnect\concepts\animal-art-v1\buffalo-makeup-v1.png
+  （1536x1024・透過PNG・採用版。平塗りの方。毛並み版 buffalo-game-transparent-v4.png とは別物）
+
+以下を貼る。
+
+----------------------------------------------------------------------
+
+This is a RETOUCH of the attached picture, not a new illustration. Do
+not redraw the buffalo. Start from the attached image and change only
+the parts listed below, leaving everything else exactly as it is.
+
+CANVAS: the output must be LANDSCAPE, 1536 wide by 1024 tall, the same
+as the input. Do NOT change the canvas size or re-centre the animal.
+
+THE BODY DOES NOT MOVE. Copy the four legs, the hooves, the gaps
+between them, the belly line, the chest, the rump and the tail straight
+from the input, in the same places and at the same size. The buffalo
+keeps standing exactly where it stands.
+
+NOTHING MAY GET WIDER. The picture must not grow to the right, the left
+or the bottom. The horns already reach almost as far right as the nose,
+so as the head comes down the muzzle drops and pulls back toward the
+chest, and the horns swing down into the space the muzzle leaves. No
+part of the horns may end up further right than the nose is now.
+
+Change these four things:
+
+1. THE HEAD DROPS. Right now the horns are the highest point of the
+   whole picture. Let the neck sink and the head hang, muzzle angled
+   down toward the ground, until the horns are LOWER than the line of
+   the back. Keep both horns whole, the same size, the same sweep and
+   the same pale ivory colour -- they rotate with the skull, they do
+   not shrink. This is an exhausted animal letting its head fall, NOT a
+   bull lowering its horns to charge.
+2. THE HUMP BECOMES THE TOP, AND GOES HOLLOW. With the head down, the
+   hump of muscle over the shoulders is the highest point of the
+   animal. Let the fat come off it: the top line of the back sinks and
+   hollows between the hump and the hips, and the hip bone shows as a
+   soft rise. This line may only move DOWNWARD and INWARD. The belly,
+   the chest, the legs and the hooves do not move at all.
+3. THE EARS DROOP. Hanging down and back beside the lowered jaw, not
+   out to the side.
+4. THE SMILE CLOSES. The small pink smiling mouth becomes a short, flat,
+   tired line. No teeth, no open mouth, no snarl.
+
+This buffalo is starving, weak and worn out. It is NOT angry and NOT
+charging: no flared nostrils, no snorting, no dust, no stamping, no
+motion lines, no effects of any kind. The eyes stay the size they are,
+with the same lashes, but heavy and dull. Keep the pink cheek, the
+makeup lashes and all body colours exactly as they are.
+
+Do NOT change: any leg, any hoof, the spacing between the legs, the
+belly line, the chest, the rump, the tail, the body colours, the canvas
+size.
+
+Keep the existing style exactly: clean dark outline, flat brown colour
+with soft pale shading, pale ivory horns, lighter belly band, dark
+hooves and tail tuft. Side view facing right. Transparent background --
+no scene, no text, no frame, no floor, no cast shadow. Output a PNG
+with alpha, 1536 x 1024.
+
+If you cannot guarantee a pixel-perfect match elsewhere, produce the
+image anyway. The only hard requirements are that the four legs, the
+hooves and the belly line are unchanged and in the same place, and that
+the picture does not get any wider.
+
+----------------------------------------------------------------------
+
+戻ってきたPNGは、このフォルダに
+  buffalo-hungry-src.png
+という名前で置く（複数枚戻ったら buffalo-try1-a.png … の連番で全部置く。選別はこちらでやる）。
+
+戻ってきたらこちら側でやること:
+  1. 本物の背景色の上で合成して見る（原則17）。この元絵も薄い透明画素が散っている。
+  2. 画布が違っていたら脚の帯でIoUを最大化して元の画布に戻す（原則16）。
+     画布の縦横が入れ替わっていたら、それは編集ではなく描き直し（原則24）。作り直す。
+  3. 複数枚あれば**脚の帯のIoUだけで選別**する（原則25）。シカは94.2/86.4/67.8/9〜15%で分かれた。
+  4. python hungry-faces/check-pair.py buffalo <元絵> <戻り>
+     **脚・ひづめ・腹が灰色かどうかが唯一の本当の検査**。赤青が頭・角・耳・背中の線だけなら通す。
+  5. **右端を必ず測る。** 角が x1441 を越えていたら共通枠が広がり、この動物は横に余裕が無いので
+     絵が縮む。越えた幅によっては不採用（シカと違ってここは払えない）。
+  6. python make-face-pair.py buffalo-makeup-v1.png hungry-faces/buffalo-hungry-src.png \
+         ../../img/buffalo-calm.png ../../img/buffalo-hungry.png
+  7. script.js の SPRITE_FILES に buffaloCalm/buffaloHungry を足し、RIG.buffalo.head を差し替える。
+  8. python measure-rig.py で **64.6% / 119.6% / 95.7% / 上端31.1% / 空腹時98.6%** に戻す。
+  9. node rules.test.js と、実ブラウザで満腹・空腹を44pxで並べて見る。
+
+リグについて（測り直しは確実に要る）:
+  - `img/buffalo-whole.png` は透明画素バグ時代の**古い緩い切り抜き**。オオカミ・クマと同じで、
+    新方式の共通枠で切り直すと枠が変わる。`w` 50 / `ox` 2.5 / `oy` 6.7 は解き直しになる。
+  - 絵が同じなら上の5つの数値は**変更前と同じ値に戻すのが正解**（原則19）。揃えるのが正解ではない。
+
+やらない案（記録）:
+  - 角を前に構える・突進 → 怒りになる（原則7）
+  - 前足で地面を掻く・土煙 → 脚が動く（原則8）うえ、横に余裕が無い（原則14・26）
+  - 尻尾を垂らす → `ox` 2.5 で尻尾はタイルの外。44pxで1画素も見えない
+  - 頬のピンクを沈ませる（シマウマ型）→ 体の0.69%。44pxで1画素未満（原則23）
+  - あばらを浮かせる → 体の内側の線。44pxで消える（ライオンで確定）
