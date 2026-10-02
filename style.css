@@ -850,22 +850,6 @@ body.is-modal { overflow: hidden; }
 .start-icon:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(60, 74, 54, .1); }
 .start-icon:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
 
-.start-icon svg {
-  width: 21px;
-  height: 21px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-/* the speaker wears a slash until sound is switched on */
-.start-icon .start-wave { display: none; }
-.start-icon[aria-pressed="true"] { color: var(--green); }
-.start-icon[aria-pressed="true"] .start-wave { display: inline; }
-.start-icon[aria-pressed="true"] .start-slash { display: none; }
-
 .start-foot { margin: 2px 0 0; color: var(--ink-soft); font-size: .7rem; }
 
 @keyframes start-bob {
@@ -1745,7 +1729,6 @@ body.is-modal { overflow: hidden; }
   .cell--lion .tile-art { animation: none; }
 }
 
-.audio-controls { display:flex; justify-content:center; gap:10px; margin:16px auto; }
 .first--elephant { border:3px solid #c6983b; background:#fff9df; }
 
 /* Keep the choices and the whole meadow together on a phone. */

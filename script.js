@@ -2887,7 +2887,7 @@ async function init() {
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
     'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
-    'startHowBtn', 'startSoundBtn', 'countdown', 'countdownWord',
+    'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
     'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer'];
   for (const id of ids) el[id] = document.getElementById(id);
@@ -2975,17 +2975,9 @@ async function init() {
     setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || counting);
   });
 
-  // The title screen carries the guide and the sound switch, so both are
-  // reachable before the first tap. Sound stays owned by the footer
-  // toggle in audio.js; this button forwards to it and mirrors its state.
+  // The title screen carries the guide, so it is reachable before the
+  // first tap. Sound has no switch: the device's silent mode decides.
   el.startHowBtn.addEventListener('click', function () { openHow(el.startHowBtn); setPaused(true); });
-  el.startSoundBtn.addEventListener('click', function () {
-    const real = document.getElementById('soundToggle');
-    if (real) real.click();
-    const on = !!real && real.getAttribute('aria-pressed') === 'true';
-    el.startSoundBtn.setAttribute('aria-pressed', String(on));
-    el.startSoundBtn.setAttribute('aria-label', 'Sound: ' + (on ? 'on' : 'off'));
-  });
 
   el.newBtn.addEventListener('click', onNewGame);
   el.goAgain.addEventListener('click', function () { disarmNew(); newGame(); });

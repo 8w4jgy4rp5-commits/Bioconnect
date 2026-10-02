@@ -34,7 +34,7 @@ window.BioSound = (() => {
   function create(ctx, destination = ctx.destination) {
     const master = ctx.createGain(), compressor = ctx.createDynamicsCompressor();
     const music = ctx.createGain(), effects = ctx.createGain();
-    music.gain.value = .7; effects.gain.value = .8; master.gain.value = .86;
+    music.gain.value = 1.6; effects.gain.value = .8; master.gain.value = .86;
     compressor.threshold.value = -14; compressor.knee.value = 12;
     compressor.ratio.value = 3; compressor.attack.value = .006; compressor.release.value = .15;
     music.connect(master); effects.connect(master); master.connect(compressor); compressor.connect(destination);
