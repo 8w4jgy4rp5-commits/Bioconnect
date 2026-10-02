@@ -1881,12 +1881,12 @@ const RIG = {
   // The muscled elephant is the first whole-body painting with a real
   // second face: a smirk when fed, a snorting glare when hungry. Both
   // were cut from one shared box, so the body stays put and only the
-  // face (and the steam from the trunk) changes on the swap. Sized like
-  // the bear: drawn wider than the tile and pushed left, so the tail
-  // drops off the edge and the trunk stays in. Measured at 84% of the
-  // tile's height to the bear's 80% -- the top of the ladder looks it.
+  // face (and the steam from the trunk) changes on the swap. The whole
+  // body fits, rump to trunk tip, with a little room each side: it
+  // breathes and sways, and a body cut off at the edge stops reading as
+  // one animal the moment it moves. Feet sit where they did before.
   elephant: {
-    fit: { span: 38, ox: 2.6, oy: 1.8 },
+    fit: { span: 48, ox: 0, oy: 6.4 },
     parts: [
       ['@head', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
