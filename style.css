@@ -1477,6 +1477,12 @@ body.is-modal { overflow: hidden; }
 .merge-preview { color: #345824; font-size: clamp(9px, 2.5vw, 13px); font-weight: 700; pointer-events: none; }
 
 .first--bear { border-color: #a57550; background: #fff6df; box-shadow: 0 8px 36px #80563d38; }
+/* One knob for every idle on the board. Each animal keeps its own
+   shape and pace below; this only sets how far they all move. The
+   numbers in each @keyframes are the shape at 1; 2.5 is what it takes
+   for a 44px tile to read as alive on a phone rather than as a still. */
+.cell { --idle: 2.5; }
+
 /* The bear carries her weight from one side to the other.
    Deliberately the opposite of the rabbit: where the rabbit ticks at
    2.6s and never settles, the bear takes 4.2s and is always settled.
@@ -1493,9 +1499,9 @@ body.is-modal { overflow: hidden; }
 .cell--bear:nth-child(3n+3) .tile-art { animation-delay: -2.8s; }
 
 @keyframes bear-sway {
-  0%, 100% { transform: rotate(-.9deg); }
-  25%, 75% { transform: translateY(-.5px) rotate(0deg); }
-  50%      { transform: rotate(.9deg); }
+  0%, 100% { transform: rotate(calc(-.9deg * var(--idle))); }
+  25%, 75% { transform: translateY(calc(-.5px * var(--idle))) rotate(0deg); }
+  50%      { transform: rotate(calc(.9deg * var(--idle))); }
 }
 
 /* the arrival takes the tile over for its third of a second; the sway
@@ -1523,7 +1529,7 @@ body.is-modal { overflow: hidden; }
 
 @keyframes rabbit-idle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-1.6px); }
+  50% { transform: translateY(calc(-1.6px * var(--idle))); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1554,7 +1560,7 @@ body.is-modal { overflow: hidden; }
 
 @keyframes buffalo-graze {
   0%, 100%  { transform: rotate(0deg); }
-  45%, 65%  { transform: translateY(.4px) rotate(1.1deg); }
+  45%, 65%  { transform: translateY(calc(.4px * var(--idle))) rotate(calc(1.1deg * var(--idle))); }
 }
 
 /* the arrival owns the tile for a third of a second, then the graze
@@ -1605,16 +1611,16 @@ body.is-modal { overflow: hidden; }
 .cell--deer:nth-child(3n+3) .tile-art { animation-delay: -.18s, -3.7s; }
 
 @keyframes deer-shiver {
-  0%, 100% { translate: -.15px 0; }
-  50%      { translate: .15px 0; }
+  0%, 100% { translate: calc(-.15px * var(--idle)) 0; }
+  50%      { translate: calc(.15px * var(--idle)) 0; }
 }
 
 @keyframes deer-flinch {
   0%, 62% { rotate: 0deg; scale: 1 1; }
-  65%     { rotate: -.75deg; scale: 1 1.012; }
-  70%     { rotate: -.6deg; }
-  78%     { rotate: -.45deg; }
-  88%     { rotate: -.2deg; }
+  65%     { rotate: calc(-.75deg * var(--idle)); scale: 1 calc(1 + .012 * var(--idle)); }
+  70%     { rotate: calc(-.6deg * var(--idle)); }
+  78%     { rotate: calc(-.45deg * var(--idle)); }
+  88%     { rotate: calc(-.2deg * var(--idle)); }
   100%    { rotate: 0deg; scale: 1 1; }
 }
 
@@ -1654,7 +1660,7 @@ body.is-modal { overflow: hidden; }
 
 @keyframes tiger-breath {
   0%, 22%   { transform: scaleY(1); }
-  50%       { transform: scaleY(1.006); }
+  50%       { transform: scaleY(calc(1 + .006 * var(--idle))); }
   78%, 100% { transform: scaleY(1); }
 }
 
@@ -1685,9 +1691,9 @@ body.is-modal { overflow: hidden; }
 .cell--zebra:nth-child(3n+3) .tile-art { animation-delay: -3.9s; }
 
 @keyframes zebra-settle {
-  0%, 34%   { transform: translateX(-.3px) scaleY(1); }
-  50%       { transform: translateX(0) scaleY(1.004); }
-  66%, 100% { transform: translateX(.3px) scaleY(1); }
+  0%, 34%   { transform: translateX(calc(-.3px * var(--idle))) scaleY(1); }
+  50%       { transform: translateX(0) scaleY(calc(1 + .004 * var(--idle))); }
+  66%, 100% { transform: translateX(calc(.3px * var(--idle))) scaleY(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1719,10 +1725,10 @@ body.is-modal { overflow: hidden; }
 
 @keyframes lion-sigh {
   0%, 100% { transform: scaleY(1); }
-  26%      { transform: scaleY(1.014); }
-  38%      { transform: scaleY(1.012); }
-  64%      { transform: scaleY(.995); }
-  82%      { transform: scaleY(.997); }
+  26%      { transform: scaleY(calc(1 + .014 * var(--idle))); }
+  38%      { transform: scaleY(calc(1 + .012 * var(--idle))); }
+  64%      { transform: scaleY(calc(1 - .005 * var(--idle))); }
+  82%      { transform: scaleY(calc(1 - .003 * var(--idle))); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1847,3 +1853,53 @@ body.is-modal { overflow: hidden; }
   .board-frame { width: min(100%, max(266px, calc(100svh - 304px))); }
   .move-hint { font-size: 10px; }
 }
+
+/* The fox sniffs: the nose dips and lifts twice, quickly, then the
+   animal stands and listens. Pivot at the paws, so it is the head end
+   that moves (everything faces right). Faster than the rabbit's breath,
+   because a fox is busy, but with a long still stretch so it reads as
+   attention rather than fidgeting. */
+.cell--fox .tile-art {
+  transform-origin: center bottom;
+  animation: fox-sniff 3.4s ease-in-out infinite;
+}
+.cell--fox:nth-child(3n+2) .tile-art { animation-delay: -1.1s; }
+.cell--fox:nth-child(3n+3) .tile-art { animation-delay: -2.3s; }
+@keyframes fox-sniff {
+  0%, 52%, 100% { transform: rotate(0deg); }
+  60%           { transform: rotate(calc(.7deg * var(--idle))); }
+  67%           { transform: rotate(calc(-.2deg * var(--idle))); }
+  74%           { transform: rotate(calc(.6deg * var(--idle))); }
+  84%           { transform: rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) { .cell--fox .tile-art { animation: none; } }
+
+/* The wolf is drawn starving, so it pants: short, quick breaths that
+   never get a pause between them. The quickest loop on the board after
+   the deer's shiver, and the only one with no hold at either end --
+   the tiger rests full and empty, the wolf cannot afford to. */
+.cell--wolf .tile-art {
+  transform-origin: center bottom;
+  animation: wolf-pant .9s ease-in-out infinite;
+}
+.cell--wolf:nth-child(3n+2) .tile-art { animation-delay: -.3s; }
+.cell--wolf:nth-child(3n+3) .tile-art { animation-delay: -.6s; }
+@keyframes wolf-pant {
+  0%, 100% { transform: scaleY(1); }
+  45%      { transform: translateY(calc(-.2px * var(--idle))) scaleY(calc(1 + .006 * var(--idle))); }
+}
+@media (prefers-reduced-motion: reduce) { .cell--wolf .tile-art { animation: none; } }
+
+/* The elephant moves like the biggest thing in the meadow: a slow
+   rock from foot to foot over eight seconds, the slowest loop here.
+   It covers four squares, so a fraction of a degree is already a lot
+   of ground -- half the bear's swing reads as more weight, not less. */
+.cell--elephant .tile-art {
+  transform-origin: center bottom;
+  animation: elephant-sway 8s ease-in-out infinite;
+}
+@keyframes elephant-sway {
+  0%, 100% { transform: rotate(calc(-.4deg * var(--idle))); }
+  50%      { transform: translateY(calc(-.3px * var(--idle))) rotate(calc(.4deg * var(--idle))); }
+}
+@media (prefers-reduced-motion: reduce) { .cell--elephant .tile-art { animation: none; } }

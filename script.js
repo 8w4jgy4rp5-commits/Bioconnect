@@ -2221,6 +2221,20 @@ function inReach() {
   return risk;
 }
 
+// render() rebuilds every tile, and a new element starts its CSS
+// animation from the first frame -- so every tick (1.8s) cut each idle
+// loop (2.6-8s) off before it got anywhere, and the animals looked
+// frozen. Pinning the endless loops to the page clock lets a redrawn
+// animal carry on mid-breath. One-shot arrivals are left alone.
+function keepIdlePhase() {
+  for (const art of el.board.querySelectorAll('.cell .tile-art')) {
+    if (!art.getAnimations) return;
+    for (const anim of art.getAnimations()) {
+      if (anim.effect && anim.effect.getTiming().iterations === Infinity) anim.startTime = 0;
+    }
+  }
+}
+
 function render(grew, meals, deaths) {
   const risk = inReach();
   // at -> which rung landed there, so the square's flash can wait for the
@@ -2356,6 +2370,7 @@ function render(grew, meals, deaths) {
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
   renderMovePreview();
+  keepIdlePhase();
 }
 
 // The rung, and how far along it. The bar is the whole difficulty curve
