@@ -618,5 +618,45 @@ ok('...and gives the other three squares back', !S.cells[home + 1] && !S.cells[h
    && !S.cells[home + X.SIZE + 1]);
 
 
+// ---------- what a chain leaves behind for the replay ----------
+//
+// The replay draws a chain one rung at a time, 145ms apart, over a board
+// that growFrom has already finished. By then the squares a rung took are
+// empty and whatever stood on them is gone, so the only record is what the
+// event carries. These check that the record is true, because a wrong
+// `from` is not a crash — it is a ghost flying out of the wrong square,
+// which nobody would notice until they wondered why the game felt sloppy.
+console.log('\nwhat a chain leaves behind for the replay');
+
+board([[2, 1, 'sprout'], [1, 1, 'sprout'], [0, 1, 'grass']]);
+const scoreBefore = S.score;
+const chain = X.ctx.growFrom(at(2, 1));
+ok('a sprout dropped beside a sprout beside a grass is a chain of two',
+   chain.length === 2 && chain[0].kind === 'grass' && chain[1].kind === 'rabbit',
+   JSON.stringify(chain.map(function (e) { return e.kind; })));
+ok('every rung says what was standing on the squares it took',
+   chain.every(function (e) { return X.GROWS_INTO[e.was] === e.kind; }),
+   JSON.stringify(chain.map(function (e) { return e.was + '->' + e.kind; })));
+ok('every rung names exactly the squares it took',
+   chain.every(function (e) { return e.from.length === e.size; }),
+   JSON.stringify(chain.map(function (e) { return e.from.length + '/' + e.size; })));
+ok('...and keeps its result on one of them',
+   chain.every(function (e) { return e.from.indexOf(e.at) >= 0; }),
+   JSON.stringify(chain.map(function (e) { return e.at + ' in ' + JSON.stringify(e.from); })));
+ok('the second rung takes the square the first one landed on',
+   chain[1].from.indexOf(chain[0].at) >= 0,
+   chain[0].at + ' in ' + JSON.stringify(chain[1].from));
+
+// The ticker says one number and the replay pops one per rung. If the
+// shares stopped adding up to the whole, the pops would quietly disagree
+// with the score bar and there would be nothing on screen to blame.
+const paid = X.ctx.scoreGrowth(chain);
+const shares = chain.reduce(function (n, e) { return n + e.points; }, 0);
+ok('each rung is paid its own share of the chain', shares === paid, shares + ' vs ' + paid);
+ok('...and the shares are the whole of what the chain paid',
+   S.score - scoreBefore === shares, (S.score - scoreBefore) + ' vs ' + shares);
+ok('...with the bigger rung worth more than the smaller one',
+   chain[1].points > chain[0].points, chain[1].points + ' vs ' + chain[0].points);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

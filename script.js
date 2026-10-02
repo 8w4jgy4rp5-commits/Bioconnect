@@ -909,8 +909,9 @@ function placeTile(i) {
 
   // After render, because render rebuilds every cell and the effects
   // layer is measured against where those cells ended up.
-  if (gained) popScore(grew[grew.length - 1].at, gained, grew[grew.length - 1].kind);
-  if (grew.length > 1) showChain(grew.length);
+  // One rung at a time, over a board that is already finished. See
+  // replayChain for why nothing here waits for it.
+  if (grew.length) replayChain(grew, before);
   announceFirsts(grew);
 }
 
@@ -1057,7 +1058,12 @@ function growFrom(i, cells = state.cells, preview = false) {
     }
 
     if (!preview && rank(up) > rank(state.topKind)) state.topKind = up;
-    events.push({ at: i, kind: up, size: group.length, bones: cleared, trampled: trampled });
+    // `from` and `was` are for the replay only: the squares this rung
+    // consumed, and what was standing on them. The rule does not read
+    // them back, but they are the only record of a rung after the board
+    // has settled — by render() time those squares are empty.
+    events.push({ at: i, kind: up, size: group.length, bones: cleared, trampled: trampled,
+                  from: group, was: cell.kind });
   }
   return events;
 }
@@ -1247,6 +1253,11 @@ function scoreGrowth(events) {
   let base = 0;
   for (const e of events) base += growValue(e.kind);
   const gained = base * events.length * scoreMultiplier();
+  // The chain is paid as one thing, but the replay shows it one rung at a
+  // time, so each rung carries its own share. The shares are the same
+  // multiplication as the total and add up to it exactly — nothing here
+  // invents points that the score did not move by.
+  for (const e of events) e.points = growValue(e.kind) * events.length * scoreMultiplier();
   state.score += gained;
   return gained;
 }
@@ -2212,7 +2223,9 @@ function inReach() {
 
 function render(grew, meals, deaths) {
   const risk = inReach();
-  const popped = new Set((grew || []).map(function (g) { return g.at; }));
+  // at -> which rung landed there, so the square's flash can wait for the
+  // ghosts that caused it instead of going off before they arrive.
+  const popped = new Map((grew || []).map(function (g, n) { return [g.at, n]; }));
   const eaten = new Set((meals || []).map(function (m) { return m.ate; }));
   const died = new Set((deaths || []).map(function (d) { return d.at; }));
 
@@ -2221,6 +2234,7 @@ function render(grew, meals, deaths) {
     const cell = state.cells[i];
     node.className = 'cell';
     node.textContent = '';
+    node.style.animationDelay = '';
     node.removeAttribute('title');
     delete node.dataset.previewKind;
     delete node.dataset.previewMerges;
@@ -2318,7 +2332,15 @@ function render(grew, meals, deaths) {
     }
     node.setAttribute('aria-label', label);
 
-    if (popped.has(i)) node.classList.add('cell--grew');
+    if (popped.has(i)) {
+      node.classList.add('cell--grew');
+      const wait = chainStepAt(popped.get(i)) + 'ms';
+      node.style.animationDelay = wait;
+      // Bear and buffalo have their own arrival animation on the art, and
+      // it is the same event as the flash, so it waits with it.
+      const art = node.querySelector('.tile-art');
+      if (art) art.style.animationDelay = wait;
+    }
     if (died.has(i)) node.classList.add('cell--died');
   }
 
@@ -2368,12 +2390,51 @@ function setTicker(text) { el.ticker.textContent = text; }
 // sim.js has no DOM, so every entry point here returns on a missing
 // layer rather than being stubbed out one by one.
 
+// The corner of a square and the size of one, in page coordinates.
+//
+// The three squares under an elephant are `hidden`, and a hidden element
+// measures zero - a ghost leaving one would fly out of the top-left corner
+// of the meadow. So when a square cannot be measured, its place is worked
+// out from the grid: the pitch between two squares that CAN be measured is
+// the pitch everywhere, because the board is one CSS grid.
+function cellBox(i) {
+  if (!cellNodes[i]) return null;
+  const own = cellNodes[i].getBoundingClientRect();
+  if (own.width) return { x: own.left, y: own.top, w: own.width, h: own.height };
+
+  const plain = [];
+  for (let k = 0; k < CELLS; k++) {
+    const n = cellNodes[k];
+    if (!n || n.hidden || n.classList.contains('cell--big')) continue;
+    const r = n.getBoundingClientRect();
+    if (r.width) plain.push({ at: k, r: r });
+  }
+  if (!plain.length) return null;
+
+  const col = i % SIZE, row = (i / SIZE) | 0;
+  const w = plain[0].r.width, h = plain[0].r.height;
+  const sorted = function (key) {
+    return plain.slice().sort(function (a, b) { return a.r[key] - b.r[key]; });
+  };
+  const xs = sorted('left'), ys = sorted('top');
+  const lo = xs[0], hi = xs[xs.length - 1];
+  const top = ys[0], bot = ys[ys.length - 1];
+  const dc = (hi.at % SIZE) - (lo.at % SIZE);
+  const dr = ((bot.at / SIZE) | 0) - ((top.at / SIZE) | 0);
+  const pitchX = dc ? (hi.r.left - lo.r.left) / dc : w;
+  const pitchY = dr ? (bot.r.top - top.r.top) / dr : h;
+  return {
+    x: lo.r.left + (col - (lo.at % SIZE)) * pitchX,
+    y: top.r.top + (row - (((top.at / SIZE) | 0))) * pitchY,
+    w: w, h: h
+  };
+}
+
 function fxAt(i) {
-  const cell = cellNodes[i];
-  if (!cell) return null;
-  const c = cell.getBoundingClientRect();
+  const c = cellBox(i);
+  if (!c) return null;
   const f = el.fx.getBoundingClientRect();
-  return { x: c.left - f.left + c.width / 2, y: c.top - f.top + c.height / 2 };
+  return { x: c.x - f.left + c.w / 2, y: c.y - f.top + c.h / 2, w: c.w, h: c.h };
 }
 
 function fxAdd(node, life) {
@@ -2406,10 +2467,113 @@ function popScore(i, amount, kind) {
 // it land twice. So it gets said out loud.
 function showChain(steps) {
   if (!el.fx) return;
+  // One badge at a time. The next rung replaces this one 145ms later, so
+  // the number counts up in place instead of three badges stacking in the
+  // same spot and reading as a smear.
+  for (const old of el.fx.querySelectorAll('.fx-chain')) old.remove();
   const tag = document.createElement('span');
   tag.className = 'fx-chain';
   tag.textContent = 'Chain ×' + steps;
   fxAdd(tag, 1200);
+}
+
+// ---------- Replaying the chain ----------
+//
+// The board is finished before any of this runs. growFrom resolved every
+// rung and render() has already drawn the result, so a tap is accepted at
+// every moment of the replay and nothing here can be waited on. This is a
+// story told over a settled board, which is the only way to stage a chain
+// without making the player stand still for it.
+//
+// The timing is not a free choice. audio-synth.js already plays one pop
+// per rung, the first at +105ms and the rest every 145ms, so the picture
+// is fitted to the sound rather than the other way round. Changing either
+// number here means changing effect('merge') with it.
+const CHAIN_LEAD_MS = 105;
+const CHAIN_STEP_MS = 145;
+const GHOST_MS = 300;
+const RING_MS = 500;
+
+function chainStepAt(n) { return CHAIN_LEAD_MS + n * CHAIN_STEP_MS; }
+
+let chainTimers = [];
+
+// A second placement during a replay cancels the first. Two chains
+// telling their stories over one board reads as neither, and the player
+// who taps fast is exactly the player who did not want to watch.
+function cancelChain() {
+  for (const t of chainTimers) clearTimeout(t);
+  chainTimers = [];
+  if (!el.fx) return;
+  for (const n of el.fx.querySelectorAll('.ghost, .ring')) n.remove();
+}
+
+// The tiles that are gone, shown going. A ghost leaves the square it
+// stood on and is swallowed by the square that kept the result, which
+// answers "where did my two foxes go" by watching rather than by reading
+// the ticker. It is drawn in the same 92% x 82% box the art has inside a
+// square, so it is the tile that was there and not another drawing of it.
+function ghostInto(from, to, kind) {
+  const a = fxAt(from), b = fxAt(to);
+  if (!a || !b) return;
+  const ghost = document.createElement('span');
+  ghost.className = 'ghost';
+  ghost.style.left = a.x + 'px';
+  ghost.style.top = a.y + 'px';
+  ghost.style.width = (a.w * 0.92) + 'px';
+  ghost.style.height = (a.h * 0.82) + 'px';
+  ghost.style.setProperty('--dx', (b.x - a.x) + 'px');
+  ghost.style.setProperty('--dy', (b.y - a.y) + 'px');
+  ghost.style.animationDuration = GHOST_MS + 'ms';
+  fxAdd(ghost, GHOST_MS + 60);
+  paintTile(ghost, kind, 1);
+}
+
+// Where it landed. Sized to the square that kept the result, so an
+// elephant's ring is twice the size of a rabbit's without a word
+// anywhere saying that it is bigger.
+function ringAt(i) {
+  const at = fxAt(i);
+  if (!at) return;
+  const ring = document.createElement('span');
+  ring.className = 'ring';
+  ring.style.left = at.x + 'px';
+  ring.style.top = at.y + 'px';
+  ring.style.width = at.w + 'px';
+  ring.style.height = at.h + 'px';
+  ring.style.animationDuration = RING_MS + 'ms';
+  fxAdd(ring, RING_MS + 40);
+}
+
+// `before` is the raw score as it stood before the chain was paid. Each
+// rung carries its own share, so walking the raw total upward gives every
+// rung the display points the bar actually moved by at that moment - and
+// because the shares add up to the total, the pops add up to the number
+// in the ticker. Late in a run the same rung pays less, and this is where
+// that becomes visible.
+function replayChain(grew, before) {
+  if (!el.fx) return;
+  cancelChain();
+  // Motion is the whole point of a ghost, so when motion is unwelcome the
+  // rungs still arrive one at a time and still say what they paid - they
+  // just do not travel.
+  const still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let raw = before, shown = displayScore(before);
+  for (let n = 0; n < grew.length; n++) {
+    const step = grew[n];
+    raw += step.points || 0;
+    const next = displayScore(raw);
+    const gain = Math.round(next - shown);
+    shown = next;
+    chainTimers.push(setTimeout(function () {
+      if (!still) {
+        for (const g of step.from) if (g !== step.at) ghostInto(g, step.at, step.was);
+        ringAt(step.at);
+      }
+      if (gain >= 1) popScore(step.at, gain, step.kind);
+      if (n > 0) showChain(n + 1);
+    }, chainStepAt(n)));
+  }
 }
 
 // The first rabbit, the first fox, the first wolf. These are the beats

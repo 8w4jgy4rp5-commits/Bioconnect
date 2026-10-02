@@ -1362,6 +1362,49 @@ body.is-modal { overflow: hidden; }
   100% { opacity: 0; transform: translate(-50%, -155%) scale(1); }
 }
 
+/* A chain used to land all at once: the result appeared, one number flew
+   up, and a badge said how many rungs had happened somewhere. These two
+   shapes are the chain told one rung at a time, timed to the pops the
+   synth was already playing. Durations come from script.js so the
+   milliseconds live in one place. */
+
+/* The tile that is gone, going. It travels from its own square into the
+   square that kept the result and shrinks as it is swallowed, so a merge
+   has a direction instead of merely a before and an after. Partly
+   transparent from the first frame: it is a memory of a tile, and a solid
+   one reads as a second animal that was somehow there all along. */
+.ghost {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: ghost-suck 300ms cubic-bezier(.35, 0, .65, 1) forwards;
+}
+
+@keyframes ghost-suck {
+  0% { opacity: .62; transform: translate(-50%, -50%) scale(1); }
+  65% { opacity: .46; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(.42);
+  }
+}
+
+/* The landing. Drawn at the size of the square that kept the result, so
+   the elephant's ring is twice the size of the rabbit's and nothing has
+   to say so. */
+.ring {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border: 3px solid var(--warm);
+  border-radius: 14px;
+  animation: ring-out 500ms cubic-bezier(.2, .8, .3, 1) forwards;
+}
+
+@keyframes ring-out {
+  0% { opacity: .9; transform: translate(-50%, -50%) scale(.52); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22); }
+}
+
 .fx-chain {
   position: absolute;
   top: 10px;
@@ -1440,6 +1483,9 @@ body.is-modal { overflow: hidden; }
     opacity: 1;
   }
   .pop { transform: translate(-50%, -140%); }
+  /* The ghost and the ring are nothing but motion, so replayChain does not
+     make them at all here. The rungs still arrive one at a time and still
+     say what each one paid. */
 }
 
 /* A touch-friendly preview: no hover or extra tap is needed. */
