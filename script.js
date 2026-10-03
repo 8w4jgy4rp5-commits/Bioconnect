@@ -140,6 +140,24 @@ const FOX_STARVE_AT = 16;
 const WOLF_EAT_AT = 17;
 const WOLF_STARVE_AT = 21;
 
+// THE BIG ANIMALS WAIT FOR THEIR PARTNER. (rules 17)
+//
+// From the wolf up, a rung is only ever made by putting two of the rung
+// below side by side, and the second one takes a long time to build: a
+// bear is 128 grass of merging, a lion 256. Measured with a bot that
+// lays the board out in a line like a 2048 player, the first bear simply
+// starved before its partner was finished — bear 0% even for careful
+// planning, and the elephant was out of reach by rule rather than by
+// skill. Doubling how long the big four can wait gave that same bot bear
+// 75% and lion 42%, while tiger and elephant stayed at 0%: still rare,
+// no longer impossible. The casual bot never gets that far, so its game
+// did not change.
+//
+// Percent, applied to the base numbers written in ANIMALS below, so
+// sim.js can sweep it.
+const BIG_STAMINA_PCT = 200;
+function stamina(n) { return Math.round(n * BIG_STAMINA_PCT / 100); }
+
 // A meal is worth WHAT WAS EATEN, not who ate it.
 //
 // While every animal had exactly one prey the two were the same number,
@@ -171,7 +189,9 @@ const MEAL_LINE = {
   'wolf<rabbit': 'The wolf took a rabbit',
   'wolf<fox': 'The wolf took your fox',
   'bear<grass': 'The bear grazed on grass',
-  'bear<rabbit': 'The bear caught a rabbit'
+  'bear<rabbit': 'The bear caught a rabbit',
+  'lion<fox': 'The lion snapped up a fox',
+  'tiger<fox': 'The tiger snapped up a fox'
 };
 
 // The elephant takes one thing only — an animal you raised — so its line
@@ -232,9 +252,8 @@ function growValue(kind) {
 const SPROUT_WITHER_AT = 14;
 const GRASS_WITHER_AT = 18;
 
-// A fixed half-sprout, half-grass supply keeps every animal earned.
-// More grass offsets the removed animal windfalls without skipping the
-// bottom of the ladder. Neither time nor discoveries change these odds.
+// Spring deals half sprouts, half grass. See HAND_BY_STAGE for how the
+// hand widens as the year hardens.
 const GRASS_IN_HAND = 50;
 
 const LADDER = ["sprout", "grass", "rabbit", "fox", "deer", "zebra", "buffalo", "wolf", "bear", "lion", "tiger", "elephant"];
@@ -335,6 +354,17 @@ const ELEPHANT_HUNGER_PCT = 250;
 // parked in a corner and quietly fed is worth nothing at all.
 const ELEPHANT_MEAL_PCT = 400;
 
+// THE JACKPOT. (rules 17)
+//
+// The elephant is meant to work like the watermelon in a fruit-dropping
+// game: most runs never see one, and the run that does should feel it in
+// the number. Raw points are paid on birth, once per elephant, flat —
+// not multiplied by the chain or the season, so the same feat is worth
+// the same whenever it lands. On the display curve two million raw lifts
+// a typical late run by roughly 2,500 shown points, a jump nothing else
+// in the game comes close to.
+const ELEPHANT_BONUS = 2000000;
+
 function elephantEatAt() { return Math.max(2, Math.round(ELEPHANT_BASE_EAT_AT * 100 / ELEPHANT_HUNGER_PCT)); }
 function elephantStarveAt() { return Math.max(elephantEatAt() + 1, Math.round(ELEPHANT_BASE_STARVE_AT * 100 / ELEPHANT_HUNGER_PCT)); }
 
@@ -344,8 +374,8 @@ const ANIMALS = {
   deer: { diet: ['grass', 'sprout'], eatAt: 18, starveAt: 25 },
   zebra: { diet: ['grass', 'sprout'], eatAt: 21, starveAt: 29 },
   buffalo: { diet: ['grass', 'sprout'], eatAt: 24, starveAt: 33 },
-  wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: 17, starveAt: 21 },
-  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: 20, starveAt: 27 },
+  wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: stamina(WOLF_EAT_AT), starveAt: stamina(WOLF_STARVE_AT) },
+  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: stamina(20), starveAt: stamina(27) },
   // THE BIG MEALS, AND WHY THEY SIT AT THE END OF THE LIST.
   //
   // MEAL_VALUE priced a wolf at 8000 and a tiger at 18000, but nothing ate
@@ -366,8 +396,8 @@ const ANIMALS = {
   // MEAL_VALUE.elephant (24000) stays unreachable, and honestly so: the
   // apex of the ladder has nothing above it to be eaten by. It is dead
   // until the ladder grows a rung past the elephant.
-  lion: { diet: ['deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: 27, starveAt: 37 },
-  tiger: { diet: ['deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: 30, starveAt: 41 },
+  lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: stamina(27), starveAt: stamina(37) },
+  tiger: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: stamina(30), starveAt: stamina(41) },
 
   // THE ELEPHANT EATS ONLY WHAT YOU BUILT.
   //
@@ -453,8 +483,8 @@ const SCORE_PER_SEASON = 1;     // growth AND meals: x1 through x8
 const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
 const SEASON_NOTES = [
   'Room to grow. Start small.',
-  'More stones. Keep space open.',
-  'Plants fade sooner. Plan a chain.',
+  'More stones. Rabbits join your hand.',
+  'Plants fade sooner. Foxes join your hand.',
   'Winter deepens. Keep your meadow fed.'
 ];
 
@@ -485,10 +515,37 @@ function nextDifficultySeconds() {
   return Math.ceil(left * TICK_MS * (state.relaxed ? RELAXED_SCALE : 1) / 1000);
 }
 
-const HAND_ODDS = [
-  { kind: 'sprout', weight: 100 - GRASS_IN_HAND },
-  { kind: 'grass', weight: GRASS_IN_HAND }
+// THE HAND WIDENS WITH THE YEAR. (rules 18)
+//
+// Stones come faster every season while the hand stayed plants-only, so
+// the gap between how fast the meadow fills and how fast you can grow
+// only ever widened. From summer on, a few small animals are dealt too —
+// rabbits first, foxes from autumn, never anything above the fox. Like
+// the fruit game the elephant is modelled on, the hand only ever holds
+// the bottom of the ladder; everything from the deer up is still earned.
+//
+// Driven by the clock, plus one discovery: raising a zebra jumps the
+// hand straight to the winter row (rules 19). Waiting for winter left a
+// player who climbed fast building a wolf out of sprouts. The old
+// discovery-driven hand (rules 12) let a tiger summon lions and complete
+// the elephant by itself; this one still never deals above the fox, so a
+// discovery can speed the bottom of the ladder but never skip the top. Measured against rules 17 (`node sim.js 300`): casual median
+// 2,386 -> 3,268, three-tick thinker 3,271 -> 3,762; the careful bot's
+// runs got shorter (212 -> 116 ticks) because dealt animals with no
+// partner take squares. The planner reached the bear 88% (was 45%); lion
+// and above did not move. Weights are percent of each deal, stage 0-7.
+const HAND_BY_STAGE = [
+  { sprout: 100 - GRASS_IN_HAND, grass: GRASS_IN_HAND },  // Spring
+  { sprout: 45, grass: 45, rabbit: 10 },                  // Summer
+  { sprout: 40, grass: 40, rabbit: 15, fox: 5 },          // Autumn
+  { sprout: 35, grass: 35, rabbit: 20, fox: 10 }          // Winter 1 and on
 ];
+const WIDE_HAND_FROM = 'zebra';
+function handOdds() {
+  const last = HAND_BY_STAGE.length - 1;
+  const stage = rank(state.topKind) >= rank(WIDE_HAND_FROM) ? last : difficultyStage();
+  return HAND_BY_STAGE[Math.min(last, stage)];
+}
 
 // ---------- The clock ----------
 //
@@ -518,7 +575,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 16;
+const RULES_VERSION = 19;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -649,15 +706,23 @@ function writeBest(n) {
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
+// Elephants raised on this device, every run and every ruleset. Like
+// `met`, it is a fact about the player rather than about a score, so the
+// rules version does not reset it. It only ever goes up: a stale copy
+// from another tab cannot lower it.
+let lifetimeElephants = 0;
+
 function readMet() {
   const v = metStore ? metStore.get() : null;
   const list = v && Array.isArray(v.kinds) ? v.kinds : [];
   for (const k of list) if (typeof k === 'string') met.add(k);
+  const n = v ? Number(v.elephants) : 0;
+  if (Number.isFinite(n) && n > lifetimeElephants) lifetimeElephants = Math.floor(n);
 }
 
 function writeMet() {
   if (!metStore) return;
-  metStore.set({ kinds: Array.from(met) })
+  metStore.set({ kinds: Array.from(met), elephants: lifetimeElephants })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
@@ -673,6 +738,8 @@ const state = {
   ticks: 0,           // the world's own clock. Seasons and stones read it
   over: false,
   paused: false,      // title screen, tab hidden, guide open, or the run is done
+  celebrating: false, // the elephant overlay is up; the meadow waits for it
+  elephants: 0,       // elephants born this run
   relaxed: false,
   topKind: 'sprout',  // the highest thing this run has grown, for the end card
   seen: {}            // kinds this run has already made a fuss about
@@ -721,14 +788,15 @@ function vitality(cell) {
 // The same plant mix at every time and discovery. Every animal must be
 // raised by merging; discovering one never changes the supply.
 function rollHand() {
+  const odds = handOdds();
   let total = 0;
-  for (const o of HAND_ODDS) total += o.weight;
+  for (const k in odds) total += odds[k];
   let r = Math.random() * total;
-  for (const o of HAND_ODDS) {
-    r -= o.weight;
-    if (r < 0) return o.kind;
+  for (const k in odds) {
+    r -= odds[k];
+    if (r < 0) return k;
   }
-  return HAND_ODDS[0].kind;
+  return 'sprout';
 }
 
 function neighbours(i) {
@@ -858,6 +926,8 @@ function newGame() {
   state.over = false;
   state.topKind = 'sprout';
   state.seen = {};
+  state.elephants = 0;
+  closeCelebration(true);
   clearFx();
   el.gameover.hidden = true;
   setTicker('Tap an empty square to plant. The meadow moves on its own.');
@@ -878,7 +948,7 @@ function newGame() {
 // on now, because the two are no longer the same instant.
 
 function placeTile(i) {
-  if (state.over || state.cells[i]) return;
+  if (state.over || state.celebrating || state.cells[i]) return;
 
   // An empty hand was the one refusal that looked like a broken button:
   // the square was bare, the tap was legal, and the function just
@@ -886,7 +956,12 @@ function placeTile(i) {
   // hand is where the thing you are waiting for actually is.
   if (!state.stock.length) { nudgeHand(); return; }
 
-  state.cells[i] = makeTile(state.stock.shift());
+  const dealtKind = state.stock.shift();
+  state.cells[i] = makeTile(dealtKind);
+  // A rabbit or fox from the hand (rules 18) is a discovery too, so the
+  // growth panel and the welcome card do not wait for it to be merged.
+  const dealtFirst = rank(dealtKind) > rank(state.topKind);
+  if (dealtFirst) state.topKind = dealtKind;
   // Keep planting fluid; only the world clock ages the meadow.
   state.stock.push(state.next);
   state.next = rollHand();
@@ -912,7 +987,14 @@ function placeTile(i) {
   // One rung at a time, over a board that is already finished. See
   // replayChain for why nothing here waits for it.
   if (grew.length) replayChain(grew, before);
-  announceFirsts(grew);
+  announceFirsts(dealtFirst ? [{ kind: dealtKind }].concat(grew) : grew);
+  const giants = grew.filter(function (g) { return g.kind === 'elephant'; }).length;
+  if (giants) {
+    state.elephants += giants;
+    lifetimeElephants += giants;
+    writeMet();
+    celebrate(displayScore(state.score) - displayScore(before));
+  }
 }
 
 // Flashes the hand and says why nothing happened. The class has to come
@@ -940,7 +1022,7 @@ function nudgeHand() {
 // turn, and deaths run after feeding so a meal always saves a life.
 
 function worldTick() {
-  if (state.over || state.paused) return;
+  if (state.over || state.paused || state.celebrating) return;
 
   state.ticks += 1;
 
@@ -1148,15 +1230,25 @@ function feedEveryone() {
 // rabbit about to starve was lost either way.
 // Returns { at, kind } for the square it takes, or null if nothing it
 // eats is beside it.
+//
+// Anything dealt from the hand is taken before anything the player grew
+// (rules 19). A wolf waiting for its partner sits beside the deer and
+// zebras that partner is being built from, and eating one of them made
+// every rung above it a lost cause. The food chain is unchanged — the
+// wolf still eats the deer if that is all there is — but a dealt rabbit
+// placed beside it now saves the deer, so the player can defend a build
+// by feeding it. The elephant eats only raised animals and is unaffected.
 function pickMeal(i, cfg) {
-  for (const want of cfg.diet) {
-    let target = -1, worst = -1;
-    for (const n of tileNeighbours(state.cells, i)) {
-      const p = state.cells[n];
-      if (!edible(cfg, p, want)) continue;
-      if (p.clock > worst) { worst = p.clock; target = n; }
+  for (const dealtOnly of [true, false]) {
+    for (const want of cfg.diet) {
+      let target = -1, worst = -1;
+      for (const n of tileNeighbours(state.cells, i)) {
+        const p = state.cells[n];
+        if (!edible(cfg, p, want) || (dealtOnly && isRaised(p))) continue;
+        if (p.clock > worst) { worst = p.clock; target = n; }
+      }
+      if (target >= 0) return { at: target, kind: want };
     }
-    if (target >= 0) return { at: target, kind: want };
   }
   return null;
 }
@@ -1266,8 +1358,17 @@ function scoreGrowth(events) {
   // multiplication as the total and add up to it exactly — nothing here
   // invents points that the score did not move by.
   for (const e of events) e.points = growValue(e.kind) * events.length * scoreMultiplier();
-  state.score += gained;
-  return gained;
+  // The elephant's jackpot rides on its own rung, so the replay pops it
+  // from the square it landed on and the shares still add up.
+  let bonus = 0;
+  for (const e of events) {
+    if (e.kind !== 'elephant') continue;
+    e.bonus = ELEPHANT_BONUS;
+    e.points += ELEPHANT_BONUS;
+    bonus += ELEPHANT_BONUS;
+  }
+  state.score += gained + bonus;
+  return gained + bonus;
 }
 
 // The best score used to be checked only on the world's move, because
@@ -1303,7 +1404,7 @@ function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
 // their phone in their pocket.
 function syncClock() {
   if (window.BioAudio) window.BioAudio.pause(state.over || state.paused);
-  const shouldRun = !state.over && !state.paused;
+  const shouldRun = !state.over && !state.paused && !state.celebrating;
   if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
   else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
 }
@@ -1332,12 +1433,14 @@ function endRun() {
   el.goScore.textContent = displayScore(state.score).toLocaleString();
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
+  if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
   el.gameover.hidden = false;
   el.goAgain.focus();
 }
 
 function endNote() {
-  return state.topKind === 'elephant' ? 'Elephant reached! Your meadow is complete. Play again to beat your score.' : 'You reached ' + state.topKind + '. Next discovery: ' + GROWS_INTO[state.topKind] + '.';
+  if (state.elephants > 1) return 'You raised ' + state.elephants + ' elephants in one meadow. Legendary.';
+  return state.topKind === 'elephant' ? 'You raised an elephant! Few meadows ever do. Play again to beat your score.' : 'You reached ' + state.topKind + '. Next discovery: ' + GROWS_INTO[state.topKind] + '.';
 }
 
 // What your own move did: what grew, what the chain was worth, and the
@@ -2622,6 +2725,8 @@ function announceFirsts(grew) {
     if (met.has(g.kind)) continue;
     met.add(g.kind);
     fresh = true;
+    // The elephant gets the full-screen celebration every time instead.
+    if (g.kind === 'elephant') continue;
 
     const card = document.createElement('div');
     card.className = 'first first--' + g.kind;
@@ -2640,6 +2745,158 @@ function announceFirsts(grew) {
     fxAdd(card, g.kind === 'elephant' ? 4500 : 2200);
   }
   if (fresh) writeMet();
+}
+
+// ---------- The elephant celebration ----------
+//
+// The watermelon moment. Most runs never raise an elephant, so the one
+// that does stops the meadow — the clock waits behind `celebrating` —
+// and says so across the whole screen: the animal, the jackpot counting
+// up, petals, and a fanfare. Unlike the welcome cards this plays every
+// time, because it is the rare thing the whole game points at.
+//
+// Nothing here is read by the rules. sim.js has no document, so the
+// guard below keeps the harness and the tests exactly as they were.
+const CONFETTI = 72;
+const COUNT_UP_MS = 1400;
+let celebrationNode = null;
+let celebrationTimers = [];
+
+function celebrate(gain, demo) {
+  if (typeof document === 'undefined' || typeof document.createElement !== 'function' || !document.body) return;
+  closeCelebration(true);
+  state.celebrating = true;
+  syncClock();
+  cancelChain();
+
+  const still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const root = document.createElement('div');
+  root.className = 'celebrate' + (still ? ' celebrate--still' : '');
+  root.setAttribute('role', 'dialog');
+  root.setAttribute('aria-modal', 'true');
+  root.setAttribute('aria-labelledby', 'celebrateTitle');
+
+  const rays = document.createElement('div');
+  rays.className = 'celebrate-rays';
+  rays.setAttribute('aria-hidden', 'true');
+  root.appendChild(rays);
+
+  if (!still) {
+    const fall = document.createElement('div');
+    fall.className = 'celebrate-confetti';
+    fall.setAttribute('aria-hidden', 'true');
+    const shapes = ['petal', 'leaf', 'dot'];
+    for (let n = 0; n < CONFETTI; n++) {
+      const bit = document.createElement('span');
+      bit.className = 'confetti confetti--' + shapes[n % shapes.length] + ' confetti--c' + (n % 5);
+      bit.style.left = (Math.random() * 100).toFixed(1) + '%';
+      bit.style.animationDelay = (Math.random() * 0.7).toFixed(2) + 's';
+      bit.style.animationDuration = (2.6 + Math.random() * 2.2).toFixed(2) + 's';
+      bit.style.setProperty('--drift', Math.round(Math.random() * 160 - 80) + 'px');
+      bit.style.setProperty('--spin', Math.round(Math.random() * 720 - 360) + 'deg');
+      fall.appendChild(bit);
+    }
+    root.appendChild(fall);
+  }
+
+  const card = document.createElement('div');
+  card.className = 'celebrate-card';
+
+  const kicker = document.createElement('p');
+  kicker.className = 'celebrate-kicker';
+  kicker.textContent = 'Legendary';
+  card.appendChild(kicker);
+
+  const art = tileArt('elephant');
+  art.classList.add('celebrate-art');
+  card.appendChild(art);
+  if (art.tagName === 'CANVAS') requestAnimationFrame(function () { paintAnimal(art, 'elephant', 1); });
+
+  const title = document.createElement('h2');
+  title.id = 'celebrateTitle';
+  title.textContent = 'ELEPHANT!';
+  card.appendChild(title);
+
+  const sub = document.createElement('p');
+  sub.className = 'celebrate-sub';
+  sub.textContent = 'Two tigers became the giant of the meadow.';
+  card.appendChild(sub);
+
+  const score = document.createElement('p');
+  score.className = 'celebrate-score';
+  const label = document.createElement('span');
+  label.textContent = 'Jackpot';
+  const num = document.createElement('strong');
+  num.textContent = '+0';
+  score.appendChild(label);
+  score.appendChild(num);
+  card.appendChild(score);
+
+  const count = document.createElement('p');
+  count.className = 'celebrate-count';
+  count.textContent = demo ? 'Preview — no points were added'
+    : (state.elephants > 1 ? 'Elephant ×' + state.elephants + ' this meadow · ' : '')
+      + 'Your ' + ordinal(Math.max(1, lifetimeElephants)) + ' elephant ever';
+  card.appendChild(count);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn btn--primary celebrate-btn';
+  btn.textContent = 'Keep growing';
+  btn.addEventListener('click', function () { closeCelebration(); });
+  card.appendChild(btn);
+
+  root.appendChild(card);
+  // A stray tap from the merge that made the elephant must not dismiss
+  // it before it has been seen, so the backdrop only listens after a beat.
+  let armed = false;
+  celebrationTimers.push(setTimeout(function () { armed = true; }, 1200));
+  root.addEventListener('click', function (e) { if (armed && e.target === root) closeCelebration(); });
+  root.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { e.preventDefault(); closeCelebration(); }
+  });
+
+  document.body.appendChild(root);
+  document.body.classList.add('is-celebrating');
+  celebrationNode = root;
+  btn.focus();
+
+  // Count the jackpot up in shown points, the same scale as the score bar.
+  const target = Math.max(0, Math.round(gain || 0));
+  if (still || !target) num.textContent = '+' + target.toLocaleString();
+  else {
+    const t0 = performance.now();
+    const step = function (now) {
+      if (celebrationNode !== root) return;
+      const k = Math.min(1, (now - t0) / COUNT_UP_MS);
+      const eased = 1 - Math.pow(1 - k, 3);
+      num.textContent = '+' + Math.round(target * eased).toLocaleString();
+      if (k < 1) requestAnimationFrame(step);
+      else score.classList.add('is-done');
+    };
+    requestAnimationFrame(step);
+  }
+  if (window.BioAudio) celebrationTimers.push(setTimeout(function () { window.BioAudio.effect('fanfare'); }, demo ? 0 : 650));
+}
+
+function closeCelebration(silent) {
+  for (const t of celebrationTimers) clearTimeout(t);
+  celebrationTimers = [];
+  if (celebrationNode) celebrationNode.remove();
+  celebrationNode = null;
+  if (typeof document !== 'undefined' && document.body) document.body.classList.remove('is-celebrating');
+  if (!state.celebrating) return;
+  state.celebrating = false;
+  if (silent) return;
+  syncClock();
+  render();
+  if (el.board && el.board.focus) el.board.focus();
+}
+
+function ordinal(n) {
+  const v = n % 100;
+  const suf = v >= 11 && v <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' })[n % 10] || 'th';
+  return n + suf;
 }
 
 // The hand is HAND_MAX slots, filled oldest-first, with the empty ones
@@ -2876,7 +3133,14 @@ function startRun() {
   document.body.classList.remove('is-modal');
   setPaused(false);
   el.board.focus();
+  // `?celebrate` in the address shows the elephant celebration once, so
+  // it can be checked without raising one. It pays nothing.
+  if (!demoShown && /[?&]celebrate\b/.test(location.search)) {
+    demoShown = true;
+    celebrate(2500, true);
+  }
 }
+let demoShown = false;
 
 // "New game" mid-run asks once, in the button itself, rather than
 // throwing a browser dialog at the player.

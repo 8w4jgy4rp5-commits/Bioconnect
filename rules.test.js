@@ -29,7 +29,7 @@ function load() {
   vm.runInContext(
     code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX,'
          + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER,'
-         + ' SEASON_LENGTH, DIFFICULTY_STAGES, GRASS_IN_HAND, RULES_VERSION, el };',
+         + ' SEASON_LENGTH, DIFFICULTY_STAGES, GRASS_IN_HAND, RULES_VERSION, ELEPHANT_BONUS, BIG_STAMINA_PCT, el };',
     ctx
   );
   ctx.render = function () {};
@@ -348,34 +348,67 @@ for (const k of Object.keys(X.ANIMALS)) {
     ok(k + ' eats ' + food, meals.length === 1 && Number.isFinite(meals[0].points));
   }
 }
-// The entire deal distribution must be identical across discoveries/time.
-// Exhaust the random input deterministically rather than hoping samples
-// hit the old 65% branch, and test the real placement/refill paths too.
+// A hungry hunter takes a dealt animal before one the player grew
+// (rules 19), even when the grown one is cheaper or nearer to starving.
+board([[1, 1, 'wolf', starving('wolf')], [0, 1, 'rabbit', 9, RAISED], [2, 1, 'deer', 0, RAISED], [1, 0, 'fox']]);
+let wm = X.ctx.feedEveryone();
+ok('a wolf takes the dealt fox over a raised rabbit', wm.length === 1 && wm[0].ateKind === 'fox' && cell(0, 1) && cell(2, 1));
+board([[1, 1, 'wolf', starving('wolf')], [2, 1, 'deer', 0, RAISED]]);
+wm = X.ctx.feedEveryone();
+ok('...and still eats a raised deer when nothing dealt is beside it', wm.length === 1 && wm[0].ateKind === 'deer');
+board([[1, 1, 'lion', starving('lion')], [2, 1, 'deer', 0, RAISED], [0, 1, 'fox']]);
+wm = X.ctx.feedEveryone();
+ok('a lion can be fed a dealt fox', wm.length === 1 && wm[0].ateKind === 'fox' && cell(2, 1).kind === 'deer');
+board([[1, 1, 'tiger', starving('tiger')], [0, 1, 'fox']]);
+ok('so can a tiger', X.ctx.feedEveryone().length === 1);
+// The deal follows the clock, and raising a zebra jumps it to the winter
+// row (rules 19). Nothing else a player discovers changes it. Exhaust the
+// random input deterministically for every stage and every top rung.
 const originalRandom = X.ctx.Math.random;
-let fixedDeal = true;
-for (const top of X.LADDER) {
-  for (const ticks of [0, 24, 25, 75, 175, 10000]) {
-    S.topKind = top; S.ticks = ticks;
-    let grass = 0;
-    for (let n = 0; n < 1000; n++) {
-      X.ctx.Math.random = () => (n + 0.5) / 1000;
-      const dealt = X.ctx.rollHand();
-      if (dealt === 'grass') grass++;
-      else if (dealt !== 'sprout') fixedDeal = false;
-    }
-    if (grass !== X.GRASS_IN_HAND * 10) fixedDeal = false;
+function dealAt(ticks, top) {
+  S.topKind = top; S.ticks = ticks;
+  const n = {};
+  for (let i = 0; i < 1000; i++) {
+    X.ctx.Math.random = () => (i + 0.5) / 1000;
+    const k = X.ctx.rollHand();
+    n[k] = (n[k] || 0) + 1;
+  }
+  return n;
+}
+let sameAcrossDiscoveries = true, neverAboveFox = true, zebraWidens = true;
+const ZEBRA = X.LADDER.indexOf('zebra');
+for (const ticks of [0, 24, 25, 50, 75, 175, 10000]) {
+  const ref = JSON.stringify(dealAt(ticks, 'sprout'));
+  const wide = JSON.stringify(dealAt(10000, 'sprout'));
+  for (const top of X.LADDER) {
+    const d = dealAt(ticks, top);
+    if (X.LADDER.indexOf(top) < ZEBRA && JSON.stringify(d) !== ref) sameAcrossDiscoveries = false;
+    if (X.LADDER.indexOf(top) >= ZEBRA && JSON.stringify(d) !== wide) zebraWidens = false;
+    for (const k in d) if (['sprout', 'grass', 'rabbit', 'fox'].indexOf(k) < 0) neverAboveFox = false;
   }
 }
-ok('every discovery and elapsed time deal exactly the same plant mix', fixedDeal);
+ok('below the zebra, discoveries never change the deal — only the clock does', sameAcrossDiscoveries);
+ok('from the zebra up, the hand deals the winter row in any season', zebraWidens);
+ok('the hand never holds anything above the fox', neverAboveFox);
+const spring = dealAt(0, 'sprout'), summer = dealAt(25, 'sprout'), autumn = dealAt(50, 'sprout'), winter = dealAt(10000, 'elephant');
+ok('spring deals plants only, half and half',
+   spring.grass === X.GRASS_IN_HAND * 10 && spring.sprout === 1000 - X.GRASS_IN_HAND * 10, JSON.stringify(spring));
+ok('summer adds rabbits but no foxes', summer.rabbit === 100 && !summer.fox, JSON.stringify(summer));
+ok('autumn adds the first foxes', autumn.rabbit === 150 && autumn.fox === 50, JSON.stringify(autumn));
+ok('winter deals a fifth rabbits and a tenth foxes, to the end', winter.rabbit === 200 && winter.fox === 100, JSON.stringify(winter));
 board([]); S.topKind = 'elephant'; S.ticks = 10000; S.over = false;
 S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass';
 X.ctx.Math.random = () => 0.99;
 X.ctx.placeTile(at(2, 2));
-ok('late placement refills with plants and keeps the queue order',
-   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'grass');
-S.stock = []; S.refill = 0; S.next = 'sprout';
+ok('late placement refills from the winter deal and keeps the queue order',
+   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'fox', S.stock.join(',') + ' / ' + S.next);
+S.stock = []; S.refill = 0; S.next = 'sprout'; S.ticks = 0; S.topKind = 'sprout';
+X.ctx.Math.random = () => 0.99;
 X.ctx.refillHand();
-ok('late fallback refill also deals only plants', S.stock[0] === 'sprout' && S.next === 'grass');
+ok('spring fallback refill deals only plants', S.stock[0] === 'sprout' && S.next === 'grass');
+board([]); S.topKind = 'grass'; S.stock = ['fox', 'grass', 'grass']; S.over = false;
+X.ctx.placeTile(at(0, 0));
+ok('a fox from the hand counts as reaching the fox', S.topKind === 'fox', S.topKind);
 X.el.gameover = {};
 X.ctx.newGame();
 ok('restart resets difficulty and deals plants', S.ticks === 0 && X.ctx.scoreMultiplier() === 1
@@ -420,10 +453,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from the old easier supply use a different rules version', X.RULES_VERSION === 16);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 19);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 16, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 19, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;
@@ -664,6 +697,57 @@ ok('...and the shares are the whole of what the chain paid',
    S.score - scoreBefore === shares, (S.score - scoreBefore) + ' vs ' + shares);
 ok('...with the bigger rung worth more than the smaller one',
    chain[1].points > chain[0].points, chain[1].points + ' vs ' + chain[0].points);
+
+// ---------- the elephant jackpot and the big animals' patience (rules 17) ----------
+//
+// The elephant is the watermelon: rare, and worth it when it lands. The
+// jackpot is flat and paid once per elephant, on its own rung, so the
+// replay pops still add up to the score bar.
+console.log('\nthe elephant jackpot');
+board([[1, 2, 'tiger'], [2, 2, 'tiger']]);
+S.score = 0; S.ticks = 0; S.over = false; S.celebrating = false; S.elephants = 0;
+let jack = X.ctx.growFrom(at(2, 2));
+let jackPaid = X.ctx.scoreGrowth(jack);
+ok('an elephant pays the flat jackpot on top of its growth',
+   jackPaid === X.ELEPHANT_BONUS + X.ctx.growValue('elephant'), String(jackPaid));
+ok('...carried on its own rung so the replay adds up', jack[0].points === jackPaid && jack[0].bonus === X.ELEPHANT_BONUS,
+   JSON.stringify(jack[0]));
+S.ticks = X.SEASON_LENGTH * 5; S.score = 0;
+board([[1, 2, 'tiger'], [2, 2, 'tiger']]);
+jack = X.ctx.growFrom(at(2, 2));
+ok('...and the season does not multiply the jackpot',
+   X.ctx.scoreGrowth(jack) === X.ELEPHANT_BONUS + X.ctx.growValue('elephant') * X.ctx.scoreMultiplier());
+S.ticks = 0;
+ok('the jackpot alone lifts a typical run by over two thousand shown points',
+   X.ctx.displayScore(300000 + X.ELEPHANT_BONUS) - X.ctx.displayScore(300000) > 2000);
+
+// Placing the second tiger through the real move counts the elephant for
+// the run. The celebration itself needs a document, so the harness only
+// sees that it did not stop the rules.
+board([[1, 2, 'tiger']]);
+S.stock = ['tiger', 'grass', 'grass']; S.score = 0; S.over = false;
+X.ctx.placeTile(at(2, 2));
+ok('placing into an elephant counts it for this run', S.elephants === 1, String(S.elephants));
+ok('...and the run goes on afterwards', !S.over && !S.celebrating);
+
+// While the celebration is up the meadow waits: no tick, no placement.
+S.celebrating = true; const tBefore = S.ticks;
+X.ctx.worldTick();
+ok('the meadow does not tick while the elephant is celebrated', S.ticks === tBefore);
+board([]); S.stock = ['grass', 'grass', 'grass'];
+X.ctx.placeTile(at(0, 0));
+ok('...and nothing can be planted under the celebration', !S.cells[at(0, 0)]);
+S.celebrating = false;
+
+console.log('\nthe big animals wait for a partner');
+for (const [k, e, d] of [['wolf', 17, 21], ['bear', 20, 27], ['lion', 27, 37], ['tiger', 30, 41]]) {
+  ok('a ' + k + ' can wait ' + X.BIG_STAMINA_PCT + '% as long as before',
+     X.ANIMALS[k].eatAt === Math.round(e * X.BIG_STAMINA_PCT / 100) && X.ANIMALS[k].starveAt === Math.round(d * X.BIG_STAMINA_PCT / 100),
+     X.ANIMALS[k].eatAt + '/' + X.ANIMALS[k].starveAt);
+}
+ok('the small animals keep their old pace', X.ANIMALS.rabbit.starveAt === 11 && X.ANIMALS.fox.starveAt === 16 && X.ANIMALS.deer.starveAt === 25);
+ok('the elephant is still the hungriest thing on the board',
+   X.ANIMALS.elephant.starveAt < X.ANIMALS.tiger.starveAt && X.ANIMALS.elephant.starveAt < X.ANIMALS.wolf.starveAt);
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);

@@ -1883,3 +1883,83 @@ body.is-modal { overflow: hidden; }
   50%      { transform: translateY(calc(-.3px * var(--idle))) rotate(calc(.4deg * var(--idle))); }
 }
 @media (prefers-reduced-motion: reduce) { .cell--elephant .tile-art { animation: none; } }
+
+/* ---------- The elephant celebration (rules 17) ----------
+   Shown every time an elephant is born. Full screen, above the board,
+   while the meadow's clock waits. Motion stops under reduced motion. */
+.celebrate {
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center; padding: 16px;
+  background: radial-gradient(circle at 50% 42%, #fff6cfee 0%, #f3d77fe6 34%, #3c4a36f2 100%);
+  overflow: hidden;
+  animation: celebrate-in .35s ease-out both;
+}
+.celebrate-rays {
+  position: absolute; left: 50%; top: 42%; width: 220vmax; height: 220vmax;
+  margin: -110vmax 0 0 -110vmax; pointer-events: none;
+  background: repeating-conic-gradient(from 0deg, #fff3b833 0deg 9deg, transparent 9deg 22.5deg);
+  animation: celebrate-spin 24s linear infinite;
+}
+.celebrate-confetti { position: absolute; inset: 0; pointer-events: none; }
+.confetti {
+  position: absolute; top: -24px; width: 10px; height: 14px; border-radius: 60% 0 60% 0;
+  opacity: 0; animation-name: confetti-fall; animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.confetti--leaf { width: 9px; height: 16px; border-radius: 0 80% 0 80%; }
+.confetti--dot { width: 8px; height: 8px; border-radius: 50%; }
+.confetti--c0 { background: #f6c945; }
+.confetti--c1 { background: #7ec05c; }
+.confetti--c2 { background: #f29bb0; }
+.confetti--c3 { background: #e08a4a; }
+.confetti--c4 { background: #ffffff; }
+.celebrate-card {
+  position: relative; width: min(100%, 340px);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 18px 18px 20px; border-radius: 22px; text-align: center;
+  background: #fffbea; border: 3px solid #c6983b; color: var(--ink);
+  box-shadow: 0 0 0 6px #fff3c466, 0 18px 60px #3c2a0a66;
+  animation: celebrate-pop .6s cubic-bezier(.2, 1.6, .4, 1) .1s both;
+}
+.celebrate-kicker {
+  margin: 0; font-size: .78rem; font-weight: 800; letter-spacing: .22em;
+  text-transform: uppercase; color: #a87414;
+}
+.celebrate-art {
+  width: 150px; height: 150px; display: block;
+  animation: celebrate-stomp 1.1s ease-in-out .5s infinite alternate;
+  filter: drop-shadow(0 8px 10px #6b4a1240);
+}
+.celebrate h2 {
+  margin: 0; font-size: clamp(2rem, 11vw, 2.8rem); line-height: 1; letter-spacing: .04em;
+  color: #b9781a; text-shadow: 0 2px 0 #fff, 0 4px 0 #e9c46a;
+}
+.celebrate-sub { margin: 0; font-size: .9rem; color: var(--ink-soft); }
+.celebrate-score {
+  margin: 6px 0 0; display: flex; align-items: baseline; gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.celebrate-score span { font-size: .78rem; font-weight: 700; color: #a87414; text-transform: uppercase; letter-spacing: .12em; }
+.celebrate-score strong { font-size: 2rem; color: var(--green-deep); }
+.celebrate-score.is-done strong { animation: celebrate-flash .5s ease-out; }
+.celebrate-count { margin: 0; font-size: .8rem; color: var(--ink-soft); }
+.celebrate-btn { margin-top: 8px; min-height: 44px; min-width: 160px; }
+body.is-celebrating { overflow: hidden; }
+
+.gameover--elephant .gameover-card { border: 3px solid #c6983b; background: #fffbea; }
+.gameover--elephant #goNote { color: #a87414; font-weight: 700; }
+
+@keyframes celebrate-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes celebrate-spin { to { transform: rotate(360deg); } }
+@keyframes celebrate-pop { from { opacity: 0; transform: scale(.4) translateY(30px); } to { opacity: 1; transform: none; } }
+@keyframes celebrate-stomp { from { transform: translateY(0) rotate(-1.5deg); } to { transform: translateY(-6px) rotate(1.5deg); } }
+@keyframes celebrate-flash { 0% { transform: scale(1.25); } 100% { transform: scale(1); } }
+@keyframes confetti-fall {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0); }
+  8% { opacity: 1; }
+  100% { opacity: .9; transform: translate(var(--drift), 108vh) rotate(var(--spin)); }
+}
+.celebrate--still, .celebrate--still .celebrate-card { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .celebrate, .celebrate-rays, .celebrate-card, .celebrate-art, .celebrate-score.is-done strong { animation: none; }
+}

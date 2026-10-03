@@ -153,6 +153,13 @@ window.BioSound = (() => {
         pop(time, 0, .052);
       } else if (kind === 'preview') {
         pop(time, 0, .14);
+      } else if (kind === 'fanfare') {
+        // The elephant: a rising run, then a held chord with a low answer.
+        [62,66,69,74,78,81].forEach((n, i) => wood(n, time + i * .085, .085, effects));
+        const hold = time + 6 * .085 + .06;
+        [74,78,81,86].forEach((n, i) => wood(n, hold + i * .012, .09, effects));
+        tone(hz(50), hold, 1.1, .11, effects, 'sine', .02);
+        [0,1,2].forEach(i => pop(hold + .45 + i * .16, 6 + i * 2, .12));
       }
     }
 
