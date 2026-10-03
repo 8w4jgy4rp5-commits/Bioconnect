@@ -749,5 +749,8 @@ ok('the small animals keep their old pace', X.ANIMALS.rabbit.starveAt === 11 && 
 ok('the elephant is still the hungriest thing on the board',
    X.ANIMALS.elephant.starveAt < X.ANIMALS.tiger.starveAt && X.ANIMALS.elephant.starveAt < X.ANIMALS.wolf.starveAt);
 
+console.log('\nthe page asks for the current files');
+ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed\n');
 process.exit(fail ? 1 : 0);
