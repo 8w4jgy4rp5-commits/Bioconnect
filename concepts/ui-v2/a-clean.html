@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · A Clean</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5ef; --card: #ffffff; --ink: #1d2a1f; --mute: #7b857c; --line: #e6e9df;
+    --green: #2f9e57; --green-soft: #e3f4e8; --amber: #f2a93b; --red: #e5484d;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    display: flex; justify-content: center;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* top: score left, season centre, icons right */
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .score b { display: block; font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .score span { font-size: 12px; color: var(--mute); font-weight: 600; }
+  .icons { display: flex; gap: 8px; }
+  .icon { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--card); box-shadow: 0 1px 2px rgba(0,0,0,.06); display: grid; place-items: center; }
+  .icon svg { width: 18px; height: 18px; stroke: var(--ink); stroke-width: 2.2; fill: none; stroke-linecap: round; }
+
+  /* one line of progress: what you have, what is next, and the long road as dots */
+  .goal { background: var(--card); border-radius: 18px; padding: 10px 14px 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .goal-row { display: flex; align-items: center; gap: 10px; }
+  .goal-row img { height: 34px; width: 46px; object-fit: contain; }
+  .goal-text { flex: 1; font-size: 14px; font-weight: 600; color: var(--mute); }
+  .goal-text strong { color: var(--ink); font-weight: 800; }
+  .season { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #fff5e3; color: #a2650c; font-size: 12px; font-weight: 800; }
+  .season i { width: 14px; height: 14px; border-radius: 50%; background: conic-gradient(var(--amber) 0 62%, #f6dfb6 0); }
+  .ladder { display: flex; gap: 4px; margin-top: 10px; }
+  .rung { flex: 1; height: 5px; border-radius: 3px; background: var(--line); }
+  .rung img { display: none; }
+  .rung.is-done { background: var(--green); }
+  .rung.is-next { background: linear-gradient(90deg, var(--green) 50%, var(--line) 50%); }
+
+  /* the board is the page */
+  .board-wrap { flex: 1; display: flex; align-items: center; }
+  .board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 8px; background: #e4ebd9; border-radius: 22px; }
+  .cell { position: relative; background: #f1f5ea; border-radius: 13px; display: grid; place-items: center; overflow: visible; }
+  .cell.has { background: var(--card); box-shadow: 0 1px 0 rgba(0,0,0,.05), 0 2px 6px rgba(40,60,30,.06); }
+  .cell img { width: 84%; height: 84%; object-fit: contain; }
+  .cell.k-sprout img, .cell.k-grass img { width: 52%; height: 52%; }
+  .cell.is-preview { outline: 2px dashed #9cc9a8; outline-offset: -3px; background: var(--green-soft); }
+  .cell.is-preview img { opacity: .45; width: 64%; }
+  .cell.is-hungry::after { content: ''; position: absolute; top: 6px; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--red); box-shadow: 0 0 0 3px #fff; }
+  .stone { width: 56%; height: 44%; border-radius: 45% 50% 40% 48%; background: linear-gradient(160deg, #c9ccc4, #9ea39a); }
+
+  .toast { text-align: center; font-size: 13px; font-weight: 600; color: var(--mute); min-height: 18px; }
+  .toast b { color: var(--red); }
+
+  /* hand: the tile you place is big, the queue is small and quiet */
+  .hand { display: flex; align-items: center; gap: 14px; background: var(--card); border-radius: 22px; padding: 10px 14px; box-shadow: 0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(40,60,30,.08); }
+  .now { width: 66px; height: 66px; border-radius: 16px; background: var(--green-soft); box-shadow: inset 0 0 0 2px var(--green); display: grid; place-items: center; }
+  .now img { width: 70%; height: 70%; object-fit: contain; }
+  .hand-label { flex: 1; }
+  .hand-label small { display: block; font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+  .hand-label b { font-size: 18px; font-weight: 800; }
+  .queue { display: flex; gap: 6px; }
+  .queue span { width: 40px; height: 40px; border-radius: 11px; background: #f4f6f0; display: grid; place-items: center; }
+  .queue img { width: 64%; height: 64%; object-fit: contain; }
+  .queue span + span { opacity: .55; }
+  /* keep every square square, whatever the art inside */
+  .board { grid-template-rows: repeat(5, 1fr); }
+  .cell { min-width: 0; min-height: 0; }
+  .cell img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="score"><b>4,210</b><span>Best 8,032</span></div>
+    <div class="icons">
+      <button class="icon" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+      <button class="icon" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M5 8h14M5 16h14"/></svg></button>
+    </div>
+  </header>
+
+  <section class="goal">
+    <div class="goal-row">
+      <img src="../../img/wolf-calm.png" alt="">
+      <p class="goal-text"><strong>1 / 2 wolves</strong> to make a bear</p>
+      <span class="season"><i></i>Summer ×2</span>
+    </div>
+    <div class="ladder" id="ladder"></div>
+  </section>
+
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+
+  <p class="toast"><b>Wolf is hungry</b> · place a rabbit beside it</p>
+
+  <section class="hand">
+    <div class="now"><img src="art/grass.png" alt="grass"></div>
+    <div class="hand-label"><small>Place now</small><b>Grass</b></div>
+    <div class="queue"><span><img src="art/rabbit.png" alt="rabbit"></span><span><img src="art/sprout.png" alt="sprout"></span></div>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>drawBoard(document.getElementById('board')); drawLadder(document.getElementById('ladder'));</script>
+</body>
+</html>

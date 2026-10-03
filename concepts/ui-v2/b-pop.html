@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · B Pop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky1: #6cc8ff; --sky2: #bfeaff; --grass: #7fd04b; --grass-d: #4fa62a;
+    --ink: #24351c; --white: #fffdf7; --sun: #ffc93c; --sun-d: #e09a00; --red: #ff5a5f;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Fredoka', system-ui, sans-serif; color: var(--ink);
+    background:
+      radial-gradient(120% 55% at 50% 108%, #8fdc55 0 48%, transparent 48.4%),
+      radial-gradient(90% 40% at 0% 100%, #a6e86d 0 50%, transparent 50.5%),
+      linear-gradient(var(--sky1), var(--sky2) 62%);
+    display: flex; justify-content: center;
+  }
+  .app { width: 100%; max-width: 430px; min-height: 100dvh; padding: 12px 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .top { display: flex; align-items: center; gap: 8px; }
+  .chip { background: var(--white); border-radius: 18px; box-shadow: 0 4px 0 rgba(30,70,110,.25); padding: 6px 14px; }
+  .score { flex: 1; display: flex; align-items: baseline; gap: 8px; }
+  .score b { font-size: 32px; font-weight: 700; letter-spacing: .01em; }
+  .score span { font-size: 13px; font-weight: 600; color: #7a8a70; }
+  .season { background: var(--sun); box-shadow: 0 4px 0 var(--sun-d); font-weight: 700; font-size: 15px; color: #5a3b00; padding: 10px 12px; transform: rotate(-3deg); }
+  .menu { width: 46px; height: 46px; padding: 0; display: grid; place-items: center; font-size: 22px; font-weight: 700; border: 0; }
+
+  /* the goal as a speech bubble from the next animal */
+  .goal { position: relative; display: flex; align-items: center; gap: 10px; background: var(--white); border-radius: 22px; padding: 8px 14px 8px 8px; box-shadow: 0 4px 0 rgba(30,70,110,.22); }
+  .goal .pair { display: flex; align-items: center; background: #eef8e6; border-radius: 16px; padding: 4px 8px; }
+  .goal .pair img { height: 34px; width: 40px; object-fit: contain; }
+  .goal .pair img + img { filter: grayscale(1) opacity(.35); }
+  .goal p { flex: 1; font-size: 16px; font-weight: 600; line-height: 1.15; }
+  .goal p small { display: block; font-size: 12px; color: #7a8a70; font-weight: 500; }
+  .goal .next { height: 46px; width: 56px; object-fit: contain; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-4px) rotate(-3deg); } }
+
+  /* chunky board */
+  .board-wrap { flex: 1; display: flex; align-items: center; }
+  .board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; padding: 10px; background: #5fae35; border-radius: 26px; box-shadow: 0 7px 0 #3f8a20, inset 0 2px 0 rgba(255,255,255,.25); }
+  .cell { position: relative; border-radius: 15px; background: #8bd65a; box-shadow: inset 0 -4px 0 rgba(0,0,0,.08); display: grid; place-items: center; }
+  .cell.has { background: #c9f0a4; box-shadow: inset 0 -5px 0 #9ccd73; }
+  .cell img { width: 96%; height: 96%; object-fit: contain; margin-top: -10%; filter: drop-shadow(0 3px 0 rgba(0,0,0,.12)); }
+  .cell.k-sprout img, .cell.k-grass img { width: 58%; height: 58%; margin-top: -6%; }
+  .cell.is-preview { background: #a8e27c; box-shadow: inset 0 0 0 3px #fff; }
+  .cell.is-preview img { opacity: .5; width: 70%; }
+  .cell.is-hungry { background: #ffd9d4; box-shadow: inset 0 -5px 0 #f3aaa1; }
+  .cell.is-hungry::after { content: '!'; position: absolute; top: -8px; right: -6px; width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: #fff; font-weight: 700; font-size: 16px; display: grid; place-items: center; box-shadow: 0 3px 0 #c43237; animation: bob 1s ease-in-out infinite; }
+  .stone { width: 60%; height: 46%; border-radius: 45% 50% 40% 48%; background: #b7bdb0; box-shadow: inset 0 -5px 0 #8f968a; }
+
+  .toast { align-self: center; font-size: 15px; font-weight: 600; color: #b3262b; background: var(--white); padding: 6px 16px; border-radius: 999px; box-shadow: 0 3px 0 rgba(0,0,0,.12); }
+
+  /* the hand is a basket: one big tile, two waiting in bubbles */
+  .hand { display: flex; align-items: flex-end; justify-content: center; gap: 12px; }
+  .now { width: 86px; height: 86px; border-radius: 26px; background: var(--white); box-shadow: 0 6px 0 #d8c99c, 0 0 0 4px var(--sun); display: grid; place-items: center; animation: bob 1.6s ease-in-out infinite; }
+  .now img { width: 66%; height: 66%; object-fit: contain; }
+  .wait { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,253,247,.85); box-shadow: 0 4px 0 rgba(0,0,0,.12); display: grid; place-items: center; margin-bottom: 6px; }
+  .wait img { width: 66%; height: 66%; object-fit: contain; }
+  .wait.later { width: 42px; height: 42px; opacity: .7; }
+  /* keep every square square, whatever the art inside */
+  .board { grid-template-rows: repeat(5, 1fr); }
+  .cell { min-width: 0; min-height: 0; }
+  .cell img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -58%); margin: 0; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="chip score"><b>4,210</b><span>best 8,032</span></div>
+    <div class="chip season">☀ Summer ×2</div>
+    <button class="chip menu" aria-label="Menu">≡</button>
+  </header>
+
+  <section class="goal">
+    <div class="pair"><img src="../../img/wolf-calm.png" alt=""><img src="../../img/wolf-calm.png" alt=""></div>
+    <p>One more wolf!<small>2 wolves become a bear</small></p>
+    <img class="next" src="../../img/bear-calm.png" alt="bear">
+  </section>
+
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+
+  <p class="toast">Wolf is hungry! Feed it a rabbit</p>
+
+  <section class="hand">
+    <span class="wait later"><img src="art/sprout.png" alt="sprout"></span>
+    <span class="wait"><img src="art/rabbit.png" alt="rabbit"></span>
+    <span class="now"><img src="art/grass.png" alt="grass"></span>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>drawBoard(document.getElementById('board'));</script>
+</body>
+</html>
