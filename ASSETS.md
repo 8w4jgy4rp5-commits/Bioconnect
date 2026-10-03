@@ -2,6 +2,7 @@
 
 移行時点で存在した画像は、Gitに未登録・除外されているものも含めて保存。
 ゲームで使用中の画像は script.js の SPRITE_FILES と RIG が正本。
+オープニング画面だけ `img/rabbit-pose.png` / `img/fox-pose.png` を使う（2026-10-03、ゲームの描画を透過で切り出した1枚絵。盤面は部品リグのまま）。
 実コードではラダー10種すべての画像を使用（ウサギ・キツネ・シカ・シマウマ・バッファロー・オオカミ・クマ・ライオン・トラ・ゾウ）。クマは親子の絵。残る候補は不採用の記録として保管する。
 シカは満腹 `img/deer-calm.png` と空腹 `img/deer-hungry.png` の2枚組（2026-10-01）。元絵は
 `concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923.png`（おびえた描き直し）で、

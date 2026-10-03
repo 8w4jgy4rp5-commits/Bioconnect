@@ -2919,6 +2919,7 @@ function renderGrowth() {
   if (el.growthNextName) el.growthNextName.textContent = next ? kindName(next) : 'Complete!';
   if (el.growthFinalTile) paintTile(el.growthFinalTile, 'elephant');
   if (el.growthProgress) el.growthProgress.textContent = Math.max(0, rank(top) - 1) + '/10 animals';
+  renderGoalBubble(top, next);
   if (!el.growthTrack) return;
   for (const node of el.growthTrack.querySelectorAll('.chain-step')) {
     const art = node.querySelector('[data-art]');
@@ -2934,6 +2935,33 @@ function renderGrowth() {
     node.classList.toggle('is-next', kind === next);
     node.setAttribute('aria-label', kindName(kind) + (kind === top ? ', highest reached' : kind === next ? ', next discovery' : rank(kind) < rank(top) ? ', reached' : ', undiscovered'));
   }
+}
+
+// The bubble over the board says the next move in words: how many of
+// the highest kind are standing, and what two of them become. Two
+// pictures of that kind, the second greyed until it exists.
+function plural(kind) {
+  if (kind === 'fox') return 'foxes';
+  if (kind === 'wolf') return 'wolves';
+  if (kind === 'grass' || kind === 'deer' || kind === 'buffalo') return kind;
+  return kind + 's';
+}
+function renderGoalBubble(top, next) {
+  if (!el.goalHead) return;
+  const have = countKind(top);
+  if (el.growthCurrentTile2) {
+    paintTile(el.growthCurrentTile2, next ? top : null);
+    el.growthCurrentTile2.classList.toggle('is-missing', have < 2);
+  }
+  if (!next) {
+    el.goalHead.textContent = 'Elephant raised!';
+    el.goalSub.textContent = 'Keep it fed with animals you grew';
+    return;
+  }
+  el.goalHead.textContent = have >= 2 ? 'Put the ' + plural(top) + ' side by side!'
+    : have === 1 ? 'One more ' + top + '!'
+    : 'Make two ' + plural(top);
+  el.goalSub.textContent = 'Two ' + plural(top) + ' become ' + an(next).toLowerCase();
 }
 
 function renderHand() {
@@ -3078,6 +3106,21 @@ function nextGoal() {
 // focus goes back to whichever button opened it.
 let howOpener = null;
 
+function menuOpen() { return !!el.menuSheet && !el.menuSheet.hidden; }
+function openMenu() {
+  el.menuSheet.hidden = false;
+  document.body.classList.add('is-modal');
+  setPaused(true);
+  el.menuClose.focus();
+}
+function closeMenu() {
+  if (!menuOpen()) return;
+  el.menuSheet.hidden = true;
+  if (el.startScreen.hidden && el.howModal.hidden) document.body.classList.remove('is-modal');
+  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || counting);
+  el.menuBtn.focus();
+}
+
 function openHow(opener) {
   el.howModal.hidden = false;
   document.body.classList.add('is-modal');
@@ -3176,7 +3219,8 @@ async function init() {
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
-    'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer'];
+    'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer',
+    'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
@@ -3259,14 +3303,29 @@ async function init() {
     if (e.key === 'Escape' && !el.howModal.hidden) resume();
   });
   document.addEventListener('visibilitychange', function () {
-    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || counting);
+    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || counting);
   });
+
+  // The menu holds the guide, the pace, a new game, the ladder and the
+  // level. Like the guide, it stops the meadow while it is open.
+  if (el.menuBtn) {
+    el.menuBtn.addEventListener('click', openMenu);
+    el.menuClose.addEventListener('click', closeMenu);
+    el.menuSheet.addEventListener('click', function (e) { if (e.target === el.menuSheet) closeMenu(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menuOpen() && el.howModal.hidden) closeMenu();
+    });
+    // the guide opens over the game, not over the menu
+    el.howBtn.addEventListener('click', function () { el.menuSheet.hidden = true; }, true);
+  }
 
   // The title screen carries the guide, so it is reachable before the
   // first tap. Sound has no switch: the device's silent mode decides.
   el.startHowBtn.addEventListener('click', function () { openHow(el.startHowBtn); setPaused(true); });
 
   el.newBtn.addEventListener('click', onNewGame);
+  // a new game that actually started takes the menu down with it
+  if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
   el.goAgain.addEventListener('click', function () { disarmNew(); newGame(); });
 
   // the little reference row under the board

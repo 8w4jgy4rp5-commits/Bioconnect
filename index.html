@@ -6,6 +6,10 @@
   <title>Bioconnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23eef6e4'/><path d='M16 3.5v25M3.5 16h25' stroke='%23d5e5c2' stroke-width='1.2'/><path d='M8.6 12.6V8.2' stroke='%235a9e4b' stroke-width='1.5' stroke-linecap='round'/><path d='M8.6 10.4c-2 0-3.2-1.4-3.4-3.3 2 .1 3.2 1.4 3.4 3.3z' fill='%236fbb56'/><path d='M8.6 9.6c.2-1.9 1.4-3.2 3.4-3.3-.2 1.9-1.4 3.3-3.4 3.3z' fill='%236fbb56'/><path d='M20.2 25.4c0-2.6 2-4.6 4.4-4.6s4.4 2 4.4 4.6z' fill='%23e08a4a'/><path d='M22.3 21.6l-1.1-3.1 2.9 1.5zm4.6 0l1.1-3.1-2.9 1.5z' fill='%23e08a4a'/><circle cx='23' cy='24' r='.7' fill='%23fff'/><circle cx='25.8' cy='24' r='.7' fill='%23fff'/></svg>" />
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
+  <link rel="stylesheet" href="pop.css" />
   <!-- cobbleworks:seo:start -->
     <meta name="description" content="Grow a food chain, then keep it fed. A real-time high-score puzzle." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/Bioconnect/" />
@@ -207,54 +211,44 @@
     <p class="tagline">Grow a food chain, then keep it fed.</p>
   </header>
 
-  <!-- ---------- Scores ---------- -->
-  <section class="scorebar" aria-label="Score">
-    <div class="score">
-      <span class="score-label">Score</span>
-      <strong class="score-value" id="scoreValue">0</strong>
-    </div>
-    <div class="score score--best">
-      <span class="score-label">Best</span>
-      <strong class="score-value" id="bestValue">0</strong>
-    </div>
-
-  </section>
-
-  <!-- Planting order and growth are separate, visible decisions. -->
-  <section class="handbar" aria-label="Planting order, left to right">
-    <div class="hand-slot" id="hand" aria-label="Planting order" aria-live="polite">
-      <div class="hand-tiles">
-        <div class="hand-piece is-now"><span class="hand-step-label">Place now</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
-        <span class="hand-arrow" aria-hidden="true">→</span>
-        <div class="hand-piece"><span class="hand-step-label">Next</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
-        <span class="hand-arrow" aria-hidden="true">→</span>
-        <div class="hand-piece"><span class="hand-step-label">Then</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+  <!-- Score, season and the menu. Everything that is not the next move
+       lives behind the menu. -->
+  <div class="pop-top">
+    <!-- ---------- Scores ---------- -->
+    <section class="scorebar pop-chip" aria-label="Score">
+      <div class="score">
+        <span class="score-label">Score</span>
+        <strong class="score-value" id="scoreValue">0</strong>
       </div>
-      <span class="refill sr-only"><span class="refill-track"><span class="refill-fill" id="refillFill"></span></span><span class="refill-word" id="refillWord">Ready</span></span>
-    </div>
-    <span class="hand-arrow" aria-hidden="true">→</span>
-    <div class="hand-piece hand-slot--next"><span class="hand-step-label">Later</span><span class="tile tile--next" id="nextTile"></span><span class="hand-kind-name" id="nextKindName"></span></div>
-    <p class="pause-note" id="pauseNote" hidden>Paused</p>
-  </section>
+      <div class="score score--best">
+        <span class="score-label">Best</span>
+        <strong class="score-value" id="bestValue">0</strong>
+      </div>
 
-  <section class="growth-summary" aria-label="Growth toward the elephant">
-    <div class="growth-pair">
-      <div class="growth-kind"><span class="growth-label">Reached</span><span class="growth-picture"><span class="tile growth-tile" id="growthCurrentTile"></span><span class="growth-two">×2</span></span><strong id="growthCurrentName">Sprout</strong></div>
-      <span class="growth-arrow" aria-hidden="true">→</span>
-      <div class="growth-kind"><span class="growth-label" id="growthNextLabel">Grow next</span><span class="tile growth-tile" id="growthNextTile"></span><strong id="growthNextName">Grass</strong></div>
+    </section>
+    <!-- ---------- Season ---------- -->
+    <!-- The ramp has to be visible or a harder board just reads as bad luck. -->
+    <div class="season pop-chip" id="seasonBar" data-season="0">
+      <span class="season-name" id="seasonName">Spring</span>
+      <span class="season-note" id="seasonNote">Stones are rare and growth keeps well.</span>
+      <span class="season-mult" id="seasonMult">Points &times;1</span>
+      <span class="season-next" id="seasonNext">Next challenge in 45s · Points &times;2</span>
+      <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
     </div>
-    <div class="growth-goal"><span class="tile growth-tile" id="growthFinalTile"></span><div><span class="growth-label">Final goal</span><strong>Elephant</strong><span id="growthProgress">0/10 animals</span></div></div>
-  </section>
-
-  <!-- ---------- Season ---------- -->
-  <!-- The ramp has to be visible or a harder board just reads as bad luck. -->
-  <div class="season" id="seasonBar" data-season="0">
-    <span class="season-name" id="seasonName">Spring</span>
-    <span class="season-note" id="seasonNote">Stones are rare and growth keeps well.</span>
-    <span class="season-mult" id="seasonMult">Points &times;1</span>
-    <span class="season-next" id="seasonNext">Next challenge in 45s · Points &times;2</span>
-    <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
+    <button class="pop-chip menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-haspopup="dialog" aria-controls="menuSheet"><span aria-hidden="true"></span></button>
   </div>
+
+  <!-- What to make next, said as a speech bubble from the next animal. -->
+  <section class="growth-summary" aria-label="Growth toward the elephant">
+    <div class="goal-pair"><span class="tile growth-tile" id="growthCurrentTile"></span><span class="tile growth-tile is-missing" id="growthCurrentTile2"></span></div>
+    <p class="goal-words"><strong id="goalHead">Two sprouts make grass</strong><small id="goalSub">Place them side by side</small></p>
+    <span class="tile growth-tile goal-next" id="growthNextTile"></span>
+    <span class="sr-only"><span id="growthCurrentName"></span> <span id="growthNextLabel"></span> <span id="growthNextName"></span> <span class="tile" id="growthFinalTile"></span> <span id="growthProgress"></span></span>
+  </section>
+
+
+
+
 
   <p class="move-hint" id="moveHint" role="status">Tap to plant · Hold a square to see its path</p>
 
@@ -277,6 +271,35 @@
     </div>
   </div>
 
+  <section class="meadow-notes" aria-label="Meadow updates"><p class="goal" id="goal">Two sprouts side by side become grass.</p><p class="ticker" id="ticker" role="status" aria-live="polite">Tap an empty square to plant.</p></section>
+
+  <!-- Planting order and growth are separate, visible decisions. -->
+  <section class="handbar" aria-label="Planting order, left to right">
+    <div class="hand-slot" id="hand" aria-label="Planting order" aria-live="polite">
+      <div class="hand-tiles">
+        <div class="hand-piece is-now"><span class="hand-step-label">Place now</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+        <span class="hand-arrow" aria-hidden="true">→</span>
+        <div class="hand-piece"><span class="hand-step-label">Next</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+        <span class="hand-arrow" aria-hidden="true">→</span>
+        <div class="hand-piece"><span class="hand-step-label">Then</span><span class="tile hand-tile"></span><span class="hand-kind-name"></span></div>
+      </div>
+      <span class="refill sr-only"><span class="refill-track"><span class="refill-fill" id="refillFill"></span></span><span class="refill-word" id="refillWord">Ready</span></span>
+    </div>
+    <span class="hand-arrow" aria-hidden="true">→</span>
+    <div class="hand-piece hand-slot--next"><span class="hand-step-label">Later</span><span class="tile tile--next" id="nextTile"></span><span class="hand-kind-name" id="nextKindName"></span></div>
+    <p class="pause-note" id="pauseNote" hidden>Paused</p>
+  </section>
+
+
+
+
+
+</main>
+
+<!-- The menu: everything that is not the next move. Opening it pauses the meadow. -->
+<div class="menu-sheet" id="menuSheet" role="dialog" aria-modal="true" aria-labelledby="menuTitle" hidden>
+  <div class="menu-card">
+    <div class="menu-head"><h2 id="menuTitle">Menu</h2><button class="pop-chip menu-close" id="menuClose" type="button" aria-label="Close menu">&times;</button></div>
   <!-- ---------- Controls ---------- -->
   <div class="controls">
     <button class="btn" id="howBtn" type="button">How to play</button>
@@ -285,14 +308,6 @@
     <button class="btn btn--speed" id="speedBtn" type="button" aria-pressed="false">Normal</button>
     <button class="btn" id="newBtn" type="button">New game</button>
   </div>
-
-  <!-- ---------- Food chain reference ---------- -->
-  <section class="chain" aria-label="Food chain">
-    <div class="chain-heading"><h2 class="chain-head">The path to the elephant</h2><span>Match 2 to grow →</span></div>
-    <ol class="chain-row" id="growthTrack"><li class="chain-step"><span class="tile tile--mini" data-art="sprout"></span><span class="chain-name">Sprout</span></li><li class="chain-step"><span class="tile tile--mini" data-art="grass"></span><span class="chain-name">Grass</span></li><li class="chain-step"><span class="tile tile--mini" data-art="rabbit"></span><span class="chain-name">Rabbit</span></li><li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span></li><li class="chain-step"><span class="tile tile--mini" data-art="deer"></span><span class="chain-name">Deer</span></li><li class="chain-step"><span class="tile tile--mini" data-art="zebra"></span><span class="chain-name">Zebra</span></li><li class="chain-step"><span class="tile tile--mini" data-art="buffalo"></span><span class="chain-name">Buffalo</span></li><li class="chain-step"><span class="tile tile--mini" data-art="wolf"></span><span class="chain-name">Wolf</span></li><li class="chain-step"><span class="tile tile--mini" data-art="bear"></span><span class="chain-name">Bear</span></li><li class="chain-step"><span class="tile tile--mini" data-art="lion"></span><span class="chain-name">Lion</span></li><li class="chain-step"><span class="tile tile--mini" data-art="tiger"></span><span class="chain-name">Tiger</span></li><li class="chain-step"><span class="tile tile--mini" data-art="elephant"></span><span class="chain-name">Elephant</span></li></ol>
-    <p class="chain-note">Growth order · Animals have different diets. See How to play.</p>
-  </section>
-
   <!-- The rung. Score alone does not say whether a run was any good,
          and the bar behind it is the difficulty curve you can watch. -->
     <div class="level" id="level" data-level="1" role="status" aria-live="polite">
@@ -303,13 +318,17 @@
       </span>
       <span class="level-track"><span class="level-fill" id="levelFill"></span></span>
     </div>
-
-  <section class="meadow-notes" aria-label="Meadow updates"><p class="goal" id="goal">Two sprouts side by side become grass.</p><p class="ticker" id="ticker" role="status" aria-live="polite">Tap an empty square to plant.</p></section>
-
+  <!-- ---------- Food chain reference ---------- -->
+  <section class="chain" aria-label="Food chain">
+    <div class="chain-heading"><h2 class="chain-head">The path to the elephant</h2><span>Match 2 to grow →</span></div>
+    <ol class="chain-row" id="growthTrack"><li class="chain-step"><span class="tile tile--mini" data-art="sprout"></span><span class="chain-name">Sprout</span></li><li class="chain-step"><span class="tile tile--mini" data-art="grass"></span><span class="chain-name">Grass</span></li><li class="chain-step"><span class="tile tile--mini" data-art="rabbit"></span><span class="chain-name">Rabbit</span></li><li class="chain-step"><span class="tile tile--mini" data-art="fox"></span><span class="chain-name">Fox</span></li><li class="chain-step"><span class="tile tile--mini" data-art="deer"></span><span class="chain-name">Deer</span></li><li class="chain-step"><span class="tile tile--mini" data-art="zebra"></span><span class="chain-name">Zebra</span></li><li class="chain-step"><span class="tile tile--mini" data-art="buffalo"></span><span class="chain-name">Buffalo</span></li><li class="chain-step"><span class="tile tile--mini" data-art="wolf"></span><span class="chain-name">Wolf</span></li><li class="chain-step"><span class="tile tile--mini" data-art="bear"></span><span class="chain-name">Bear</span></li><li class="chain-step"><span class="tile tile--mini" data-art="lion"></span><span class="chain-name">Lion</span></li><li class="chain-step"><span class="tile tile--mini" data-art="tiger"></span><span class="chain-name">Tiger</span></li><li class="chain-step"><span class="tile tile--mini" data-art="elephant"></span><span class="chain-name">Elephant</span></li></ol>
+    <p class="chain-note">Growth order · Animals have different diets. See How to play.</p>
+  </section>
   <footer class="app-footer">
     <p>Your best score is saved in this browser (and synced when you are logged in).</p>
   </footer>
-</main>
+  </div>
+</div>
 
 <!-- The run waits here until the player chooses to begin. Keeping the
      game board behind the screen lets the title feel like a real opening
@@ -323,19 +342,13 @@
       <div class="start-sun"></div>
       <div class="start-cloud start-cloud--1"></div>
       <div class="start-cloud start-cloud--2"></div>
-      <svg class="start-hills" viewBox="0 0 300 160" preserveAspectRatio="none">
-        <path d="M0 74c46-22 78 6 122-8s86-26 178-2v96H0z" fill="#d7e8bd"/>
-        <path d="M0 104c54-20 96 10 150 2s102-22 150-6v60H0z" fill="#c6dfa6"/>
-        <path d="M0 136c60-14 104 8 158 2s96-14 142-8v30H0z" fill="#b5d492"/>
-      </svg>
-      <svg class="start-critter start-critter--elephant"><use href="#artElephant"/></svg>
-      <svg class="start-critter start-critter--deer" style="--start-delay: .7s"><use href="#artDeer"/></svg>
-      <svg class="start-critter start-critter--rabbit" style="--start-delay: 1.4s"><use href="#artRabbit"/></svg>
-      <svg class="start-critter start-critter--fox" style="--start-delay: 2.1s"><use href="#artFox"/></svg>
-      <svg class="start-tufts" viewBox="0 0 300 24" preserveAspectRatio="none">
-        <path d="M10 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM48 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM92 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM140 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM196 24c-1-6 0-10 2-13 1 5 .5 9-.4 13zM252 24c-1-5 0-8 2-11 1 4 .4 8-.4 11zM284 24c-1-6 0-10 2-13 1 5 .5 9-.4 13z" fill="#9dc87c"/>
-      </svg>
-      <div class="start-fade"></div>
+      <div class="start-hill start-hill--back"></div>
+      <div class="start-hill start-hill--front"></div>
+      <img class="start-critter start-critter--elephant" src="img/elephant-calm.png" alt="">
+      <img class="start-critter start-critter--lion" src="img/lion-calm.png" alt="" style="--start-delay: .5s">
+      <img class="start-critter start-critter--zebra" src="img/zebra-calm.png" alt="" style="--start-delay: 1s">
+      <img class="start-critter start-critter--fox" src="img/fox-pose.png" alt="" style="--start-delay: 1.5s">
+      <img class="start-critter start-critter--rabbit" src="img/rabbit-pose.png" alt="" style="--start-delay: 2s">
     </div>
 
     <div class="start-topline">
