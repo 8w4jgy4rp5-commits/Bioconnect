@@ -3145,6 +3145,7 @@ function playIntro() {
   el.startScreen.hidden = true;
   document.body.classList.remove('is-modal');
   counting = true;
+  if (window.BioAudio) window.BioAudio.theme('rest');
   showWord('Ready??', '');
   if (window.BioAudio) window.BioAudio.effect('ready');
   countTimers.push(setTimeout(function () {
@@ -3173,6 +3174,7 @@ function endIntro() {
 
 function startRun() {
   el.startScreen.hidden = true;
+  if (window.BioAudio) window.BioAudio.theme('game');
   document.body.classList.remove('is-modal');
   setPaused(false);
   el.board.focus();

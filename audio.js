@@ -1,7 +1,7 @@
 // Music and effects are always on; the device's silent mode is the switch.
 // Browsers hold audio until the first touch or key, so that unlocks it.
 window.BioAudio = (() => {
-  let ctx, synth, paused = true;
+  let ctx, synth, paused = true, theme = 'title';
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
 
   // Safari: "ambient" obeys the ring/silent switch and mixes with other audio.
@@ -22,16 +22,17 @@ window.BioAudio = (() => {
     // A stalled tab skips silence rather than bursting through missed notes.
     if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + .035;
     while (nextTime < ctx.currentTime + .16) {
-      synth.musicBeat(beat, nextTime);
+      synth.musicBeat(beat, nextTime, theme);
       beat = (beat + 1) % window.BioSound.BEATS;
-      nextTime += window.BioSound.BEAT;
+      nextTime += window.BioSound.beatLength(theme);
     }
   }
 
-  // The meadow tune plays on the title, the guide and the game alike;
-  // only a hidden tab silences it.
+  // The title plays a music-box arrangement of the meadow tune, the
+  // countdown is quiet ('rest'), and the game plays the full band.
+  // Otherwise only a hidden tab silences it.
   function sync() {
-    const active = !document.hidden && ctx && ctx.state === 'running';
+    const active = !document.hidden && ctx && ctx.state === 'running' && theme !== 'rest';
     if (active && !timer) {
       nextTime = ctx.currentTime + .04;
       schedule(); timer = setInterval(schedule, 50);
@@ -62,6 +63,13 @@ window.BioAudio = (() => {
   });
 
   return {
+    theme(name) {
+      if (theme === name) return;
+      theme = name;
+      if (synth) synth.cancel('music');
+      clearInterval(timer); timer = 0; beat = 0;
+      sync();
+    },
     pause(on) {
       if (paused === on) return;
       paused = on;

@@ -3,6 +3,8 @@
 // Kept separate from playback so previews render the very same instruments.
 window.BioSound = (() => {
   const BPM = 96, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
+  // The title screen plays the same tune, slower, as a music box.
+  const TITLE_BEAT = 60 / 78;
   const chords = [
     [50,57,61,66], [47,54,57,62], [52,55,59,66], [45,55,59,64],
     [50,57,61,66], [43,54,57,62], [52,55,59,62], [45,55,61,64],
@@ -99,7 +101,34 @@ window.BioSound = (() => {
       });
     }
 
-    function musicBeat(index, time) {
+    // A music box: bright, short-ringing, with a faint bell overtone.
+    function box(midi, time, volume) {
+      const f = hz(midi);
+      tone(f, time, 1.25, volume, music, 'sine', .003);
+      tone(f * 2, time, .42, volume * .22, music, 'sine', .003);
+      tone(f * 3.01, time, .16, volume * .07, music, 'sine', .002);
+    }
+
+    // Opening arrangement: melody an octave up with a soft echo, a slow
+    // swelling pad in place of the bass, and no brushed percussion, so the
+    // title feels like the meadow before morning rather than the game.
+    function titleBeat(beat, time) {
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      for (const [position, midi] of phrases[bar]) {
+        if (Math.floor(position) === within) {
+          const t = time + (position - within) * TITLE_BEAT;
+          box(midi + 12, t, .05);
+          box(midi + 12, t + TITLE_BEAT * .75, .011);
+        }
+      }
+      if (within === 0) {
+        notes.slice(1).forEach((midi, i) => tone(hz(midi), time + i * .05, TITLE_BEAT * 4.2, .009, music, 'triangle', .6));
+        tone(hz(notes[0]), time, TITLE_BEAT * 3.8, .045, music, 'sine', .35);
+      }
+    }
+
+    function musicBeat(index, time, theme = 'game') {
+      if (theme === 'title') return titleBeat(((index % BEATS) + BEATS) % BEATS, time);
       const beat = ((index % BEATS) + BEATS) % BEATS;
       const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
       const sway = .018 * Math.sin(bar * 1.7 + within);
@@ -180,5 +209,6 @@ window.BioSound = (() => {
 
     return { musicBeat, effect, cancel };
   }
-  return { create, BPM, BEAT, BEATS, title: 'Meadow Steps' };
+  const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
+  return { create, BPM, BEAT, BEATS, beatLength, title: 'Meadow Steps' };
 })();
