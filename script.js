@@ -1031,9 +1031,17 @@ function growFrom(i, cells = state.cells, preview = false) {
     }
     for (const n of cleared) cells[n] = null;
 
-    // Grow toward an existing tile. Ties always use reading order.
-    const destination = group.filter(function (at) { return at !== i; })
-      .sort(function (a, b) { return a - b; })[0];
+    // Land where the next rung is waiting, so the chain keeps going:
+    // `grass | new grass | rabbit` must make its rabbit in the middle,
+    // and `rabbit | grass | new grass` must make it next to the rabbit.
+    // Neither "the square you placed" nor "the existing square" gets both.
+    // With nothing to join, grow toward an existing tile. Ties always use
+    // reading order, existing squares before the one just placed.
+    const order = group.filter(function (at) { return at !== i; })
+      .sort(function (a, b) { return a - b; }).concat([i]);
+    const destination = order.find(function (at) {
+      return neighbours(at).some(function (n) { return cells[n] && cells[n].kind === up; });
+    }) ?? order[0];
     for (const g of group) cells[g] = null;
     i = destination;
 

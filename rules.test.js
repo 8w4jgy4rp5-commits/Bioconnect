@@ -302,6 +302,13 @@ ok('preview leaves all live state unchanged', JSON.stringify(S) === beforePrevie
 ok('preview predicts three growths ending at the original rabbit', forecast.length === 3 && forecast[2].at === at(0, 2));
 X.ctx.placeTile(at(3, 2));
 ok('the chain reaches a fox without leaving gaps between rungs', cell(0, 2).kind === 'fox' && !cell(1, 2) && !cell(2, 2) && !cell(3, 2));
+// Regression: grass | new grass | rabbit. Landing on the existing grass
+// put the new rabbit one square away from the old one and broke the chain.
+board([[0, 2, 'grass'], [2, 2, 'rabbit']]);
+S.stock = ['grass']; S.over = false;
+X.ctx.placeTile(at(1, 2));
+ok('a growth lands next to the rung it can join', cell(2, 2) && cell(2, 2).kind === 'fox' && !cell(0, 2) && !cell(1, 2),
+  [0, 1, 2].map(x => cell(x, 2) ? cell(x, 2).kind : '.').join(','));
 board([[1, 2, 'sprout'], [3, 2, 'sprout']]);
 S.stock = ['sprout'];
 const tie = X.ctx.previewGrowth(at(2, 2));
