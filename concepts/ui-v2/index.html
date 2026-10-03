@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · Three Looks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --ink: #1c1c1e; --mute: #6e6e73; --bg: #f2f2f7; --card: #fff; }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--ink); font-family: -apple-system, 'Plus Jakarta Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+
+  /* App Store style listing header */
+  .listing { max-width: 1180px; margin: 0 auto; padding: 28px 16px 8px; display: flex; align-items: center; gap: 16px; }
+  .app-icon { width: 76px; height: 76px; border-radius: 18px; flex: none; background: linear-gradient(160deg, #9fe07a, #3e9a3c); display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+  .app-icon img { width: 70%; }
+  .listing h1 { font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+  .listing p { font-size: 14px; color: var(--mute); margin-top: 2px; }
+  .get { margin-left: auto; background: #e9e9ee; color: #0a84ff; font-weight: 800; font-size: 15px; padding: 6px 20px; border-radius: 999px; }
+  .section-title { max-width: 1180px; margin: 18px auto 0; padding: 0 16px; font-size: 20px; font-weight: 800; }
+
+  /* the screenshot row: swipes on a phone, sits side by side on a wide screen */
+  .shots { max-width: 1180px; margin: 0 auto; padding: 14px 16px 34px; display: flex; gap: 18px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+  .shot { flex: none; width: min(78vw, 360px); scroll-snap-align: center; border-radius: 26px; padding: 22px 18px 0; overflow: hidden; display: flex; flex-direction: column; align-items: center; }
+  .shot.a { background: linear-gradient(180deg, #e9f6e3, #cfe9c4); }
+  .shot.b { background: linear-gradient(180deg, #59c2ff, #9be06a); }
+  .shot.c { background: linear-gradient(180deg, #0b1712, #1c3a2a); color: #eef5ee; }
+  .tag { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; opacity: .6; }
+  .shot h2 { font-size: 24px; line-height: 1.12; font-weight: 800; text-align: center; letter-spacing: -.02em; margin: 6px 0 16px; }
+  .shot.b h2 { color: #fff; text-shadow: 0 2px 0 rgba(0,60,110,.25); }
+
+  /* phone: a 390x780 page drawn at the frame's width, cut off at the bottom like a store screenshot */
+  .phone { width: 100%; position: relative; background: #111; border-radius: 34px 34px 0 0; padding: 9px 9px 0; box-shadow: 0 18px 40px rgba(0,0,0,.25); }
+  .screen { position: relative; width: 100%; aspect-ratio: 390 / 744; border-radius: 26px 26px 0 0; overflow: hidden; }
+  .page { position: absolute; top: 0; left: 0; width: 390px; height: 744px; transform-origin: 0 0; }
+  .status { height: 44px; padding: 0 30px 0 34px; display: flex; align-items: center; justify-content: space-between; font: 600 16px -apple-system, 'Plus Jakarta Sans', sans-serif; }
+  .status i { font-style: normal; letter-spacing: 2px; font-size: 13px; }
+  .page iframe { display: block; width: 390px; height: 700px; border: 0; pointer-events: none; }
+  .a .page { background: #f4f5ef; color: #1d2a1f; }
+  .b .page { background: #6cc8ff; color: #24351c; }
+  .c .page { background: #0b1712; color: #eef5ee; }
+  .island { position: absolute; top: 19px; left: 50%; transform: translateX(-50%); width: 30%; height: 22px; background: #111; border-radius: 999px; z-index: 2; }
+  .open { margin: 14px 0 18px; font-size: 13px; font-weight: 700; color: inherit; opacity: .75; }
+
+  .notes { max-width: 1180px; margin: 0 auto; padding: 0 16px 40px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .note { background: var(--card); border-radius: 16px; padding: 14px 16px; font-size: 14px; line-height: 1.5; color: #3a3a3c; }
+  .note b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+<header class="listing">
+  <div class="app-icon"><img src="art/rabbit.png" alt=""></div>
+  <div><h1>Bioconnect</h1><p>Grow a food chain, then keep it fed.</p></div>
+  <span class="get">GET</span>
+</header>
+<h2 class="section-title">Three looks for the play screen</h2>
+
+<section class="shots">
+  <article class="shot a">
+    <span class="tag">A · Clean</span>
+    <h2>Calm, roomy,<br>board first</h2>
+    <div class="phone"><span class="island"></span><div class="screen"><div class="page"><div class="status"><span>9:41</span><i>●●● ▮</i></div><iframe src="a-clean.html" title="A Clean" loading="lazy"></iframe></div></div></div>
+  </article>
+  <article class="shot b">
+    <span class="tag">B · Pop</span>
+    <h2>Bright, chunky,<br>made to play</h2>
+    <div class="phone"><span class="island"></span><div class="screen"><div class="page"><div class="status"><span>9:41</span><i>●●● ▮</i></div><iframe src="b-pop.html" title="B Pop" loading="lazy"></iframe></div></div></div>
+  </article>
+  <article class="shot c">
+    <span class="tag">C · Dusk</span>
+    <h2>A meadow<br>after dark</h2>
+    <div class="phone"><span class="island"></span><div class="screen"><div class="page"><div class="status"><span>9:41</span><i>●●● ▮</i></div><iframe src="c-dusk.html" title="C Dusk" loading="lazy"></iframe></div></div></div>
+  </article>
+</section>
+
+<section class="notes">
+  <div class="note"><b>A · Clean</b>White and spacious. One goal line with a thin 12-step bar; the tile you place now is the big one.</div>
+  <div class="note"><b>B · Pop</b>Sky and hills, raised squares, round type. The goal speaks in a bubble; a hungry animal bounces a red “!”.</div>
+  <div class="note"><b>C · Dusk</b>Dark glass over a night meadow. The ladder is a row of silhouettes that light up as you reach them.</div>
+</section>
+
+<script>
+  // draw each 390px page at whatever width its phone ended up
+  function fit() {
+    document.querySelectorAll('.screen').forEach(function (s) {
+      s.querySelector('.page').style.transform = 'scale(' + (s.clientWidth / 390) + ')';
+    });
+  }
+  addEventListener('resize', fit);
+  fit();
+</script>
+</body>
+</html>
