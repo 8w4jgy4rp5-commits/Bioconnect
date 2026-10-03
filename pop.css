@@ -124,7 +124,11 @@ body {
 .goal-pair { display: flex; align-items: center; flex: none; padding: 4px 8px; border-radius: 16px; background: #eef8e6; }
 .growth-summary .tile.growth-tile { width: 38px; height: 34px; background: transparent; border: 0; box-shadow: none; }
 .growth-summary .tile.growth-tile.is-missing { filter: grayscale(1) opacity(.35); }
-.goal-words { flex: 1; min-width: 0; margin: 0; line-height: 1.15; }
+/* Room for a two-line headline is kept even when it fits on one, and
+   the same for the ticker below the board: otherwise every tap that
+   changes the wording shifts the board and the hand a few pixels, and
+   that repeated jolt makes players feel seasick. */
+.goal-words { flex: 1; min-width: 0; margin: 0; line-height: 1.15; min-height: calc(16px * 1.15 * 2 + 12px * 1.15); display: flex; flex-direction: column; justify-content: center; }
 .goal-words strong { display: block; font-size: 16px; font-weight: 600; }
 .goal-words small { display: block; font-size: 12px; font-weight: 500; color: var(--pop-mute); }
 .growth-summary .tile.goal-next { width: 54px; height: 46px; flex: none; animation: pop-bob 2.4s ease-in-out infinite; }
@@ -178,10 +182,11 @@ body {
 
 /* ---------- message and hand ---------- */
 
-.meadow-notes { display: flex; justify-content: center; margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
+.meadow-notes { display: flex; justify-content: center; align-items: center; min-height: calc(14px * 1.15 * 2 + 12px + 3px); margin: 0; padding: 0; background: none; border: 0; box-shadow: none; }
 .meadow-notes .goal { display: none; }
 .meadow-notes .ticker {
   margin: 0;
+  line-height: 1.15;
   max-width: 100%;
   padding: 6px 16px;
   border-radius: 999px;
