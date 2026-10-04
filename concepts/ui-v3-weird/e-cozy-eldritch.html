@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · E Cozy Eldritch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* A + B: the meadow from A is still watching, but it is a bit of a
+     dork about it. Muted colour so the animals stay readable, googly eyes
+     stuck on a few of them, and a tentacle that brought a flower. */
+  :root { --ink: #ece4c8; --mute: #a39c7c; --moss: #a8c66c; --rot: #2b3a20; --blood: #e0573c; --plum: #6b4a72; --plum2: #8d6896; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'IM Fell English', Georgia, serif; color: var(--ink);
+    background:
+      radial-gradient(60% 40% at 50% 50%, rgba(168,198,108,.18), transparent 70%),
+      radial-gradient(90% 30% at 50% 0%, rgba(141,104,150,.22), transparent 70%),
+      linear-gradient(#1b2418, #10150e);
+    display: flex; justify-content: center; -webkit-font-smoothing: antialiased;
+  }
+  body::after { content: ''; position: fixed; inset: 0; pointer-events: none; background: radial-gradient(closest-side, transparent 65%, rgba(0,0,0,.55)); }
+  .app { position: relative; width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 11px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  .score b { font-family: 'IM Fell English SC', serif; font-size: 34px; font-weight: 400; letter-spacing: .04em; line-height: 1; }
+  .score span { display: block; font-style: italic; font-size: 13px; color: var(--mute); }
+  .season { text-align: right; font-family: 'IM Fell English SC', serif; font-size: 15px; color: var(--moss); padding: 6px 10px; border: 1px solid rgba(168,198,108,.4); border-radius: 12px; transform: rotate(2deg); }
+  .season small { display: block; font-family: 'Special Elite', monospace; font-size: 10px; color: var(--mute); }
+
+  /* the goal speaks seriously, then the margin undercuts it */
+  .omen { text-align: center; font-style: italic; font-size: 18px; line-height: 1.25; }
+  .omen b { font-style: normal; font-family: 'IM Fell English SC', serif; color: var(--moss); font-weight: 400; }
+  .aside { display: block; font-family: 'Special Elite', monospace; font-style: normal; font-size: 11px; color: var(--mute); margin-top: 3px; }
+
+  .ladder { display: flex; justify-content: space-between; padding: 6px 8px; border-radius: 14px; background: rgba(0,0,0,.25); }
+  .rung { width: 24px; height: 22px; display: grid; place-items: center; }
+  .rung img { width: 100%; height: 100%; object-fit: contain; filter: saturate(.55) sepia(.3) contrast(1.1); }
+  .rung:not(.is-done):not(.is-next) img { filter: brightness(0) opacity(.45); }
+  .rung.is-next img { filter: brightness(0) drop-shadow(0 0 3px var(--moss)) drop-shadow(0 0 1px var(--moss)); }
+
+  .board-wrap { flex: 1; display: flex; align-items: center; position: relative; }
+  .board { position: relative; z-index: 1; width: 88%; margin: 0 auto; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 5px; padding: 8px;
+    border-radius: 20px; background: rgba(12,16,10,.75); box-shadow: 0 0 0 1px rgba(236,228,200,.18), 0 0 40px rgba(168,198,108,.12); }
+  .cell { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; border-radius: 12px;
+    background: radial-gradient(circle at 50% 60%, #26321d, #171e12); box-shadow: inset 0 0 0 1px rgba(236,228,200,.08); }
+  .cell img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 88%; height: 88%; object-fit: contain;
+    filter: saturate(.6) sepia(.28) contrast(1.12) brightness(.95) drop-shadow(0 3px 5px rgba(0,0,0,.7)); }
+  .cell.k-sprout img, .cell.k-grass img { width: 56%; height: 56%; }
+  .cell.is-preview img { opacity: .3; }
+  .cell.is-preview { box-shadow: inset 0 0 0 1.5px rgba(168,198,108,.7); }
+  .cell.is-hungry { box-shadow: inset 0 0 0 1.5px var(--blood), inset 0 0 18px rgba(224,87,60,.4); }
+  .stone { width: 56%; height: 44%; border-radius: 42% 55% 45% 50%; background: linear-gradient(160deg, #47503e, #1b2016); }
+
+  /* the meadow's eyes: proper eldritch ones, blinking out of step */
+  .eye { position: absolute; width: 46%; height: 26%; border-radius: 50%; background: radial-gradient(circle at var(--lx, 50%) 50%, #10150e 0 22%, #d8cc86 23% 34%, #f1ead0 35% 100%);
+    box-shadow: 0 0 0 1.5px #0b0e09, 0 0 12px rgba(168,198,108,.4); animation: blink 5s infinite; animation-delay: var(--d, 0s); }
+  .eye.small { width: 30%; height: 17%; }
+  @keyframes blink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.06); } }
+  /* and googly ones, stuck on the animals by someone who meant well */
+  .googly { position: absolute; z-index: 2; width: 26%; aspect-ratio: 1; border-radius: 50%; background: #fff; border: 1.5px solid #10150e; }
+  .googly::after { content: ''; position: absolute; width: 52%; height: 52%; border-radius: 50%; background: #10150e; left: var(--px, 30%); top: var(--py, 40%); }
+
+  /* tentacles: plum, with suckers, and one of them brought a flower */
+  /* drawn over the board so the tips can curl onto its rim */
+  .tentacles { position: absolute; inset: 0 -16px; z-index: 2; pointer-events: none; overflow: visible; }
+  .tentacles .arm { fill: none; stroke: var(--plum); stroke-linecap: round; }
+  .tentacles .suck { fill: none; stroke: var(--plum2); stroke-linecap: round; stroke-dasharray: .1 10; }
+  .gift { position: absolute; z-index: 3; right: 1%; top: calc(50% - 44% - 34px); width: 30px; transform: rotate(-14deg); filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
+
+  .toast { align-self: center; text-align: center; font-style: italic; font-size: 15px; color: #f2c2b2; }
+  .toast span { display: block; font-family: 'Special Elite', monospace; font-style: normal; font-size: 11px; color: var(--mute); }
+
+  .hand { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 8px 10px; border-radius: 22px; background: rgba(0,0,0,.28); }
+  .hand small { font-family: 'IM Fell English SC', serif; font-size: 13px; color: var(--mute); }
+  .slot { width: 50px; height: 50px; display: grid; place-items: center; border-radius: 14px; background: #1f2918; }
+  .slot img { width: 64%; height: 64%; object-fit: contain; filter: saturate(.6) sepia(.28); }
+  .slot.now { width: 70px; height: 70px; border-radius: 18px; box-shadow: 0 0 0 1.5px var(--moss), 0 0 22px rgba(168,198,108,.3); }
+  .slot.later { opacity: .4; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="score"><b>4,210</b><span>offerings accepted · best 8,032</span></div>
+    <div class="season">The Long Summer<small>everything counts twice</small></div>
+  </header>
+
+  <p class="omen">One more wolf, and <b>the Bear</b> shall wake.<span class="aside">(he is not a morning bear.)</span></p>
+  <div class="ladder" id="ladder"></div>
+
+  <div class="board-wrap">
+    <svg class="tentacles" viewBox="0 0 400 400" preserveAspectRatio="none" aria-hidden="true">
+      <!-- left: climbs out of the dark and hooks over the rim -->
+      <path class="arm" d="M-20 420 C10 360 -6 300 14 250 S34 170 30 130 C28 108 44 100 50 116" stroke-width="16"/>
+      <path class="suck" d="M-10 410 C16 356 2 300 20 252 S38 172 34 134" stroke-width="5"/>
+      <!-- top right: reaches over the corner holding a flower up -->
+      <path class="arm" d="M430 150 C400 140 404 96 388 70 C376 48 360 40 350 22" stroke-width="13"/>
+      <path class="suck" d="M424 146 C398 136 400 98 384 74 C374 56 362 46 354 30" stroke-width="4"/>
+      <!-- bottom: a small one peeking under the frame -->
+      <path class="arm" d="M300 440 C296 410 330 404 326 384 C324 374 314 372 312 380" stroke-width="10"/>
+    </svg>
+    <img class="gift" src="../ui-v2/art/sprout.png" alt="">
+    <div class="board" id="board"></div>
+  </div>
+
+  <p class="toast">The wolf hungers. Offer it the rabbit.<span>(before it gets weird about it.)</span></p>
+
+  <section class="hand">
+    <small>Offerings</small>
+    <span class="slot now"><img src="../ui-v2/art/grass.png" alt="grass"></span>
+    <span class="slot"><img src="../ui-v2/art/rabbit.png" alt="rabbit"></span>
+    <span class="slot later"><img src="../ui-v2/art/sprout.png" alt="sprout"></span>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>
+  drawBoard(document.getElementById('board'));
+  drawLadder(document.getElementById('ladder'));
+  const cells = document.querySelectorAll('#board .cell');
+  // the meadow watching from the empty squares — one is looking the wrong way
+  [[12, '', '50%', '0s'], [16, 'small', '50%', '1.7s'], [21, '', '18%', '3.1s'], [24, 'small', '80%', '.8s']].forEach(function (e) {
+    const c = cells[e[0]];
+    if (c && !c.classList.contains('has') && !c.classList.contains('is-preview'))
+      c.insertAdjacentHTML('beforeend', '<span class="eye ' + e[1] + '" style="--lx:' + e[2] + ';--d:' + e[3] + '"></span>');
+  });
+  // googly eyes on a few animals: the rabbit got three, the deer got them on its antlers
+  [[6, '22%', '6%', '20%', '45%'], [6, '46%', '2%', '45%', '45%'], [6, '34%', '24%', '30%', '10%'],
+   [3, '38%', '2%', '45%', '42%'], [3, '58%', '8%', '5%', '42%'], [1, '56%', '18%', '40%', '45%']].forEach(function (g) {
+    const c = cells[g[0]]; if (!c) return;
+    c.insertAdjacentHTML('beforeend', '<span class="googly" style="left:' + g[1] + ';top:' + g[2] + ';--px:' + g[3] + ';--py:' + g[4] + '"></span>');
+  });
+</script>
+</body>
+</html>
