@@ -1403,6 +1403,7 @@ function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
 // fast-forwarding would hand the player a board of bones for putting
 // their phone in their pocket.
 function syncClock() {
+  syncAnimalLife();
   if (window.BioAudio) window.BioAudio.pause(state.over || state.paused);
   const shouldRun = !state.over && !state.paused && !state.celebrating;
   if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
@@ -1564,6 +1565,7 @@ const SPRITE_FILES = {
   foxLegFront: 'fox-leg-front.png',
   foxTail: 'fox-tail.png',
   wolfCalm: 'wolf-calm.png',
+  wolfHowl: 'wolf-howl.png', // Optional gesture; normal art still works if this fails to load.
   wolfHungry: 'wolf-hungry.png',
   // Hunger told by posture, like the wolf, because this animal is one
   // flat near-black and has no bright colour to drain. The head drops
@@ -2071,12 +2073,16 @@ function loadSprites() {
 // Paints one animal, still, into a canvas sized `px` on a side.
 // `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
 // wears its other face, so the tile reads before the meter does.
-function paintAnimal(canvas, type, fed) {
+function paintAnimal(canvas, type, fed, motion) {
   const rig = RIG[type];
   const dpr = Math.min(3, window.devicePixelRatio || 1);
   const px = canvas.clientWidth || 44;
-  canvas.width = Math.round(px * dpr);
-  canvas.height = Math.round(px * dpr);
+  // Do not reset the backing store for every gesture frame.
+  const backing = Math.round(px * dpr);
+  if (canvas.width !== backing || canvas.height !== backing) {
+    canvas.width = backing;
+    canvas.height = backing;
+  }
 
   const ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2091,6 +2097,25 @@ function paintAnimal(canvas, type, fed) {
   // their character. Negative lifts the nose (everything faces right).
   if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
 
+  const action = motion ? motion.amount * (fed < .34 ? .35 : 1) : 0;
+  const wave = motion ? Math.sin(motion.progress * Math.PI * 4) * action : 0;
+  // Grounded accents pivot near the paws; hunger always keeps its own art.
+  const pose = {
+    deer: [-2.4 * action, 1, 1 + .014 * action],
+    zebra: [1.2 * wave, 1, 1 - .012 * action],
+    buffalo: [2.8 * action, 1, 1],
+    bear: [1.7 * wave, 1, 1],
+    lion: [-1.2 * action, 1 + .025 * action, 1 + .018 * action],
+    tiger: [1.5 * action, 1 + .038 * action, 1 - .022 * action],
+    elephant: [.8 * wave, 1, 1 + .012 * action]
+  }[type];
+  if (pose && action) {
+    const pivotY = rig.fit.span * .43 - rig.fit.oy - sag;
+    ctx.translate(0, pivotY);
+    ctx.rotate(pose[0] * Math.PI / 180);
+    ctx.scale(pose[1], pose[2]);
+    ctx.translate(0, -pivotY);
+  }
   const headKey = rig.head[fed < 0.34 ? 'hungry' : 'calm'];
   for (const [name, p, alpha] of rig.parts) {
     const sprite = sprites[name === '@head' ? headKey : name];
@@ -2101,13 +2126,128 @@ function paintAnimal(canvas, type, fed) {
     ctx.translate(p.x, p.y);
     // `r` turns the part about its own anchor (px/py), so an ear pinned
     // at its base swings from the base rather than sliding sideways.
-    if (p.r) ctx.rotate(p.r * Math.PI / 180);
+    let turn = p.r || 0;
+    if (type === 'rabbit' && name === 'rabbitEar') turn += wave * (alpha < 1 ? -13 : 18);
+    if (type === 'rabbit' && name === 'rabbitTail') turn += wave * 9;
+    if (type === 'fox' && name === 'foxTail') turn += wave * 13;
+    if (type === 'fox' && name === '@head') turn += action * 3;
+    if (turn) ctx.rotate(turn * Math.PI / 180);
     if (p.flip) ctx.scale(-1, 1);
-    ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+    const howl = type === 'wolf' && fed >= .34 && sprites.wolfHowl && motion ? motion.amount : 0;
+    if (howl) {
+      // Blend only while raising/lowering the head. Both poses share the
+      // original width and paw baseline, including on small phone tiles.
+      ctx.globalAlpha = alpha * (1 - howl);
+      ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+      const other = sprites.wolfHowl;
+      const oh = w * other.h / other.w;
+      ctx.globalAlpha = alpha * howl;
+      ctx.drawImage(other.img, -w * p.px, h * (1 - p.py) - oh, w, oh);
+    } else {
+      ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+    }
     ctx.restore();
   }
   ctx.globalAlpha = 1;
   ctx.restore();
+}
+
+// ---------- Animal character gestures ----------
+// Visual time is independent of turns, scores and the gameplay RNG.
+// Cell objects survive render(), so a world tick cannot restart a howl.
+const ANIMAL_GESTURES = {
+  rabbit:   { name: 'ear-twitch',   gap: 6,  duration: 1.25 },
+  fox:      { name: 'tail-swish',   gap: 9,  duration: 2.1 },
+  deer:     { name: 'listen',       gap: 11, duration: 1.9 },
+  zebra:    { name: 'weight-shift', gap: 13, duration: 2.5 },
+  buffalo:  { name: 'graze',        gap: 16, duration: 3.2 },
+  wolf:     { name: 'howl',         gap: 18, duration: 2.8 },
+  bear:     { name: 'family-sway',  gap: 15, duration: 2.8 },
+  lion:     { name: 'yawn',         gap: 21, duration: 3.6 },
+  tiger:    { name: 'stretch',      gap: 23, duration: 3.0 },
+  elephant: { name: 'heavy-sway',   gap: 25, duration: 4.2 }
+};
+const animalLife = { cells: new WeakMap(), entries: [], serial: 0, time: 0, last: 0, frame: 0, painted: 0, media: null };
+
+function livingArt(art, cell, fed, index) {
+  if (art.tagName !== 'CANVAS') return;
+  let life = animalLife.cells.get(cell);
+  if (!life || life.kind !== cell.kind) {
+    // Stable variation without consuming random numbers used by the hand.
+    const seed = ((++animalLife.serial * 2654435761) >>> 0) / 4294967296;
+    const cfg = ANIMAL_GESTURES[cell.kind];
+    life = { kind: cell.kind, phase: seed * 7, born: animalLife.time,
+      first: 3 + seed * 7, period: cfg.gap * (.85 + seed * .3) };
+    animalLife.cells.set(cell, life);
+  }
+  const entry = { art, cell, fed, life, index, moving: false };
+  animalLife.entries.push(entry);
+  art.dataset.gesture = ANIMAL_GESTURES[cell.kind].name;
+  // CSS breath and subtle idles continue from the same point after a render.
+  requestAnimationFrame(function () {
+    if (art.isConnected) paintLivingArt(entry, animalLife.media && animalLife.media.matches);
+  });
+}
+
+function animalMotion(life) {
+  const cfg = ANIMAL_GESTURES[life.kind];
+  const elapsed = animalLife.time - life.born - life.first;
+  if (elapsed < 0) return { amount: 0, progress: 0 };
+  const part = elapsed % life.period;
+  if (part >= cfg.duration) return { amount: 0, progress: 0 };
+  const progress = part / cfg.duration;
+  const smooth = x => x * x * (3 - 2 * x);
+  // Ease into the pose, hold it, then settle back into the breathing idle.
+  const amount = progress < .22 ? smooth(progress / .22)
+    : progress > .72 ? smooth((1 - progress) / .28) : 1;
+  return { amount, progress };
+}
+
+function paintLivingArt(entry, still) {
+  const motion = still ? null : animalMotion(entry.life);
+  entry.art.dataset.acting = motion && motion.amount > .02 ? 'true' : 'false';
+  paintAnimal(entry.art, entry.cell.kind, entry.fed, motion);
+  entry.moving = !!(motion && motion.amount);
+}
+
+function animalLifeRuns() {
+  return !state.paused && !state.over && !state.celebrating && !document.hidden
+    && !(animalLife.media && animalLife.media.matches);
+}
+
+function animateAnimalLife(now) {
+  animalLife.frame = 0;
+  if (!animalLifeRuns() || !animalLife.entries.length) { animalLife.last = 0; return; }
+  if (animalLife.last) animalLife.time += Math.min(.1, (now - animalLife.last) / 1000);
+  animalLife.last = now;
+  // Accents need only 24fps; breathing stays compositor-driven in CSS.
+  if (now - animalLife.painted >= 1000 / 24) {
+    animalLife.painted = now;
+    for (const entry of animalLife.entries) {
+      if (!entry.art.isConnected) continue;
+      const motion = animalMotion(entry.life);
+      if (motion.amount || entry.moving) paintLivingArt(entry);
+    }
+  }
+  animalLife.frame = requestAnimationFrame(animateAnimalLife);
+}
+
+function syncAnimalLife() {
+  if (!el.board) return;
+  const active = animalLifeRuns();
+  el.board.classList.toggle('board--life-paused', !active);
+  if ((!active || !animalLife.entries.length) && animalLife.frame) {
+    cancelAnimationFrame(animalLife.frame);
+    animalLife.frame = 0;
+    animalLife.last = 0;
+  }
+  if (animalLife.media && animalLife.media.matches) {
+    for (const entry of animalLife.entries) paintLivingArt(entry, true);
+  }
+  keepIdlePhase();
+  if (active && animalLife.entries.length && !animalLife.frame) {
+    animalLife.frame = requestAnimationFrame(animateAnimalLife);
+  }
 }
 
 // ---------- Rendering ----------
@@ -2338,15 +2478,19 @@ function inReach() {
 // frozen. Pinning the endless loops to the page clock lets a redrawn
 // animal carry on mid-breath. One-shot arrivals are left alone.
 function keepIdlePhase() {
-  for (const art of el.board.querySelectorAll('.cell .tile-art')) {
-    if (!art.getAnimations) return;
-    for (const anim of art.getAnimations()) {
-      if (anim.effect && anim.effect.getTiming().iterations === Infinity) anim.startTime = 0;
+  const active = animalLifeRuns();
+  for (const entry of animalLife.entries) {
+    if (!entry.art.getAnimations) continue;
+    for (const anim of entry.art.getAnimations()) {
+      if (!anim.effect || anim.effect.getTiming().iterations !== Infinity) continue;
+      anim.currentTime = (animalLife.time + entry.life.phase) * 1000;
+      if (active) anim.play(); else anim.pause();
     }
   }
 }
 
 function render(grew, meals, deaths) {
+  animalLife.entries = [];
   const risk = inReach();
   // at -> which rung landed there, so the square's flash can wait for the
   // ghosts that caused it instead of going off before they arrive.
@@ -2447,7 +2591,7 @@ function render(grew, meals, deaths) {
       label += ', ' + (left <= 0.34 ? words[0] : left <= 0.67 ? words[1] : words[2]);
 
       if (art.tagName === 'CANVAS') {
-        requestAnimationFrame(function () { paintAnimal(art, cell.kind, left); });
+        livingArt(art, cell, left, i);
       }
       if (left <= 0.34) node.classList.add('cell--fading');
     }
@@ -2481,7 +2625,7 @@ function render(grew, meals, deaths) {
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
   renderMovePreview();
-  keepIdlePhase();
+  syncAnimalLife();
 }
 
 // The rung, and how far along it. The bar is the whole difficulty curve
@@ -3227,6 +3371,10 @@ async function init() {
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
   buildBoard();
+  animalLife.media = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const motionPreferenceChanged = function () { syncAnimalLife(); };
+  if (animalLife.media.addEventListener) animalLife.media.addEventListener('change', motionPreferenceChanged);
+  else if (animalLife.media.addListener) animalLife.media.addListener(motionPreferenceChanged);
 
   el.board.addEventListener('click', function (e) {
     const btn = e.target.closest('.cell');

@@ -1,0 +1,5 @@
+Built-in image_gen / precise-object-edit
+Input: img/wolf-calm.png
+Create ONE matching full-body pose of this same cute gray wolf howling. Keep flat warm brown outlines, gray coat, cream muzzle/chest/paws, right-facing body, tail, four legs and body proportions. Change only head and upper neck: muzzle upward about 50 degrees, mouth a small dark oval, gently closed eyes, friendly peaceful howl, no fangs. Keep standing, not sitting. Entire wolf and paws visible on genuine transparent background; no shadows, text, howl lines or other animals. Do not redesign the lower body.
+
+Asset preparation: crop transparent margins and downsample to width 220 with Lanczos3; preserve alpha. Runtime anchors both poses at the same paw baseline. The generated lower body is approximate, so keep the transition brief.
