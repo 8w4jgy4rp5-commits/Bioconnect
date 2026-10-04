@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · A Eldritch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+  /* Lovecraft: an old book's engraving of a meadow that is looking back */
+  :root { --ink: #d9d3b8; --mute: #8c8a6c; --bile: #9fbf5a; --rot: #3b4a26; --blood: #c2412d; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'IM Fell English', Georgia, serif; color: var(--ink);
+    background:
+      radial-gradient(70% 45% at 50% 48%, rgba(159,191,90,.16), transparent 70%),
+      radial-gradient(120% 60% at 50% 120%, #0d1309, transparent 70%),
+      linear-gradient(#141a10, #0a0d08);
+    display: flex; justify-content: center; -webkit-font-smoothing: antialiased;
+  }
+  /* paper grain and a vignette */
+  body::after { content: ''; position: fixed; inset: 0; pointer-events: none; mix-blend-mode: overlay; opacity: .35;
+    background: repeating-radial-gradient(circle at 30% 20%, rgba(255,255,255,.06) 0 1px, transparent 1px 3px), radial-gradient(closest-side, transparent 60%, rgba(0,0,0,.7)); }
+  .app { position: relative; width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+  .top { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid rgba(217,211,184,.25); padding-bottom: 8px; }
+  .score b { font-family: 'IM Fell English SC', serif; font-size: 34px; font-weight: 400; letter-spacing: .04em; }
+  .score span { display: block; font-style: italic; font-size: 13px; color: var(--mute); }
+  .season { font-family: 'IM Fell English SC', serif; font-size: 15px; color: var(--bile); text-align: right; }
+  .season small { display: block; font-family: 'IM Fell English', serif; font-style: italic; font-size: 12px; color: var(--mute); }
+
+  .omen { text-align: center; font-style: italic; font-size: 17px; line-height: 1.3; }
+  .omen b { font-style: normal; font-family: 'IM Fell English SC', serif; color: var(--bile); font-weight: 400; }
+
+  /* the ladder: twelve engravings, the unreached ones still sealed */
+  .ladder { display: flex; justify-content: space-between; padding: 6px 4px; }
+  .rung { width: 25px; height: 23px; display: grid; place-items: center; }
+  .rung img { width: 100%; height: 100%; object-fit: contain; filter: grayscale(1) contrast(1.7) brightness(.85) sepia(.5) hue-rotate(35deg); }
+  .rung:not(.is-done):not(.is-next) img { filter: brightness(0) opacity(.5); }
+  .rung.is-next img { filter: brightness(0) drop-shadow(0 0 4px var(--bile)) drop-shadow(0 0 1px var(--bile)); }
+
+  .board-wrap { flex: 1; display: flex; align-items: center; position: relative; }
+  .board { position: relative; z-index: 1; width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px; padding: 8px;
+    border: 1px solid rgba(217,211,184,.35); outline: 1px solid rgba(217,211,184,.15); outline-offset: 4px; background: rgba(10,13,8,.6); }
+  .cell { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 55%, #1f2716, #12170d); border: 1px solid rgba(217,211,184,.12); }
+  .cell img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 88%; height: 88%; object-fit: contain;
+    filter: grayscale(1) contrast(1.8) brightness(.9) sepia(.55) hue-rotate(38deg) drop-shadow(0 0 6px rgba(0,0,0,.9)); }
+  .cell.k-sprout img, .cell.k-grass img { width: 56%; height: 56%; }
+  .cell.is-preview img { opacity: .3; }
+  .cell.is-preview { border-color: rgba(159,191,90,.6); }
+  .cell.is-hungry { border-color: var(--blood); box-shadow: inset 0 0 18px rgba(194,65,45,.45); }
+  .cell.is-hungry::after { content: ''; position: absolute; left: 40%; top: 30%; width: 6px; height: 6px; border-radius: 50%; background: #ff5a3c; box-shadow: 10px 0 0 #ff5a3c, 0 0 8px #ff5a3c; }
+  .stone { width: 58%; height: 46%; border-radius: 40% 55% 45% 50%; background: linear-gradient(160deg, #3a3f33, #15180f); }
+  /* empty squares are not empty: an eye opens in some of them */
+  .eye { position: absolute; width: 46%; height: 26%; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #0a0d08 0 22%, #c9c08a 23% 34%, #e9e2c2 35% 100%);
+    box-shadow: 0 0 0 1.5px #0a0d08, 0 0 12px rgba(159,191,90,.35); animation: blink 6s infinite; }
+  .eye.small { width: 30%; height: 17%; animation-delay: 2.2s; }
+  @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.08); } }
+
+  /* tentacles creeping in from behind the board */
+  .tentacles { position: absolute; inset: -30px -16px; z-index: 0; pointer-events: none; }
+  .tentacles path { fill: none; stroke: #3d5024; stroke-linecap: round; }
+
+  .toast { text-align: center; font-style: italic; font-size: 15px; color: #e8b9a8; }
+  .toast::before, .toast::after { content: ' ❦ '; color: var(--blood); font-style: normal; }
+
+  .hand { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 8px; border-top: 1px solid rgba(217,211,184,.25); }
+  .hand small { font-family: 'IM Fell English SC', serif; font-size: 13px; color: var(--mute); }
+  .slot { width: 50px; height: 50px; display: grid; place-items: center; border: 1px solid rgba(217,211,184,.25); }
+  .slot img { width: 64%; height: 64%; object-fit: contain; filter: grayscale(1) contrast(1.8) sepia(.55) hue-rotate(38deg); }
+  .slot.now { width: 70px; height: 70px; border-color: var(--bile); box-shadow: 0 0 22px rgba(159,191,90,.25), inset 0 0 14px rgba(159,191,90,.2); }
+  .slot.later { opacity: .4; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="score"><b>4,210</b><span>souls fed · best 8,032</span></div>
+    <div class="season">The Long Summer<small>offerings count twice</small></div>
+  </header>
+
+  <p class="omen">A second wolf, and <b>the Bear</b> shall wake.</p>
+  <div class="ladder" id="ladder"></div>
+
+  <div class="board-wrap">
+    <svg class="tentacles" viewBox="0 0 400 400" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M-10 330 C40 300 10 250 50 225 S90 190 70 150" stroke-width="16"/>
+      <path d="M-10 330 C40 300 10 250 50 225 S90 190 70 150" stroke-width="3" stroke="#7d9a48" stroke-dasharray="1 9"/>
+      <path d="M410 60 C360 70 380 120 340 130 S300 150 320 190" stroke-width="12"/>
+      <path d="M410 60 C360 70 380 120 340 130 S300 150 320 190" stroke-width="3" stroke="#7d9a48" stroke-dasharray="1 8"/>
+      <path d="M260 420 C250 380 300 370 290 335" stroke-width="10"/>
+    </svg>
+    <div class="board" id="board"></div>
+  </div>
+
+  <p class="toast">The wolf hungers. Offer it the rabbit.</p>
+
+  <section class="hand">
+    <small>Offerings</small>
+    <span class="slot now"><img src="../ui-v2/art/grass.png" alt="grass"></span>
+    <span class="slot"><img src="../ui-v2/art/rabbit.png" alt="rabbit"></span>
+    <span class="slot later"><img src="../ui-v2/art/sprout.png" alt="sprout"></span>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>
+  drawBoard(document.getElementById('board'));
+  drawLadder(document.getElementById('ladder'));
+  // the meadow watches: eyes in a few of the empty squares
+  const cells = document.querySelectorAll('#board .cell');
+  [[12, ''], [16, 'small'], [21, ''], [24, 'small']].forEach(function (e) {
+    const c = cells[e[0]];
+    if (c && !c.classList.contains('has') && !c.classList.contains('is-preview')) c.insertAdjacentHTML('beforeend', '<span class="eye ' + e[1] + '"></span>');
+  });
+</script>
+</body>
+</html>

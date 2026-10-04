@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · C Specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,700;1,500&family=Homemade+Apple&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* a naturalist's field notebook, kept a little too long: pinned
+     specimens with Latin labels, and the margin notes getting stranger */
+  :root { --paper: #ece2c6; --paper2: #e2d5b2; --ink: #2b2118; --sepia: #6f5232; --red: #8f2a1c; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif; color: var(--ink);
+    background:
+      radial-gradient(120% 80% at 50% 0%, transparent 60%, rgba(111,82,50,.35)),
+      repeating-linear-gradient(0deg, transparent 0 25px, rgba(111,82,50,.12) 25px 26px),
+      linear-gradient(var(--paper), var(--paper2));
+    display: flex; justify-content: center;
+  }
+  /* a coffee ring */
+  body::before { content: ''; position: fixed; right: -40px; top: 90px; width: 150px; height: 150px; border-radius: 50%;
+    border: 7px solid rgba(111,82,50,.16); filter: blur(1px); pointer-events: none; }
+  .app { position: relative; width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+  .top { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+  .entry { font-family: 'Special Elite', monospace; font-size: 12px; color: var(--sepia); }
+  .entry b { display: block; font-family: 'Cormorant Garamond', serif; font-size: 34px; line-height: 1; color: var(--ink); }
+  .season { font-family: 'Special Elite', monospace; font-size: 12px; text-align: right; }
+  .season b { display: block; font-family: 'Cormorant Garamond'; font-style: italic; font-size: 18px; }
+
+  .note { font-family: 'Homemade Apple', cursive; font-size: 13px; color: var(--sepia); transform: rotate(-1.5deg); line-height: 1.6; }
+  .note s { color: var(--red); }
+
+  .ladder { display: flex; justify-content: space-between; padding: 4px 2px; border: 1px solid rgba(43,33,24,.4); background: rgba(255,255,255,.18); }
+  .rung { width: 25px; height: 23px; display: grid; place-items: center; }
+  .rung img { width: 100%; height: 100%; object-fit: contain; filter: sepia(1) saturate(.6) contrast(1.15); }
+  .rung:not(.is-done) img { filter: brightness(0) opacity(.18); }
+  .rung.is-next { outline: 1.5px dashed var(--red); outline-offset: 1px; border-radius: 50%; }
+
+  .board-wrap { flex: 1; display: flex; align-items: center; }
+  /* the specimen case: each square a pinned card with a label */
+  .board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 5px; padding: 9px;
+    background: #4a3523; box-shadow: inset 0 0 0 3px #2d1f13, 0 6px 14px rgba(43,33,24,.35); }
+  .cell { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; background: #f3ebd6; box-shadow: inset 0 0 8px rgba(111,82,50,.25); }
+  .cell img { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); width: 82%; height: 74%; object-fit: contain; filter: sepia(.85) saturate(.7) contrast(1.15) drop-shadow(1px 2px 1px rgba(43,33,24,.4)); }
+  .cell.k-sprout img, .cell.k-grass img { width: 52%; height: 52%; }
+  .cell.has::before { content: ''; position: absolute; z-index: 2; top: 6%; left: 50%; width: 5px; height: 5px; border-radius: 50%; background: #9a1f12; box-shadow: 0 0 0 1px #3a0b05; }
+  .label { position: absolute; bottom: 2px; left: 0; right: 0; text-align: center; font-family: 'Cormorant Garamond'; font-style: italic; font-size: 8.5px; line-height: 1; color: var(--ink); white-space: nowrap; overflow: hidden; }
+  .cell.is-preview img { opacity: .3; filter: sepia(1); }
+  .cell.is-preview { box-shadow: inset 0 0 0 1.5px var(--red); }
+  .cell.is-hungry { background: #f0d9c4; }
+  .cell.is-hungry .label { color: var(--red); font-weight: 700; }
+  .stone { width: 54%; height: 42%; border-radius: 45% 50% 40% 48%; background: radial-gradient(circle at 35% 30%, #a9a08a, #5e5545); }
+
+  .toast { font-family: 'Special Elite', monospace; font-size: 13px; text-align: center; }
+  .toast b { color: var(--red); }
+
+  .hand { display: flex; align-items: center; justify-content: center; gap: 12px; padding-top: 6px; border-top: 2px solid var(--ink); }
+  .hand small { font-family: 'Special Elite'; font-size: 11px; color: var(--sepia); }
+  .slot { width: 50px; height: 50px; display: grid; place-items: center; background: #f3ebd6; border: 1px solid rgba(43,33,24,.4); }
+  .slot img { width: 64%; height: 64%; object-fit: contain; filter: sepia(.85) saturate(.7); }
+  .slot.now { width: 70px; height: 70px; border: 2px solid var(--ink); box-shadow: 3px 3px 0 rgba(43,33,24,.35); }
+  .slot.later { opacity: .45; }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="entry">SPECIMENS CATALOGUED<b>4,210</b></div>
+    <div class="season">DAY 41 · best 8,032<b>Midsummer — doubled</b></div>
+  </header>
+
+  <p class="note">Need one more <i>Canis</i> for the Bear. <s>They are only animals.</s> The wolves watch me pin them.</p>
+  <div class="ladder" id="ladder"></div>
+
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+
+  <p class="toast"><b>C. famelicus</b> is starving — feed it <i>Lepus</i>.</p>
+
+  <section class="hand">
+    <small>TO PIN</small>
+    <span class="slot now"><img src="../ui-v2/art/grass.png" alt="grass"></span>
+    <span class="slot"><img src="../ui-v2/art/rabbit.png" alt="rabbit"></span>
+    <span class="slot later"><img src="../ui-v2/art/sprout.png" alt="sprout"></span>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>
+  drawBoard(document.getElementById('board'));
+  drawLadder(document.getElementById('ladder'));
+  const LATIN = { sprout: 'Germen', grass: 'Poa', rabbit: 'Lepus', fox: 'Vulpes', deer: 'Cervus', zebra: 'Equus z.', buffalo: 'Bubalus', wolf: 'Canis lupus', bear: 'Ursus', lion: 'Panthera leo', tiger: 'P. tigris', elephant: 'Loxodonta' };
+  document.querySelectorAll('#board .cell.has').forEach(function (c) {
+    const kind = (c.className.match(/k-(\w+)/) || [])[1];
+    const name = c.classList.contains('is-hungry') ? 'C. famelicus' : LATIN[kind];
+    if (name) c.insertAdjacentHTML('beforeend', '<span class="label">' + name + '</span>');
+  });
+</script>
+</body>
+</html>

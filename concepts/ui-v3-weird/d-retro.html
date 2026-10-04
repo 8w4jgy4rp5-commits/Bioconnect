@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · D Retro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* a handheld from 1989: four greens, a pixel grid, and chunky type */
+  :root { --g0: #0f380f; --g1: #306230; --g2: #8bac0f; --g3: #9bbc0f; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'Press Start 2P', monospace; color: var(--g0); background: var(--g3); display: flex; justify-content: center; }
+  /* LCD dot grid over everything */
+  body::after { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: .18;
+    background: linear-gradient(90deg, rgba(15,56,15,.5) 1px, transparent 1px) 0 0 / 3px 3px, linear-gradient(rgba(15,56,15,.5) 1px, transparent 1px) 0 0 / 3px 3px; }
+  .app { position: relative; width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+  .box { border: 4px solid var(--g0); box-shadow: inset 0 0 0 3px var(--g3), inset 0 0 0 6px var(--g1); padding: 10px; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .score { font-size: 20px; letter-spacing: 1px; }
+  .score small { display: block; font-size: 8px; margin-top: 6px; color: var(--g1); }
+  .season { font-size: 9px; line-height: 1.6; text-align: right; }
+  .season b { display: block; font-size: 12px; font-weight: 400; background: var(--g0); color: var(--g3); padding: 3px 5px; }
+
+  .goal { font-size: 9px; line-height: 1.8; }
+  .goal b { font-weight: 400; background: var(--g0); color: var(--g3); padding: 1px 3px; }
+  .blink { animation: blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .ladder { display: flex; justify-content: space-between; padding: 6px 8px; }
+  .rung { width: 24px; height: 22px; display: grid; place-items: center; }
+  .rung canvas { width: 100%; height: 100%; }
+  .rung:not(.is-done):not(.is-next) canvas { opacity: .25; }
+  .rung.is-next canvas { animation: blink 1s steps(1) infinite; }
+
+  .board-wrap { flex: 1; display: flex; align-items: center; }
+  .board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 4px; padding: 8px; background: var(--g2); }
+  .cell { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; background: var(--g3); box-shadow: inset -3px -3px 0 var(--g1), inset 3px 3px 0 #c4d86a; }
+  .cell canvas { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 86%; height: 86%; }
+  .cell.k-sprout canvas, .cell.k-grass canvas { width: 56%; height: 56%; }
+  .cell.is-preview canvas { opacity: .35; }
+  .cell.is-preview { box-shadow: inset 0 0 0 3px var(--g0); animation: blink 1s steps(1) infinite; }
+  .cell.is-hungry { background: var(--g1); }
+  .cell.is-hungry::after { content: '!'; position: absolute; top: 2px; right: 4px; font-size: 12px; color: var(--g3); }
+  .stone { width: 50%; height: 40%; background: var(--g1); box-shadow: inset -4px -4px 0 var(--g0); }
+
+  /* pixel art: drawn small, then blown up with no smoothing, then squeezed into four greens */
+  canvas { image-rendering: pixelated; filter: grayscale(1) contrast(2.2) brightness(.95) sepia(1) hue-rotate(40deg) saturate(2.4) brightness(.55); }
+
+  .toast { font-size: 9px; line-height: 1.8; }
+  .toast::before { content: '▶ '; }
+
+  .hand { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .hand small { font-size: 8px; }
+  .slot { width: 50px; height: 50px; display: grid; place-items: center; border: 3px solid var(--g0); background: var(--g3); }
+  .slot canvas { width: 70%; height: 70%; }
+  .slot.now { width: 70px; height: 70px; border-width: 4px; box-shadow: 4px 4px 0 var(--g1); }
+  .slot.later { opacity: .45; }
+  .buttons { display: flex; justify-content: space-between; font-size: 8px; color: var(--g1); }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top box">
+    <div class="score">004210<small>HI 008032</small></div>
+    <div class="season"><b>SUMMER</b>PTS x2</div>
+  </header>
+
+  <p class="goal">1 MORE <b>WOLF</b> → BEAR<span class="blink">_</span></p>
+  <div class="ladder box" id="ladder"></div>
+
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+
+  <p class="toast">WOLF IS HUNGRY! FEED IT A RABBIT.</p>
+
+  <section class="hand box">
+    <small>HAND</small>
+    <span class="slot now"><img src="../ui-v2/art/grass.png" alt="grass"></span>
+    <span class="slot"><img src="../ui-v2/art/rabbit.png" alt="rabbit"></span>
+    <span class="slot later"><img src="../ui-v2/art/sprout.png" alt="sprout"></span>
+  </section>
+  <div class="buttons"><span>(A) PLANT</span><span>(B) PEEK</span><span>START ≡</span></div>
+</main>
+<script src="_board.js"></script>
+<script>
+  drawBoard(document.getElementById('board'));
+  drawLadder(document.getElementById('ladder'));
+  // swap every picture for a 20-pixel version of itself
+  document.querySelectorAll('.cell img, .slot img, .rung img').forEach(function (img) {
+    const i = new Image(); i.src = img.src;
+    const c = document.createElement('canvas'); c.width = c.height = 20;
+    i.onload = function () {
+      const g = c.getContext('2d'), r = Math.min(20 / i.naturalWidth, 20 / i.naturalHeight);
+      g.drawImage(i, (20 - i.naturalWidth * r) / 2, (20 - i.naturalHeight * r) / 2, i.naturalWidth * r, i.naturalHeight * r);
+    };
+    img.replaceWith(c);
+  });
+</script>
+</body>
+</html>

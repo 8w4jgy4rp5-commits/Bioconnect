@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bioconnect · B Googly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Archivo+Black&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  /* a cut-and-paste fever dream: magazine cut-outs, tape and googly eyes
+     stuck on everything, letters snipped from different headlines */
+  :root { --pink: #ff5fa2; --acid: #d7ff3a; --ink: #151515; --paper: #fbf6ea; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Archivo Black', system-ui, sans-serif; color: var(--ink);
+    background:
+      radial-gradient(circle, rgba(0,0,0,.18) 1.2px, transparent 1.6px) 0 0 / 9px 9px,
+      linear-gradient(135deg, var(--pink) 0 50%, #ffcf3a 50% 100%);
+    display: flex; justify-content: center;
+  }
+  .app { position: relative; width: 100%; max-width: 430px; min-height: 100dvh; padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; }
+  /* ransom-note score: every digit cut from a different page */
+  .ransom { display: flex; gap: 2px; }
+  .ransom i { font-style: normal; display: inline-block; padding: 2px 5px; font-size: 28px; line-height: 1; box-shadow: 2px 3px 0 rgba(0,0,0,.35); }
+  .ransom i:nth-child(1) { background: #fff; transform: rotate(-6deg); font-family: 'Rubik Mono One'; }
+  .ransom i:nth-child(2) { background: var(--ink); color: var(--acid); transform: rotate(4deg); font-family: 'Special Elite'; font-size: 30px; }
+  .ransom i:nth-child(3) { background: var(--acid); transform: rotate(-3deg); }
+  .ransom i:nth-child(4) { background: #fff; color: #e2262b; transform: rotate(7deg); font-family: 'Rubik Mono One'; font-size: 24px; }
+  .ransom i:nth-child(5) { background: #3a8bff; color: #fff; transform: rotate(-5deg); }
+  .season { background: var(--acid); padding: 6px 10px; transform: rotate(5deg); font-size: 14px; box-shadow: 3px 3px 0 var(--ink); position: relative; }
+  .season::before { content: ''; position: absolute; top: -8px; left: 30%; width: 38px; height: 14px; background: rgba(255,255,255,.6); transform: rotate(-8deg); }
+
+  .goal { align-self: center; background: var(--paper); padding: 8px 14px; transform: rotate(-1.5deg); box-shadow: 4px 4px 0 var(--ink); font-family: 'Special Elite', monospace; font-size: 15px; text-align: center; }
+  .goal b { font-family: 'Rubik Mono One'; font-weight: 400; background: var(--pink); color: #fff; padding: 0 4px; }
+
+  .ladder { display: flex; justify-content: space-between; background: rgba(255,255,255,.55); padding: 4px 6px; transform: rotate(.6deg); }
+  .rung { width: 24px; height: 22px; display: grid; place-items: center; }
+  .rung img { width: 100%; height: 100%; object-fit: contain; }
+  .rung:not(.is-done) img { filter: grayscale(1) opacity(.35); }
+  .rung.is-next img { filter: none; animation: jiggle .5s infinite; }
+
+  .board-wrap { flex: 1; display: flex; align-items: center; }
+  .board { width: 100%; aspect-ratio: 1; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); gap: 6px; padding: 10px;
+    background: var(--ink); transform: rotate(-.8deg); box-shadow: 6px 6px 0 rgba(0,0,0,.35); }
+  .cell { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; background: var(--paper); }
+  .cell:nth-child(3n) { background: #fff3c4; } .cell:nth-child(4n) { background: #ffe3ef; }
+  /* each animal is a magazine cut-out: white border, slightly wrong angle, wrong size */
+  .cell img { position: absolute; left: 50%; top: 50%; width: 92%; height: 92%; object-fit: contain;
+    transform: translate(-50%, -50%) rotate(var(--r, -4deg)) scale(var(--s, 1));
+    filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(3px 4px 0 rgba(0,0,0,.35)) saturate(1.4); }
+  .cell.k-sprout img, .cell.k-grass img { width: 60%; height: 60%; }
+  .cell.is-preview img { opacity: .35; filter: grayscale(1); }
+  .cell.is-preview { outline: 3px dashed var(--pink); outline-offset: -5px; }
+  .cell.is-hungry { background: #ff3b30; animation: jiggle .35s infinite; }
+  .stone { width: 60%; height: 46%; border-radius: 48% 40% 52% 44%; background: #8d8d8d; box-shadow: 2px 3px 0 var(--ink); }
+  /* the googly eyes, stuck on with no regard for anatomy */
+  .googly { position: absolute; z-index: 2; width: 34%; aspect-ratio: 1; border-radius: 50%; background: #fff; border: 2px solid var(--ink); }
+  .googly::after { content: ''; position: absolute; width: 50%; height: 50%; border-radius: 50%; background: var(--ink); left: var(--px, 30%); top: var(--py, 40%); }
+
+  .toast { align-self: center; background: #fff; padding: 6px 12px; font-family: 'Special Elite', monospace; font-size: 15px; transform: rotate(1.5deg); box-shadow: 3px 3px 0 var(--ink); }
+  .toast b { color: #e2262b; }
+
+  .hand { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .hand small { font-family: 'Rubik Mono One'; font-size: 11px; background: var(--ink); color: var(--acid); padding: 4px 6px; transform: rotate(-90deg); }
+  .slot { width: 54px; height: 54px; display: grid; place-items: center; background: var(--paper); box-shadow: 3px 3px 0 var(--ink); transform: rotate(4deg); }
+  .slot img { width: 66%; height: 66%; object-fit: contain; }
+  .slot.now { width: 76px; height: 76px; background: var(--acid); transform: rotate(-5deg); box-shadow: 5px 5px 0 var(--ink); }
+  .slot.later { opacity: .55; transform: rotate(-2deg); }
+  @keyframes jiggle { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="ransom" aria-label="4,210 points"><i>4</i><i>,</i><i>2</i><i>1</i><i>0</i></div>
+    <span class="season">SUMMER ×2</span>
+  </header>
+
+  <p class="goal">one more wolf = <b>BEAR?!</b></p>
+  <div class="ladder" id="ladder"></div>
+
+  <div class="board-wrap"><div class="board" id="board"></div></div>
+
+  <p class="toast">wolf is <b>HUNGRY</b>. give it the bunny.</p>
+
+  <section class="hand">
+    <small>HAND</small>
+    <span class="slot now"><img src="../ui-v2/art/grass.png" alt="grass"></span>
+    <span class="slot"><img src="../ui-v2/art/rabbit.png" alt="rabbit"></span>
+    <span class="slot later"><img src="../ui-v2/art/sprout.png" alt="sprout"></span>
+  </section>
+</main>
+<script src="_board.js"></script>
+<script>
+  drawBoard(document.getElementById('board'));
+  drawLadder(document.getElementById('ladder'));
+  // every cut-out sits a little crooked, and some get googly eyes in the wrong place
+  const cells = document.querySelectorAll('#board .cell');
+  cells.forEach(function (c, i) {
+    const img = c.querySelector('img');
+    if (!img || c.classList.contains('is-preview')) return;
+    img.style.setProperty('--r', ((i * 37) % 15 - 7) + 'deg');
+    img.style.setProperty('--s', [1, 1.15, .9, 1.25, 1][i % 5]);
+  });
+  // [cell, left, top, pupil-x, pupil-y] — deliberately off-anatomy
+  [[0, '18%', '8%', '10%', '45%'], [0, '48%', '4%', '45%', '10%'], [1, '58%', '2%', '30%', '40%'], [2, '30%', '50%', '40%', '45%'],
+   [3, '10%', '10%', '45%', '45%'], [6, '55%', '45%', '5%', '40%'], [7, '4%', '30%', '42%', '8%'], [7, '34%', '28%', '42%', '42%'], [14, '50%', '10%', '40%', '45%']]
+    .forEach(function (g) {
+      const c = cells[g[0]]; if (!c) return;
+      c.insertAdjacentHTML('beforeend', '<span class="googly" style="left:' + g[1] + ';top:' + g[2] + ';--px:' + g[3] + ';--py:' + g[4] + '"></span>');
+    });
+</script>
+</body>
+</html>
