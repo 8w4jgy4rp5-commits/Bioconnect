@@ -1782,7 +1782,13 @@ body.is-modal { overflow: hidden; }
 .move-hint { color: #586b48; font-size: 11px; line-height: 16px; margin: 0; min-height: 16px; text-align: center; }
 .board-frame { width: 100%; justify-self: center; }
 .board { gap: 5px; padding: 7px; }
-.cell { touch-action: pan-y; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+/* A finger on the board never scrolls the page. With pan-y, a tap that
+   drifted a few pixels scrolled the page (it is a little taller than the
+   screen) and on a phone it bounced back, which read as the screen
+   shaking on every planting. A drifting tap is still cancelled by the
+   10px check in script.js. */
+.board-frame { touch-action: none; }
+.cell { touch-action: none; -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
 .cell:not(:disabled):active { transform: none; }
 .cell--merge-ready { background: #f8fbf0; border: 1px dashed #7c9e5d; box-shadow: none; }
 .merge-preview { display: flex; position: absolute; inset: 4px 1px; flex-direction: column; align-items: center; justify-content: center; gap: 1px; pointer-events: none; }
