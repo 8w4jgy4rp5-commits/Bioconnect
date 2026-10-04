@@ -636,8 +636,8 @@ body.is-modal { overflow: hidden; }
 .start-screen[hidden] { display: none; }
 
 /* A painted meadow the player looks at once before the first tap: sky,
-   two hills, four animals out of the chain, and the wordmark standing
-   in the grass like a sign. The board waits behind it, already dealt. */
+   a mountain with low hills in front, five animals out of the chain, and
+   the wordmark above them. The board waits behind it, already dealt. */
 
 .start-screen {
   position: fixed;
@@ -653,7 +653,7 @@ body.is-modal { overflow: hidden; }
 .start-stage {
   position: relative;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto;
   width: min(100%, 560px);
   height: 100%;
   overflow: hidden;
@@ -686,35 +686,42 @@ body.is-modal { overflow: hidden; }
 }
 
 .start-cloud--1 { top: 11%; left: 8%; width: 66px; animation: start-drift 34s linear infinite; }
-.start-cloud--2 { top: 19%; left: 52%; width: 46px; opacity: .6; animation: start-drift 46s linear infinite; }
 
-.start-hills { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 52%; }
-.start-tufts { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 16%; }
-
-/* the grass fades into the controls so the buttons stay readable
-   wherever an animal happens to stand */
-.start-fade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 34%;
-  background: linear-gradient(rgba(231, 242, 211, 0), rgba(231, 242, 211, .72) 42%, rgba(231, 242, 211, .94) 100%);
+/* the meadow is the grid row between the title and PLAY; it reaches out
+   over the stage padding so the grass meets both window edges */
+.start-meadow {
+  position: relative;
+  margin: 8px -20px 10px;
+  container-type: size;
+  pointer-events: none;
 }
 
+/* stretched to the row, never cropped: the paths reach past the box,
+   and the animals use the same percentages, so they move with the hills */
+.start-hills { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.start-mountain { fill: #a6e86d; }
+.start-knolls { fill: #7fd04b; stroke: rgba(255, 255, 255, .35); stroke-width: 4px; vector-effect: non-scaling-stroke; }
+
+/* --x / --y are the spot on the hill line under the animal's feet; the
+   size follows the row's height so a short screen gets a smaller herd */
 .start-critter {
   position: absolute;
-  width: var(--start-size, 68px);
-  height: var(--start-size, 68px);
-  filter: drop-shadow(0 6px 10px rgba(60, 74, 54, .16));
-  animation: start-bob 4.6s ease-in-out infinite;
+  left: var(--x);
+  bottom: var(--y);
+  width: auto;
+  height: min(var(--start-size), var(--start-max));
+  translate: -50% 0;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 4px 0 rgba(40, 90, 30, .18));
+  animation: start-breathe 3.6s ease-in-out infinite;
   animation-delay: var(--start-delay, 0s);
 }
 
-.start-critter--elephant { --start-size: 122px; right: -4px; bottom: 25%; }
-.start-critter--deer { --start-size: 80px; left: 1%; bottom: 32%; }
-.start-critter--rabbit { --start-size: 50px; left: 41%; bottom: 27%; }
-.start-critter--fox { --start-size: 58px; left: 20%; bottom: 23%; }
+.start-critter--elephant { --start-size: 30cqh; --start-max: 120px; }
+.start-critter--zebra { --start-size: 34cqh; --start-max: 110px; }
+.start-critter--lion { --start-size: 26cqh; --start-max: 90px; }
+.start-critter--fox { --start-size: 17cqh; --start-max: 54px; }
+.start-critter--rabbit { --start-size: 18cqh; --start-max: 56px; }
 
 /* ---- top line ---- */
 
@@ -852,9 +859,10 @@ body.is-modal { overflow: hidden; }
 
 .start-foot { margin: 2px 0 0; color: var(--ink-soft); font-size: .7rem; }
 
-@keyframes start-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+/* breathing, not hopping: the feet stay on the grass */
+@keyframes start-breathe {
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(1.012, 1.035); }
 }
 
 @keyframes start-drift {

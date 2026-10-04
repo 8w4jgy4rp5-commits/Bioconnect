@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bioconnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23eef6e4'/><path d='M16 3.5v25M3.5 16h25' stroke='%23d5e5c2' stroke-width='1.2'/><path d='M8.6 12.6V8.2' stroke='%235a9e4b' stroke-width='1.5' stroke-linecap='round'/><path d='M8.6 10.4c-2 0-3.2-1.4-3.4-3.3 2 .1 3.2 1.4 3.4 3.3z' fill='%236fbb56'/><path d='M8.6 9.6c.2-1.9 1.4-3.2 3.4-3.3-.2 1.9-1.4 3.3-3.4 3.3z' fill='%236fbb56'/><path d='M20.2 25.4c0-2.6 2-4.6 4.4-4.6s4.4 2 4.4 4.6z' fill='%23e08a4a'/><path d='M22.3 21.6l-1.1-3.1 2.9 1.5zm4.6 0l1.1-3.1-2.9 1.5z' fill='%23e08a4a'/><circle cx='23' cy='24' r='.7' fill='%23fff'/><circle cx='25.8' cy='24' r='.7' fill='%23fff'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=f0ec65a5" />
+  <link rel="stylesheet" href="style.css?v=bb642805" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="pop.css?v=f8c95c86" />
+  <link rel="stylesheet" href="pop.css?v=f354d64f" />
   <!-- cobbleworks:seo:start -->
     <meta name="description" content="Grow a food chain, then keep it fed. A real-time high-score puzzle." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/Bioconnect/" />
@@ -336,19 +336,10 @@
 <div class="start-screen" id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
   <div class="start-stage">
 
-    <!-- The meadow the player is about to keep alive, painted once:
-         sky, two hills, and four animals out of the chain. -->
+    <!-- The sky behind everything. -->
     <div class="start-scene" aria-hidden="true">
       <div class="start-sun"></div>
       <div class="start-cloud start-cloud--1"></div>
-      <div class="start-cloud start-cloud--2"></div>
-      <div class="start-hill start-hill--back"></div>
-      <div class="start-hill start-hill--front"></div>
-      <img class="start-critter start-critter--elephant" src="img/elephant-calm.png" alt="">
-      <img class="start-critter start-critter--lion" src="img/lion-calm.png" alt="" style="--start-delay: .5s">
-      <img class="start-critter start-critter--zebra" src="img/zebra-calm.png" alt="" style="--start-delay: 1s">
-      <img class="start-critter start-critter--fox" src="img/fox-pose.png" alt="" style="--start-delay: 1.5s">
-      <img class="start-critter start-critter--rabbit" src="img/rabbit-pose.png" alt="" style="--start-delay: 2s">
     </div>
 
     <div class="start-topline">
@@ -367,6 +358,24 @@
         </svg>connect</span>
       </h2>
       <p class="start-tagline">Grow a food chain, then keep it fed.</p>
+    </div>
+
+    <!-- The meadow fills the space between the title and PLAY. The hills
+         and the animals share one 400×300 coordinate box, so every animal
+         stands on the line it was measured against at any screen size.
+         The paths run far past the box to reach both window edges and
+         down under the buttons. The mountain in the middle is where the
+         board will grow. -->
+    <div class="start-meadow" aria-hidden="true">
+      <svg class="start-hills" viewBox="0 0 400 300" preserveAspectRatio="none">
+        <path class="start-mountain" d="M-1600,2000 V262 H-40 C40,262 70,142 140,134 Q210,126 280,134 C350,142 370,262 440,262 H2000 V2000 Z"/>
+        <path class="start-knolls" d="M-1600,2000 V270 C-20,270 20,222 90,222 C150,222 170,262 210,264 C250,266 270,232 330,230 C390,228 420,262 470,268 H2000 V2000 Z"/>
+      </svg>
+      <img class="start-critter start-critter--zebra" src="img/zebra-calm.png" alt="" style="--x: 37%; --y: 54.6%; --start-delay: 1s">
+      <img class="start-critter start-critter--elephant" src="img/elephant-calm.png" alt="" style="--x: 60%; --y: 55.4%">
+      <img class="start-critter start-critter--lion" src="img/lion-calm.png" alt="" style="--x: 21%; --y: 25%; --start-delay: .5s">
+      <img class="start-critter start-critter--fox" src="img/fox-pose.png" alt="" style="--x: 79.5%; --y: 22%; --start-delay: 1.5s">
+      <img class="start-critter start-critter--rabbit" src="img/rabbit-pose.png" alt="" style="--x: 92%; --y: 21.1%; --start-delay: 2s">
     </div>
 
     <div class="start-controls">
