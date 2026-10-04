@@ -1,0 +1,243 @@
+/* ============================================================
+   Cozy Eldritch — concept E from concepts/ui-v3-weird (2026-10-04),
+   on trial. Only active when <html> has .skin-eldritch, which the
+   head script sets from ?skin=eldritch (and remembers). ?skin=pop
+   goes back. Like pop.css it only restyles: no id or class the game
+   reads is changed.
+
+   The meadow is watching, and it is a bit of a dork about it: an old
+   book's dark green, eyes opening in empty squares, plum tentacles on
+   the rim of the board, googly eyes on a few animals.
+   ============================================================ */
+
+.skin-eldritch {
+  --el-ink: #ece4c8;
+  --el-mute: #a39c7c;
+  --el-moss: #a8c66c;
+  --el-moss-d: #6f8a3e;
+  --el-deep: #10150e;
+  --el-cell: #1f2918;
+  --el-cell-up: #2b3822;
+  --el-blood: #e0573c;
+  --el-plum: #6b4a72;
+  --el-plum2: #8d6896;
+  --el-serif: "IM Fell English", Georgia, serif;
+  --el-caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --el-type: "Special Elite", "Courier New", monospace;
+  /* pop.css reads these, so most of its pieces darken on their own */
+  --pop-white: #1f2918;
+  --pop-ink: #ece4c8;
+  --pop-mute: #a39c7c;
+  --pop-sun: #a8c66c;
+  --pop-sun-d: #5d7434;
+  --pop-red: #e0573c;
+  --pop-lift: 0 0 0 1px rgba(236, 228, 200, .14), 0 4px 14px rgba(0, 0, 0, .45);
+  --font: var(--el-serif);
+}
+
+.skin-eldritch, .skin-eldritch body { background: var(--el-deep); }
+.skin-eldritch body {
+  color: var(--el-ink);
+  background:
+    radial-gradient(60% 40% at 50% 46%, rgba(168, 198, 108, .16), transparent 70%),
+    radial-gradient(90% 30% at 50% 0%, rgba(141, 104, 150, .2), transparent 70%),
+    linear-gradient(#1b2418, #10150e);
+  background-attachment: fixed;
+}
+
+/* ---------- top: score, season, menu ---------- */
+
+.skin-eldritch .scorebar .score-value { font-family: var(--el-caps); font-weight: 400; letter-spacing: .04em; color: var(--el-ink); }
+.skin-eldritch .scorebar .score-label,
+.skin-eldritch .scorebar .score--best .score-value { font-family: var(--el-serif); font-style: italic; color: var(--el-mute); }
+
+.skin-eldritch .season.pop-chip,
+.skin-eldritch .season[data-season] {
+  background: rgba(168, 198, 108, .08);
+  box-shadow: inset 0 0 0 1px rgba(168, 198, 108, .45);
+  transform: rotate(2deg);
+}
+.skin-eldritch .season .season-name,
+.skin-eldritch .season[data-season] .season-name { font-family: var(--el-caps); font-weight: 400; color: var(--el-moss); }
+.skin-eldritch .season .season-mult,
+.skin-eldritch .season[data-season] .season-mult { font-family: var(--el-type); font-weight: 400; color: var(--el-mute); }
+.skin-eldritch .season .season-track { background: rgba(168, 198, 108, .12); }
+.skin-eldritch .season .season-fill,
+.skin-eldritch .season[data-season] .season-fill { background: var(--el-moss); }
+.skin-eldritch .season[data-season="3"] { box-shadow: inset 0 0 0 1px rgba(170, 200, 230, .5); }
+.skin-eldritch .season[data-season="3"] .season-name { color: #b8cfe6; }
+
+.skin-eldritch .menu-btn span,
+.skin-eldritch .menu-btn span::before,
+.skin-eldritch .menu-btn span::after { background: var(--el-ink); }
+
+/* ---------- the goal ---------- */
+
+.skin-eldritch .growth-summary { background: rgba(0, 0, 0, .28); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .12); }
+.skin-eldritch .goal-pair { background: rgba(168, 198, 108, .08); }
+.skin-eldritch .goal-words strong { font-family: var(--el-serif); font-style: italic; font-weight: 400; font-size: 17px; color: var(--el-ink); }
+.skin-eldritch .goal-words small { font-family: var(--el-type); font-size: 11px; color: var(--el-mute); }
+
+/* ---------- the board ---------- */
+
+.skin-eldritch .board-frame { position: relative; }
+.skin-eldritch .board {
+  position: relative;
+  z-index: 1;
+  background: rgba(12, 16, 10, .78);
+  box-shadow: 0 0 0 1px rgba(236, 228, 200, .18), 0 0 40px rgba(168, 198, 108, .12);
+}
+.skin-eldritch .cell { background: radial-gradient(circle at 50% 60%, #26321d, #171e12); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .07); }
+.skin-eldritch .cell:not(:disabled):hover { background: radial-gradient(circle at 50% 60%, #33432a, #1d2617); }
+.skin-eldritch .cell--taken { background: radial-gradient(circle at 50% 60%, #2f3d25, #1c2416); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .12); }
+.skin-eldritch .cell--bones, .skin-eldritch .cell--scrub, .skin-eldritch .cell--stone { background: #22281c; box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .06); }
+.skin-eldritch .cell--big { box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .18), 0 6px 18px rgba(0, 0, 0, .5); }
+.skin-eldritch .cell--merge-ready { background: radial-gradient(circle at 50% 60%, #2e3d22, #1a2214); box-shadow: inset 0 0 0 1.5px rgba(168, 198, 108, .7); }
+.skin-eldritch .merge-preview-label { color: var(--el-moss); font-family: var(--el-serif); }
+.skin-eldritch .cell--inreach { background: rgba(224, 87, 60, .1); box-shadow: inset 0 0 0 1.5px rgba(224, 87, 60, .6); }
+.skin-eldritch .cell--inreach::after { border-color: rgba(224, 87, 60, .4); }
+.skin-eldritch .cell--raised::before { background: var(--el-plum2); box-shadow: 0 0 0 2px rgba(16, 21, 14, .8); }
+
+/* dead ground stays dark instead of a bright brown patch */
+.skin-eldritch .cell--scrub .tile-art, .skin-eldritch .cell--stone .tile-art { filter: grayscale(.85) brightness(.38); }
+.skin-eldritch .cell--bones .tile-art { filter: grayscale(.7) brightness(.55) contrast(1.3); }
+/* a meal flashes ember red, a death a cold plum, both fading to the dark */
+.skin-eldritch .cell--eaten { animation-name: el-eaten; }
+.skin-eldritch .cell--died { animation-name: el-died; }
+@keyframes el-eaten { 0% { background: rgba(224, 87, 60, .45); } 100% { background: rgba(31, 41, 24, .9); } }
+@keyframes el-died { 0%, 40% { background: rgba(107, 74, 114, .55); } 100% { background: rgba(34, 40, 28, .9); } }
+/* muted colour: still readable, no longer a sticker book */
+.skin-eldritch .tile-art { filter: saturate(.6) sepia(.28) contrast(1.12) brightness(.95) drop-shadow(0 3px 4px rgba(0, 0, 0, .6)); }
+
+/* hungry: the meter has gone red, so the square glows like an ember */
+.skin-eldritch .cell:has(.meter-fill.is-low) { box-shadow: inset 0 0 0 1.5px var(--el-blood), inset 0 0 18px rgba(224, 87, 60, .4); }
+.skin-eldritch .meter { background: rgba(0, 0, 0, .4); }
+.skin-eldritch .meter-fill { background: var(--el-moss); }
+.skin-eldritch .meter-fill.is-mid { background: #d6a64a; }
+.skin-eldritch .meter-fill.is-low { background: var(--el-blood); }
+
+/* the meadow's eyes: a few empty squares open one, out of step. Which
+   squares is fixed by position, so an eye never jumps between them. */
+.skin-eldritch .cell:not(.cell--taken):not(.cell--merge-ready):is(:nth-child(7), :nth-child(13), :nth-child(17), :nth-child(24))::before {
+  content: "";
+  position: absolute;
+  left: 27%;
+  top: 37%;
+  width: 46%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #10150e 0 22%, #d8cc86 23% 34%, #f1ead0 35% 100%);
+  box-shadow: 0 0 0 1.5px #0b0e09, 0 0 12px rgba(168, 198, 108, .4);
+  animation: el-blink 5s infinite;
+  pointer-events: none;
+}
+.skin-eldritch .cell:not(.cell--taken):nth-child(13)::before { left: 35%; top: 42%; width: 30%; height: 17%; animation-delay: 1.7s; }
+/* this one is looking the wrong way */
+.skin-eldritch .cell:not(.cell--taken):nth-child(17)::before { background: radial-gradient(circle at 18% 50%, #10150e 0 22%, #d8cc86 23% 34%, #f1ead0 35% 100%); animation-delay: 3.1s; }
+.skin-eldritch .cell:not(.cell--taken):nth-child(24)::before { left: 35%; top: 42%; width: 30%; height: 17%; animation-delay: .8s; }
+@keyframes el-blink { 0%, 90%, 100% { transform: scaleY(1); } 94% { transform: scaleY(.06); } }
+
+/* googly eyes, stuck on by someone who meant well: two on the deer's
+   antlers, one on the buffalo's back, three on every rabbit. Each eye
+   is a white disc with its pupil rolled off to one side. */
+.skin-eldritch .cell--rabbit::after,
+.skin-eldritch .cell--deer::after,
+.skin-eldritch .cell--buffalo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: 0;
+  pointer-events: none;
+  --eye: #fff 0 6.5px, #10150e 7px 8px, transparent 8.5px;
+  --pupil: #10150e 0 3.4px, transparent 3.8px;
+  background:
+    radial-gradient(circle at calc(var(--g1x) + var(--p1x, 2px)) calc(var(--g1y) + var(--p1y, 2px)), var(--pupil)),
+    radial-gradient(circle at var(--g1x) var(--g1y), var(--eye)),
+    radial-gradient(circle at calc(var(--g2x) + var(--p2x, -2px)) calc(var(--g2y) + var(--p2y, 3px)), var(--pupil)),
+    radial-gradient(circle at var(--g2x) var(--g2y), var(--eye)),
+    radial-gradient(circle at calc(var(--g3x, -50%) + 3px) calc(var(--g3y, -50%) - 1px), var(--pupil)),
+    radial-gradient(circle at var(--g3x, -50%) var(--g3y, -50%), var(--eye));
+}
+.skin-eldritch .cell--rabbit::after { --g1x: 36%; --g1y: 22%; --g2x: 58%; --g2y: 18%; --g3x: 47%; --g3y: 40%; }
+.skin-eldritch .cell--deer::after { --g1x: 40%; --g1y: 16%; --g2x: 64%; --g2y: 20%; --p1x: -2px; --p1y: -1px; }
+.skin-eldritch .cell--buffalo::after { --g1x: 62%; --g1y: 30%; --g2x: -50%; --g2y: -50%; --p1x: 2px; --p1y: -2px; }
+
+/* tentacles on the rim, and the one that brought a flower */
+.el-deco { display: none; }
+.skin-eldritch .el-deco { display: block; }
+/* 8px past each side of the board: the board sits 10px from the screen
+   edge on a phone, so the tentacles never widen the page */
+.skin-eldritch .el-tentacles { position: absolute; inset: -6% -8px; z-index: 2; width: calc(100% + 16px); height: 112%; pointer-events: none; overflow: visible; }
+.el-tentacles .arm { fill: none; stroke: var(--el-plum); stroke-linecap: round; }
+.el-tentacles .suck { fill: none; stroke: var(--el-plum2); stroke-linecap: round; stroke-dasharray: .1 10; }
+.skin-eldritch .el-gift { position: absolute; z-index: 3; right: -6px; top: -9%; width: 28px; transform: rotate(-14deg); pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .6)); }
+
+/* ---------- message and hand ---------- */
+
+.skin-eldritch .meadow-notes .ticker {
+  background: none;
+  box-shadow: none;
+  color: #f2c2b2;
+  font-family: var(--el-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 15px;
+}
+.skin-eldritch .el-aside { display: block; margin-top: 2px; font-family: var(--el-type); font-style: normal; font-size: 11px; color: var(--el-mute); }
+
+.skin-eldritch .tile.hand-tile { background: var(--el-cell); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .12); }
+.skin-eldritch .is-now .tile.hand-tile { background: var(--el-cell); box-shadow: 0 0 0 1.5px var(--el-moss), 0 0 22px rgba(168, 198, 108, .3); }
+.skin-eldritch .hand-piece.is-now .hand-step-label { background: var(--el-deep); color: var(--el-moss); font-family: var(--el-caps); font-weight: 400; box-shadow: inset 0 0 0 1px rgba(168, 198, 108, .5); }
+.skin-eldritch .tile.hand-tile.is-empty { background: rgba(31, 41, 24, .5); }
+.skin-eldritch .pause-note { color: var(--el-ink); text-shadow: none; }
+.skin-eldritch .move-hint.is-previewing { background: rgba(16, 21, 14, .92); color: var(--el-ink); box-shadow: 0 0 0 1px rgba(236, 228, 200, .2); font-family: var(--el-serif); font-weight: 400; }
+
+/* ---------- buttons, menu, end of a run ---------- */
+
+.skin-eldritch .btn { background: var(--el-cell-up); color: var(--el-ink); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .18); font-family: var(--el-serif); }
+.skin-eldritch .btn:active { box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .3); }
+.skin-eldritch .btn--primary { background: var(--el-moss); color: var(--el-deep); box-shadow: 0 0 18px rgba(168, 198, 108, .3); }
+.skin-eldritch .menu-sheet { background: rgba(0, 0, 0, .55); }
+.skin-eldritch .menu-card { background: linear-gradient(#1f2918, #141b11); color: var(--el-ink); }
+.skin-eldritch .menu-head h2 { font-family: var(--el-caps); font-weight: 400; }
+.skin-eldritch .menu-card .level, .skin-eldritch .menu-card .chain { background: rgba(0, 0, 0, .25); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .1); color: var(--el-ink); }
+.skin-eldritch .gameover { z-index: 5; background: rgba(10, 13, 8, .72); }
+.skin-eldritch .gameover-card #goScore, .skin-eldritch .gameover-card .go-score strong { color: var(--el-ink); }
+.skin-eldritch .gameover-card .go-score { color: var(--el-mute); }
+/* the first-of-its-kind card: a page torn from the same old book */
+.skin-eldritch .first { background: rgba(24, 32, 20, .96); border-color: rgba(168, 198, 108, .5); box-shadow: 0 0 30px rgba(0, 0, 0, .6), 0 0 0 1px rgba(236, 228, 200, .12); color: var(--el-ink); }
+.skin-eldritch .first strong { font-family: var(--el-serif); font-style: italic; font-weight: 400; font-size: 1.2rem; color: var(--el-moss); }
+.skin-eldritch .first span { font-family: var(--el-type); color: var(--el-mute); }
+.skin-eldritch .gameover-card { background: #182014; color: var(--el-ink); box-shadow: 0 0 0 1px rgba(236, 228, 200, .18), 0 18px 40px rgba(0, 0, 0, .5); }
+.skin-eldritch .gameover-card h2 { font-family: var(--el-serif); font-style: italic; font-weight: 400; }
+.skin-eldritch .countdown { background: rgba(10, 13, 8, .5); }
+.skin-eldritch .countdown-word { font-family: var(--el-caps); font-weight: 400; color: var(--el-moss);
+  text-shadow: 0 0 2px #10150e, 0 0 18px rgba(168, 198, 108, .55), 0 6px 0 #10150e; }
+.skin-eldritch .countdown-word--go { color: #f1ead0; }
+.skin-eldritch .countdown-word--go::before { border-color: rgba(168, 198, 108, .5); }
+.skin-eldritch .countdown-word--over { color: var(--el-blood); text-shadow: 0 0 2px #10150e, 0 0 22px rgba(224, 87, 60, .5), 0 6px 0 #10150e; }
+
+/* ---------- the opening, after dark ---------- */
+
+.skin-eldritch .start-screen { background: linear-gradient(#141b22, #1b2418 70%); }
+.skin-eldritch .start-sun { background: radial-gradient(circle at 40% 40%, #f4efd8 0 40%, #cfc7a2 70%); box-shadow: 0 0 30px 8px rgba(241, 234, 208, .18); }
+.skin-eldritch .start-cloud, .skin-eldritch .start-cloud::before, .skin-eldritch .start-cloud::after { background: #2a3329; box-shadow: none; }
+.skin-eldritch .start-mountain { fill: #24301d; }
+.skin-eldritch .start-knolls { fill: #1a2414; stroke: rgba(168, 198, 108, .25); }
+.skin-eldritch .start-critter { filter: saturate(.6) sepia(.28) brightness(.85) drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+.skin-eldritch .start-kicker { color: var(--el-mute); text-shadow: none; font-family: var(--el-type); font-weight: 400; }
+.skin-eldritch .start-best { background: rgba(0, 0, 0, .35); color: var(--el-mute); }
+.skin-eldritch .start-best span { color: var(--el-ink); }
+.skin-eldritch .start-logo { font-family: var(--el-caps); font-weight: 400; color: #f1ead0; -webkit-text-stroke: 0; letter-spacing: .01em;
+  text-shadow: 0 0 2px #10150e, 0 0 24px rgba(168, 198, 108, .45), 0 6px 0 #10150e; }
+.skin-eldritch .start-tagline { background: rgba(0, 0, 0, .4); color: var(--el-ink); font-family: var(--el-serif); font-style: italic; font-weight: 400; }
+.skin-eldritch .start-play { background: var(--el-moss); color: var(--el-deep); font-family: var(--el-caps); font-weight: 400; box-shadow: 0 6px 0 var(--el-moss-d), 0 0 30px rgba(168, 198, 108, .35); }
+.skin-eldritch .start-play:focus-visible { box-shadow: 0 6px 0 var(--el-moss-d), 0 0 0 3px #f1ead0, 0 0 30px rgba(168, 198, 108, .35); }
+.skin-eldritch .start-play:active { box-shadow: 0 1px 0 var(--el-moss-d); }
+.skin-eldritch .start-icon { background: rgba(0, 0, 0, .4); color: var(--el-ink); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .2); }
+.skin-eldritch .start-foot { color: var(--el-mute); }
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-eldritch .cell::before { animation: none; }
+}
