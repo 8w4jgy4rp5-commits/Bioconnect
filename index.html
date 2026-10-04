@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="pop.css?v=f354d64f" />
+  <link rel="stylesheet" href="pop.css?v=9f9aa360" />
   <!-- cobbleworks:seo:start -->
     <meta name="description" content="Grow a food chain, then keep it fed. A real-time high-score puzzle." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/Bioconnect/" />
@@ -250,10 +250,11 @@
 
 
 
-  <p class="move-hint" id="moveHint" role="status">Tap to plant · Hold a square to see its path</p>
 
   <!-- ---------- Board ---------- -->
   <div class="board-frame">
+    <!-- floats over the board's top edge, so showing it never moves anything -->
+    <p class="move-hint" id="moveHint" role="status">Tap to plant · Hold a square to see its path</p>
     <div class="board" id="board" aria-label="Meadow, 5 by 5"></div>
     <!-- Score pops, chain tags and the first-of-its-kind cards. Purely
          decorative, never read out, and never inside a cell — render()

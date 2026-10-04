@@ -134,12 +134,25 @@ body {
 .growth-summary .tile.goal-next { width: 54px; height: 46px; flex: none; animation: pop-bob 2.4s ease-in-out infinite; }
 .growth-summary.is-complete .goal-pair { display: none; }
 
-/* the hold preview speaks only while it has something to say */
+/* the hold preview speaks only while it has something to say. It floats
+   over the board's top edge instead of taking a row: as a row, every hold
+   and every tap added and removed 22px above the board, and on a short
+   phone the board and the hand jumped up and down with it. */
 .move-hint { display: none; }
 .move-hint.is-previewing {
   display: block;
-  align-self: center;
-  margin: -4px 0 -4px;
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: calc(100% - 16px);
+  margin: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 0 rgba(30, 70, 110, .12);
   padding: 3px 12px;
   border-radius: 999px;
   background: rgba(255, 253, 247, .9);
