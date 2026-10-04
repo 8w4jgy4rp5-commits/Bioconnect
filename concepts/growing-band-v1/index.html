@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bioconnect · The growing meadow band</title>
+<link rel="icon" href="data:,">
+<style>
+*{box-sizing:border-box}body{margin:0;color:#23452c;background:linear-gradient(#b9e7ff,#eaf9db);font:16px/1.6 system-ui,sans-serif;min-height:100vh}main{width:min(780px,100%);margin:auto;padding:44px 20px}h1{font-size:clamp(30px,6vw,48px);line-height:1.14;letter-spacing:-.04em;margin:10px 0 16px}h2{font-size:19px;margin:0 0 8px}p{color:#526653;margin:8px 0}.eyebrow{font-size:12px;font-weight:800;letter-spacing:.13em}section{background:#ffffffed;border-radius:24px;padding:24px;margin:24px 0;box-shadow:0 5px 0 #73966324}.controls{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}button,select{font:inherit;color:#23452c;border:1px solid #bcd3bc;border-radius:12px;min-height:46px;padding:10px 15px;background:#fff;cursor:pointer}button.primary{background:#ffd361;border-color:#e6ba46;font-weight:750}button:disabled{opacity:.45;cursor:default}button:focus-visible,select:focus-visible{outline:3px solid #407b52;outline-offset:3px}label{display:block;font-weight:700;font-size:14px}select{display:block;width:100%;margin-top:7px}#status{font-weight:650;min-height:26px;color:#387647}.band{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:20px}.member{border:1px solid #d9e5d8;border-radius:14px;padding:12px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px;opacity:.5}.member.is-joined{background:#eef8df;border-color:#8bbf73;opacity:1}.member strong{font-size:14px}.member span{display:block;font-size:12px;color:#677467}.solo{font-size:12px;padding:7px 10px;min-height:38px}.note{font-size:13px}a{color:#346540}#count{display:inline-block;padding:4px 12px;background:#e3f1d7;border-radius:20px;font-weight:750;font-size:13px}@media(max-width:450px){main{padding:26px 14px}.band{grid-template-columns:1fr}section{padding:18px}.controls button{flex:1}}
+</style>
+<main>
+  <span class="eyebrow">BIOCONNECT / MEADOW BAND</span>
+  <h1>A new animal.<br>A new instrument.</h1>
+  <p>Start with wooden notes. Add an animal, and hear a new musician join the same tune.</p>
+  <section>
+    <h2>Grow the band</h2>
+    <span id="count">0 animals · wooden notes</span>
+    <div class="controls"><button id="play" class="primary">Play music</button><button id="add">Add an animal</button><button id="stop">Stop</button></div>
+    <label for="stage">Compare an arrangement<select id="stage"></select></label>
+    <p id="status" role="status">Press Play to hear the meadow.</p>
+    <div id="band" class="band"></div>
+    <p class="note">In the game, each species joins once per run. Its instrument stays after a merge or a meal. A new game starts the band over.</p>
+  </section>
+  <p class="note">Use Solo to hear an instrument on its own. Piano, brass, woodwind and strings are synthesized in the same sound engine used by the game.</p>
+  <a href="../../index.html">← Play Bioconnect</a>
+</main>
+<script src="../../audio-synth.js?v=a2d22b34"></script>
+<script>
+(() => {
+  const instruments=BioSound.instruments, names=instruments.map(i=>i.kind);
+  const select=document.getElementById('stage'), status=document.getElementById('status');
+  let ctx,synth,timer=0,beat=0,next=0,target=0,active=0,soloTimer=0;
+  try{if(navigator.audioSession)navigator.audioSession.type='ambient';}catch(_){}
+  for(let n=0;n<=names.length;n++){
+    const option=document.createElement('option');option.value=n;
+    option.textContent=n ? n+(n===1?' animal · ':' animals · ')+instruments[n-1].name+' joins' : 'Plants only · wooden notes';
+    select.appendChild(option);
+  }
+  instruments.forEach((item,i)=>{
+    const row=document.createElement('div');row.className='member';row.dataset.index=i;
+    const label=document.createElement('div'), name=document.createElement('strong'), sound=document.createElement('span');
+    name.textContent=item.kind[0].toUpperCase()+item.kind.slice(1);sound.textContent=item.name;
+    label.append(name,sound);
+    const button=document.createElement('button');button.textContent='Solo';button.className='solo';button.setAttribute('aria-label','Hear '+item.name);
+    button.addEventListener('click',async()=>{
+      stop();await unlock();synth.instrumentPreview(item.kind,ctx.currentTime+.1);status.textContent=item.name+' · solo';
+      soloTimer=setTimeout(()=>status.textContent='Press Play to hear the meadow.',3600);
+    });row.append(label,button);document.getElementById('band').appendChild(row);
+  });
+  function paint(){
+    select.value=target;document.getElementById('add').disabled=target===names.length;
+    document.getElementById('count').textContent=target+' animals · '+(target ? target+' added instruments' : 'wooden notes');
+    document.querySelectorAll('.member').forEach((row,i)=>row.classList.toggle('is-joined',i<active));
+    document.getElementById('play').disabled=!!timer;
+  }
+  async function unlock(){
+    ctx ||= new (window.AudioContext||window.webkitAudioContext)();synth ||= BioSound.create(ctx);await ctx.resume();
+  }
+  function schedule(){
+    if(ctx.state!=='running')return;
+    if(next<ctx.currentTime)next=ctx.currentTime+.04;
+    while(next<ctx.currentTime+.16){
+      if(beat%4===0&&target!==active){active=target;paint();status.textContent=active ? instruments[active-1].name+' is in the band.' : 'Wooden notes in the meadow.';}
+      synth.musicBeat(beat,next,'game',names.slice(0,active));beat=(beat+1)%BioSound.BEATS;next+=BioSound.BEAT;
+    }
+  }
+  function stop(){clearInterval(timer);timer=0;clearTimeout(soloTimer);if(synth)synth.cancel('music');paint();status.textContent='Music stopped.';}
+  async function play(){if(timer)return;await unlock();synth.cancel('music');clearTimeout(soloTimer);beat=0;active=target;next=ctx.currentTime+.06;status.textContent='The meadow band is playing.';timer=setInterval(schedule,50);schedule();paint();}
+  function choose(n){target=n;paint();if(timer)status.textContent=n ? instruments[n-1].name+' joins on the next bar.' : 'Wooden notes return on the next bar.';}
+  document.getElementById('play').addEventListener('click',play);
+  document.getElementById('stop').addEventListener('click',stop);
+  document.getElementById('add').addEventListener('click',()=>choose(Math.min(names.length,target+1)));
+  select.addEventListener('change',()=>choose(Number(select.value)));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){stop();if(ctx)ctx.suspend();}});
+  paint();
+})();
+</script>
+</html>

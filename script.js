@@ -975,6 +975,9 @@ function placeTile(i) {
   // run the same chain is worth less, and this is where they see that.
   const gained = displayScore(state.score) - displayScore(before);
   if (window.BioAudio) {
+    // Include every rung of a chain, even when it disappears into the next
+    // animal immediately. A dealt rabbit/fox also brings its instrument.
+    if (window.BioAudio.discover) window.BioAudio.discover([dealtKind].concat(grew.map(g => g.kind)));
     window.BioAudio.effect("place");
     if (grew.length) window.BioAudio.effect(grew.some(g => g.kind === "elephant") ? "finish" : "merge", grew.length);
   }

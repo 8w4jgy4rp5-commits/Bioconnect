@@ -3,6 +3,8 @@
 window.BioAudio = (() => {
   let ctx, synth, paused = true, theme = 'title';
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
+  const discovered = new Set();
+  let playingKinds = [];
 
   // Safari: "ambient" obeys the ring/silent switch and mixes with other audio.
   try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (_) {}
@@ -22,7 +24,9 @@ window.BioAudio = (() => {
     // A stalled tab skips silence rather than bursting through missed notes.
     if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + .035;
     while (nextTime < ctx.currentTime + .16) {
-      synth.musicBeat(beat, nextTime, theme);
+      // Join on the next bar without restarting the tune or its tempo.
+      if (theme === 'game' && beat % 4 === 0) playingKinds = [...discovered];
+      synth.musicBeat(beat, nextTime, theme, playingKinds);
       beat = (beat + 1) % window.BioSound.BEATS;
       nextTime += window.BioSound.beatLength(theme);
     }
@@ -63,6 +67,13 @@ window.BioAudio = (() => {
   });
 
   return {
+    discover(kinds) {
+      const known = new Set((window.BioSound && window.BioSound.instruments || []).map(i => i.kind));
+      for (const kind of Array.isArray(kinds) ? kinds : [kinds]) {
+        if (known.has(kind)) discovered.add(kind);
+      }
+    },
+    band() { return { discovered: [...discovered], playing: playingKinds.slice(), theme }; },
     theme(name) {
       if (theme === name) return;
       theme = name;
@@ -76,7 +87,8 @@ window.BioAudio = (() => {
       if (on && synth) synth.cancel('effects');
     },
     reset() {
-      if (synth) synth.cancel();
+      discovered.clear(); playingKinds = [];
+      if (synth) { synth.cancel(); synth.setEnsemble([], ctx.currentTime); }
       clearInterval(timer); timer = 0; beat = 0; lastEffect = -1;
       sync();
     },

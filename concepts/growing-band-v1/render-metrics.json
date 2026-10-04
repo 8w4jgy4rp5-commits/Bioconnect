@@ -1,0 +1,201 @@
+[
+  {
+    "name": "stage-0",
+    "count": 0,
+    "peak": 0.2029961347579956,
+    "rms": 0.024724783774849338,
+    "finite": true
+  },
+  {
+    "name": "stage-1",
+    "count": 1,
+    "peak": 0.2030932754278183,
+    "rms": 0.029798591337802535,
+    "finite": true,
+    "addedSignal": 0.017337280562607315
+  },
+  {
+    "name": "stage-2",
+    "count": 2,
+    "peak": 0.24411816895008087,
+    "rms": 0.030659882025486404,
+    "finite": true,
+    "addedSignal": 0.0059263592426973865
+  },
+  {
+    "name": "stage-3",
+    "count": 3,
+    "peak": 0.31602129340171814,
+    "rms": 0.037901771051694996,
+    "finite": true,
+    "addedSignal": 0.02330259052529762
+  },
+  {
+    "name": "stage-4",
+    "count": 4,
+    "peak": 0.30930307507514954,
+    "rms": 0.042648661443283255,
+    "finite": true,
+    "addedSignal": 0.02160083192445171
+  },
+  {
+    "name": "stage-5",
+    "count": 5,
+    "peak": 0.3042970597743988,
+    "rms": 0.04308411785829304,
+    "finite": true,
+    "addedSignal": 0.011609936772684681
+  },
+  {
+    "name": "stage-6",
+    "count": 6,
+    "peak": 0.29944393038749695,
+    "rms": 0.042413586329725556,
+    "finite": true,
+    "addedSignal": 0.010132403119340272
+  },
+  {
+    "name": "stage-7",
+    "count": 7,
+    "peak": 0.3083568215370178,
+    "rms": 0.04785308138869935,
+    "finite": true,
+    "addedSignal": 0.024516218800903104
+  },
+  {
+    "name": "stage-8",
+    "count": 8,
+    "peak": 0.30948325991630554,
+    "rms": 0.049436739231855834,
+    "finite": true,
+    "addedSignal": 0.01751650545068358
+  },
+  {
+    "name": "stage-9",
+    "count": 9,
+    "peak": 0.3042958080768585,
+    "rms": 0.04845260493574607,
+    "finite": true,
+    "addedSignal": 0.006063750926563199
+  },
+  {
+    "name": "stage-10",
+    "count": 10,
+    "peak": 0.3131592869758606,
+    "rms": 0.04836250204400041,
+    "finite": true,
+    "addedSignal": 0.010352325569335142
+  },
+  {
+    "name": "solo-rabbit",
+    "count": 0,
+    "peak": 0.3005554974079132,
+    "rms": 0.02782744203001945,
+    "finite": true
+  },
+  {
+    "name": "solo-fox",
+    "count": 1,
+    "peak": 0.23058713972568512,
+    "rms": 0.015220780981996028,
+    "finite": true
+  },
+  {
+    "name": "solo-deer",
+    "count": 2,
+    "peak": 0.2205614447593689,
+    "rms": 0.0844196554494021,
+    "finite": true
+  },
+  {
+    "name": "solo-zebra",
+    "count": 3,
+    "peak": 0.26470401883125305,
+    "rms": 0.0842793176882375,
+    "finite": true
+  },
+  {
+    "name": "solo-buffalo",
+    "count": 4,
+    "peak": 0.2341133952140808,
+    "rms": 0.025896929079792217,
+    "finite": true
+  },
+  {
+    "name": "solo-wolf",
+    "count": 5,
+    "peak": 0.25983861088752747,
+    "rms": 0.05635800429001727,
+    "finite": true
+  },
+  {
+    "name": "solo-bear",
+    "count": 6,
+    "peak": 0.2562738358974457,
+    "rms": 0.06070469214920496,
+    "finite": true
+  },
+  {
+    "name": "solo-lion",
+    "count": 7,
+    "peak": 0.23415809869766235,
+    "rms": 0.07224275692825724,
+    "finite": true
+  },
+  {
+    "name": "solo-tiger",
+    "count": 8,
+    "peak": 0.27900460362434387,
+    "rms": 0.04098813489873006,
+    "finite": true
+  },
+  {
+    "name": "solo-elephant",
+    "count": 9,
+    "peak": 0.24522127211093903,
+    "rms": 0.031934309650188064,
+    "finite": true
+  },
+  {
+    "name": "plants-only",
+    "count": 0,
+    "peak": 0.2029961347579956,
+    "rms": 0.02575482046405584,
+    "finite": true
+  },
+  {
+    "name": "wolf-band",
+    "count": 6,
+    "peak": 0.29944396018981934,
+    "rms": 0.04336597775272234,
+    "finite": true
+  },
+  {
+    "name": "elephant-band",
+    "count": 10,
+    "peak": 0.3131592869758606,
+    "rms": 0.049457098752168284,
+    "finite": true
+  },
+  {
+    "name": "growing-meadow",
+    "count": 10,
+    "peak": 0.2855832874774933,
+    "rms": 0.041136407869846486,
+    "finite": true
+  },
+  {
+    "name": "stress",
+    "count": 10,
+    "peak": 0.3168404698371887,
+    "rms": 0.056242945864289295,
+    "finite": true
+  },
+  {
+    "name": "cancel-music",
+    "count": 10,
+    "peak": 0,
+    "rms": 0,
+    "finite": true
+  }
+]

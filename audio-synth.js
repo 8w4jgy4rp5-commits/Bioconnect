@@ -5,6 +5,20 @@ window.BioSound = (() => {
   const BPM = 96, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
   // The title screen plays the same tune, slower, as a music box.
   const TITLE_BEAT = 60 / 78;
+  // Each newly encountered species joins the band once during this run.
+  const INSTRUMENTS = Object.freeze([
+    { kind: 'rabbit', name: 'Piano' },
+    { kind: 'fox', name: 'Pizzicato strings' },
+    { kind: 'deer', name: 'Flute' },
+    { kind: 'zebra', name: 'Clarinet' },
+    { kind: 'buffalo', name: 'Double bass' },
+    { kind: 'wolf', name: 'Trumpet' },
+    { kind: 'bear', name: 'Cello' },
+    { kind: 'lion', name: 'French horn' },
+    { kind: 'tiger', name: 'Glockenspiel' },
+    { kind: 'elephant', name: 'Timpani' }
+  ]);
+
   const chords = [
     [50,57,61,66], [47,54,57,62], [52,55,59,66], [45,55,59,64],
     [50,57,61,66], [43,54,57,62], [52,55,59,62], [45,55,61,64],
@@ -50,20 +64,21 @@ window.BioSound = (() => {
       data[i] = seed / 2147483648 - 1;
     }
 
-    function envelope(param, time, attack, duration, volume) {
+    function envelope(param, time, attack, duration, volume, hold = 0) {
       param.setValueAtTime(0, time);
       param.linearRampToValueAtTime(volume, time + attack);
+      if (hold > attack) param.setValueAtTime(volume * .9, time + hold);
       param.exponentialRampToValueAtTime(.00001, time + duration);
       param.linearRampToValueAtTime(0, time + duration + .02);
     }
 
-    function voice(source, bus, time, duration, volume, attack = .008, filter = null) {
+    function voice(source, bus, time, duration, volume, attack = .008, filter = null, hold = 0) {
       const gain = ctx.createGain(), nodes = [source, gain];
-      envelope(gain.gain, time, attack, duration, volume);
+      envelope(gain.gain, time, attack, duration, volume, hold);
       if (filter) { source.connect(filter); filter.connect(gain); nodes.push(filter); }
       else source.connect(gain);
       gain.connect(bus);
-      const entry = { source, gain, bus, time };
+      const entry = { source, gain, bus: bus === effects ? effects : music, time };
       voices.add(entry);
       source.onended = () => { nodes.forEach(node => node.disconnect()); voices.delete(entry); };
       source.start(time); source.stop(time + duration + .03);
@@ -93,14 +108,6 @@ window.BioSound = (() => {
       tone(f * 3.98, time, .105, volume * .07, bus, 'sine', .004);
     }
 
-    function chord(notes, time) {
-      notes.slice(1).forEach((midi, i) => {
-        const t = time + i * .019;
-        tone(hz(midi), t, .75, .017, music, 'triangle', .018);
-        tone(hz(midi) * 1.002, t, .52, .006, music, 'sine', .023);
-      });
-    }
-
     // A music box: bright, short-ringing, with a faint bell overtone.
     function box(midi, time, volume) {
       const f = hz(midi);
@@ -127,8 +134,131 @@ window.BioSound = (() => {
       }
     }
 
-    function musicBeat(index, time, theme = 'game') {
+    const layers = new Map();
+    for (const { kind } of INSTRUMENTS) {
+      const bus = ctx.createGain();
+      bus.gain.value = 0;
+      bus.connect(music);
+      layers.set(kind, bus);
+    }
+    let ensembleKey = '';
+    const waves = new Map();
+
+    function setEnsemble(kinds, time = ctx.currentTime) {
+      const chosen = new Set(kinds);
+      const active = INSTRUMENTS.filter(i => chosen.has(i.kind));
+      const key = active.map(i => i.kind).join(',');
+      if (key === ensembleKey) return;
+      ensembleKey = key;
+      // Let the ensemble get richer without making ten parts ten times louder.
+      const level = 1 / Math.sqrt(1 + Math.max(0, active.length - 2) * .15);
+      for (const { kind } of INSTRUMENTS) {
+        const gain = layers.get(kind).gain;
+        if (gain.cancelAndHoldAtTime) gain.cancelAndHoldAtTime(time);
+        else { const value = gain.value; gain.cancelScheduledValues(time); gain.setValueAtTime(value, time); }
+        gain.linearRampToValueAtTime(chosen.has(kind) ? level : 0, time + .55);
+      }
+    }
+
+    // Sustained instruments have shaped harmonics and a held breath; struck
+    // instruments lose their upper partials early. These are synth timbres,
+    // not recordings of acoustic instruments.
+    function held(midi, time, duration, volume, bus, profile, attack, cutoff) {
+      if (!waves.has(profile)) {
+        const partials = {
+          flute: [0,1,.12,.04,.015], clarinet: [0,1,.05,.55,.02,.25,.01,.1],
+          trumpet: [0,1,.85,.65,.42,.28,.18,.1,.05],
+          cello: [0,1,.5,.3,.2,.13,.08], horn: [0,1,.4,.2,.09,.03]
+        }[profile];
+        waves.set(profile, ctx.createPeriodicWave(new Float32Array(partials.length), new Float32Array(partials)));
+      }
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.setPeriodicWave(waves.get(profile));
+      source.frequency.setValueAtTime(hz(midi), time);
+      filter.type = 'lowpass'; filter.Q.value = .55;
+      filter.frequency.setValueAtTime(cutoff * .65, time);
+      filter.frequency.linearRampToValueAtTime(cutoff, time + attack * 2);
+      filter.frequency.linearRampToValueAtTime(cutoff * .78, time + duration);
+      voice(source, bus, time, duration, volume, attack, filter, duration * .55);
+    }
+
+    function instrument(kind, midi, time, duration, volume) {
+      const bus = layers.get(kind);
+      if (!bus) return;
+      const f = hz(midi);
+      switch (kind) {
+        case 'rabbit': // Hammer attack, then the upper strings decay first.
+          tone(f, time, duration, volume, bus, 'sine', .003);
+          tone(f * 2.002, time, duration * .42, volume * .4, bus, 'sine', .002);
+          tone(f * 3.995, time, duration * .18, volume * .16, bus, 'sine', .002);
+          tone(f * 7, time, .035, volume * .045, bus, 'sine', .001);
+          break;
+        case 'fox':
+          tone(f, time, .28, volume, bus, 'triangle', .003);
+          tone(f * 2.01, time, .09, volume * .18, bus, 'sine', .002);
+          break;
+        case 'deer': held(midi,time,duration,volume,bus,'flute',.065,4200); break;
+        case 'zebra': held(midi,time,duration,volume,bus,'clarinet',.035,2600); break;
+        case 'buffalo':
+          tone(f,time,.8,volume,bus,'triangle',.012);
+          tone(f * 2,time,.2,volume * .13,bus,'sine',.006);
+          break;
+        case 'wolf': held(midi,time,duration,volume,bus,'trumpet',.04,3400); break;
+        case 'bear': held(midi,time,duration,volume,bus,'cello',.16,1500); break;
+        case 'lion': held(midi,time,duration,volume,bus,'horn',.09,1700); break;
+        case 'tiger':
+          tone(f,time,1.4,volume,bus,'sine',.002);
+          tone(f * 2.76,time,.38,volume * .22,bus,'sine',.001);
+          tone(f * 5.4,time,.09,volume * .07,bus,'sine',.001);
+          break;
+        case 'elephant':
+          tone(f * 1.12,time,.85,volume,bus,'sine',.004,f);
+          tone(f * 1.53,time,.25,volume * .25,bus,'sine',.003,f * 1.5);
+          rustle(time,.035,volume * .06,500,bus);
+          break;
+      }
+    }
+
+    function ensembleBeat(beat, time, kinds) {
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      const active = new Set(kinds);
+      const play = (kind, midi, offset, duration, volume) => {
+        if (active.has(kind)) instrument(kind,midi,time + offset * BEAT,duration,volume);
+      };
+      // Different registers and spaces: a conversation, not ten copies of
+      // the melody. Every unlocked part has an audible role in every bar.
+      if (within === 1 || within === 3) {
+        [notes[1],notes[2],notes[3]].forEach((midi,i) => play('rabbit',midi,.04 + i * .025,1.1,.029));
+      }
+      if (within === 0 || within === 2) play('fox',notes[within === 0 ? 2 : 3] + 12,.5,.28,.045);
+      if (within === 2) {
+        play('deer',notes[3] + 12,.12,.52,.042);
+        play('deer',notes[2] + 12,1.02,.5,.034);
+      }
+      if (within === 1) play('zebra',notes[2],.5,.7,.04);
+      if (within === 3) play('zebra',notes[1],.5,.38,.032);
+      if (within === 0 || within === 2) play('buffalo',notes[0] + (within === 2 ? 7 : 0),0,.8,.065);
+      if (within === 0) play('wolf',notes[3] + (bar % 2 ? 0 : 7),.14,.48,.038);
+      if (within === 3) play('wolf',notes[2] + 12,.2,.42,.026);
+      if (within === 0) play('bear',notes[1] - 12,.05,2.1,.044);
+      if (within === 2) play('lion',notes[2] - 12,.03,1.0,.042);
+      if (within === 0) play('tiger',notes[3] + 24,.75,1.4,.025);
+      if (within === 3) play('tiger',notes[2] + 24,.7,1.4,.019);
+      if (within === 0) play('elephant',notes[0] - 12,0,.85,.07);
+      if (within === 2) play('elephant',notes[0] - 5,.5,.85,.045);
+    }
+
+    function instrumentPreview(kind, time = ctx.currentTime + .02) {
+      if (!layers.has(kind)) return;
+      setEnsemble([kind], time);
+      const low = ['buffalo','bear','lion','elephant'].includes(kind);
+      const high = kind === 'tiger';
+      [62,66,69,66].forEach((midi,i) => instrument(kind,midi + (low ? -12 : high ? 12 : 0),time + i * .65,.6,.11));
+    }
+
+    function musicBeat(index, time, theme = 'game', kinds = []) {
       if (theme === 'title') return titleBeat(((index % BEATS) + BEATS) % BEATS, time);
+      setEnsemble(kinds, time);
       const beat = ((index % BEATS) + BEATS) % BEATS;
       const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
       const sway = .018 * Math.sin(bar * 1.7 + within);
@@ -136,17 +266,12 @@ window.BioSound = (() => {
         if (Math.floor(position) === within) {
           const offset = position - within;
           const t = time + offset * BEAT + (offset > 0 ? .018 : 0);
-          wood(midi, t, .087 + sway);
+          wood(midi, t, .074 + sway * .6);
           // A quiet resonant answer softens the dry synthesized attack.
           wood(midi - 12, t + .115, .012);
         }
       }
-      if (within === 0 || within === 2) {
-        const bass = within === 0 ? notes[0] : notes[0] + 7;
-        tone(hz(bass), time, .53, .092, music, 'sine', .014);
-        tone(hz(bass) * 2, time, .24, .013, music, 'sine', .01);
-      }
-      if (within === 1 || within === 3) chord(notes, time + .036);
+      ensembleBeat(beat, time, kinds);
       // Brushed seeds instead of a sharp hi-hat or a heavy drum loop.
       rustle(time + BEAT * .56, .09, .013, 3300, music);
       if (within === 1 || within === 3) tone(190, time, .09, .017, music, 'sine', .004, 130);
@@ -231,8 +356,8 @@ window.BioSound = (() => {
       }
     }
 
-    return { musicBeat, effect, cancel };
+    return { musicBeat, effect, cancel, setEnsemble, instrumentPreview };
   }
   const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
-  return { create, BPM, BEAT, BEATS, beatLength, title: 'Meadow Steps' };
+  return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Meadow Steps' };
 })();

@@ -1,5 +1,18 @@
 # Bioconnect 音の設計 — Meadow Steps
 
+## 2026-10-04 — Growing meadow band（現在のゲームBGM）
+
+ユーザー決定で、同じMeadow Stepsに動物の初登場ごとに1楽器ずつ追加する構成に更新。
+木琴風の旋律と小さなリズムから始まり、Piano、Pizzicato strings、Flute、Clarinet、Double bass、
+Trumpet、Cello、French horn、Glockenspiel、Timpaniが、その試合での各動物の初登場に合わせて参加する。
+同種は1回、連鎖途中と手札の動物も対象、盤面から消えても維持、New gameでリセット。
+次の小節頭で0.55秒フェードインし、曲の位置は変えない。合奏の各音域/拍を分け、音量を調整する。
+現在の試聴/音源/測定はconcepts/growing-band-v1/。audio-v1のWAVは以前の固定伴奏版として保存。
+タイトルはオルゴール、カウントダウンと終了はrest（現在の実装）。非表示では全音を止める。
+楽器はWeb Audioで合成した近似音色。全11段階と10ソロを検査、全楽器ピーク0.3132、ストレス0.3168。
+本人の聴感、スマホ/Safari実機は未確認。下の固定BGMと停止方針の記述は当時の記録。
+
+
 2026-09-28。BGMと効果音を更新。ルール版16は変更しない。
 
 ## 狙いと音の出どころ

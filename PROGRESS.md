@@ -1,5 +1,33 @@
 # Bioconnect 進捗
 
+## 2026-10-04 — Growing meadow bandのコミット・push
+
+ユーザーの明示依頼で、動物の初登場ごとに楽器が増えるBGM、試聴ページと4音源、開発記録をmainへコミット・pushする。
+直前の検証はルール255件と実ブラウザのゲーム連動・試聴、全11編成/10音色の音声検査。
+push前にorigin/mainと差分なし、キャッシュ識別子が最新、git diff --check成功を確認。
+GitHub Pagesの公開処理と配信ファイルを今回の会話で確認する。スマホ/Safari実機と聴感調整は今後の作業。
+
+## 2026-10-04 — 動物の種類が増えると楽器も増えるBGM
+
+ユーザーが提案3「成長とともに音楽も育つ」を選択。「動物の種類が増えるたびに、音の種類の数も増える。
+トランペットからピアノまで」を採用。ゲームは木琴と小さいリズムから始まり、初登場1種類につき1楽器を追加。
+Rabbit=Piano / Fox=Pizzicato / Deer=Flute / Zebra=Clarinet / Buffalo=Double bass / Wolf=Trumpet /
+Bear=Cello / Lion=French horn / Tiger=Glockenspiel / Elephant=Timpani。合成した楽器風の音で、外部音源不要。
+
+変更: audio-synth.js（10音色、別音域/別拍の合奏、音量調整、フェード、音楽グループの一括停止）、
+audio.js（試合ごとの種類Set、次の小節から参加、重複防止、新規ゲームでreset）、script.js（配置と合体の
+全段を通知）、index.html（stamp更新）。保存/点数/配給のルール変更なし。
+盤面から消えても楽器は残る。連鎖の中間と手札の動物も数える。曲は新加入時に頭へ戻さない。
+試聴ページと4音源: concepts/growing-band-v1/。ここで0〜10種類の比較と10種類のSoloができる。
+
+検証: 構文/ルール255件/差分の検査成功。OfflineAudioContextで全11段階と全10音色に有効な信号。
+10楽器ピーク0.3132、効果音ストレス混合0.3168、クリッピング/NaNなし。music停止後の出力0。
+Chromium実操作で楽器の加入、3段連鎖全種、同種の重複防止、盤面から消えた後の保持、
+非表示/復帰、New gameでのリセット、手札のFox、試聴操作と375pxの表示を確認。JS例外0件。
+記録: concepts/growing-band-v1/README.md とrender-metrics.json。証跡: output/playwright/growing-band-v1/。
+未実施: スマホ/Safari実機、本人の耳での評価、コミット・push・公開。次: 音色と音量を本人の試聴で調整。
+
+
 ## 2026-10-04 — 動物モーションのコミット・push
 
 ユーザーの明示依頼で、上の動物モーション、遠吠え素材、生成指示と開発記録をmainへコミット・pushする。
