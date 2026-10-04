@@ -317,30 +317,81 @@ body {
     linear-gradient(var(--pop-sky1), var(--pop-sky2) 72%);
   font-family: var(--font);
 }
+/* the screen clips, not the phone-shaped stage, so the hills can run
+   out to both edges of a wide window instead of stopping in a box */
+.start-screen { overflow: hidden; }
+.start-stage { overflow: visible; }
+
+/* sits below the Best chip on any height; one solid disc and a soft
+   glow, with no sky showing between them */
 .start-sun {
-  top: 7%;
-  right: 10%;
-  width: 70px;
-  height: 70px;
-  background: radial-gradient(circle, #fff3b0 0 40%, var(--pop-sun) 41% 62%, rgba(255, 201, 60, 0) 64%);
-  box-shadow: 0 0 0 10px rgba(255, 225, 120, .25);
+  top: max(8%, 70px);
+  right: 12%;
+  width: 54px;
+  height: 54px;
+  background: radial-gradient(circle at 42% 40%, #fff6c4 0 34%, var(--pop-sun) 36% 100%);
+  box-shadow: 0 0 0 9px rgba(255, 230, 130, .35), 0 0 34px 14px rgba(255, 220, 110, .35);
 }
-.start-cloud { opacity: .95; height: 24px; box-shadow: 24px 7px 0 -3px #fff, -22px 6px 0 -4px #fff, 0 4px 0 rgba(30, 70, 110, .08); }
-.start-hill { position: absolute; left: -10%; right: -10%; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
-.start-hill--back { bottom: 18%; height: 30%; background: #a6e86d; }
-.start-hill--front { bottom: -6%; height: 34%; left: -30%; right: 20%; background: #7fd04b; box-shadow: inset 0 6px 0 rgba(255, 255, 255, .25); }
+
+/* a puffy cloud: a flat base with two round bumps on top */
+.start-cloud { height: 22px; opacity: .95; background: #fff; box-shadow: 0 4px 0 rgba(30, 70, 110, .08); }
+.start-cloud::before,
+.start-cloud::after { content: ""; position: absolute; border-radius: 50%; background: #fff; }
+.start-cloud::before { width: 30px; height: 30px; left: 14%; top: -15px; }
+.start-cloud::after { width: 22px; height: 22px; left: 48%; top: -10px; }
+.start-cloud--1 { top: 15%; width: 72px; }
+/* below the tagline, in the open sky, never under the wordmark */
+.start-cloud--2 { top: 45%; width: 54px; opacity: .8; }
+
+/* 50% − 50vw is the window's edge, wherever the stage is centred */
+.start-hill { position: absolute; border-radius: 50% 50% 0 0 / 100% 100% 0 0; }
+.start-hill--back { bottom: -6%; height: 54%; left: calc(50% - 50vw - 10%); right: calc(50% - 50vw - 10%); background: #a6e86d; }
+.start-hill--front { bottom: -6%; height: 34%; left: calc(50% - 50vw - 30%); right: 20%; background: #7fd04b; box-shadow: inset 0 6px 0 rgba(255, 255, 255, .25); }
+
+/* every animal stands on one ground line that stays above the buttons,
+   however short the screen is */
+.start-scene { --ground: max(24%, 205px); }
 .start-critter { width: auto; height: var(--start-size, 68px); filter: drop-shadow(0 5px 0 rgba(0, 0, 0, .12)); }
-.start-critter--elephant { --start-size: 124px; right: -14px; bottom: 30%; }
-.start-critter--lion { --start-size: 80px; left: 0; bottom: 33%; }
-.start-critter--zebra { --start-size: 88px; left: 27%; bottom: 37%; }
-.start-critter--fox { --start-size: 46px; left: 20%; bottom: 25%; }
-.start-critter--rabbit { --start-size: 50px; left: 50%; bottom: 25%; }
+.start-critter--elephant { --start-size: 124px; right: 6px; bottom: calc(var(--ground) + 46px); }
+.start-critter--lion { --start-size: 80px; left: 0; bottom: calc(var(--ground) + 72px); }
+.start-critter--zebra { --start-size: 88px; left: 27%; bottom: calc(var(--ground) + 104px); }
+.start-critter--fox { --start-size: 46px; left: 20%; bottom: var(--ground); }
+.start-critter--rabbit { --start-size: 50px; left: 48%; bottom: var(--ground); }
+
+/* a short screen: the herd shrinks and crowds closer so the zebra
+   never reaches up behind the tagline */
+@media (max-height: 700px) {
+  .start-critter--elephant { --start-size: 104px; bottom: calc(var(--ground) + 34px); }
+  .start-critter--lion { --start-size: 66px; bottom: calc(var(--ground) + 56px); }
+  .start-critter--zebra { --start-size: 70px; bottom: calc(var(--ground) + 76px); }
+  .start-critter--fox { --start-size: 42px; }
+  .start-critter--rabbit { --start-size: 44px; }
+  .start-cloud--2 { display: none; }
+}
+/* the smallest phones leave the zebra no sky to stand in */
+@media (max-height: 600px) { .start-critter--zebra { display: none; } }
+/* a phone on its side: no room for a meadow under the title, so the
+   herd steps away and the title shrinks to keep PLAY clear */
+@media (max-height: 480px) {
+  .start-critter, .start-cloud--2 { display: none; }
+  .start-hero { padding-top: 0; }
+  .start-logo { font-size: 2.6rem; }
+  .start-tagline { margin-top: 10px; }
+  .start-controls { gap: 8px; }
+  .start-play { min-height: 54px; }
+  .start-foot { display: none; }
+}
 
 .start-kicker { color: #fff; text-shadow: 0 2px 0 rgba(0, 60, 110, .25); font-weight: 700; }
 .start-best { border: 0; background: var(--pop-white); box-shadow: var(--pop-lift); color: var(--pop-mute); font-weight: 600; }
 .start-best span { color: var(--pop-ink); font-weight: 700; }
 
 .start-hero { align-content: start; padding-top: 7vh; }
+/* a tall phone has room to bring the title down toward the meadow */
+@media (min-height: 760px) { .start-hero { padding-top: 12vh; } }
+
+/* the sprout before "connect" wears the same green outline as the letters */
+.start-sprout { width: .5em; height: .62em; margin-right: .04em; vertical-align: -.02em; overflow: visible; }
 .start-logo {
   font-family: var(--font);
   font-weight: 700;
@@ -363,7 +414,12 @@ body {
   box-shadow: 0 7px 0 var(--pop-sun-d), 0 14px 24px rgba(120, 80, 0, .25);
   animation: pop-breathe 2.2s ease-in-out infinite;
 }
-.start-play:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+/* PLAY is focused when the screen opens; the ring hugs the button and
+   its raised edge like a sticker border rather than floating around it */
+.start-play:focus-visible {
+  outline: none;
+  box-shadow: 0 7px 0 var(--pop-sun-d), 0 0 0 4px #fff, 0 7px 0 4px #fff, 0 14px 24px rgba(120, 80, 0, .25);
+}
 .start-play:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--pop-sun-d); animation: none; }
 .start-icon { border: 0; border-radius: 50%; background: var(--pop-white); color: var(--pop-ink); box-shadow: 0 4px 0 rgba(0, 0, 0, .14); font-family: var(--font); }
 .start-foot { color: #2f5a17; font-weight: 500; }
