@@ -82,7 +82,7 @@ window.BioAudio = (() => {
     },
     effect(kind, count = 1) {
       if (document.hidden || !ctx || ctx.state !== 'running') return;
-      if (paused && kind !== 'ready' && kind !== 'go') return;
+      if (paused && kind !== 'ready' && kind !== 'go' && kind !== 'gameover') return;
       // Replace the preceding move's queued pops on a rapid new placement.
       if (kind === 'place') { synth.cancel('effects'); lastEffect = ctx.currentTime; }
       if (kind === 'eat' && ctx.currentTime - lastEffect < .45) return;

@@ -907,7 +907,10 @@ function pickBlock(cells, at, side) {
   return best;
 }
 
+let overTimer = 0;
+
 function newGame() {
+  if (overTimer) { clearTimeout(overTimer); overTimer = 0; hideWord(); }
   clearMovePreview();
   pointerGesture = null;
   cancelledPlacement = false;
@@ -1435,8 +1438,16 @@ function endRun() {
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
   if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
-  el.gameover.hidden = false;
-  el.goAgain.focus();
+  // The music stops, a sad horn sags, and "Game Over" wilts over the
+  // board before the score card comes up.
+  if (window.BioAudio) { window.BioAudio.theme('rest'); window.BioAudio.effect('gameover'); }
+  showWord('Game Over', ' countdown-word--over');
+  overTimer = setTimeout(function () {
+    overTimer = 0;
+    hideWord();
+    el.gameover.hidden = false;
+    el.goAgain.focus();
+  }, 2400);
 }
 
 function endNote() {
@@ -3310,10 +3321,22 @@ function endIntro() {
   counting = false;
   for (const t of countTimers) clearTimeout(t);
   countTimers.length = 0;
+  hideWord();
+  startRun();
+}
+
+function hideWord() {
   el.countdown.hidden = true;
   el.countdownWord.className = 'countdown-word';
   el.countdownWord.textContent = '';
-  startRun();
+}
+
+// Play again and New game deal a fresh board and run the same
+// Ready?? / Go!! beat as the title screen, with the clock held still.
+function replay() {
+  setPaused(true);
+  newGame();
+  playIntro();
 }
 
 function startRun() {
@@ -3346,7 +3369,7 @@ function onNewGame() {
     return;
   }
   disarmNew();
-  newGame();
+  replay();
 }
 
 function disarmNew() {
@@ -3476,7 +3499,7 @@ async function init() {
   el.newBtn.addEventListener('click', onNewGame);
   // a new game that actually started takes the menu down with it
   if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
-  el.goAgain.addEventListener('click', function () { disarmNew(); newGame(); });
+  el.goAgain.addEventListener('click', function () { disarmNew(); replay(); });
 
   // the little reference row under the board
   for (const node of document.querySelectorAll('.tile--mini')) {

@@ -168,6 +168,26 @@ window.BioSound = (() => {
       rustle(time, .045, .023, 1150, effects);
     }
 
+    // A muted horn that sags: the pitch slides down through the note and
+    // a slow wobble rides on it, like a deflating "wah".
+    function sag(midi, time, duration, volume, drop, wobble = 0) {
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.type = 'sawtooth';
+      source.frequency.setValueAtTime(hz(midi), time);
+      source.frequency.exponentialRampToValueAtTime(hz(midi - drop), time + duration);
+      filter.type = 'lowpass'; filter.Q.value = 4;
+      filter.frequency.setValueAtTime(1500, time);
+      filter.frequency.exponentialRampToValueAtTime(420, time + duration);
+      if (wobble) {
+        const lfo = ctx.createOscillator(), depth = ctx.createGain();
+        lfo.frequency.value = 5.5; depth.gain.value = wobble;
+        lfo.connect(depth); depth.connect(source.frequency);
+        lfo.start(time); lfo.stop(time + duration + .03);
+        lfo.onended = () => { lfo.disconnect(); depth.disconnect(); };
+      }
+      voice(source, effects, time, duration, volume, .03, filter);
+    }
+
     function effect(kind, count = 1, time = ctx.currentTime + .012) {
       if (kind === 'place') plant(time);
       else if (kind === 'merge' || kind === 'finish') {
@@ -178,6 +198,10 @@ window.BioSound = (() => {
         wood(69, time, .075, effects); wood(69, time + .22, .055, effects);
       } else if (kind === 'go') {
         [66,69,74].forEach((n, i) => wood(n, time + i * .09, .085, effects));
+      } else if (kind === 'gameover') {
+        // wah, wah, wah, waaaah: three falling steps, then a long droop
+        [55, 54, 53].forEach((n, i) => sag(n, time + i * .42, .36, .05, .6));
+        sag(52, time + 1.26, 1.15, .055, 2.5, 4);
       } else if (kind === 'eat') {
         pop(time, 0, .052);
       } else if (kind === 'preview') {
