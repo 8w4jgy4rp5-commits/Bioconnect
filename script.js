@@ -2130,7 +2130,8 @@ function loadSprites() {
   for (const key of keys) {
     const img = new Image();
     img.onload = function () {
-      sprites[key] = { img: shrinkSprite(img, 72), w: img.width, h: img.height };
+      // The elephant stands on 2x2 squares, so it keeps twice the pixels.
+      sprites[key] = { img: shrinkSprite(img, /^elephant/.test(key) ? 220 : 72), w: img.width, h: img.height };
       settle();
     };
     // a missing file only costs the kinds that wanted it
