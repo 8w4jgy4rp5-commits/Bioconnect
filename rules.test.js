@@ -452,9 +452,9 @@ S.ticks = 10000;
 ok('endless play has bounded positive pressure and rewards', X.ctx.stoneEvery() === 2
    && X.ctx.plantLimit('sprout') === 14 && X.ctx.scoreMultiplier() === 8);
 S.ticks = 25; S.relaxed = false;
-ok('normal challenge countdown uses world time', X.ctx.nextDifficultySeconds() === 45);
+ok('normal challenge countdown uses world time', X.ctx.nextDifficultySeconds() === 55);
 S.relaxed = true;
-ok('relaxed countdown gives twice the thinking time', X.ctx.nextDifficultySeconds() === 90);
+ok('relaxed countdown gives twice the thinking time', X.ctx.nextDifficultySeconds() === 110);
 S.relaxed = false; S.ticks = 24; S.paused = true; S.score = 0; board([]);
 X.ctx.worldTick();
 ok('pause freezes the stage and earns no passive score', S.ticks === 24 && S.score === 0);

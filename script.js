@@ -596,7 +596,15 @@ function handOdds() {
 // to answer a red bar, and nothing about the arithmetic of the board.
 // A tick is deliberately slow. The game is a puzzle that now allows
 // hurrying, not a test of how fast you can tap.
-const TICK_MS = 1800;
+//
+// 1800 -> 2200 (2026-10-05). The bots met the lion/tiger targets while
+// people still found it too hard, and the bots decide instantly: what a
+// person lacks is placements per tick, not dealt animals (more rabbits
+// and foxes in the hand made every bot worse, because they push out the
+// grass they eat). sim.js's "thinks every N" rows stand in for that — 4
+// -> 3 is a third more time and takes the lion from ~38% to ~70%. Stones
+// still come on the same tick, only the seconds between them grew.
+const TICK_MS = 2200;
 // Relaxed doubles every tick. Real time punishes anyone who reads the
 // board slowly, uses a keyboard, or is on a phone on a train, and that
 // is a worse failure than an easy setting is.
