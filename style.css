@@ -2023,3 +2023,151 @@ body.is-celebrating { overflow: hidden; }
   background: #2b2140; color: #fff; font: 700 14px/1 system-ui, sans-serif;
   letter-spacing: .04em; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); cursor: pointer;
 }
+
+/* ============================================================
+   The Ledger — achievements (concepts/achievements-v1, design B).
+   An old naturalist's book on its own paper, so it reads the same in
+   every skin. Seals are wax; only the elephant's plate is gilded, and
+   only the elephant has a diamond.
+   ============================================================ */
+
+.start-ledger { position: relative; }
+.start-ledger svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linejoin: round; }
+.ledger-dot {
+  position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%;
+  background: #e0573c; box-shadow: 0 0 0 2px #10150e;
+}
+.ledger-dot[hidden] { display: none; }
+
+.ledger {
+  position: fixed; inset: 0; z-index: 45; display: grid; place-items: end center;
+  background: rgba(8, 10, 6, .62);
+  --lg-ink: #2b2416; --lg-mute: #6d5d3a; --lg-cream: #ece4c8;
+  --lg-bronze: #c8834a; --lg-silver: #d4d8de; --lg-gold: #e8c25a;
+  --lg-dia: linear-gradient(135deg, #bff6ff 0%, #8fd3ff 25%, #f3b6ff 50%, #fff3b0 75%, #bff6ff 100%);
+  --lg-serif: "IM Fell English", Georgia, serif;
+  --lg-caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --lg-type: "Special Elite", "Courier New", monospace;
+}
+.ledger[hidden] { display: none; }
+.ledger-book {
+  position: relative; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; overscroll-behavior: contain;
+  padding: 16px 16px 22px; color: var(--lg-ink); font-family: var(--lg-serif);
+  border-radius: 8px 18px 0 0;
+  background: radial-gradient(120% 80% at 30% 20%, #efe4c4, #d9c99c 70%, #c9b57f);
+  box-shadow: inset 6px 0 0 #8a7448, inset 8px 0 10px rgba(0, 0, 0, .25), 0 -8px 30px rgba(0, 0, 0, .5);
+}
+.ledger-head { display: flex; align-items: baseline; gap: 10px; margin: 0 0 14px 6px; }
+.ledger-head h2 { margin: 0; font-family: var(--lg-caps); font-weight: 400; font-size: 1.5rem; letter-spacing: .04em; }
+.ledger-count { font-family: var(--lg-type); font-size: .72rem; color: var(--lg-mute); }
+.ledger-close {
+  margin-left: auto; align-self: center; width: 36px; height: 36px; border: 0; border-radius: 50%;
+  background: rgba(60, 48, 24, .12); color: var(--lg-ink); font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.ledger-close:focus-visible { outline: 3px solid #7a2a20; outline-offset: 2px; }
+
+.lg-plate {
+  position: relative; margin: 6px 4px 18px; padding: 14px 12px 12px; text-align: center; transform: rotate(-1.2deg);
+  background: linear-gradient(#1d1810, #120e08); color: var(--lg-cream); border-radius: 4px;
+  box-shadow: 0 0 0 3px #b8913d, 0 0 0 4px #5a4318, 0 0 0 7px var(--lg-gold), 0 6px 16px rgba(0, 0, 0, .45);
+}
+.lg-plate::before, .lg-plate::after {
+  content: ""; position: absolute; top: -10px; width: 46px; height: 18px; background: rgba(240, 232, 200, .65); transform: rotate(-8deg);
+}
+.lg-plate::before { left: -8px; }
+.lg-plate::after { right: -8px; transform: rotate(9deg); }
+.lg-plate--diamond { box-shadow: 0 0 0 3px #b8913d, 0 0 0 4px #5a4318, 0 0 0 7px #bff6ff, 0 0 30px rgba(143, 211, 255, .6), 0 6px 16px rgba(0, 0, 0, .45); }
+.lg-kicker, .lg-label { font-family: var(--lg-type); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; }
+.lg-kicker { color: var(--lg-gold); }
+.lg-label { color: var(--lg-mute); margin: 16px 0 4px; font-weight: 400; }
+.lg-plate-name { margin: 2px 0 0; font-family: var(--lg-caps); font-weight: 400; font-size: 1.75rem; letter-spacing: .08em; }
+.lg-plate-name em { display: block; font-family: var(--lg-serif); font-size: .9rem; color: #a39c7c; letter-spacing: 0; }
+.lg-plate-art { width: 170px; height: 120px; object-fit: contain; margin: 4px 0; filter: sepia(.35) drop-shadow(0 0 12px rgba(232, 194, 90, .35)); }
+.lg-tally { margin: 0; font-family: var(--lg-type); font-size: .8rem; color: #a39c7c; }
+.lg-tally b { margin-right: 6px; font-family: var(--lg-caps); font-weight: 400; font-size: 1.6rem; color: var(--lg-gold); }
+.lg-seals { display: flex; justify-content: center; gap: 12px; margin-top: 10px; }
+.lg-seal { width: 54px; text-align: center; font-family: var(--lg-type); font-size: .62rem; color: #a39c7c; }
+.lg-seal .lg-wax { margin: 0 auto 4px; }
+.lg-dia-word { background: var(--lg-dia); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.lg-margin { margin: 10px 0 0; font-family: var(--lg-type); font-size: .68rem; color: #c9b57f; transform: rotate(1deg); }
+
+.lg-wax {
+  display: grid; place-items: center; flex: none; width: 46px; height: 46px; font-style: normal;
+  font-family: var(--lg-caps); font-size: 1.1rem; color: rgba(0, 0, 0, .45);
+  border-radius: 47% 53% 50% 50% / 52% 48% 52% 48%;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .25), inset 0 2px 0 rgba(255, 255, 255, .25);
+}
+.lg-wax--b { background: radial-gradient(circle at 40% 35%, #e6a06a, var(--lg-bronze) 60%, #7a4a24); }
+.lg-wax--s { background: radial-gradient(circle at 40% 35%, #fff, var(--lg-silver) 60%, #8b9097); }
+.lg-wax--g { background: radial-gradient(circle at 40% 35%, #fff2b8, var(--lg-gold) 60%, #9a7424); }
+.lg-wax--d { background: var(--lg-dia); background-size: 300% 300%; border-radius: 0; clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); animation: lg-shine 6s linear infinite; }
+.lg-wax--off, .lg-wax--part { background: none; box-shadow: inset 0 0 0 1.5px rgba(236, 228, 200, .25); color: rgba(236, 228, 200, .35); }
+.lg-wax--part { color: var(--lg-silver); font-family: var(--lg-type); font-size: .62rem; }
+.lg-wax--dia { position: relative; border-radius: 0; box-shadow: none; background: #1a1522; clip-path: polygon(50% 0, 100% 40%, 50% 100%, 0 40%); color: #bff6ff; font-size: 1.2rem; }
+@keyframes lg-shine { to { background-position: 300% 0; } }
+
+.lg-entry { display: grid; grid-template-columns: 46px 1fr auto; gap: 10px; align-items: center; padding: 8px 2px; border-bottom: 1px dashed rgba(60, 48, 24, .35); }
+.lg-entry-art { width: 46px; height: 38px; object-fit: contain; filter: sepia(.6) contrast(1.05); }
+.lg-entry-name { font-family: var(--lg-caps); font-size: 1.05rem; }
+.lg-entry-sub { font-family: var(--lg-type); font-size: .66rem; color: var(--lg-mute); }
+.lg-mini { display: flex; gap: 3px; }
+.lg-mini i { width: 15px; height: 15px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(60, 48, 24, .4); }
+.lg-mini .lg-mini--b { background: var(--lg-bronze); box-shadow: none; }
+.lg-mini .lg-mini--s { background: var(--lg-silver); box-shadow: none; }
+.lg-mini .lg-mini--g { background: var(--lg-gold); box-shadow: none; }
+
+.lg-specimens { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+.lg-pin {
+  position: relative; height: 52px; display: grid; place-items: center; border-radius: 4px;
+  background: rgba(255, 255, 255, .25); box-shadow: inset 0 0 0 1px rgba(60, 48, 24, .2);
+}
+.lg-pin img { width: 90%; height: 40px; object-fit: contain; filter: sepia(.6); }
+.lg-pin::before { content: ""; position: absolute; top: 3px; left: 50%; width: 5px; height: 5px; margin-left: -2px; border-radius: 50%; background: #7a2a20; }
+.lg-pin--empty { background: none; box-shadow: inset 0 0 0 1.5px rgba(60, 48, 24, .3); color: rgba(60, 48, 24, .45); font-family: var(--lg-caps); font-size: 1.2rem; }
+.lg-pin--empty::before { display: none; }
+.lg-stamp {
+  display: inline-block; margin-top: 12px; padding: 3px 8px; transform: rotate(-4deg); opacity: .85;
+  border: 2px solid #7a2a20; color: #7a2a20; font-family: var(--lg-type); font-size: .7rem; letter-spacing: .1em; text-transform: uppercase;
+}
+.lg-stamp--todo { border-style: dashed; opacity: .6; }
+
+/* ---------- seal toasts: torn slips of the ledger, top right ---------- */
+.seal-toasts {
+  position: fixed; top: 66px; right: 10px; z-index: 50; display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  pointer-events: none;
+  --lg-bronze: #c8834a; --lg-silver: #d4d8de; --lg-gold: #e8c25a;
+  --lg-dia: linear-gradient(135deg, #bff6ff 0%, #8fd3ff 25%, #f3b6ff 50%, #fff3b0 75%, #bff6ff 100%);
+  --lg-caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+}
+.seal-toast {
+  pointer-events: auto; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px;
+  border: 0; color: #2b2416; text-align: left; transform-origin: right top;
+  background: radial-gradient(120% 80% at 30% 20%, #efe4c4, #d9c99c);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, .5));
+  clip-path: polygon(0 4%, 6% 0, 14% 5%, 24% 1%, 36% 4%, 50% 0, 63% 4%, 76% 1%, 88% 5%, 100% 0, 100% 100%, 90% 96%, 78% 100%, 64% 97%, 50% 100%, 37% 96%, 24% 100%, 12% 96%, 0 100%);
+  animation: seal-in .55s ease-out both, seal-out .5s ease-in 4.3s forwards;
+}
+.seal-toast .lg-wax { width: 36px; height: 36px; font-size: .9rem; }
+.seal-toast-words { display: flex; flex-direction: column; }
+.seal-toast-kind { font-family: "Special Elite", "Courier New", monospace; font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: #7a2a20; }
+.seal-toast-name { font-family: "IM Fell English", Georgia, serif; font-size: 1rem; line-height: 1.15; }
+.seal-toast--elephant {
+  padding-right: 18px; color: #ece4c8; background: linear-gradient(#1d1810, #120e08);
+  filter: drop-shadow(0 0 3px #e8c25a) drop-shadow(0 0 14px rgba(232, 194, 90, .6));
+  animation: seal-in .55s ease-out both, seal-out .5s ease-in 6.5s forwards;
+}
+.seal-toast--elephant .seal-toast-kind { color: #e8c25a; }
+.seal-toast-art { width: 46px; height: 36px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(232, 194, 90, .7)); }
+.seal-flash {
+  position: fixed; inset: 0; z-index: 49; pointer-events: none;
+  background: radial-gradient(circle at 85% 10%, rgba(232, 194, 90, .45), transparent 60%);
+  animation: seal-flash 1.6s ease-out forwards;
+}
+@keyframes seal-in { from { transform: translateY(-30px) rotate(-6deg); opacity: 0; } to { transform: rotate(-1.5deg); } }
+@keyframes seal-out { to { transform: translateX(30%) rotate(-1.5deg); opacity: 0; } }
+@keyframes seal-flash { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .seal-toast, .seal-toast--elephant { animation: seal-out .01s linear 4.3s forwards; transform: rotate(-1.5deg); }
+  .lg-wax--d, .seal-flash { animation: none; }
+  .seal-flash { display: none; }
+}

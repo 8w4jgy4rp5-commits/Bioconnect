@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Achievements C — The Watching Sky</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+/* C: the meadow is watching you back. Every medal is an eye that opens a
+   little more. The elephant is the huge eye in the sky, ringed by its four
+   tiers; the outermost ring is the diamond, still dark. */
+.sky{position:relative;height:330px;margin:0 0 6px;overflow:hidden}
+.sky::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(1px 1px at 12% 20%,#fff8,transparent),radial-gradient(1px 1px at 80% 12%,#fff8,transparent),
+  radial-gradient(1.5px 1.5px at 65% 70%,#fff6,transparent),radial-gradient(1px 1px at 25% 78%,#fff6,transparent),
+  radial-gradient(1px 1px at 90% 55%,#fff7,transparent),radial-gradient(1px 1px at 40% 8%,#fff7,transparent)}
+.rings{position:absolute;left:50%;top:150px;transform:translate(-50%,-50%)}
+.rings svg{display:block;overflow:visible}
+.ring-label{position:absolute;font-family:var(--type);font-size:10px;color:var(--mute);white-space:nowrap}
+.big-eye{animation:look 7s ease-in-out infinite}
+@keyframes look{0%,40%{transform:translateX(0)}50%,70%{transform:translateX(-7px)}80%,100%{transform:translateX(0)}}
+.blink{transform-origin:150px 150px;animation:blink 6s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.08)}}
+.title{text-align:center;margin-top:-6px}
+.title h2{font-family:var(--caps);font-weight:400;font-size:26px;letter-spacing:.06em}
+.title p{font-family:var(--type);font-size:11.5px;color:var(--mute);margin-top:2px}
+.title p b{color:var(--ink);font-size:15px}
+
+.watchers{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 16px 14px}
+.w{padding:12px;border-radius:16px;background:rgba(31,41,24,.75);box-shadow:inset 0 0 0 1px rgba(236,228,200,.08);text-align:center}
+.w .eyes{display:flex;justify-content:center;gap:6px;margin-bottom:6px}
+.eye{width:26px;height:16px;border-radius:50%;background:#0c100a;box-shadow:inset 0 0 0 1px rgba(236,228,200,.18);position:relative;overflow:hidden}
+.eye::after{content:"";position:absolute;left:8px;top:3px;width:10px;height:10px;border-radius:50%}
+.eye.b{background:#f3e7c7}.eye.b::after{background:radial-gradient(#111 35%,var(--bronze) 40%)}
+.eye.s{background:#f3e7c7}.eye.s::after{background:radial-gradient(#111 35%,var(--silver) 40%)}
+.eye.shut{height:3px;margin-top:7px;background:rgba(236,228,200,.25);box-shadow:none}
+.w img{width:64px;height:46px;object-fit:contain}
+.w .name{font-size:16px}
+.w .sub{font-family:var(--type);font-size:10px;color:var(--mute);margin-top:2px}
+
+.chain{margin:0 16px 18px;padding:12px 10px;border-radius:16px;background:rgba(31,41,24,.75);box-shadow:inset 0 0 0 1px rgba(168,198,108,.3)}
+.chain svg{width:100%;height:auto;display:block}
+.chain .foot{text-align:center;font-family:var(--type);font-size:11px;color:var(--moss);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="top"><span class="back">‹</span><h1>Who's Watching</h1><small>7 / 17 eyes open</small></div>
+
+  <div class="sky">
+    <div class="rings">
+      <svg width="300" height="300" viewBox="0 0 300 300" aria-hidden="true">
+        <defs>
+          <linearGradient id="dia" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#bff6ff"/><stop offset=".35" stop-color="#f3b6ff"/><stop offset=".7" stop-color="#fff3b0"/><stop offset="1" stop-color="#8fd3ff"/></linearGradient>
+          <clipPath id="lid"><path d="M40 150 Q150 62 260 150 Q150 238 40 150Z"/></clipPath>
+        </defs>
+        <!-- outermost: diamond, dark and dashed until 50 -->
+        <circle cx="150" cy="150" r="146" fill="none" stroke="url(#dia)" stroke-width="2" stroke-dasharray="2 8" opacity=".55"/>
+        <!-- gold: not started -->
+        <circle cx="150" cy="150" r="134" fill="none" stroke="rgba(232,194,90,.18)" stroke-width="5"/>
+        <!-- silver: 3 of 5 -->
+        <circle cx="150" cy="150" r="122" fill="none" stroke="rgba(212,216,222,.14)" stroke-width="5"/>
+        <circle cx="150" cy="150" r="122" fill="none" stroke="#d4d8de" stroke-width="5" stroke-linecap="round" stroke-dasharray="460 767" transform="rotate(-90 150 150)"/>
+        <!-- bronze: done -->
+        <circle cx="150" cy="150" r="110" fill="none" stroke="#c8834a" stroke-width="5"/>
+        <g class="blink">
+          <path d="M40 150 Q150 62 260 150 Q150 238 40 150Z" fill="#efe4c4" stroke="#6b4a72" stroke-width="3"/>
+          <g clip-path="url(#lid)"><g class="big-eye">
+            <circle cx="150" cy="150" r="46" fill="#3b2a42"/>
+            <circle cx="150" cy="150" r="40" fill="#6b4a72"/>
+            <image href="../../img/elephant-calm.png" x="118" y="124" width="64" height="52" opacity=".95"/>
+            <circle cx="166" cy="134" r="6" fill="#fff" opacity=".8"/>
+          </g></g>
+        </g>
+      </svg>
+      <span class="ring-label" style="left:226px;top:46px">◆ 50 · <span class="dia-text">???</span></span>
+      <span class="ring-label" style="left:-6px;top:40px">Gold · 10</span>
+      <span class="ring-label" style="left:-14px;top:250px">Silver · 3 / 5</span>
+      <span class="ring-label" style="left:226px;top:254px">Bronze ✓</span>
+    </div>
+  </div>
+  <div class="title">
+    <h2>The Elephant Sees You</h2>
+    <p><b>3</b> raised. It opens one ring wider each time.</p>
+  </div>
+
+  <div class="watchers">
+    <div class="w"><div class="eyes"><span class="eye b"></span><span class="eye shut"></span><span class="eye shut"></span></div><img src="../../img/tiger-calm.png" alt=""><div class="name">Tiger</div><div class="sub">2 / 5</div></div>
+    <div class="w"><div class="eyes"><span class="eye b"></span><span class="eye shut"></span><span class="eye shut"></span></div><img src="../../img/lion-calm.png" alt=""><div class="name">Lion</div><div class="sub">14 / 25</div></div>
+    <div class="w"><div class="eyes"><span class="eye b"></span><span class="eye s"></span><span class="eye shut"></span></div><img src="../../img/wolf-calm.png" alt=""><div class="name">Wolf &amp; Bear</div><div class="sub">312 / 1,000</div></div>
+    <div class="w"><div class="eyes"><span class="eye b"></span><span class="eye shut"></span><span class="eye shut"></span></div><img src="../../img/zebra-calm.png" alt=""><div class="name">Ecosystem</div><div class="sub">4,820 / 10,000</div></div>
+  </div>
+
+  <div class="chain">
+    <div class="label" style="margin:0 4px 6px">Field Guide · the food chain</div>
+    <svg viewBox="0 0 350 90" aria-hidden="true">
+      <polyline points="15,70 50,52 85,66 120,42 155,56 190,30 225,46 260,22 295,36 332,14" fill="none" stroke="rgba(168,198,108,.5)" stroke-width="1.5" stroke-dasharray="3 4"/>
+      <g>
+        <image href="../../img/rabbit-pose.png" x="0" y="56" width="30" height="28"/>
+        <image href="../../img/fox-pose.png" x="35" y="38" width="30" height="28"/>
+        <image href="../../img/deer-calm.png" x="70" y="52" width="30" height="28"/>
+        <image href="../../img/zebra-calm.png" x="105" y="28" width="30" height="28"/>
+        <image href="../../img/buffalo-calm.png" x="140" y="42" width="30" height="28"/>
+        <image href="../../img/wolf-calm.png" x="175" y="16" width="30" height="28"/>
+        <image href="../../img/bear-calm.png" x="210" y="32" width="30" height="28"/>
+        <image href="../../img/lion-calm.png" x="245" y="8" width="30" height="28"/>
+        <image href="../../img/tiger-calm.png" x="280" y="22" width="30" height="28"/>
+        <image href="../../img/elephant-calm.png" x="315" y="0" width="34" height="30"/>
+      </g>
+    </svg>
+    <div class="foot">✓ All 10 met — every eye in the meadow has seen you</div>
+  </div>
+</div>
+</body>
+</html>

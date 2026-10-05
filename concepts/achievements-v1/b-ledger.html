@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Achievements B — The Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+/* B: an old naturalist's ledger. Medals are wax seals; the elephant is a
+   gilded fold-out plate glued into the book, nothing else is. */
+.book{margin:6px 14px 16px;padding:16px 14px 18px;border-radius:6px 14px 14px 6px;color:#2b2416;
+  background:radial-gradient(120% 80% at 30% 20%,#efe4c4,#d9c99c 70%,#c9b57f);
+  box-shadow:inset 6px 0 0 #8a7448,inset 8px 0 10px rgba(0,0,0,.25),0 8px 24px rgba(0,0,0,.5)}
+.book .label{color:#6d5d3a}
+.plate{position:relative;margin:4px 0 16px;padding:14px 12px 12px;text-align:center;transform:rotate(-1.2deg);
+  background:linear-gradient(#1d1810,#120e08);color:var(--ink);border-radius:4px;
+  box-shadow:0 0 0 3px #b8913d,0 0 0 4px #5a4318,0 0 0 7px #e8c25a,0 6px 16px rgba(0,0,0,.45)}
+.plate::before,.plate::after{content:"";position:absolute;top:-10px;width:46px;height:18px;background:rgba(240,232,200,.65);transform:rotate(-8deg)}
+.plate::before{left:-8px}.plate::after{right:-8px;transform:rotate(9deg)}
+.plate .label{color:var(--gold)}
+.plate h2{font-family:var(--caps);font-weight:400;font-size:28px;letter-spacing:.08em}
+.plate h2 em{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--mute);display:block;letter-spacing:0}
+.plate img{width:170px;height:120px;object-fit:contain;filter:sepia(.35) drop-shadow(0 0 12px rgba(232,194,90,.35));margin:4px 0}
+.tally{font-family:var(--type);font-size:13px;color:var(--mute)}
+.tally b{font-family:var(--caps);font-size:26px;color:var(--gold);font-weight:400;margin-right:4px}
+.seals{display:flex;justify-content:center;gap:12px;margin-top:10px}
+.seal{width:52px;text-align:center;font-family:var(--type);font-size:10px;color:var(--mute)}
+.seal i{display:grid;place-items:center;width:46px;height:46px;margin:0 auto 4px;font-style:normal;font-family:var(--caps);font-size:18px;color:rgba(0,0,0,.45);
+  border-radius:47% 53% 50% 50%/52% 48% 52% 48%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.25)}
+.seal .b{background:radial-gradient(circle at 40% 35%,#e6a06a,var(--bronze) 60%,#7a4a24)}
+.seal .s{background:radial-gradient(circle at 40% 35%,#fff,var(--silver) 60%,#8b9097)}
+.seal .g{background:radial-gradient(circle at 40% 35%,#fff2b8,var(--gold) 60%,#9a7424)}
+.seal .off{background:none;box-shadow:inset 0 0 0 1.5px rgba(236,228,200,.25);color:rgba(236,228,200,.35)}
+.seal .part{background:none;box-shadow:inset 0 0 0 1.5px rgba(236,228,200,.25);color:var(--silver);font-family:var(--type);font-size:11px}
+.seal .dia{background:none;border-radius:0;clip-path:polygon(50% 0,100% 40%,50% 100%,0 40%);background:#1a1522;box-shadow:none;position:relative}
+.seal .dia::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--caps);font-size:20px;background:var(--dia);-webkit-background-clip:text;background-clip:text;color:transparent}
+.margin-note{font-family:var(--type);font-size:11px;color:#c9b57f;margin-top:10px;transform:rotate(1deg)}
+
+.entry{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:center;padding:8px 2px;border-bottom:1px dashed rgba(60,48,24,.35)}
+.entry img{width:44px;height:36px;object-fit:contain;filter:sepia(.6) contrast(1.05)}
+.entry .name{font-family:var(--caps);font-size:17px}
+.entry .sub{font-family:var(--type);font-size:10.5px;color:#6d5d3a}
+.entry .mini{display:flex;gap:3px}
+.entry .mini i{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(60,48,24,.4)}
+.entry .mini .b{background:var(--bronze);box-shadow:none}.entry .mini .s{background:var(--silver);box-shadow:none}
+.specimens{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px}
+.pin{position:relative;height:50px;border-radius:4px;background:rgba(255,255,255,.25);box-shadow:inset 0 0 0 1px rgba(60,48,24,.2);display:grid;place-items:center}
+.pin img{width:90%;height:40px;object-fit:contain;filter:sepia(.6)}
+.pin::before{content:"";position:absolute;top:3px;left:50%;width:5px;height:5px;margin-left:-2px;border-radius:50%;background:#7a2a20}
+.stamp{margin-top:10px;display:inline-block;font-family:var(--type);font-size:11px;letter-spacing:.1em;color:#7a2a20;border:2px solid #7a2a20;padding:3px 8px;transform:rotate(-4deg);opacity:.85}
+h3.label{margin:16px 0 2px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="top"><span class="back">‹</span><h1>The Ledger</h1><small>7 / 17 seals</small></div>
+  <div class="book">
+    <div class="plate">
+      <div class="label">Plate I · glued in, not printed</div>
+      <h2>Elephas<em>the elephant</em></h2>
+      <img src="../../img/elephant-calm.png" alt="">
+      <div class="tally"><b>3</b>raised in all your seasons</div>
+      <div class="seals">
+        <div class="seal"><i class="b">I</i>1</div>
+        <div class="seal"><i class="part">3/5</i>5</div>
+        <div class="seal"><i class="off">III</i>10</div>
+        <div class="seal"><i class="dia"></i>50</div>
+      </div>
+      <div class="margin-note">— the ledger keeps one more page for these, and won't say why.</div>
+    </div>
+
+    <h3 class="label">Lesser entries</h3>
+    <div class="entry"><img src="../../img/tiger-calm.png" alt=""><div><div class="name">Tiger</div><div class="sub">2 of 5 · next seal</div></div><div class="mini"><i class="b"></i><i></i><i></i></div></div>
+    <div class="entry"><img src="../../img/lion-calm.png" alt=""><div><div class="name">Lion</div><div class="sub">14 of 25 · next seal</div></div><div class="mini"><i class="b"></i><i></i><i></i></div></div>
+    <div class="entry"><img src="../../img/bear-calm.png" alt=""><div><div class="name">Wolf &amp; Bear</div><div class="sub">312 of 1,000 · next seal</div></div><div class="mini"><i class="b"></i><i class="s"></i><i></i></div></div>
+    <div class="entry"><img src="../../img/deer-calm.png" alt=""><div><div class="name">Ecosystem</div><div class="sub">4,820 of 10,000 animals</div></div><div class="mini"><i class="b"></i><i></i><i></i></div></div>
+
+    <h3 class="label">Field Guide · specimens</h3>
+    <div class="specimens">
+      <div class="pin"><img src="../../img/rabbit-pose.png" alt=""></div><div class="pin"><img src="../../img/fox-pose.png" alt=""></div><div class="pin"><img src="../../img/deer-calm.png" alt=""></div><div class="pin"><img src="../../img/zebra-calm.png" alt=""></div><div class="pin"><img src="../../img/buffalo-calm.png" alt=""></div>
+      <div class="pin"><img src="../../img/wolf-calm.png" alt=""></div><div class="pin"><img src="../../img/bear-calm.png" alt=""></div><div class="pin"><img src="../../img/lion-calm.png" alt=""></div><div class="pin"><img src="../../img/tiger-calm.png" alt=""></div><div class="pin"><img src="../../img/elephant-calm.png" alt=""></div>
+    </div>
+    <span class="stamp">COMPLETE · 10 / 10</span>
+  </div>
+</div>
+</body>
+</html>

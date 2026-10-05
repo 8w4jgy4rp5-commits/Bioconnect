@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ledger Button &amp; Seal Toasts</title>
+<style>
+body{margin:0;background:#0b0f0a;color:#ece4c8;font-family:Georgia,serif;padding:16px}
+h1{font-weight:400;margin:0 0 4px}p.lead{color:#a39c7c;margin:0 0 12px;max-width:900px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.bar button{font:inherit;background:#1f2918;color:#ece4c8;border:1px solid #6f8a3e;border-radius:999px;padding:6px 14px;cursor:pointer}
+.grid{display:flex;flex-wrap:wrap;gap:16px}
+figure{margin:0}figcaption{margin:6px 0;font-size:15px}figcaption small{display:block;color:#a39c7c;font-size:12px}
+iframe{width:390px;max-width:calc(100vw - 32px);height:844px;border:0;border-radius:24px;background:#10150e}
+</style>
+</head>
+<body>
+<h1>Where the Ledger lives</h1>
+<p class="lead">The real game, with the mock pieces laid on top. Title: a ledger button beside “?”. Game over: seals earned this run slide in at the top right, one after another, then fade. Tapping one opens the Ledger.</p>
+<div class="bar">
+  <button id="replay">Replay toasts</button>
+  <button id="normal">Case: Lion bronze + Ecosystem silver</button>
+  <button id="ele">Case: Elephant silver (the abnormal one)</button>
+</div>
+<div class="grid">
+  <figure><figcaption>Title screen<small>📖 sits next to ?</small></figcaption><iframe id="f0" src="../../index.html"></iframe></figure>
+  <figure><figcaption>Toast 1 · Wax seal<small>dark card, the seal stamps down</small></figcaption><iframe id="f1" src="../../index.html"></iframe></figure>
+  <figure><figcaption>Toast 2 · Ledger slip<small>a torn paper slip, like a page of B</small></figcaption><iframe id="f2" src="../../index.html"></iframe></figure>
+  <figure><figcaption>Toast 3 · Quiet log<small>small stacked lines, out of the way</small></figcaption><iframe id="f3" src="../../index.html"></iframe></figure>
+</div>
+
+<script>
+const CSS = `
+.mk-ledger{width:48px;height:48px;border-radius:50%;display:inline-grid;place-items:center;margin-left:12px;vertical-align:middle;
+  background:radial-gradient(circle at 40% 35%,#efe4c4,#c9b57f);box-shadow:0 0 0 2px #b8913d,0 4px 10px rgba(0,0,0,.4);border:0;cursor:pointer;position:relative}
+.mk-ledger svg{width:24px;height:24px}
+.mk-ledger i{position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:#e0573c;box-shadow:0 0 0 2px #10150e}
+.start-minor{display:flex!important;justify-content:center;align-items:center}
+
+.mk-stack{position:fixed;top:66px;right:10px;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.mk-t{pointer-events:auto;cursor:pointer;animation:mkIn .45s cubic-bezier(.2,1.4,.4,1) both, mkOut .5s ease-in 4.2s forwards}
+@keyframes mkIn{from{transform:translateX(120%);opacity:0}}
+@keyframes mkOut{to{transform:translateX(30%);opacity:0}}
+.mk-seal{width:38px;height:38px;flex:none;display:grid;place-items:center;font-family:"IM Fell English SC",Georgia,serif;font-size:15px;color:rgba(0,0,0,.5);
+  border-radius:47% 53% 50% 50%/52% 48% 52% 48%;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),inset 0 2px 0 rgba(255,255,255,.25)}
+.mk-seal.b{background:radial-gradient(circle at 40% 35%,#e6a06a,#c8834a 60%,#7a4a24)}
+.mk-seal.s{background:radial-gradient(circle at 40% 35%,#fff,#d4d8de 60%,#8b9097)}
+.mk-seal.g{background:radial-gradient(circle at 40% 35%,#fff2b8,#e8c25a 60%,#9a7424)}
+.mk-k{font-family:"Special Elite",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase}
+.mk-n{font-family:"IM Fell English",Georgia,serif;font-size:16px;line-height:1.15}
+
+/* 1 wax seal */
+.v1{display:flex;gap:10px;align-items:center;padding:9px 14px 9px 10px;border-radius:14px;background:#151b11;color:#ece4c8;
+  box-shadow:0 0 0 1px rgba(232,194,90,.45),0 8px 20px rgba(0,0,0,.55)}
+.v1 .mk-k{color:#e8c25a}
+.v1 .mk-seal{animation:stamp .5s .35s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes stamp{from{transform:scale(2.2) rotate(-25deg);opacity:0}}
+/* 2 ledger slip */
+.v2{display:flex;gap:10px;align-items:center;padding:10px 16px 10px 10px;color:#2b2416;transform-origin:right top;
+  background:radial-gradient(120% 80% at 30% 20%,#efe4c4,#d9c99c);box-shadow:0 6px 16px rgba(0,0,0,.5);
+  clip-path:polygon(0 4%,6% 0,14% 5%,24% 1%,36% 4%,50% 0,63% 4%,76% 1%,88% 5%,100% 0,100% 100%,90% 96%,78% 100%,64% 97%,50% 100%,37% 96%,24% 100%,12% 96%,0 100%);
+  animation:mkIn2 .55s ease-out both, mkOut .5s ease-in 4.2s forwards}
+@keyframes mkIn2{from{transform:translateY(-30px) rotate(-6deg);opacity:0}to{transform:rotate(-1.5deg)}}
+.v2 .mk-k{color:#7a2a20}
+/* 3 quiet log */
+.v3{display:flex;gap:7px;align-items:center;padding:5px 10px 5px 6px;border-radius:999px;background:rgba(16,21,14,.88);color:#ece4c8;
+  box-shadow:inset 0 0 0 1px rgba(236,228,200,.18)}
+.v3 .mk-seal{width:22px;height:22px;font-size:10px}
+.v3 .mk-n{font-size:13px}.v3 .mk-k{font-size:9px;color:#a8c66c}
+
+/* the elephant is never just another line */
+.ele{padding-right:18px!important}
+.v1.ele{background:linear-gradient(#2a2210,#151005);box-shadow:0 0 0 2px #e8c25a,0 0 26px rgba(232,194,90,.55),0 8px 20px rgba(0,0,0,.55)}
+.v2.ele{background:linear-gradient(#1d1810,#120e08);color:#ece4c8;box-shadow:0 0 0 3px #e8c25a,0 0 24px rgba(232,194,90,.5)}
+.v2.ele .mk-k,.v3.ele .mk-k{color:#e8c25a}
+.v3.ele{background:linear-gradient(90deg,#2a2210,#151005);box-shadow:0 0 0 1.5px #e8c25a,0 0 16px rgba(232,194,90,.45)}
+.ele img{width:46px;height:36px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(232,194,90,.7))}
+.v3.ele img{width:30px;height:24px}
+.mk-flash{position:fixed;inset:0;z-index:9998;pointer-events:none;background:radial-gradient(circle at 85% 10%,rgba(232,194,90,.45),transparent 60%);animation:fl 1.6s ease-out forwards}
+@keyframes fl{to{opacity:0}}
+`;
+const BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="#5a4318" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></svg>';
+const CASES = {
+  normal: [{ seal: 'b', mark: 'I', kind: 'Seal earned', name: 'Lion · Bronze' }, { seal: 's', mark: 'II', kind: 'Seal earned', name: 'Ecosystem · Silver' }],
+  ele: [{ seal: 's', mark: 'II', kind: 'The ledger shudders', name: 'Elephant · Silver', ele: true }]
+};
+let current = 'normal';
+
+function ready(f, cb) {
+  const go = () => { const w = f.contentWindow, d = f.contentDocument; if (!d || !d.getElementById('startBtn')) return setTimeout(go, 200); cb(w, d); };
+  go();
+}
+function addCss(d) { if (d.getElementById('mkcss')) return; const s = d.createElement('style'); s.id = 'mkcss'; s.textContent = CSS; d.head.appendChild(s); }
+
+function toasts(d, v) {
+  d.querySelectorAll('.mk-stack,.mk-flash').forEach(n => n.remove());
+  const stack = d.createElement('div'); stack.className = 'mk-stack'; d.body.appendChild(stack);
+  CASES[current].forEach((c, i) => {
+    setTimeout(() => {
+      if (c.ele) { const f = d.createElement('div'); f.className = 'mk-flash'; d.body.appendChild(f); }
+      const t = d.createElement('div'); t.className = 'mk-t v' + v + (c.ele ? ' ele' : '');
+      t.innerHTML = (c.ele ? '<img src="img/elephant-calm.png" alt="">' : '') +
+        '<span class="mk-seal ' + c.seal + '">' + c.mark + '</span><span><div class="mk-k">' + c.kind + '</div><div class="mk-n">' + c.name + '</div></span>';
+      stack.appendChild(t);
+    }, 700 + i * 650);
+  });
+}
+
+ready(document.getElementById('f0'), (w, d) => {
+  addCss(d);
+  const b = d.createElement('button'); b.className = 'mk-ledger'; b.type = 'button'; b.setAttribute('aria-label', 'Ledger');
+  b.innerHTML = BOOK + '<i></i>';
+  d.querySelector('.start-minor').appendChild(b);
+});
+
+const overFrames = [1, 2, 3].map(n => document.getElementById('f' + n));
+overFrames.forEach((f, idx) => ready(f, (w, d) => {
+  addCss(d);
+  d.getElementById('startBtn').click();
+  setTimeout(() => { try { w.eval('state.score = 1840000; endRun();'); } catch (e) { console.error(e); } }, 3500);
+  setTimeout(() => toasts(d, idx + 1), 7500);
+}));
+
+function replayAll() { overFrames.forEach((f, idx) => toasts(f.contentDocument, idx + 1)); }
+document.getElementById('replay').onclick = replayAll;
+document.getElementById('normal').onclick = () => { current = 'normal'; replayAll(); };
+document.getElementById('ele').onclick = () => { current = 'ele'; replayAll(); };
+</script>
+</body>
+</html>

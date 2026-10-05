@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Achievements A — The Shrine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_base.css">
+<style>
+/* A: the elephant gets an altar; everyone else gets a shelf. */
+.shrine{margin:8px 16px 18px;padding:22px 16px 18px;position:relative;text-align:center;
+  border-radius:160px 160px 18px 18px;
+  background:radial-gradient(70% 55% at 50% 38%,rgba(232,194,90,.22),transparent 70%),linear-gradient(#26301d,#171e13);
+  box-shadow:inset 0 0 0 1px rgba(232,194,90,.45),inset 0 0 0 6px rgba(16,21,14,.9),inset 0 0 0 7px rgba(232,194,90,.18),0 10px 30px rgba(0,0,0,.5)}
+.shrine .label{color:var(--gold)}
+.shrine h2{font-family:var(--caps);font-weight:400;font-size:30px;margin:4px 0 2px;letter-spacing:.06em}
+.shrine .count{font-family:var(--type);font-size:12px;color:var(--mute)}
+.shrine .count b{color:var(--ink);font-size:16px}
+.idol{width:180px;height:150px;margin:10px auto 6px;position:relative}
+.idol img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 18px rgba(232,194,90,.45));animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:translateY(-3px) scale(1.01)}}
+.candles{position:absolute;bottom:4px;width:100%;display:flex;justify-content:space-between;padding:0 8px}
+.candles i{width:6px;height:22px;background:#d9cfae;border-radius:2px;position:relative}
+.candles i::after{content:"";position:absolute;left:-2px;top:-11px;width:10px;height:12px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:radial-gradient(#fff6c4,#f0a63a 60%,transparent 70%);animation:flick 1.3s ease-in-out infinite alternate}
+@keyframes flick{to{transform:scaleY(.8) translateX(1px)}}
+.tiers{display:flex;justify-content:center;gap:10px;margin-top:12px}
+.tier{width:66px}
+.coin{width:56px;height:56px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-family:var(--caps);font-size:20px;color:#1a1a12;position:relative}
+.coin.bronze{background:radial-gradient(circle at 35% 30%,#f2c193,var(--bronze) 55%,#7a4a24)}
+.coin.locked{background:#1b2216;color:var(--mute);box-shadow:inset 0 0 0 2px rgba(236,228,200,.15)}
+.coin.next{background:conic-gradient(var(--silver) 0 60%,#2a3322 60% 100%);}
+.coin.next::before{content:"";position:absolute;inset:5px;border-radius:50%;background:#1b2216}
+.coin.next span{position:relative;color:var(--silver);font-family:var(--type);font-size:12px}
+.coin.diamond{background:#14101a;box-shadow:inset 0 0 0 2px rgba(191,246,255,.35),0 0 18px rgba(143,211,255,.25);clip-path:polygon(50% 0,100% 38%,50% 100%,0 38%);border-radius:0}
+.coin.diamond span{font-size:22px}
+.tier p{font-family:var(--type);font-size:10px;color:var(--mute);margin-top:6px}
+.tier p b{display:block;color:var(--ink);font-family:var(--serif);font-size:13px;font-weight:400}
+.whisper{margin-top:14px;font-style:italic;font-size:13px;color:var(--mute)}
+
+.shelf{margin:0 16px 14px}
+.shelf h3{margin:0 2px 8px}
+.row{display:grid;grid-template-columns:48px 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:rgba(31,41,24,.8);box-shadow:inset 0 0 0 1px rgba(236,228,200,.08);margin-bottom:8px}
+.row img{width:48px;height:40px;object-fit:contain}
+.row .name{font-size:16px}
+.row .sub{font-family:var(--type);font-size:10.5px;color:var(--mute)}
+.bar{height:5px;border-radius:3px;background:#11170e;margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--moss)}
+.pips{display:flex;gap:4px}
+.pip{width:16px;height:16px;border-radius:50%;background:#141a10;box-shadow:inset 0 0 0 1px rgba(236,228,200,.18)}
+.pip.b{background:var(--bronze)} .pip.s{background:var(--silver)} .pip.g{background:var(--gold)}
+.guide{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;padding:10px;border-radius:14px;background:rgba(31,41,24,.8);box-shadow:inset 0 0 0 1px rgba(168,198,108,.35)}
+.guide img{width:100%;height:42px;object-fit:contain}
+.guide .done{grid-column:1/-1;text-align:center;font-family:var(--type);font-size:11px;color:var(--moss);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="top"><span class="back">‹</span><h1>Trophies</h1><small>7 / 17 medals</small></div>
+
+  <section class="shrine">
+    <div class="label">The one that matters</div>
+    <h2>Elephant</h2>
+    <div class="count"><b>3</b> raised, ever</div>
+    <div class="idol"><img src="../../img/elephant-calm.png" alt=""><div class="candles"><i></i><i></i></div></div>
+    <div class="tiers">
+      <div class="tier"><div class="coin bronze">I</div><p><b>Bronze</b>1</p></div>
+      <div class="tier"><div class="coin next"><span>3/5</span></div><p><b>Silver</b>5</p></div>
+      <div class="tier"><div class="coin locked">III</div><p><b>Gold</b>10</p></div>
+      <div class="tier"><div class="coin diamond"><span class="dia-text">?</span></div><p><b class="dia-text">Diamond</b>50</p></div>
+    </div>
+    <p class="whisper">“Most players never see one.”</p>
+  </section>
+
+  <section class="shelf">
+    <h3 class="label">The rest of the herd</h3>
+    <div class="row"><img src="../../img/tiger-calm.png" alt=""><div><div class="name">Tiger</div><div class="sub">2 / 5 for silver</div><div class="bar"><i style="width:40%"></i></div></div><div class="pips"><span class="pip b"></span><span class="pip"></span><span class="pip"></span></div></div>
+    <div class="row"><img src="../../img/lion-calm.png" alt=""><div><div class="name">Lion</div><div class="sub">14 / 25 for silver</div><div class="bar"><i style="width:56%"></i></div></div><div class="pips"><span class="pip b"></span><span class="pip"></span><span class="pip"></span></div></div>
+    <div class="row"><img src="../../img/wolf-calm.png" alt=""><div><div class="name">Wolf &amp; Bear</div><div class="sub">312 / 1,000 for gold</div><div class="bar"><i style="width:31%"></i></div></div><div class="pips"><span class="pip b"></span><span class="pip s"></span><span class="pip"></span></div></div>
+    <div class="row"><img src="../../img/rabbit-pose.png" alt=""><div><div class="name">Ecosystem</div><div class="sub">4,820 / 10,000 animals for silver</div><div class="bar"><i style="width:48%"></i></div></div><div class="pips"><span class="pip b"></span><span class="pip"></span><span class="pip"></span></div></div>
+  </section>
+
+  <section class="shelf">
+    <h3 class="label">Field Guide</h3>
+    <div class="guide">
+      <img src="../../img/rabbit-pose.png" alt=""><img src="../../img/fox-pose.png" alt=""><img src="../../img/deer-calm.png" alt=""><img src="../../img/zebra-calm.png" alt=""><img src="../../img/buffalo-calm.png" alt="">
+      <img src="../../img/wolf-calm.png" alt=""><img src="../../img/bear-calm.png" alt=""><img src="../../img/lion-calm.png" alt=""><img src="../../img/tiger-calm.png" alt=""><img src="../../img/elephant-calm.png" alt="">
+      <div class="done">✓ All 10 met — the meadow knows your name</div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

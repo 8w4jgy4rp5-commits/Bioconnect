@@ -764,12 +764,241 @@ function readMet() {
   for (const k of list) if (typeof k === 'string') met.add(k);
   const n = v ? Number(v.elephants) : 0;
   if (Number.isFinite(n) && n > lifetimeElephants) lifetimeElephants = Math.floor(n);
+  const r = v && v.raised && typeof v.raised === 'object' ? v.raised : {};
+  for (const k of RAISED_KINDS) {
+    const c = Number(r[k]);
+    if (Number.isFinite(c) && c > raised[k]) raised[k] = Math.floor(c);
+  }
+  const g = v ? Number(v.grown) : 0;
+  if (Number.isFinite(g) && g > grownTotal) grownTotal = Math.floor(g);
+  if (v && Array.isArray(v.sealsSeen)) for (const id of v.sealsSeen) if (typeof id === 'string') sealsSeen.add(id);
+  // Whatever arrives from storage or another device was not earned on
+  // this run, so it must not come up as a toast when this run ends.
+  if (v) for (const id of earnedSeals(storedCounts(v))) runStartSeals.add(id);
+  updateLedgerDot();
 }
 
 function writeMet() {
   if (!metStore) return;
-  metStore.set({ kinds: Array.from(met), elephants: lifetimeElephants })
+  metStore.set({ kinds: Array.from(met), elephants: lifetimeElephants, raised: Object.assign({}, raised),
+    grown: grownTotal, sealsSeen: Array.from(sealsSeen) })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
+}
+
+// ---------- The Ledger (achievements) ----------
+//
+// Seals for raising animals, counted over every run and every ruleset,
+// like the elephant count above. Revived runs count the same as any
+// other. Only the elephant has a fourth, diamond seal: it is the one
+// animal this game wants to feel abnormal, and nothing else may share
+// that tier. Rabbit to buffalo are easy to raise, so they only appear in
+// the Field Guide and in the Ecosystem total.
+//
+// The thresholds come from runs of sim.js's casual bot (rules 20, per
+// run: lion 1.6, tiger 0.2, wolf+bear ~18, ~250 animals grown by
+// merging). People play slower than the bot.
+const RAISED_KINDS = ['wolf', 'bear', 'lion', 'tiger'];
+const raised = { wolf: 0, bear: 0, lion: 0, tiger: 0 };
+let grownTotal = 0;            // every animal grown by a merge, all kinds
+const sealsSeen = new Set();   // seal ids already shown in the Ledger
+let runStartSeals = new Set(); // seals held when this run began
+const FIELD_GUIDE = LADDER.slice(2);
+const TIER_NAMES = ['Bronze', 'Silver', 'Gold', 'Diamond'];
+const TIER_MARKS = ['I', 'II', 'III', '◆'];
+const TIER_CLASS = ['b', 's', 'g', 'd'];
+
+const SEALS = [
+  { id: 'elephant', name: 'Elephant', art: 'elephant', of: c => c.elephant, tiers: [1, 5, 10, 50] },
+  { id: 'tiger', name: 'Tiger', art: 'tiger', of: c => c.tiger, tiers: [1, 5, 25] },
+  { id: 'lion', name: 'Lion', art: 'lion', of: c => c.lion, tiers: [1, 25, 100] },
+  { id: 'wolfbear', name: 'Wolf & Bear', art: 'bear', of: c => c.wolf + c.bear, tiers: [25, 250, 1000] },
+  { id: 'ecosystem', name: 'Ecosystem', art: 'deer', unit: 'animals', of: c => c.grown, tiers: [1000, 10000, 100000] },
+  { id: 'guide', name: 'Field Guide', of: c => c.guide, tiers: [FIELD_GUIDE.length] }
+];
+
+function currentCounts() {
+  return { elephant: lifetimeElephants, tiger: raised.tiger, lion: raised.lion, wolf: raised.wolf, bear: raised.bear,
+    grown: grownTotal, guide: FIELD_GUIDE.filter(k => met.has(k)).length };
+}
+
+function storedCounts(v) {
+  const num = x => { const n = Number(x); return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0; };
+  const r = v.raised && typeof v.raised === 'object' ? v.raised : {};
+  const kinds = Array.isArray(v.kinds) ? v.kinds : [];
+  return { elephant: num(v.elephants), tiger: num(r.tiger), lion: num(r.lion), wolf: num(r.wolf), bear: num(r.bear),
+    grown: num(v.grown), guide: FIELD_GUIDE.filter(k => kinds.indexOf(k) >= 0).length };
+}
+
+// How many of a seal's tiers `n` has reached.
+function tiersHeld(seal, n) {
+  let t = 0;
+  while (t < seal.tiers.length && n >= seal.tiers[t]) t += 1;
+  return t;
+}
+
+// Every tier held, as ids like "lion:1" (bronze) or "elephant:4" (diamond).
+function earnedSeals(counts) {
+  const out = [];
+  for (const s of SEALS) for (let t = 1; t <= tiersHeld(s, s.of(counts)); t++) out.push(s.id + ':' + t);
+  return out;
+}
+
+// Raising counts, from one placement's growth events.
+function countRaised(grew) {
+  let changed = false;
+  for (const g of grew) {
+    if (!ANIMALS[g.kind]) continue;
+    grownTotal += 1;
+    if (RAISED_KINDS.indexOf(g.kind) >= 0) raised[g.kind] += 1;
+    changed = true;
+  }
+  return changed;
+}
+
+function updateLedgerDot() {
+  if (!el.ledgerDot) return;
+  el.ledgerDot.hidden = earnedSeals(currentCounts()).every(id => sealsSeen.has(id));
+}
+
+function animalImg(kind, cls) {
+  const img = document.createElement('img');
+  img.src = 'img/' + (kind === 'rabbit' || kind === 'fox' ? kind + '-pose.png' : kind + '-calm.png');
+  img.alt = '';
+  if (cls) img.className = cls;
+  return img;
+}
+
+function node(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+// One wax seal of the elephant's plate. Held tiers are pressed; the next
+// one shows how far along it is; the diamond stays a question until held.
+function sealMark(seal, t, n) {
+  const held = tiersHeld(seal, n);
+  const wrap = node('div', 'lg-seal');
+  let mark;
+  if (t <= held) mark = node('i', 'lg-wax lg-wax--' + TIER_CLASS[t - 1], TIER_MARKS[t - 1]);
+  else if (t === 4) mark = node('i', 'lg-wax lg-wax--dia', '?');
+  else if (t === held + 1) mark = node('i', 'lg-wax lg-wax--part', n + '/' + seal.tiers[t - 1]);
+  else mark = node('i', 'lg-wax lg-wax--off', TIER_MARKS[t - 1]);
+  wrap.appendChild(mark);
+  wrap.appendChild(node('span', t === 4 ? 'lg-dia-word' : null, seal.tiers[t - 1].toLocaleString()));
+  return wrap;
+}
+
+function renderLedger() {
+  const counts = currentCounts();
+  const all = SEALS.reduce((a, s) => a + s.tiers.length, 0);
+  el.ledgerCount.textContent = earnedSeals(counts).length + ' / ' + all + ' seals';
+  const body = el.ledgerBody;
+  body.textContent = '';
+
+  // The elephant is a gilded plate glued into the book. Nothing else is.
+  const ele = SEALS[0], en = ele.of(counts);
+  const plate = node('section', 'lg-plate' + (en >= 50 ? ' lg-plate--diamond' : ''));
+  plate.appendChild(node('div', 'lg-kicker', 'Plate I · glued in, not printed'));
+  const h = node('h3', 'lg-plate-name', 'Elephas');
+  h.appendChild(node('em', null, 'the elephant'));
+  plate.appendChild(h);
+  plate.appendChild(animalImg('elephant', 'lg-plate-art'));
+  const tally = node('p', 'lg-tally');
+  tally.appendChild(node('b', null, en.toLocaleString()));
+  tally.appendChild(document.createTextNode('raised in all your seasons'));
+  plate.appendChild(tally);
+  const row = node('div', 'lg-seals');
+  for (let t = 1; t <= ele.tiers.length; t++) row.appendChild(sealMark(ele, t, en));
+  plate.appendChild(row);
+  plate.appendChild(node('p', 'lg-margin', en >= 50
+    ? '— the last page. The ledger has nothing more to say.'
+    : '— the ledger keeps one more page for these, and won’t say why.'));
+  body.appendChild(plate);
+
+  body.appendChild(node('h3', 'lg-label', 'Lesser entries'));
+  for (const s of SEALS.slice(1, -1)) {
+    const n = s.of(counts), held = tiersHeld(s, n);
+    const unit = s.unit ? ' ' + s.unit : '';
+    const e = node('div', 'lg-entry');
+    e.appendChild(animalImg(s.art, 'lg-entry-art'));
+    const words = node('div');
+    words.appendChild(node('div', 'lg-entry-name', s.name));
+    words.appendChild(node('div', 'lg-entry-sub', held >= s.tiers.length
+      ? n.toLocaleString() + unit + ' · every seal'
+      : n.toLocaleString() + ' of ' + s.tiers[held].toLocaleString() + unit + ' · next seal'));
+    e.appendChild(words);
+    const mini = node('div', 'lg-mini');
+    for (let t = 1; t <= s.tiers.length; t++) mini.appendChild(node('i', t <= held ? 'lg-mini--' + TIER_CLASS[t - 1] : null));
+    e.appendChild(mini);
+    body.appendChild(e);
+  }
+
+  body.appendChild(node('h3', 'lg-label', 'Field Guide · specimens'));
+  const grid = node('div', 'lg-specimens');
+  for (const k of FIELD_GUIDE) {
+    const pin = node('div', 'lg-pin');
+    if (met.has(k)) { pin.appendChild(animalImg(k)); pin.title = k; }
+    else { pin.classList.add('lg-pin--empty'); pin.textContent = '?'; }
+    grid.appendChild(pin);
+  }
+  body.appendChild(grid);
+  const gn = counts.guide, done = gn >= FIELD_GUIDE.length;
+  body.appendChild(node('span', 'lg-stamp' + (done ? '' : ' lg-stamp--todo'),
+    done ? 'Complete · ' + gn + ' / ' + FIELD_GUIDE.length : gn + ' / ' + FIELD_GUIDE.length + ' met'));
+}
+
+let ledgerOpener = null;
+function openLedger(opener) {
+  renderLedger();
+  el.ledgerModal.hidden = false;
+  document.body.classList.add('is-modal');
+  ledgerOpener = opener || null;
+  for (const id of earnedSeals(currentCounts())) sealsSeen.add(id);
+  writeMet();
+  updateLedgerDot();
+  el.ledgerClose.focus();
+}
+
+function closeLedger() {
+  if (el.ledgerModal.hidden) return;
+  el.ledgerModal.hidden = true;
+  if (el.startScreen.hidden && el.howModal.hidden) document.body.classList.remove('is-modal');
+  if (ledgerOpener && document.contains(ledgerOpener)) ledgerOpener.focus();
+}
+
+// Once the score card is up: every seal this run earned, one torn slip
+// of the ledger at a time, top right. Tapping one opens the Ledger. The
+// elephant's slip is gilded and lights the corner; no other seal does.
+function showSealToasts() {
+  if (!el.sealToasts) return;
+  const fresh = earnedSeals(currentCounts()).filter(id => !runStartSeals.has(id));
+  el.sealToasts.textContent = '';
+  fresh.forEach(function (id, i) {
+    const parts = id.split(':');
+    const seal = SEALS.find(s => s.id === parts[0]), t = Number(parts[1]);
+    const ele = seal.id === 'elephant', guide = seal.id === 'guide';
+    setTimeout(function () {
+      if (!state.over) return;
+      if (ele) {
+        const flash = node('div', 'seal-flash');
+        document.body.appendChild(flash);
+        setTimeout(function () { flash.remove(); }, 1700);
+      }
+      const slip = node('button', 'seal-toast' + (ele ? ' seal-toast--elephant' : ''));
+      slip.type = 'button';
+      if (ele) slip.appendChild(animalImg('elephant', 'seal-toast-art'));
+      slip.appendChild(node('span', 'lg-wax lg-wax--' + (guide ? 'g' : TIER_CLASS[t - 1]), guide ? '✓' : TIER_MARKS[t - 1]));
+      const words = node('span', 'seal-toast-words');
+      words.appendChild(node('span', 'seal-toast-kind', ele ? 'The ledger shudders' : 'Seal earned'));
+      words.appendChild(node('span', 'seal-toast-name', seal.name + ' · ' + (guide ? 'Complete' : TIER_NAMES[t - 1])));
+      slip.appendChild(words);
+      slip.addEventListener('click', function () { openLedger(el.goAgain); });
+      el.sealToasts.appendChild(slip);
+      setTimeout(function () { slip.remove(); }, ele ? 7000 : 4800);
+    }, 600 + i * 650);
+  });
 }
 
 // ---------- State ----------
@@ -985,6 +1214,8 @@ function newGame() {
   state.topKind = 'sprout';
   state.seen = {};
   state.elephants = 0;
+  runStartSeals = new Set(earnedSeals(currentCounts()));
+  if (el.sealToasts) el.sealToasts.textContent = '';
   closeCelebration(true);
   clearFx();
   el.gameover.hidden = true;
@@ -1050,6 +1281,7 @@ function placeTile(i) {
   if (grew.length) replayChain(grew, before);
   announceFirsts(dealtFirst ? [{ kind: dealtKind }].concat(grew) : grew);
   const giants = grew.filter(function (g) { return g.kind === 'elephant'; }).length;
+  if (countRaised(grew) && !giants) writeMet();
   if (giants) {
     state.elephants += giants;
     lifetimeElephants += giants;
@@ -1505,6 +1737,7 @@ function endRun() {
     hideWord();
     el.gameover.hidden = false;
     el.goAgain.focus();
+    showSealToasts();
   }, 2400);
 }
 
@@ -3448,7 +3681,8 @@ async function init() {
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
     'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer',
-    'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose'];
+    'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose',
+    'startLedgerBtn', 'ledgerDot', 'ledgerModal', 'ledgerClose', 'ledgerCount', 'ledgerBody', 'sealToasts'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
@@ -3554,6 +3788,10 @@ async function init() {
   // The title screen carries the guide, so it is reachable before the
   // first tap. Sound has no switch: the device's silent mode decides.
   el.startHowBtn.addEventListener('click', function () { openHow(el.startHowBtn); setPaused(true); });
+  el.startLedgerBtn.addEventListener('click', function () { openLedger(el.startLedgerBtn); });
+  el.ledgerClose.addEventListener('click', closeLedger);
+  el.ledgerModal.addEventListener('click', function (e) { if (e.target === el.ledgerModal) closeLedger(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeLedger(); });
 
   el.newBtn.addEventListener('click', onNewGame);
   // a new game that actually started takes the menu down with it
