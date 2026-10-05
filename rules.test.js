@@ -419,6 +419,7 @@ board([]); S.topKind = 'grass'; S.stock = ['fox', 'grass', 'grass']; S.over = fa
 X.ctx.placeTile(at(0, 0));
 ok('a fox from the hand counts as reaching the fox', S.topKind === 'fox', S.topKind);
 X.el.gameover = {};
+S.ticks = 190;          // Play again comes after a run that reached late winter
 X.ctx.newGame();
 ok('restart resets difficulty and deals plants', S.ticks === 0 && X.ctx.scoreMultiplier() === 1
    && S.stock.length === X.HAND_MAX && S.stock.every(k => k === 'grass' || k === 'sprout'));

@@ -585,6 +585,13 @@ function row(label, r) {
   );
 }
 
+// Required rather than run (watch-record.js), hand out the bots and stop
+// before the table.
+if (require.main !== module) {
+  module.exports = { use, G: () => G, spendAll, casualBot, carefulBot, bankerBot, count };
+  return;
+}
+
 const runs = Number(process.argv[2]) || 300;
 // e.g. `HAND_MAX=1,2,3,4,6`, or several knobs at once —
 // `MERGE_SPROUT=2 GRASS_IN_HAND=22,35` runs every combination, because

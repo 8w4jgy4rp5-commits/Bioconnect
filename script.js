@@ -833,11 +833,17 @@ function vitality(cell) {
 
 // The same plant mix at every time and discovery. Every animal must be
 // raised by merging; discovering one never changes the supply.
+//
+// Every roll the rules make goes through gameRandom(), and nothing else
+// does, so a run is fixed by its seed plus the moves made. watch.js swaps
+// in a seeded stream to replay a bot's recorded run on the real board;
+// confetti and the like keep using Math.random so they cannot shift it.
+function gameRandom() { return Math.random(); }
 function rollHand() {
   const odds = handOdds();
   let total = 0;
   for (const k in odds) total += odds[k];
-  let r = Math.random() * total;
+  let r = gameRandom() * total;
   for (const k in odds) {
     r -= odds[k];
     if (r < 0) return k;
@@ -963,6 +969,9 @@ function newGame() {
   if (window.BioAudio) window.BioAudio.reset();
   state.cells = new Array(CELLS).fill(null);
   state.topKind = 'sprout';
+  // Before the deal: rollHand reads the clock, and Play again used to
+  // deal its opening hand at the last run's late-winter odds.
+  state.ticks = 0;
   // Start with a full hand. The first thing a new player does is look at
   // the board, and arriving with one tile and a running clock teaches
   // panic rather than the game.
@@ -1360,7 +1369,7 @@ function surfaceStone() {
     return true;
   });
   const from = away.length ? away : open;
-  const at = from[(Math.random() * from.length) | 0];
+  const at = from[(gameRandom() * from.length) | 0];
   state.cells[at] = makeTile('stone');
   return { at: at, kind: 'stone' };
 }

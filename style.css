@@ -2014,3 +2014,12 @@ body.is-celebrating { overflow: hidden; }
 .cell--deer { --breath-rate: 2s; }
 .cell--fading { --idle: .65; }
 .board--life-paused .cell > .tile-art { animation-play-state: paused; }
+
+/* index.html?watch — a bot replays a recorded run (watch.js). */
+.is-watching #board { pointer-events: none; }
+.watch-badge {
+  position: fixed; right: 12px; bottom: 12px; z-index: 60;
+  padding: 8px 14px; border: 0; border-radius: 999px;
+  background: #2b2140; color: #fff; font: 700 14px/1 system-ui, sans-serif;
+  letter-spacing: .04em; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); cursor: pointer;
+}
