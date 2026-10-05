@@ -77,6 +77,8 @@ function load(overrides) {
   x.el.goLevel = {};
   x.el.goNote = {};
   x.el.goAgain = { focus() {} };
+  x.el.countdown = {};
+  x.el.countdownWord = {};
   x.ctx = ctx;
   return x;
 }
@@ -445,14 +447,14 @@ function count(kind) {
 // banker, a whole hand-spending policy. One flag rather than two loops.
 function playMany(bot, runs, ownPolicy) {
   const spend = ownPolicy ? bot : function (tag) { return spendAll(bot, tag); };
-  const scores = [], raws = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [], firstBear = [], firstElephant = [];
+  const scores = [], raws = [], ticks = [], firstFox = [], firstRabbit = [], firstWolf = [], firstBear = [], firstElephant = [], firstLion = [], firstTiger = [];
   const endedIn = [0, 0, 0, 0];
-  let sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawElephant = 0, sawBear = 0, sawWolf = 0, twoFoxes = 0;
+  let sawLion = 0, sawTiger = 0, sawFox = 0, sawRabbit = 0, twoRabbits = 0, sawElephant = 0, sawBear = 0, sawWolf = 0, twoFoxes = 0;
   fromGrowth = 0; fromMeals = 0;
   let starved = 0, tickTotal = 0, idle = 0, aliveSum = 0, aliveN = 0;
   for (let r = 0; r < runs; r++) {
     ctx.newGame();
-    let foxAt = 0, rabbitAt = 0, elephantAt = 0, bearAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
+    let lionAt = 0, tigerAt = 0, foxAt = 0, rabbitAt = 0, elephantAt = 0, bearAt = 0, wolfAt = 0, peakRabbits = 0, peakFoxes = 0, guard = 0;
     // opening hand, before the world has moved at all
     spend('run ' + r + ' opening');
     while (!state.over && state.ticks < TICK_CAP) {
@@ -474,6 +476,8 @@ function playMany(bot, runs, ownPolicy) {
       if (!foxAt && foxes) foxAt = state.ticks;
       if (!elephantAt && count('elephant')) elephantAt = state.ticks;
       if (!bearAt && count('bear')) bearAt = state.ticks;
+      if (!lionAt && count('lion')) lionAt = state.ticks;
+      if (!tigerAt && count('tiger')) tigerAt = state.ticks;
       if (!wolfAt && count('wolf')) wolfAt = state.ticks;
     }
     scores.push(ctx.displayScore(state.score));
@@ -488,6 +492,8 @@ function playMany(bot, runs, ownPolicy) {
     if (peakRabbits >= 2) twoRabbits += 1;
     if (elephantAt) { sawElephant++; firstElephant.push(elephantAt); }
     if (bearAt) { sawBear += 1; firstBear.push(bearAt); }
+    if (lionAt) { sawLion += 1; firstLion.push(lionAt); }
+    if (tigerAt) { sawTiger += 1; firstTiger.push(tigerAt); }
     if (wolfAt) { sawWolf += 1; firstWolf.push(wolfAt); }
     if (peakFoxes >= 2) twoFoxes += 1;
   }
@@ -521,6 +527,9 @@ function playMany(bot, runs, ownPolicy) {
     twoFoxPct: Math.round((twoFoxes / runs) * 100),
     elephantPct: Math.round(100*sawElephant/runs), elephantAt: avg(firstElephant),
     bearPct: Math.round((sawBear / runs) * 100), bearAt: avg(firstBear),
+    lionPct: Math.round((sawLion / runs) * 100), lionAt: avg(firstLion),
+    tigerPct: Math.round((sawTiger / runs) * 100), tigerAt: avg(firstTiger),
+    mean: avg(scores),
     wolfPct: Math.round((sawWolf / runs) * 100), wolfAt: avg(firstWolf),
     endedIn: endedIn.map((n) => Math.round((n / runs) * 100))
   };
@@ -557,6 +566,7 @@ function row(label, r) {
     label.padEnd(22) +
     String(r.ticks).padStart(6) + '  ' +
     (r.p25 + '/' + r.p50 + '/' + r.p75).padStart(16) + '  ' +
+    String(r.mean).padStart(5) + '  ' +
     String(r.max).padStart(6) + '  ' +
     (r.zero + '%').padStart(5) + '  ' +
     (r.topPct + '%').padStart(5) + '  ' +
@@ -568,6 +578,8 @@ function row(label, r) {
     (r.foxPct + '% @' + r.foxAt).padStart(10) + '  ' +
     (r.wolfPct + '% @' + r.wolfAt).padStart(10) + '  ' +
     (r.bearPct + '% @' + r.bearAt).padStart(10) + '  ' +
+    (r.lionPct + '% @' + r.lionAt).padStart(10) + '  ' +
+    (r.tigerPct + '% @' + r.tigerAt).padStart(10) + '  ' +
     (r.elephantPct + '% @' + r.elephantAt).padStart(10) + '  ' +
     r.endedIn.join('/').padStart(16)
   );
@@ -580,7 +592,7 @@ const runs = Number(process.argv[2]) || 300;
 // right amount of ready-made grass is.
 const sweep = process.argv.slice(3);
 
-console.log('configuration          ticks   shown p25/50/75     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear   elephant     ended sp/su/au/wi');
+console.log('configuration          ticks   shown p25/50/75   mean     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear        lion       tiger   elephant     ended sp/su/au/wi');
 console.log('-'.repeat(146));
 
 if (sweep.indexOf('--meals') >= 0) {

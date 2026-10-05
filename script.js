@@ -537,14 +537,52 @@ function nextDifficultySeconds() {
 const HAND_BY_STAGE = [
   { sprout: 100 - GRASS_IN_HAND, grass: GRASS_IN_HAND },  // Spring
   { sprout: 45, grass: 45, rabbit: 10 },                  // Summer
-  { sprout: 40, grass: 40, rabbit: 15, fox: 5 },          // Autumn
-  { sprout: 35, grass: 35, rabbit: 20, fox: 10 }          // Winter 1 and on
+  { sprout: 40, grass: 40, rabbit: 15, fox: 5 }           // Autumn
 ];
+// THE WINTERS KEEP WIDENING. (rules 20)
+//
+// One fixed winter row meant the deal stopped helping at tick 75 while
+// stones kept speeding up, so a player who averaged around 5,000 shown
+// stalled at the bear and never saw a lion. Past the first winter the
+// rabbit and fox shares now climb in a straight line from the first
+// pair of numbers to the second, and deer, zebras and buffalo join, over
+// HAND_RAMP_STAGES winters; sprouts and grass split what is left. Nothing
+// above the buffalo is ever dealt, so the wolf up is still earned.
+//
+// Rabbits and foxes alone could not do it: 60% rabbits and 50% foxes at
+// the end still left the lion near 1%, because an elephant is 256 foxes
+// of merging and a run is about 200 ticks. Most runs also ended in
+// Winter 2, before a four-winter ramp had done anything, hence one winter.
+// Target: the tiger about one run in ten. Measured, `node sim.js 400`
+// against rules 19 — casual bot lion 0% -> 48%, tiger ~1% -> 15%;
+// thinks-every-3 lion 0% -> 73%, tiger 0% -> 5%; elephant 0-1%,
+// and that last figure is on purpose: the elephant stays a
+// feat few runs ever reach, and stones are not slowed to get there.
+// Changing the shown scale is why RULES_VERSION moved.
+const HAND_RABBIT_WINTER = 20;
+const HAND_FOX_WINTER = 10;
+const HAND_RABBIT_LATE = 20;
+const HAND_FOX_LATE = 20;
+const HAND_DEER_LATE = 20;
+const HAND_ZEBRA_LATE = 20;
+const HAND_BUFFALO_LATE = 15;
+const HAND_RAMP_STAGES = 1;    // winters it takes to reach the late shares
 const WIDE_HAND_FROM = 'zebra';
 function handOdds() {
-  const last = HAND_BY_STAGE.length - 1;
-  const stage = rank(state.topKind) >= rank(WIDE_HAND_FROM) ? last : difficultyStage();
-  return HAND_BY_STAGE[Math.min(last, stage)];
+  // A zebra jumps the hand to at least the first winter (rules 19).
+  const firstWinter = SEASONS - 1;
+  let stage = difficultyStage();
+  if (rank(state.topKind) >= rank(WIDE_HAND_FROM)) stage = Math.max(stage, firstWinter);
+  if (stage < firstWinter) return HAND_BY_STAGE[stage];
+  const t = Math.min(1, (stage - firstWinter) / Math.max(1, HAND_RAMP_STAGES));
+  const rabbit = Math.round(HAND_RABBIT_WINTER + (HAND_RABBIT_LATE - HAND_RABBIT_WINTER) * t);
+  const fox = Math.round(HAND_FOX_WINTER + (HAND_FOX_LATE - HAND_FOX_WINTER) * t);
+  const deer = Math.round(HAND_DEER_LATE * t);
+  const zebra = Math.round(HAND_ZEBRA_LATE * t);
+  const buffalo = Math.round(HAND_BUFFALO_LATE * t);
+  const rest = Math.max(0, 100 - rabbit - fox - deer - zebra - buffalo);
+  const sprout = Math.floor(rest / 2);
+  return { sprout: sprout, grass: rest - sprout, rabbit: rabbit, fox: fox, deer: deer, zebra: zebra, buffalo: buffalo };
 }
 
 // ---------- The clock ----------
@@ -575,7 +613,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 19;
+const RULES_VERSION = 20;
 
 // ---------- WHAT A SCORE MEANS ----------
 //

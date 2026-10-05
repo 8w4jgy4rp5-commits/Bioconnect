@@ -27,7 +27,7 @@ function load() {
   ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(
-    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX,'
+    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX, SEASONS, SEASON_LENGTH, HAND_RABBIT_LATE, HAND_FOX_LATE, HAND_DEER_LATE, HAND_ZEBRA_LATE, HAND_BUFFALO_LATE,'
          + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER,'
          + ' SEASON_LENGTH, DIFFICULTY_STAGES, GRASS_IN_HAND, RULES_VERSION, ELEPHANT_BONUS, BIG_STAMINA_PCT, el };',
     ctx
@@ -361,8 +361,8 @@ wm = X.ctx.feedEveryone();
 ok('a lion can be fed a dealt fox', wm.length === 1 && wm[0].ateKind === 'fox' && cell(2, 1).kind === 'deer');
 board([[1, 1, 'tiger', starving('tiger')], [0, 1, 'fox']]);
 ok('so can a tiger', X.ctx.feedEveryone().length === 1);
-// The deal follows the clock, and raising a zebra jumps it to the winter
-// row (rules 19). Nothing else a player discovers changes it. Exhaust the
+// The deal follows the clock, and raising a zebra jumps it to at least the
+// first winter (rules 19, 20). Nothing else a player discovers changes it. Exhaust the
 // random input deterministically for every stage and every top rung.
 const originalRandom = X.ctx.Math.random;
 function dealAt(ticks, top) {
@@ -375,33 +375,42 @@ function dealAt(ticks, top) {
   }
   return n;
 }
-let sameAcrossDiscoveries = true, neverAboveFox = true, zebraWidens = true;
+let sameAcrossDiscoveries = true, neverAboveBuffalo = true, foxCapUntilLate = true, zebraWidens = true;
+const FIRST_WINTER = (X.SEASONS - 1) * X.SEASON_LENGTH;
 const ZEBRA = X.LADDER.indexOf('zebra');
 for (const ticks of [0, 24, 25, 50, 75, 175, 10000]) {
   const ref = JSON.stringify(dealAt(ticks, 'sprout'));
-  const wide = JSON.stringify(dealAt(10000, 'sprout'));
+  const wide = ticks < FIRST_WINTER ? JSON.stringify(dealAt(FIRST_WINTER, 'sprout')) : ref;
   for (const top of X.LADDER) {
     const d = dealAt(ticks, top);
     if (X.LADDER.indexOf(top) < ZEBRA && JSON.stringify(d) !== ref) sameAcrossDiscoveries = false;
     if (X.LADDER.indexOf(top) >= ZEBRA && JSON.stringify(d) !== wide) zebraWidens = false;
-    for (const k in d) if (['sprout', 'grass', 'rabbit', 'fox'].indexOf(k) < 0) neverAboveFox = false;
+    for (const k in d) {
+      if (X.LADDER.indexOf(k) > X.LADDER.indexOf('buffalo')) neverAboveBuffalo = false;
+      if (ticks <= FIRST_WINTER && X.LADDER.indexOf(top) < ZEBRA && X.LADDER.indexOf(k) > X.LADDER.indexOf('fox')) foxCapUntilLate = false;
+    }
   }
 }
 ok('below the zebra, discoveries never change the deal — only the clock does', sameAcrossDiscoveries);
-ok('from the zebra up, the hand deals the winter row in any season', zebraWidens);
-ok('the hand never holds anything above the fox', neverAboveFox);
-const spring = dealAt(0, 'sprout'), summer = dealAt(25, 'sprout'), autumn = dealAt(50, 'sprout'), winter = dealAt(10000, 'elephant');
+ok('from the zebra up, the hand deals at least the first winter row', zebraWidens);
+ok('the hand never holds anything above the buffalo', neverAboveBuffalo);
+ok('nothing above the fox is dealt until the winters deepen', foxCapUntilLate);
+const spring = dealAt(0, 'sprout'), summer = dealAt(25, 'sprout'), autumn = dealAt(50, 'sprout'), winter = dealAt(FIRST_WINTER, 'sprout'), late = dealAt(10000, 'elephant');
 ok('spring deals plants only, half and half',
    spring.grass === X.GRASS_IN_HAND * 10 && spring.sprout === 1000 - X.GRASS_IN_HAND * 10, JSON.stringify(spring));
 ok('summer adds rabbits but no foxes', summer.rabbit === 100 && !summer.fox, JSON.stringify(summer));
 ok('autumn adds the first foxes', autumn.rabbit === 150 && autumn.fox === 50, JSON.stringify(autumn));
-ok('winter deals a fifth rabbits and a tenth foxes, to the end', winter.rabbit === 200 && winter.fox === 100, JSON.stringify(winter));
+ok('the first winter deals a fifth rabbits and a tenth foxes', winter.rabbit === 200 && winter.fox === 100 && !winter.deer, JSON.stringify(winter));
+ok('the late winters deal the late rabbit, fox, deer, zebra and buffalo shares',
+   late.rabbit === X.HAND_RABBIT_LATE * 10 && late.fox === X.HAND_FOX_LATE * 10 &&
+   late.deer === X.HAND_DEER_LATE * 10 && late.zebra === X.HAND_ZEBRA_LATE * 10 &&
+   late.buffalo === X.HAND_BUFFALO_LATE * 10, JSON.stringify(late));
 board([]); S.topKind = 'elephant'; S.ticks = 10000; S.over = false;
 S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass';
 X.ctx.Math.random = () => 0.99;
 X.ctx.placeTile(at(2, 2));
-ok('late placement refills from the winter deal and keeps the queue order',
-   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'fox', S.stock.join(',') + ' / ' + S.next);
+ok('late placement refills from the late deal and keeps the queue order',
+   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'buffalo', S.stock.join(',') + ' / ' + S.next);
 S.stock = []; S.refill = 0; S.next = 'sprout'; S.ticks = 0; S.topKind = 'sprout';
 X.ctx.Math.random = () => 0.99;
 X.ctx.refillHand();
@@ -453,10 +462,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 19);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 20);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 19, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 20, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;
