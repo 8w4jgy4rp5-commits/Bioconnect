@@ -11,9 +11,9 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
   <link rel="stylesheet" href="pop.css?v=9f9aa360" />
   <link rel="stylesheet" href="eldritch.css?v=4da804e3" />
-  <!-- Look on trial: ?skin=eldritch switches to the Cozy Eldritch look and
-       remembers it in this browser; ?skin=pop switches back. Runs before
-       first paint so the page never flashes the other look. -->
+  <!-- Cozy Eldritch is the standard look. ?skin=pop switches to the old
+       pop look and remembers it in this browser; ?skin=eldritch switches
+       back. Runs before first paint so the page never flashes the other look. -->
   <script>
     (function () {
       var skin = null;
@@ -22,7 +22,7 @@
         if (m) localStorage.setItem('ecosystem-puzzle:skin', m[1]);
         skin = m ? m[1] : localStorage.getItem('ecosystem-puzzle:skin');
       } catch (e) {}
-      if (skin !== 'eldritch') return;
+      if (skin === 'pop') return;
       document.documentElement.classList.add('skin-eldritch');
       var font = document.createElement('link');
       font.rel = 'stylesheet';
@@ -453,7 +453,7 @@
 <script src="audio-synth.js?v=a2d22b34"></script>
 <script src="audio.js?v=f67f9514"></script>
 <script src="script.js?v=de7493d4"></script>
-<script src="skin.js?v=c2d19eaa"></script>
+<script src="skin.js?v=5406c35f"></script>
 <!-- cobbleworks:footer:start -->
   <footer class="cw-footer">
     <a href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" target="_blank" rel="noopener noreferrer">Made on CobbleWorks — browse other mini apps</a>

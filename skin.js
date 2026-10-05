@@ -1,4 +1,4 @@
-// Cozy Eldritch, on trial (see eldritch.css). Does nothing unless the
+// Cozy Eldritch, the standard look (see eldritch.css). Does nothing unless the
 // head script put .skin-eldritch on <html>. Its one job: under each
 // line the ticker says, a small deadpan aside — the meadow is watching,
 // and it is a bit of a dork about it. The game never reads the aside.
