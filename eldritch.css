@@ -167,8 +167,10 @@
 .el-deco { display: none; }
 .skin-eldritch .el-deco { display: block; }
 /* 8px past each side of the board: the board sits 10px from the screen
-   edge on a phone, so the tentacles never widen the page */
-.skin-eldritch .el-tentacles { position: absolute; inset: -6% -8px; z-index: 2; width: calc(100% + 16px); height: 112%; pointer-events: none; overflow: visible; }
+   edge on a phone, so the tentacles never widen the page. Behind the
+   board (2026-10-05): drawn in front they covered whole squares, so now
+   they only show past the rim and faintly through the gaps. */
+.skin-eldritch .el-tentacles { position: absolute; inset: -6% -8px; z-index: 0; width: calc(100% + 16px); height: 112%; pointer-events: none; overflow: visible; }
 .el-tentacles .arm { fill: none; stroke: var(--el-plum); stroke-linecap: round; }
 .el-tentacles .suck { fill: none; stroke: var(--el-plum2); stroke-linecap: round; stroke-dasharray: .1 10; }
 .skin-eldritch .el-gift { position: absolute; z-index: 3; right: -6px; top: -9%; width: 28px; transform: rotate(-14deg); pointer-events: none; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, .6)); }
