@@ -2171,3 +2171,19 @@ body.is-celebrating { overflow: hidden; }
   .lg-wax--d, .seal-flash { animation: none; }
   .seal-flash { display: none; }
 }
+
+/* ---------- Growth strip (always on screen) ----------
+   Twelve rungs in one row under the hand, so the next animal is never
+   behind the menu. Sized off the row width so all twelve fit a 320px
+   phone without scrolling sideways. */
+.ladder-strip { display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: var(--card, #fff); border: 1px solid var(--line, #e3e7da); }
+.ladder-label { flex: none; font-size: 9px; font-weight: 700; line-height: 1.1; width: 34px; color: var(--ink-faint, #6b7a5e); }
+.ladder-row { flex: 1; min-width: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0; margin: 0; padding: 0; list-style: none; }
+.ladder-step { position: relative; display: flex; justify-content: center; padding: 1px 0; border-radius: 8px; border: 1px solid transparent; }
+.ladder-row .chain-step.ladder-step::after { content: none; }
+.ladder-step + .ladder-step::before { content: '›'; position: absolute; left: -3px; top: 50%; transform: translateY(-50%); font-size: 10px; line-height: 1; color: var(--ink-faint, #90a080); pointer-events: none; }
+.ladder-step .tile--mini { width: 100%; max-width: 30px; height: auto; aspect-ratio: 1; margin: 0; border-radius: 7px; }
+.ladder-step:not(.is-reached):not(.is-next) .tile--mini { opacity: .5; }
+.ladder-step.is-current { background: rgba(125, 170, 87, .18); border-color: #7daa57; }
+.ladder-step.is-next { border-style: dashed; border-color: #b69b50; }
+@media (max-width: 360px) { .ladder-label { display: none; } .ladder-strip { padding: 3px 5px; } }

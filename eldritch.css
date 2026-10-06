@@ -243,3 +243,6 @@
 @media (prefers-reduced-motion: reduce) {
   .skin-eldritch .cell::before { animation: none; }
 }
+.skin-eldritch .ladder-strip { background: rgba(0, 0, 0, .25); border-color: rgba(236, 228, 200, .12); }
+.skin-eldritch .ladder-label, .skin-eldritch .ladder-step + .ladder-step::before { color: var(--el-mute); }
+.skin-eldritch .ladder-step.is-current { background: rgba(168, 198, 108, .15); border-color: var(--el-moss); }

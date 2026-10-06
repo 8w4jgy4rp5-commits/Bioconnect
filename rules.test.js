@@ -27,7 +27,7 @@ function load() {
   ctx.globalThis = ctx;
   vm.createContext(ctx);
   vm.runInContext(
-    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX, SEASONS, SEASON_LENGTH, HAND_RABBIT_LATE, HAND_FOX_LATE, HAND_DEER_LATE, HAND_ZEBRA_LATE, HAND_BUFFALO_LATE,'
+    code + '\n;globalThis.__x = { state, CELLS, SIZE, MERGE_AT, ANIMALS, MEAL_VALUE, GROWS_INTO, HAND_MAX, SEASONS, SEASON_LENGTH, HAND_RABBIT_LATE, HAND_FOX_LATE, HAND_DEER_LATE, HAND_ZEBRA_LATE, HAND_BUFFALO_LATE, HAND_GRASS_MIN,'
          + ' ELEPHANT_BASE_EAT_AT, ELEPHANT_BASE_STARVE_AT, ELEPHANT_HUNGER_PCT, ELEPHANT_MEAL_PCT, LADDER,'
          + ' SEASON_LENGTH, DIFFICULTY_STAGES, GRASS_IN_HAND, RULES_VERSION, ELEPHANT_BONUS, BIG_STAMINA_PCT, el };',
     ctx
@@ -405,6 +405,8 @@ ok('the late winters deal the late rabbit, fox, deer, zebra and buffalo shares',
    late.rabbit === X.HAND_RABBIT_LATE * 10 && late.fox === X.HAND_FOX_LATE * 10 &&
    late.deer === X.HAND_DEER_LATE * 10 && late.zebra === X.HAND_ZEBRA_LATE * 10 &&
    late.buffalo === X.HAND_BUFFALO_LATE * 10, JSON.stringify(late));
+ok('grass never runs out: every winter deal is at least the grass floor',
+   winter.grass >= X.HAND_GRASS_MIN * 10 && late.grass >= X.HAND_GRASS_MIN * 10, winter.grass + ' / ' + late.grass);
 board([]); S.topKind = 'elephant'; S.ticks = 10000; S.over = false;
 S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass';
 X.ctx.Math.random = () => 0.99;

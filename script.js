@@ -561,11 +561,22 @@ const HAND_BY_STAGE = [
 // Changing the shown scale is why RULES_VERSION moved.
 const HAND_RABBIT_WINTER = 20;
 const HAND_FOX_WINTER = 10;
-const HAND_RABBIT_LATE = 20;
-const HAND_FOX_LATE = 20;
-const HAND_DEER_LATE = 20;
+const HAND_RABBIT_LATE = 10;
+const HAND_FOX_LATE = 12;
+const HAND_DEER_LATE = 18;
 const HAND_ZEBRA_LATE = 20;
-const HAND_BUFFALO_LATE = 15;
+const HAND_BUFFALO_LATE = 20;
+// GRASS NEVER RUNS OUT. (2026-10-06, rules 20 kept: the score scale barely moved)
+//
+// At 95% animals the late hand dealt grass about one tile in thirty, and
+// players read that as "grass stopped coming". Every grazer from the
+// rabbit to the bear still needs it, so it is now a floor, not leftovers:
+// the late animals went from 95% to 80%, and leaned toward the top of
+// the dealt range (rabbit/fox 20/20 -> 10/12, buffalo 15 -> 20) so the
+// tiger did not pay for it. `node sim.js 400` against rules 20: casual
+// lion 55% -> 52%, tiger 17% -> 18%; thinks-every-3 lion 69% -> 78%,
+// tiger 5% -> 6%. Scaling every share evenly instead cost half the tigers.
+const HAND_GRASS_MIN = 20;    // percent of every winter deal that is grass
 const HAND_RAMP_STAGES = 1;    // winters it takes to reach the late shares
 const WIDE_HAND_FROM = 'zebra';
 function handOdds() {
@@ -581,8 +592,9 @@ function handOdds() {
   const zebra = Math.round(HAND_ZEBRA_LATE * t);
   const buffalo = Math.round(HAND_BUFFALO_LATE * t);
   const rest = Math.max(0, 100 - rabbit - fox - deer - zebra - buffalo);
-  const sprout = Math.floor(rest / 2);
-  return { sprout: sprout, grass: rest - sprout, rabbit: rabbit, fox: fox, deer: deer, zebra: zebra, buffalo: buffalo };
+  const grass = Math.min(rest, Math.max(HAND_GRASS_MIN, rest - Math.floor(rest / 2)));
+  const sprout = rest - grass;
+  return { sprout: sprout, grass: grass, rabbit: rabbit, fox: fox, deer: deer, zebra: zebra, buffalo: buffalo };
 }
 
 // ---------- The clock ----------
@@ -3367,8 +3379,9 @@ function renderGrowth() {
   if (el.growthFinalTile) paintTile(el.growthFinalTile, 'elephant');
   if (el.growthProgress) el.growthProgress.textContent = Math.max(0, rank(top) - 1) + '/10 animals';
   renderGoalBubble(top, next);
-  if (!el.growthTrack) return;
-  for (const node of el.growthTrack.querySelectorAll('.chain-step')) {
+  const steps = [];
+  for (const track of [el.growthTrack, el.ladderStrip]) if (track) steps.push(...track.querySelectorAll('.chain-step'));
+  for (const node of steps) {
     const art = node.querySelector('[data-art]');
     const kind = node.dataset.kind || (art && art.dataset.art);
     if (!kind) continue;
@@ -3680,7 +3693,7 @@ async function init() {
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
-    'growthFinalTile', 'growthProgress', 'growthTrack', 'moveHint', 'previewLayer',
+    'growthFinalTile', 'growthProgress', 'growthTrack', 'ladderStrip', 'moveHint', 'previewLayer',
     'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose',
     'startLedgerBtn', 'ledgerDot', 'ledgerModal', 'ledgerClose', 'ledgerCount', 'ledgerBody', 'sealToasts'];
   for (const id of ids) el[id] = document.getElementById(id);

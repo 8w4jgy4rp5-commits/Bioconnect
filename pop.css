@@ -164,6 +164,9 @@ body {
 /* ---------- the board ---------- */
 
 .board-frame { width: 100%; }
+/* On a short phone the board gives up a little width so the growth strip
+   under the hand still fits on screen without scrolling. */
+@media (max-height: 760px) { .board-frame { width: min(100%, max(240px, calc(100svh - 370px))); align-self: center; } }
 .board {
   gap: 7px;
   padding: 10px;
@@ -417,3 +420,4 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .growth-summary .tile.goal-next, .is-now .tile.hand-tile, .start-play, .menu-card { animation: none; }
 }
+.ladder-strip { border: 0; background: var(--pop-white); box-shadow: 0 3px 0 rgba(30, 70, 110, .14); }
