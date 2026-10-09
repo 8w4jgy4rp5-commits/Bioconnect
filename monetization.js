@@ -71,6 +71,11 @@ window.BioEconomy = (() => {
     // Until the live backend sells, the store and revivals stay out of sight there.
     const storeOn = cfg.storeEnabled === true || loopback;
     for (const id of ['shopBtn', 'startShopBtn']) if ($(id)) $(id).hidden = !storeOn;
+    if ($('startWallet')) {
+      const n = session && !wallet ? '–' : String(wallet?.crystals ?? 0);
+      $('startWallet').textContent = n;
+      $('startShopBtn').setAttribute('aria-label', (n === '–' ? 'Crystal balance unavailable' : `You hold ${n} Crystal${n === '1' ? '' : 's'}`) + '. Open Crystals and No Ads');
+    }
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
     if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `You hold ${wallet.crystals} Crystal${wallet.crystals === 1 ? '' : 's'}${paid ? ' · No Ads owned' : ''}` : 'Account balance unavailable') : 'No Crystals yet';
     if ($('authControls')) $('authControls').hidden = !!session;

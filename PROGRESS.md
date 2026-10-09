@@ -1,5 +1,12 @@
 # Bioconnect 進捗
 
+## 2026-10-09 — タイトルのショップ入口を「所持数の札」に
+- 決定: `concepts/shop-entry-v1/` の3案（1 下の丸ボタン列／2 右上の所持数の札／3 丘の上の宝石）からユーザーが2を選択。
+- 変更: index.html のタイトル右上の文字ボタン「Crystals & No Ads」を、宝石・所持数・「＋」の札（`.start-wallet`、id は startShopBtn のまま）に置き換え。monetization.js で数字と読み上げ文（You hold N Crystals. Open Crystals and No Ads）を更新。ログイン前は0、ログイン中に残高が取れないときは「–」。style.css に札の見た目（全スキン共通の夜色）。メニュー内の「Crystals & No Ads」は変更なし。本番は storeEnabled:false で今までどおり非表示。
+- テスト側: test/local-adapter.js の「LOCAL SIMULATION」帯（ローカル模擬のときだけ出る）が右上の札に重なりクリックを奪っていたので、帯に pointer-events:none を付けた。実際の利用者には帯は出ない。
+- 検証: rules 258件、npm test 成功。test:browser は前回と同じく16件成功後に同じ箇所（71行）で停止（変更前も同じ、環境由来）。Chromium 390×844 / 320×568 / ?skin=pop で撮影、横はみ出しなし、札から Enter でショップが開き Esc で札へフォーカスが戻る、ページエラーなし。
+- 未確認: 実機、ログイン後に数字が増える様子（ローカル模擬のブラウザテストの残りで要確認）。?skin=pop では明るい空の上に暗い札が乗る（試遊で気になれば色を合わせる）。
+
 ## 2026-10-09 — クリスタルショップの中身を A1「Tarot Grid」に
 - 決定: 入手・交換・入口は DEVELOPMENT の記録どおり。雰囲気はE（Cozy Eldritch）、形はカード型。`concepts/crystal-shop-v1/` の3案（A1 Tarot Grid / A2 Ledger List / A3 One Card Picker）からユーザーが A1 を選択。
 - 変更: index.html のショップ（#shopModal）を 所持数 → 無料3個 → クリスタル2×2カード（宝石の山・+1/+5/+15 bonus・65個に Most glow）→ No Ads カード → 注意書き → 一番下にサインイン欄、の順に組み替え。id と data-product は不変。style.css に `.shop-card` 一式（全スキンで夜の配色）。monetization.js は所持数の文言（You hold N Crystals / No Crystals yet）、No Ads 購入済みで「Owned」、ログインが必要なときサインイン欄へスクロール、の3点だけ。購入・広告は無効のまま、本番は storeEnabled:false で非表示のまま。
