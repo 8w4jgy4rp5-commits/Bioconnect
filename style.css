@@ -2322,3 +2322,5 @@ body.is-celebrating { overflow: hidden; }
 .start-wallet-plus { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #a8c66c; color: #10150e; font: 700 20px/1 Georgia, serif; box-shadow: 0 2px 0 #6f8a3e; }
 .start-wallet:active .start-wallet-plus { transform: translateY(2px); box-shadow: 0 0 0 #6f8a3e; }
 .start-wallet:focus-visible { outline: 2px solid #a8c66c; outline-offset: 3px; }
+/* the full moon behind the title's mountain; only the night skin shows it */
+.start-moon { display: none; }

@@ -225,9 +225,19 @@
 .skin-eldritch .start-screen { background: linear-gradient(#141b22, #1b2418 70%); }
 .skin-eldritch .start-sun { background: radial-gradient(circle at 40% 40%, #f4efd8 0 40%, #cfc7a2 70%); box-shadow: 0 0 30px 8px rgba(241, 234, 208, .18); }
 .skin-eldritch .start-cloud, .skin-eldritch .start-cloud::before, .skin-eldritch .start-cloud::after { background: #2a3329; box-shadow: none; }
-.skin-eldritch .start-mountain { fill: #24301d; }
-.skin-eldritch .start-knolls { fill: #1a2414; stroke: rgba(168, 198, 108, .25); }
-.skin-eldritch .start-critter { filter: saturate(.6) sepia(.28) brightness(.85) drop-shadow(0 4px 0 rgba(0, 0, 0, .35)); }
+/* Silhouettes on a full moon (concept 2 in concepts/title-art-v1): the game's
+   own animal art, cut in black, so it reads as one picture instead of pasted
+   stickers. The big moon sits behind the mountain; the small one goes. */
+.skin-eldritch .start-sun { display: none; }
+.skin-eldritch .start-moon { display: block; position: absolute; left: 50%; bottom: 38%; width: 62cqh; height: 62cqh; max-width: 250px; max-height: 250px; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle, #f4efd8 0 52%, #d9d2b0 63%, rgba(241, 234, 208, .18) 66%, transparent 74%); opacity: .9; }
+.skin-eldritch .start-moon::after { content: ""; position: absolute; inset: 18% 26% 50% 40%; border-radius: 50%; background: rgba(170, 160, 120, .18); box-shadow: -40px 50px 0 -6px rgba(170, 160, 120, .14); }
+.skin-eldritch .start-mountain { fill: #0f140c; }
+.skin-eldritch .start-knolls { fill: #0a0e08; stroke: rgba(241, 234, 208, .22); }
+.skin-eldritch .start-critter { filter: brightness(0) drop-shadow(1.5px -1px 0 rgba(241, 234, 208, .55)) drop-shadow(0 0 8px rgba(241, 234, 208, .12)); }
+.skin-eldritch .start-critter--zebra, .skin-eldritch .start-critter--elephant { filter: brightness(0) drop-shadow(0 0 1px rgba(241, 234, 208, .5)); }
+/* a phone on its side hides the herd (pop.css), so the small moon comes back */
+@media (max-height: 480px) { .skin-eldritch .start-moon { display: none; } .skin-eldritch .start-sun { display: block; } }
 .skin-eldritch .start-kicker { color: var(--el-mute); text-shadow: none; font-family: var(--el-type); font-weight: 400; }
 .skin-eldritch .start-best { background: rgba(0, 0, 0, .35); color: var(--el-mute); }
 .skin-eldritch .start-best span { color: var(--el-ink); }
