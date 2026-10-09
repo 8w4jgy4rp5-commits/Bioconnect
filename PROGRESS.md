@@ -1,5 +1,34 @@
 # Bioconnect 進捗
 
+## 2026-10-09 — 本人依頼のcommit・push
+
+本人が今回変更のcommit・pushを明示依頼。対象はindex.htmlのCrystal返金注意書きとdocs/monetization.md・PROGRESS.md・DEVELOPMENT.mdの公開用記録4件。private-notes/、本人gateway、output証跡はGit対象外を維持。直前検証はrules258件、stamp/diff、Chrome320px両スキン、独立レビュー成功。公開版の購入・広告OFFと本番ボタン非表示を維持する。実行結果・SHA・配信確認は非公開接続記録へ追記する。
+
+## 2026-10-09 — Crystal購入の返金方針を購入前に表示
+
+- 本人決定: 購入したCrystalsは返金を受け付けない。index.htmlのCrystal商品ボタン直前に「Crystal purchases are non-refundable, except where required by applicable law.」を追加し、法令により必要な場合の例外を明示。No Adsへ適用範囲を広げない。
+- Chromeの320px/eldritch・popで文言、商品ボタン前の配置、横はみ出しなし、JS例外0を確認。外部通信を遮断したguest模擬のみ、購入・Claim・消費なし。stamp/diff確認成功。画像はoutput/playwright/refund-notice/。自己検証後の独立read-onlyレビューに修正必須の指摘なし。
+- 返金不可表示でもカード異議申立てや法令上の対応が消えるわけではない。返金/チャージバック通知後の資産処理は未実装で、本番販売前の残件。購入広告OFF・本番ボタン非表示・価格・バランス維持、commit/pushなし。
+
+## 2026-10-09 — No Ads復活表示とpopの残確認を完了
+
+- 本人方針: スマホの日常動作は普段の試遊で確認し、AI側は先に詰められる残件を進める。
+- 最新復活UIについてeldritch/pop × 375x812/320x568 × guest/No Ads日次あり/日次使用済み残高あり/残高0の16条件を隔離Chromeで確認。ボタン選択・所有者用ロック表示抑止・横はみ出しなし・JS例外0。小画面のguest/日次あり4条件で、カード内スクロールによりスコアと最後の操作ボタンへ到達可能なことを追加確認。375の標準スキンはカード内スクロール不要、320やpopにはスクロールあり。
+- walletは表示fixture、外部通信遮断、購入/Claim/消費要求は拒否。本人アカウントや実TEST資産は使っていない。画像は最小画面の両スキンを目視確認。ゲーム実装の変更なし、独立レビューの追加対象なし。
+- 証跡はoutput/playwright/revival-display/。本番の一時非表示、購入広告OFF、価格・バランスを維持。残件をprivate-notes/docs/monetization-next-steps-2026-10-09.mdへ整理。返金/チャージバック時の取消処理は方針決定前なので未実装を維持。commit/pushなし。
+
+## 2026-10-09 — 非公開TESTの別端末ログイン確認完了
+
+- 承認済みのTEST認証戻り先追加2件は、本人が各管理画面で保存完了と報告。続いて別端末のGoogleログインからゲーム復帰、既存アカウント内容と再読込後の維持を本人が確認。AIの実機観測ではなく本人報告として扱う。
+- 模擬検証・実TEST配信確認・独立レビューは直前記録を継承。詳細な接続値・本人資産・端末報告はprivate-notes/docs/sandbox.mdとmobile-test-entry.mdへ記録。本番ボタン非表示と購入・広告OFFを維持し、今回commit・pushなし。
+
+## 2026-10-09 — 非公開TESTのログイン入口を維持
+
+- 本人補足: 本番課金未実装の間、ボタンだけ表示する違和感を避けるため、別AIへ一時非表示を依頼した意図的な仕様。本番の不具合ではない。この設定が非loopbackのTEST入口にも効くため、非公開gatewayの配信設定だけでログイン用UIを表示するよう修正。本番設定・価格・バランスは変更なし。
+- Chrome／Windows WebKitの隔離モバイル模擬検証は各12群成功。独立レビューに重大な未解決指摘なし。実認証の成功やiPhone実機確認とは区別する。
+- TEST側の既存gatewayだけを差し替え、HTTP配信と購入・広告OFFを確認。外部認証設定は未保存、実機での再ログイン後確認は未実施。詳細はGit対象外のprivate-notes/docs/sandbox.mdとmobile-test-entry.md。
+- この作業でcommit・pushは行っていない。既存のゲーム・概念案・本人資産への操作なし。
+
 ## 2026-10-09 — 本番ではショップと復活ボタンを隠す
 - 本番Supabaseに課金の仕組みがまだ無く、購入・広告もオフなので、公開サイトでは押しても使えないボタンになっていた。
 - shared/monetization-config.js に storeEnabled: false を追加。false のあいだ公開サイトでは「Crystals & No Ads」（タイトル・メニュー）と復活ボタンをすべて隠す。localhost では常に表示（テスト・sandbox用）。課金開始時に true にする。

@@ -1,5 +1,15 @@
 # 収益化の設計・接続手順（2026-10-05）
 
+## 2026-10-09 — Crystal購入の返金表示
+
+購入したCrystalsの通常返金を受け付けない本人方針に基づき、ショップのCrystal商品ボタン前に次を表示する。
+
+> Crystal purchases are non-refundable, except where required by applicable law.
+
+法令上の対応やカード会社の異議申立てを無効化する意味ではない。No Adsの返金方針と返金/チャージバック後の資産調整は別の未決定項目。購入前表示と、販売開始前に整える最終確認表示を区別する。今回はフロント文言のみで、Stripe設定・権利・残高・購入有効化の変更なし。
+
+確認資料: [消費者庁・通信販売広告Q&A（Q3/Q12–14）](https://www.no-trouble.caa.go.jp/qa/advertising.html-2)、[Stripe・異議申立ての仕組み](https://docs.stripe.com/disputes/how-disputes-work)。販売国・顧客地域ごとの最終法務確認に代わるものではない。
+
 ## WebKit互換検証（2026-10-08）
 
 `node node_modules/playwright/cli.js install webkit` で固定済みPlaywright版に対応する検証ブラウザーを追加し、`npm run test:webkit` で収益化35＋Auth23＋広告adapter12のfixtures70項目を実行する。`npm run test:webkit:ads:official` は実Google TEST SDKの完了・途中終了・next3ケース（375×812 mobile emulation、guest、実広告はCSP拒否）。Windows WebKit26.5で両コマンド成功、Chrome35項目も再確認。
