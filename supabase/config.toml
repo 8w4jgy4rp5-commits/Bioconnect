@@ -1,0 +1,6 @@
+[functions.checkout]
+verify_jwt = false
+# checkout verifies the JWT with auth.getUser; publishable keys are not legacy JWTs.
+[functions.stripe-webhook]
+verify_jwt = false
+# The webhook verifies the raw Stripe signature instead of a Supabase JWT.

@@ -2187,3 +2187,54 @@ body.is-celebrating { overflow: hidden; }
 .ladder-step.is-current { background: rgba(125, 170, 87, .18); border-color: #7daa57; }
 .ladder-step.is-next { border-style: dashed; border-color: #b69b50; }
 @media (max-width: 360px) { .ladder-label { display: none; } .ladder-strip { padding: 3px 5px; } }
+/* Account/store and the game-over choices share the meadow palette. */
+.economy-modal { position:fixed; inset:0; z-index:1000; background:#15241bcc; display:flex; align-items:center; justify-content:center; padding:12px; }
+.economy-modal[hidden], #reviveResume[hidden] { display:none; }
+.economy-card { background:#fff8e8; color:#243c2e; border:3px solid #668666; border-radius:22px; padding:20px; width:min(100%,480px); max-height:calc(100dvh - 24px); overflow:auto; box-shadow:0 16px 60px #0006; }
+.economy-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.economy-head h2 { margin:0; font-size:22px; }
+.economy-card p { font-size:14px; line-height:1.5; }
+.economy-card label { display:block; margin:12px 0 6px; font-size:14px; }
+.economy-card input { box-sizing:border-box; display:block; width:100%; padding:10px; min-height:44px; font:inherit; border:1px solid #668666; border-radius:8px; }
+.economy-actions, .crystal-products, .revive-options { display:grid; grid-template-columns:1fr; gap:8px; margin:12px 0; }
+.crystal-products { grid-template-columns:1fr 1fr; }
+.economy-card .btn, .revive-options .btn { min-height:44px; white-space:normal; }
+.economy-card .btn { max-width:100%; }
+.economy-status { min-height:1.5em; font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
+.no-ads-product { padding:12px; border-radius:12px; background:#e8efd8; }
+.no-ads-product h3 { margin:0; font-size:17px; }
+.gameover-card { max-height:95%; overflow:auto; }
+.gameover-card .go-note { margin:8px 0; }
+.record-list { margin-top:16px; font-size:13px; }
+#scoreValue, #bestValue, #goScore, #startBest { white-space:nowrap; }
+#reviveResume { position:fixed; z-index:80; bottom:max(12px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(280px,calc(100% - 24px)); min-height:44px; box-shadow:0 4px 20px #0008; }
+@media(max-width:360px) { .pop-top .scorebar { flex-wrap:wrap; gap:2px 8px; } #scoreValue { font-size:24px; } }
+@media(max-width:360px) { .economy-card { padding:14px; } .economy-head h2 { font-size:19px; } .revive-options { gap:5px; margin:6px 0; } .gameover-card .btn { min-height:38px; padding:8px; } }
+
+/* ---------- revive: one button at a time, the daily dawn chained without No Ads ---------- */
+.go-candles, .go-rule, .revive-options [hidden] { display: none !important; }
+.skin-eldritch .go-candles:not([hidden]) { display: flex !important; }
+.skin-eldritch .go-rule:not([hidden]) { display: flex !important; }
+.revive-btn { position: relative; display: flex; align-items: center; gap: 12px; text-align: left; padding: 11px 14px; }
+.revive-words { min-width: 0; }
+.revive-words strong { display: block; font-weight: 700; }
+.revive-words em { display: block; font-style: normal; font-size: 11px; opacity: .75; }
+.revive-words em:empty { display: none; }
+.revive-ico { width: 24px; height: 24px; flex: none; }
+.revive-ico--sun { border-radius: 50%; background: radial-gradient(circle, #f1c66a 0 30%, transparent 31%), repeating-conic-gradient(#f1c66a 0 9deg, transparent 9deg 45deg);
+  -webkit-mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); }
+.revive-ico--gem { background: #c9e88a; clip-path: polygon(50% 0, 92% 38%, 50% 100%, 8% 38%); }
+.revive-ico--eye { height: 14px; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #10150e 0 24%, #d8cc86 25% 36%, #f1ead0 37%); box-shadow: 0 0 0 1.5px #0b0e09; }
+.revive-btn--locked > .revive-ico, .revive-btn--locked > .revive-words { opacity: .38; filter: grayscale(.7); }
+/* two iron chains crossed over the whole button, a padlock where they meet */
+.revive-chains { position: absolute; inset: 0; pointer-events: none; }
+.revive-chains::before, .revive-chains::after { content: ""; position: absolute; left: -4%; width: 108%; top: 50%; height: 7px; margin-top: -3.5px;
+  background: radial-gradient(4.6px 2.8px at 50% 50%, transparent 45%, #8a8676 55% 85%, transparent 95%) 0 0 / 8px 7px repeat-x;
+  filter: drop-shadow(0 1px 0 #0b0e09) drop-shadow(0 -1px 0 #0b0e09); transform: rotate(9deg); }
+.revive-chains::after { transform: rotate(-9deg); }
+.revive-lock { position: absolute; left: 50%; top: 50%; width: 18px; height: 20px; transform: translate(-50%, -45%); }
+.revive-btn--locked:not(:disabled):hover .revive-chains { animation: revive-rattle .4s ease-in-out; }
+@keyframes revive-rattle { 25% { transform: translateX(-2px) rotate(-.6deg); } 75% { transform: translateX(2px) rotate(.6deg); } }
+.revive-hush { margin: -3px 0 2px; font-size: 11px; text-align: center; color: var(--ink-soft); }
+.gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
+@media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }

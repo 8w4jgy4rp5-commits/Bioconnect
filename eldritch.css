@@ -246,3 +246,44 @@
 .skin-eldritch .ladder-strip { background: rgba(0, 0, 0, .25); border-color: rgba(236, 228, 200, .12); }
 .skin-eldritch .ladder-label, .skin-eldritch .ladder-step + .ladder-step::before { color: var(--el-mute); }
 .skin-eldritch .ladder-step.is-current { background: rgba(168, 198, 108, .15); border-color: var(--el-moss); }
+
+/* ---------- revive: a candle stand over a page of the old book ---------- */
+.skin-eldritch .gameover-card { background: radial-gradient(70% 26% at 50% 0%, rgba(241, 198, 106, .16), transparent 70%), linear-gradient(180deg, #2c2819, #1d1a11);
+  box-shadow: 0 0 0 1px #5b5236, inset 0 0 0 6px #1d1a11, inset 0 0 0 7px rgba(91, 82, 54, .7), 0 18px 40px rgba(0, 0, 0, .5); }
+.skin-eldritch .go-candles { display: flex; flex-direction: column; align-items: center; margin: 4px 0 0; zoom: .62; }
+.skin-eldritch .go-candle-tops { display: flex; align-items: flex-end; gap: 26px; }
+.skin-eldritch .go-candle-tops i { position: relative; width: 9px; height: 22px; border-radius: 2px; background: linear-gradient(#e9dfc0, #a89f80); }
+.skin-eldritch .go-candle-tops i:nth-child(2) { height: 34px; }
+.skin-eldritch .go-candle-tops i::before { content: ""; position: absolute; left: 50%; top: -12px; width: 8px; height: 12px; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(circle at 50% 70%, #fff3c2, #f1c66a 45%, transparent 70%); animation: el-flame 1.7s ease-in-out infinite; }
+.skin-eldritch .go-candle-tops i:nth-child(2)::before { animation-delay: -.5s; }
+.skin-eldritch .go-candle-tops i:nth-child(3)::before { animation-delay: -1.1s; }
+.skin-eldritch .go-candle-tops i::after { content: ""; position: absolute; left: 50%; top: -30px; width: 60px; height: 60px; transform: translateX(-50%); background: radial-gradient(rgba(241, 198, 106, .2), transparent 65%); pointer-events: none; }
+@keyframes el-flame { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(.85, 1.12); } }
+.skin-eldritch .go-candle-arm { width: 80px; height: 14px; border: 3px solid #8a7a4e; border-top: 0; border-radius: 0 0 40px 40px; }
+.skin-eldritch .go-candle-stem { width: 4px; height: 10px; background: #8a7a4e; }
+.skin-eldritch .go-candle-base { width: 28px; height: 5px; border-radius: 4px; background: #8a7a4e; }
+.skin-eldritch .go-rule { display: flex; align-items: center; gap: 8px; color: #5b5236; margin: 2px 0 0; }
+.skin-eldritch .go-rule::before, .skin-eldritch .go-rule::after { content: ""; flex: 1; height: 1px; background: currentColor; }
+.skin-eldritch .go-rule i { width: 7px; height: 7px; background: currentColor; transform: rotate(45deg); }
+.skin-eldritch .revive-btn { border-radius: 6px; background: #383220; color: var(--el-ink); transition: box-shadow .3s; }
+.skin-eldritch .revive-btn strong { font-family: var(--el-caps); font-weight: 400; font-size: 19px; }
+.skin-eldritch .revive-btn em { font-family: var(--el-type); }
+.skin-eldritch .revive-btn--dawn { box-shadow: 0 0 0 1.5px rgba(241, 198, 106, .6), 0 0 28px rgba(241, 198, 106, .22); }
+.skin-eldritch .revive-btn--crystal { box-shadow: 0 0 0 1.5px rgba(168, 198, 108, .65), 0 0 28px rgba(168, 198, 108, .2); }
+.skin-eldritch .revive-btn--locked { background: #1a2015; box-shadow: 0 0 0 1.5px rgba(125, 122, 108, .5); }
+.skin-eldritch .revive-hush { font-family: var(--el-type); color: var(--el-mute); }
+.skin-eldritch .gameover-card .go-again { font-family: var(--el-serif); font-size: 15px; color: var(--el-mute); min-height: 32px; padding: 4px; }
+@media (prefers-reduced-motion: reduce) { .skin-eldritch .go-candle-tops i::before { animation: none; } }
+.skin-eldritch .gameover-card { padding: 4px 16px 8px; }
+.skin-eldritch .gameover-card h2 { font-size: 1.05rem; margin: 0 0 2px; }
+.skin-eldritch .gameover-card .go-score { font-size: 0; }
+.skin-eldritch .gameover-card .go-score { margin-bottom: 4px; }
+.skin-eldritch .gameover-card .go-score strong { font-size: 1.6rem; }
+.skin-eldritch .gameover-card .go-level { margin-bottom: 4px; }
+.skin-eldritch .gameover-card .go-note { margin: 4px 0; font-size: .8rem; }
+.skin-eldritch .revive-options { gap: 6px; margin: 6px 0 2px; }
+.skin-eldritch .revive-btn { padding: 5px 12px; min-height: 42px; }
+.skin-eldritch .revive-btn strong { font-size: 17px; }
+.skin-eldritch .gameover-card .economy-status { margin: 0; font-size: 11px; color: var(--el-mute); font-family: var(--el-type); }
+.skin-eldritch .gameover-card .economy-status:empty { display: none; }

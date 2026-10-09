@@ -329,12 +329,14 @@ window.AppSync = (function () {
     const debounceMs = typeof opts.debounce === 'number' ? opts.debounce : DEFAULT_DEBOUNCE_MS;
     const defaultValue = Object.prototype.hasOwnProperty.call(opts, 'default') ? opts.default : null;
     const migrate = typeof opts.migrate === 'function' ? opts.migrate : null;
+    const merge = typeof opts.merge === 'function' ? opts.merge : null;
     const legacyKey = typeof opts.legacyKey === 'string' ? opts.legacyKey : null;
 
     let cache = clone(defaultValue); // メモリ上の真実。get()はこれのコピーを返す
     let cacheT = 0;             // cacheに対応する更新時刻(競合比較用)
     let cacheO = null;          // cacheの所有者(owner_id)。未ログイン時はnullのまま保つ
     let currentOwner = null;    // 現在ログイン中のowner_id。未ログインならnull
+    let disposed = false;
     let loggedIn = false;       // このstoreがリモートを使ってよいか
     let subscribers = [];
     let debounceTimer = null;
@@ -361,7 +363,7 @@ window.AppSync = (function () {
     // --- リモートI/O ------------------------------------------------
     async function pullRemote() {
       const session = await getSessionSafe();
-      if (!session) return { ok: false, envelope: null, unauthorized: true };
+      if (disposed || !session || session.user.id !== currentOwner) return { ok: false, envelope: null, unauthorized: true };
 
       try {
         const { data, error } = await supabaseClient
@@ -398,7 +400,7 @@ window.AppSync = (function () {
     // 競合解決は value.t で行う。
     async function upsertRemote(envelope) {
       const session = await getSessionSafe();
-      if (!session) return { ok: false, unauthorized: true };
+      if (disposed || !session || session.user.id !== currentOwner || ownerOf(envelope) !== currentOwner) return { ok: false, unauthorized: true };
 
       try {
         const { error } = await supabaseClient.from('user_app_data').upsert(
@@ -493,6 +495,7 @@ window.AppSync = (function () {
     }
 
     async function set(value) {
+      if (disposed) return;
       // ログイン中は常に現ユーザーを所有者として書く。
       // 未ログイン時は既存の o を保つ(ログアウトしただけで持ち主の印を
       // 消してしまうと、次に別ユーザーがログインしたとき引き受けられてしまう)。
@@ -562,7 +565,7 @@ window.AppSync = (function () {
     // --- 内部: 他タブ / 復帰時の反映 ----------------------------------
     // 同一デバイスの別タブがlocalStorageを書き換えたときに呼ばれる。
     function applyExternalLocal(envelope) {
-      if (!envelope || envelope.t <= cacheT) return;
+      if (disposed || !envelope || envelope.t <= cacheT) return;
       // 別ユーザーのデータを書いた別タブがあっても取り込まない
       if (isForeign(envelope, currentOwner)) return;
       cache = envelope.d;
@@ -573,10 +576,11 @@ window.AppSync = (function () {
 
     // タブ復帰時の再取得。前回pullから30秒未満ならスキップ。
     async function refreshFromRemote(force) {
-      if (!loggedIn) return;
+      if (disposed || !loggedIn) return;
       if (!force && Date.now() - lastPullAt < REVISIT_PULL_COOLDOWN_MS) return;
 
       const res = await pullRemote();
+      if (disposed) return;
       if (!res.ok) {
         if (res.unauthorized) degradeToLocal(true);
         return;
@@ -586,7 +590,14 @@ window.AppSync = (function () {
 
       // リモートは owner_id で絞って取得しているので必ず現ユーザーのもの。
       // 移行前データで o が無い場合に備えて押し直しておく。
-      const applied = stampOwner(applyMigration(res.envelope), currentOwner);
+      let applied = stampOwner(applyMigration(res.envelope), currentOwner);
+      if (merge) {
+        const combined = merge(clone(cache), clone(applied.d));
+        if (JSON.stringify(combined) !== JSON.stringify(applied.d)) {
+          applied = makeEnvelope(combined, appVersion, Date.now(), currentOwner);
+          pending = applied; schedulePush();
+        }
+      }
       cache = applied.d;
       cacheT = applied.t;
       cacheO = ownerOf(applied);
@@ -743,6 +754,17 @@ window.AppSync = (function () {
         return;
       }
 
+      // Optional per-app merge runs only AFTER all owner checks above.
+      // Score histories and maxima must survive an initial pull, before subscribers exist.
+      if (merge) {
+        const combined = merge(clone(applyMigration(local).d), clone(applyMigration(remote).d));
+        const changed = JSON.stringify(combined) !== JSON.stringify(remote.d);
+        const merged = makeEnvelope(combined, appVersion, changed ? Date.now() : Math.max(local.t,remote.t), currentOwner);
+        cache = merged.d; cacheT = merged.t; cacheO = currentOwner;
+        try { writeLocalEnvelope(lsKey,merged); } catch (e) { /* memory remains usable */ }
+        if (changed || local.t > remote.t) { pending=merged; await pushPending(); }
+        return;
+      }
       // 両方あり → t を比較(この比較ロジックは従来どおり)
       if (local.t > remote.t) {
         const migrated = stampOwner(applyMigration(local), currentOwner);
@@ -817,7 +839,13 @@ window.AppSync = (function () {
       // 内部用(グローバルハンドラから呼ぶ)
       _applyExternalLocal: applyExternalLocal,
       _refreshFromRemote: refreshFromRemote,
-      _lsKey: lsKey
+      _lsKey: lsKey,
+      dispose: function () {
+        disposed = true; loggedIn = false; pending = null; subscribers = [];
+        clearTimeout(debounceTimer);
+        const i = registry.indexOf(store); if (i >= 0) registry.splice(i,1);
+        if (registryByLsKey[lsKey] === store) delete registryByLsKey[lsKey];
+      }
     };
 
     return { store: store, init: init };

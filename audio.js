@@ -1,7 +1,7 @@
 // Music and effects are always on; the device's silent mode is the switch.
 // Browsers hold audio until the first touch or key, so that unlocks it.
 window.BioAudio = (() => {
-  let ctx, synth, paused = true, theme = 'title';
+  let ctx, synth, paused = true, theme = 'title', adMuted = false;
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
   let playingKinds = [];
@@ -36,7 +36,7 @@ window.BioAudio = (() => {
   // countdown is quiet ('rest'), and the game plays the full band.
   // Otherwise only a hidden tab silences it.
   function sync() {
-    const active = !document.hidden && ctx && ctx.state === 'running' && theme !== 'rest';
+    const active = !adMuted && !document.hidden && ctx && ctx.state === 'running' && theme !== 'rest';
     if (active && !timer) {
       nextTime = ctx.currentTime + .04;
       schedule(); timer = setInterval(schedule, 50);
@@ -67,13 +67,18 @@ window.BioAudio = (() => {
   });
 
   return {
+    ad(on) {
+      adMuted = on;
+      if (on && synth) synth.cancel();
+      sync();
+    },
     discover(kinds) {
       const known = new Set((window.BioSound && window.BioSound.instruments || []).map(i => i.kind));
       for (const kind of Array.isArray(kinds) ? kinds : [kinds]) {
         if (known.has(kind)) discovered.add(kind);
       }
     },
-    band() { return { discovered: [...discovered], playing: playingKinds.slice(), theme }; },
+    band() { return { discovered: [...discovered], playing: playingKinds.slice(), theme, adMuted }; },
     theme(name) {
       if (theme === name) return;
       theme = name;
@@ -93,7 +98,7 @@ window.BioAudio = (() => {
       sync();
     },
     effect(kind, count = 1) {
-      if (document.hidden || !ctx || ctx.state !== 'running') return;
+      if (adMuted || document.hidden || !ctx || ctx.state !== 'running') return;
       if (paused && kind !== 'ready' && kind !== 'go' && kind !== 'gameover') return;
       // Replace the preceding move's queued pops on a rapid new placement.
       if (kind === 'place') { synth.cancel('effects'); lastEffect = ctx.currentTime; }

@@ -1,0 +1,37 @@
+{
+  "name": "bioconnect-local-tests",
+  "private": true,
+  "scripts": {
+    "test": "node rules.test.js && node test/monetization.test.cjs",
+    "test:postgres": "node test/monetization.test.cjs --postgres",
+    "test:browser": "node test/browser-check.cjs",
+    "test:server": "node test/local-server.cjs",
+    "check:edge": "node test/edge-check.cjs",
+    "sandbox": "node test/sandbox-server.cjs",
+    "test:sandbox": "node test/sandbox-auth.test.cjs && node test/sandbox-records.test.cjs && node test/sandbox-payments-mode.test.cjs && node test/sandbox-server.test.cjs && node test/sandbox-revival-ui.test.cjs",
+    "test:sandbox:remote": "node test/sandbox-probe.cjs",
+    "bundle:edge": "node supabase/sandbox/bundle-functions.cjs",
+    "test:sandbox:edge": "node test/sandbox-edge-probe.cjs",
+    "sandbox:payments": "node test/sandbox-server.cjs --payments-test",
+    "sandbox:revivals": "node test/sandbox-server.cjs --revival-test",
+    "test:sandbox:revivals": "node test/sandbox-revival-ui.test.cjs",
+    "test:browser:auth": "node test/browser-auth-check.cjs",
+    "sandbox:ads": "node test/sandbox-server.cjs --ads-test",
+    "test:sandbox:ads": "node test/sandbox-ads.test.cjs",
+    "test:sandbox:ads:official": "node test/sandbox-ads-official.cjs",
+    "test:webkit": "node test/browser-check.cjs --webkit && node test/browser-auth-check.cjs --webkit && node test/sandbox-ads.test.cjs --webkit",
+    "test:webkit:ads:official": "node test/sandbox-ads-official.cjs --webkit",
+    "sandbox:mobile:check": "node test/mobile-gateway.cjs --check",
+    "sandbox:mobile": "node test/mobile-gateway.cjs",
+    "test:sandbox:mobile": "node test/mobile-gateway.test.cjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@supabase/supabase-js": "2.57.4",
+    "embedded-postgres": "18.4.0-beta.17",
+    "pg": "8.16.3",
+    "playwright": "1.62.1",
+    "stripe": "18.5.0",
+    "typescript": "5.9.3"
+  }
+}

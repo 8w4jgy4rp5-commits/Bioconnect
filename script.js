@@ -721,6 +721,72 @@ function levelAt(shown) {
 // ---------- Data layer (AppSync) ----------
 
 let scoreStore = null;
+let recordHistory = [];
+let storeEpoch = 0;
+let recordOwner;
+function mergeScoreData(left, right) {
+  const valid = value => value && Number(value.rules) === RULES_VERSION && Number.isFinite(value.best) ? value : { best: 0, revived: false };
+  const a = valid(left), b = valid(right), rows = new Map();
+  const leftHistory = Array.isArray(left?.history) ? left.history : [];
+  const rightHistory = Array.isArray(right?.history) ? right.history : [];
+  for (const r of leftHistory.concat(rightHistory)) {
+    if (!r || !Number.isFinite(r.score) || typeof r.runId !== 'string') continue;
+    const old = rows.get(r.runId);
+    rows.set(r.runId, !old ? r : { ...(r.at >= old.at ? r : old), revived: !!(r.revived || old.revived) });
+  }
+  return { best: Math.max(0,a.best,b.best), rules: RULES_VERSION,
+    revived: a.best > b.best ? !!a.revived : b.best > a.best ? !!b.revived : !!(a.revived || b.revived),
+    history: [...rows.values()].sort((a,b) => b.at-a.at).slice(0,30) };
+}
+function recordRun() {
+  const entry = { runId: state.runId, score: state.score, rules: RULES_VERSION,
+    revived: state.revived, season: seasonLabel(), ticks: state.ticks, at: Date.now() };
+  recordHistory = [entry].concat(recordHistory.filter(r => r.runId !== entry.runId)).slice(0,30);
+  writeBest(state.best);
+}
+function readScoreMetadata() {
+  const value = scoreStore?.get();
+  state.bestRevived = !!(value && Number(value.rules) === RULES_VERSION && value.revived);
+  recordHistory = Array.isArray(value?.history) ? value.history.filter(r => r && Number.isFinite(r.score)).slice(0,30) : [];
+}
+function applyRemoteScore() {
+  const value = scoreStore?.get();
+  const b = readBest();
+  if (b > state.best) { state.best = b; state.bestRevived = !!value?.revived; }
+  else if (b === state.best) state.bestRevived = state.bestRevived || !!value?.revived;
+  const rows = new Map();
+  for (const r of recordHistory.concat(Array.isArray(value?.history) ? value.history : [])) {
+    if (!r || !Number.isFinite(r.score) || typeof r.runId !== 'string') continue;
+    const old = rows.get(r.runId);
+    rows.set(r.runId, !old ? r : { ...(r.at >= old.at ? r : old), revived: !!(r.revived || old.revived) });
+  }
+  recordHistory = [...rows.values()].sort((a,b) => b.at-a.at).slice(0,30);
+  const historyChanged = JSON.stringify(recordHistory) !== JSON.stringify(Array.isArray(value?.history) ? value.history.slice(0,30) : []);
+  if (b < state.best || historyChanged || (b === state.best && state.bestRevived && !value?.revived)) writeBest(state.best);
+  render();
+  window.BioEconomy?.draw();
+}
+async function accountChanged(owner) {
+  if (recordOwner === owner) return;
+  const version = ++storeEpoch;
+  recordOwner = owner;
+  scoreStore?.dispose?.(); metStore?.dispose?.();
+  scoreStore = null; metStore = null; recordHistory = []; met.clear(); lifetimeElephants = 0;
+  state.best = 0; state.bestRevived = false; render();
+  try {
+    const score = await openStore(SLUG, 'score', { version: 2, default: { best: 0 }, merge: mergeScoreData });
+    if (version !== storeEpoch) { score.dispose?.(); return; }
+    scoreStore = score; state.best = readBest(); readScoreMetadata(); render(); window.BioEconomy?.draw();
+    score.subscribe(() => {
+      if (version !== storeEpoch) return;
+      applyRemoteScore();
+    });
+    const introductions = await openStore(SLUG, 'met', { version: 1, default: { kinds: [] } });
+    if (version !== storeEpoch) { introductions.dispose?.(); return; }
+    metStore = introductions; readMet();
+    introductions.subscribe(() => { if (version === storeEpoch) readMet(); });
+  } catch (e) { console.error('Bioconnect: records unavailable', e); }
+}
 
 // Kinds the player has already been introduced to, on any run. The
 // welcome card is there to teach; once it has taught, a second showing
@@ -732,7 +798,7 @@ const met = new Set();
 // Fallback for when app-sync.js fails to load. localStorage only, no sync.
 async function openStore(slug, key, opts) {
   try { if (window.AppSync) return await window.AppSync.store(slug, key, opts); } catch (e) { console.error(e); }
-  const o = opts || {}, k = 'appdata:' + slug + ':' + key;
+  const o = opts || {}, k = 'appdata:' + slug + ':' + key + (recordOwner ? ':' + recordOwner : '');
   const read = function (s) { try { return JSON.parse(localStorage.getItem(s)); } catch (e) { return null; } };
   const cp = function (v) { return v == null ? v : JSON.parse(JSON.stringify(v)); };
   const env = read(k);
@@ -760,7 +826,7 @@ function readBest() {
 
 function writeBest(n) {
   if (!scoreStore) return;
-  scoreStore.set({ best: Math.floor(n), rules: RULES_VERSION })
+  scoreStore.set({ best: Math.floor(n), rules: RULES_VERSION, revived: state.bestRevived, history: recordHistory })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
@@ -1022,6 +1088,10 @@ const state = {
   refill: 0,          // ticks banked toward the next tile
   score: 0,
   best: 0,
+  bestRevived: false,
+  revived: false,
+  revivalWait: false,
+  runId: null,
   ticks: 0,           // the world's own clock. Seasons and stones read it
   over: false,
   paused: false,      // title screen, tab hidden, guide open, or the run is done
@@ -1203,6 +1273,10 @@ function pickBlock(cells, at, side) {
 let overTimer = 0;
 
 function newGame() {
+  state.runId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'simulation';
+  state.revived = false;
+  state.revivalWait = false;
+  if (el.reviveResume) el.reviveResume.hidden = true;
   if (overTimer) { clearTimeout(overTimer); overTimer = 0; hideWord(); }
   clearMovePreview();
   pointerGesture = null;
@@ -1682,6 +1756,7 @@ function scoreGrowth(events) {
 function bankScore() {
   if (state.score <= state.best) return;
   state.best = state.score;
+  state.bestRevived = state.revived;
   writeBest(state.best);
 }
 
@@ -1710,12 +1785,13 @@ function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
 function syncClock() {
   syncAnimalLife();
   if (window.BioAudio) window.BioAudio.pause(state.over || state.paused);
-  const shouldRun = !state.over && !state.paused && !state.celebrating;
+  const shouldRun = !state.over && !state.paused && !state.celebrating && !state.revivalWait && !window.BioEconomy?.isBlocking();
   if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
   else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
 }
 
 function setPaused(on) {
+  if (!on && (state.revivalWait || window.BioEconomy?.isBlocking())) on = true;
   if (state.paused === on) return;
   state.paused = on;
   syncClock();
@@ -1733,10 +1809,12 @@ function setRelaxed(on) {
 
 function endRun() {
   state.over = true;
+  recordRun();
+  window.BioEconomy?.draw();
   syncClock();
   el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
   const lv = levelAt(displayScore(state.score));
-  el.goScore.textContent = displayScore(state.score).toLocaleString();
+  el.goScore.textContent = scoreLabel(state.score, state.revived);
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
   if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
@@ -2933,9 +3011,9 @@ function render(grew, meals, deaths) {
   renderSeason();
   el.goal.textContent = nextGoal();
   const shown = displayScore(state.score);
-  el.scoreValue.textContent = shown.toLocaleString();
-  el.bestValue.textContent = displayScore(state.best).toLocaleString();
-  if (el.startBest) el.startBest.textContent = displayScore(state.best).toLocaleString();
+  el.scoreValue.textContent = scoreLabel(state.score, state.revived);
+  el.bestValue.textContent = scoreLabel(state.best, state.bestRevived);
+  if (el.startBest) el.startBest.textContent = scoreLabel(state.best, state.bestRevived);
   renderLevel(shown);
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
@@ -3638,6 +3716,56 @@ function hideWord() {
 
 // Play again and New game deal a fresh board and run the same
 // Ready?? / Go!! beat as the title screen, with the clock held still.
+function scoreLabel(raw, revived) { return displayScore(raw).toLocaleString() + (revived ? ' 💎' : ''); }
+function reviveRun() {
+  if (!state.over || state.revived) return false;
+  if (overTimer) { clearTimeout(overTimer); overTimer = 0; hideWord(); }
+  clearMovePreview(); clearFx();
+  // Keep large-animal anchors AND their occupied footprint cells (elephant).
+  const keep = new Set();
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (c && ANIMALS[c.kind] && rank(c.kind) >= rank('deer')) {
+      c.clock = 0;
+      for (const j of footprint(state.cells, i)) keep.add(j);
+    }
+  }
+  for (let i = 0; i < CELLS; i++) if (!keep.has(i)) state.cells[i] = null;
+  state.revived = true; state.over = false; state.paused = true; state.revivalWait = true;
+  if (state.score === state.best) { state.bestRevived = true; writeBest(state.best); }
+  recordRun();
+  el.gameover.hidden = true;
+  if (el.reviveResume) { el.reviveResume.hidden = false; el.reviveResume.focus(); }
+  render(); syncClock();
+  setTicker('Revived · press Resume when you are ready.');
+  return true;
+}
+function snapshotRun() {
+  const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','runId'];
+  return { ...Object.fromEntries(keys.map(k => [k, JSON.parse(JSON.stringify(state[k]))])), startScreenVisible: !el.startScreen.hidden };
+}
+function restoreRun(data) {
+  if (!data || !Array.isArray(data.cells) || data.cells.length !== CELLS || !Array.isArray(data.stock)
+    || !Number.isFinite(data.score) || !Number.isFinite(data.ticks) || typeof data.runId !== 'string') return;
+  for (const k of Object.keys(snapshotRun())) if (k !== 'startScreenVisible' && k in data) state[k] = JSON.parse(JSON.stringify(data[k]));
+  const atTitle = data.startScreenVisible === true && !state.over;
+  state.paused = true; state.revivalWait = !state.over && !atTitle;
+  el.startScreen.hidden = !atTitle; document.body.classList.toggle('is-modal', atTitle);
+  el.gameover.hidden = !state.over;
+  el.goScore.textContent = scoreLabel(state.score, state.revived);
+  el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
+  el.goNote.textContent = endNote();
+  if (el.reviveResume) el.reviveResume.hidden = state.over || atTitle;
+  if (window.BioAudio?.discover) window.BioAudio.discover(Object.keys(state.seen));
+  render(); syncClock();
+}
+function resumeRevival() {
+  if (!state.revivalWait || window.BioEconomy?.isBlocking()) return;
+  state.revivalWait = false; el.reviveResume.hidden = true; startRun();
+}
+function resumeIfAllowed() {
+  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || counting || state.revivalWait);
+}
 function replay() {
   setPaused(true);
   newGame();
@@ -3674,7 +3802,7 @@ function onNewGame() {
     return;
   }
   disarmNew();
-  replay();
+  if (window.BioEconomy) window.BioEconomy.newGame(); else replay();
 }
 
 function disarmNew() {
@@ -3689,7 +3817,7 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
@@ -3809,7 +3937,7 @@ async function init() {
   el.newBtn.addEventListener('click', onNewGame);
   // a new game that actually started takes the menu down with it
   if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
-  el.goAgain.addEventListener('click', function () { disarmNew(); replay(); });
+  el.goAgain.addEventListener('click', function () { disarmNew(); if (window.BioEconomy) window.BioEconomy.newGame(); else replay(); });
 
   // the little reference row under the board
   for (const node of document.querySelectorAll('.tile--mini')) {
@@ -3827,27 +3955,15 @@ async function init() {
   el.startBtn.addEventListener('click', playIntro);
   el.startBtn.focus();
 
-  try {
-    scoreStore = await openStore(SLUG, 'score', { version: 1, default: { best: 0 } });
-    state.best = readBest();
-    render();
-    if (scoreStore.subscribe) {
-      scoreStore.subscribe(function () {
-        const b = readBest();
-        if (b > state.best) { state.best = b; render(); }
-      });
-    }
-  } catch (e) {
-    console.error('Ecosystem Puzzle: store unavailable', e);
-  }
+  window.BioGame = {
+    summary: () => ({ over: state.over, revived: state.revived, runId: state.runId, revivalWait: state.revivalWait }),
+    records: () => recordHistory.map(r => ({ label: scoreLabel(r.score, r.revived) + ' · ' + r.season + ' · Rules ' + r.rules })),
+    snapshot: snapshotRun, restore: restoreRun, revive: reviveRun, replay,
+    pause: () => setPaused(true), resumeIfAllowed, resumeRevival, accountChanged
+  };
+  if (window.BioEconomy) await window.BioEconomy.init();
+  else await accountChanged(null);
 
-  try {
-    metStore = await openStore(SLUG, 'met', { version: 1, default: { kinds: [] } });
-    readMet();
-    if (metStore.subscribe) metStore.subscribe(readMet);
-  } catch (e) {
-    console.error('Ecosystem Puzzle: met store unavailable', e);
-  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

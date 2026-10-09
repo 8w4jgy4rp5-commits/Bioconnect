@@ -1,0 +1,238 @@
+<title>Bioconnect ショップ案</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&family=Zen+Maru+Gothic:wght@400;700&display=swap">
+<style>
+/* Layout: the game's Cozy Eldritch world, single dark theme on purpose.
+   One state switch on top drives four revive-screen styles side by side. */
+:root{
+  color-scheme:dark;
+  --ink:#ece4c8; --mute:#a39c7c; --moss:#a8c66c; --moss-d:#6f8a3e; --deep:#10150e;
+  --cell:#1f2918; --cell-up:#2b3822; --plum:#6b4a72; --plum2:#8d6896;
+  --gem:#c9e88a; --sun:#f1c66a; --iron:#7d7a6c; --parch:#2a2619; --parch-line:#5b5236;
+  --serif:"IM Fell English",Georgia,serif; --caps:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --type:"Special Elite","Courier New",monospace; --jp:"Zen Maru Gothic","Hiragino Sans",system-ui,sans-serif;
+}
+body{background:radial-gradient(70% 30% at 50% 0%,rgba(141,104,150,.18),transparent 70%),linear-gradient(#1b2418,var(--deep));background-color:var(--deep);color:var(--ink);font-family:var(--jp);padding:32px 16px 56px;line-height:1.6}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+header h1{font-family:var(--caps);font-weight:400;font-size:clamp(28px,4vw,40px);margin:0;letter-spacing:.03em;text-wrap:balance}
+header h1 span{color:var(--moss)}
+header p{margin:6px 0 0;color:var(--mute);max-width:66ch;font-size:14.5px}
+
+.switch{display:flex;flex-wrap:wrap;gap:6px;align-items:center;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;padding:10px 0;background:linear-gradient(var(--deep) 70%,transparent)}
+.switch span{font-size:13px;color:var(--mute);margin-right:4px}
+.switch button{font:14px var(--jp);color:var(--mute);background:var(--cell);border:0;border-radius:999px;padding:6px 14px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(236,228,200,.14)}
+.switch button[aria-pressed="true"]{background:var(--moss);color:var(--deep);box-shadow:none;font-weight:700}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,265px),1fr));gap:24px}
+.opt{display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{font-family:var(--type);font-size:12px;letter-spacing:.1em;color:var(--moss)}
+.opt h2{font-size:19px;margin:-6px 0 0;font-weight:700}
+.note{font-size:13.5px;color:var(--mute);margin:0}
+.note b{color:var(--ink)}
+button:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+
+/* state logic: free = dawn label; used / locked = crystal label; locked shows the chain */
+.lbl-crystal{display:none!important}
+.grid[data-state="used"] .lbl-free,.grid[data-state="locked"] .lbl-free{display:none!important}
+.grid[data-state="used"] .lbl-crystal,.grid[data-state="locked"] .lbl-crystal{display:flex!important}
+.grid[data-state="locked"] .locked{display:flex!important}
+
+/* shared pieces inside every screen */
+.screen{position:relative;border-radius:22px;padding:22px 18px 14px;min-height:430px;display:flex;flex-direction:column;align-items:stretch;gap:12px;font-family:var(--serif);overflow:hidden}
+.score{font-family:var(--type);font-size:11px;color:var(--mute);text-align:center;letter-spacing:.08em}
+.score b{font-family:var(--caps);font-weight:400;font-size:26px;color:var(--ink);display:block;letter-spacing:.04em;line-height:1.1}
+.title{margin:0;text-align:center;font-family:var(--caps);font-weight:400;font-size:23px;letter-spacing:.03em;text-wrap:balance}
+.omen{margin:-6px 0 0;text-align:center;font-style:italic;font-size:15px;line-height:1.3;color:var(--ink)}
+.aside{display:block;font-family:var(--type);font-style:normal;font-size:11px;color:var(--mute);margin-top:3px}
+.ico{width:26px;height:26px;flex:none}
+.big{border:0;cursor:pointer;color:inherit;font:inherit;text-align:left}
+.big .lbl-free,.big .lbl-crystal{align-items:center;gap:12px}
+.big strong{display:block;font-weight:400}
+.big em{display:block;font-style:normal;font-family:var(--type);font-size:11px;opacity:.75}
+.locked{align-items:center;gap:10px;background:none;border:0;cursor:pointer;color:var(--mute);font:inherit;text-align:left;padding:4px 6px;border-radius:10px}
+.locked:hover{color:var(--ink)}
+.locked .chain{width:34px;height:34px;flex:none;animation:jangle 3.5s ease-in-out infinite;transform-origin:50% 20%}
+@keyframes jangle{0%,86%,100%{transform:rotate(0)}90%{transform:rotate(-6deg)}94%{transform:rotate(5deg)}}
+.locked span{font-size:14px;line-height:1.25}
+.locked small{display:block;font-family:var(--type);font-size:10.5px}
+.end{margin-top:auto;background:none;border:0;color:var(--mute);font:italic 15px var(--serif);padding:8px;cursor:pointer;border-radius:10px}
+.end:hover{color:var(--ink)}
+
+/* chained dawn: the whole button, wrapped in two iron chains and a padlock */
+.slots{display:flex;flex-direction:column;gap:10px}
+.chained,.unlock{display:none!important}
+.grid[data-state="locked"] .chained{display:block!important}
+.grid[data-state="locked"] .unlock{display:block!important}
+.chained{position:relative;overflow:visible!important}
+.chained .lbl-dawn{display:flex;align-items:center;gap:12px;opacity:.38;filter:grayscale(.7)}
+.chains{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);pointer-events:none;overflow:visible}
+.chained:hover .chains{animation:rattle .4s ease-in-out}
+@keyframes rattle{25%{transform:translateX(-2px) rotate(-.6deg)}75%{transform:translateX(2px) rotate(.6deg)}}
+.chains .link{fill:none;stroke:var(--iron);stroke-width:2.6}
+.chains .link-s{fill:none;stroke:#0b0e09;stroke-width:4.6;opacity:.7}
+.unlock{margin:-4px 0 0;text-align:center;font-family:var(--type);font-size:11px;color:var(--mute)}
+@media (prefers-reduced-motion:reduce){.chained:hover .chains{animation:none}}
+
+/* candle altar, long-button versions */
+.alt{background:radial-gradient(60% 40% at 50% 62%,rgba(241,198,106,.13),transparent 70%),radial-gradient(circle at 50% 30%,#232e1c,#121810);box-shadow:0 0 0 1px rgba(236,228,200,.16),0 16px 40px rgba(0,0,0,.5)}
+.candle{width:10px;height:34px;background:linear-gradient(#e9dfc0,#a89f80);border-radius:2px;position:relative;flex:none;display:block}
+.candle.s{height:24px}.candle.t{height:44px}
+.candle::before{content:"";position:absolute;left:50%;top:-13px;width:9px;height:13px;transform:translateX(-50%);background:radial-gradient(circle at 50% 70%,#fff3c2,var(--sun) 45%,transparent 70%);border-radius:50%;animation:flick 1.7s ease-in-out infinite;animation-delay:var(--d,0s)}
+.candle::after{content:"";position:absolute;left:50%;top:-34px;width:70px;height:70px;transform:translateX(-50%);background:radial-gradient(rgba(241,198,106,.2),transparent 65%);pointer-events:none}
+@keyframes flick{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(.85,1.12)}}
+.alt .big,.c3 .big{position:relative;border-radius:14px;padding:13px 16px;background:radial-gradient(circle at 50% 30%,#3a4628,#1f2918 80%);box-shadow:0 0 0 1.5px rgba(241,198,106,.6),0 0 28px rgba(241,198,106,.22);transition:box-shadow .3s}
+.alt .big:hover,.c3 .big:hover{box-shadow:0 0 0 2px var(--sun),0 0 36px rgba(241,198,106,.32)}
+.alt .big strong,.c3 .big strong{font-family:var(--caps);font-size:19px}
+.grid[data-state="used"] .big:not(.chained),.grid[data-state="locked"] .big:not(.chained){box-shadow:0 0 0 1.5px rgba(168,198,108,.65),0 0 28px rgba(168,198,108,.2)}
+.big.chained{box-shadow:0 0 0 1.5px rgba(125,122,108,.5)!important;background:#1a2015!important}
+
+/* C1 candles on both sides */
+.c1 .row{display:flex;align-items:center;gap:12px}
+.c1 .row .slots{flex:1;min-width:0}
+
+/* C2 candles standing on the slab, wax running down */
+.c2 .slots{margin-top:28px}
+.c2 .big:not(.chained){background:linear-gradient(#3b4430,#232b1c);border-radius:8px 8px 14px 14px}
+.c2 .perch{position:absolute;left:0;right:0;top:-34px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 18px;pointer-events:none;height:34px}
+.c2 .perch>span{position:relative}
+.c2 .drip{position:absolute;top:34px;left:2px;height:0;pointer-events:none}
+.c2 .drip i{position:absolute;top:0;width:6px;border-radius:0 0 4px 4px;background:#d8cfb0;display:block}
+.c2 .drip i:nth-child(1){left:-8px;height:12px}.c2 .drip i:nth-child(2){left:0;height:20px}.c2 .drip i:nth-child(3){left:8px;height:8px}
+.c2 .perch>span:last-child .drip{top:34px}
+.c2 .wax{position:absolute;left:0;right:0;top:0;height:5px;background:#d8cfb0;border-radius:8px 8px 3px 3px;opacity:.85}
+.grid[data-state="locked"] .c2 .slots{margin-top:0}
+.grid[data-state="locked"] .c2 .big:not(.chained){margin-top:30px}
+
+/* C3 candelabra over a book page */
+.c3{background:radial-gradient(55% 30% at 50% 10%,rgba(241,198,106,.16),transparent 70%),linear-gradient(180deg,#2c2819,#1d1a11);box-shadow:0 0 0 1px var(--parch-line),inset 0 0 0 6px #1d1a11,inset 0 0 0 7px rgba(91,82,54,.7),0 16px 40px rgba(0,0,0,.5)}
+.c3 .stand{display:flex;flex-direction:column;align-items:center;margin-top:14px}
+.c3 .stand .tops{display:flex;align-items:flex-end;gap:30px}
+.c3 .stand .arm{width:90px;height:16px;border:3px solid #8a7a4e;border-top:0;border-radius:0 0 40px 40px}
+.c3 .stand .stem{width:4px;height:12px;background:#8a7a4e}
+.c3 .stand .base{width:30px;height:5px;border-radius:4px;background:#8a7a4e}
+.c3 .rule{display:flex;align-items:center;gap:8px;color:var(--parch-line)}
+.c3 .rule::before,.c3 .rule::after{content:"";flex:1;height:1px;background:currentColor}
+.c3 .rule i{width:7px;height:7px;background:currentColor;transform:rotate(45deg)}
+.c3 .big:not(.chained){border-radius:6px;background:#383220}
+@media (prefers-reduced-motion:reduce){.candle::before{animation:none}}
+.foot2{border:1px solid rgba(236,228,200,.16);border-radius:18px;padding:16px 18px;background:rgba(0,0,0,.2)}
+.foot2 h2{font-size:17px;margin:0 0 6px}
+.foot2 ul{margin:0;padding-left:1.2em;color:var(--mute);font-size:14px;display:flex;flex-direction:column;gap:4px}
+.foot2 b{color:var(--ink)}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="sun" viewBox="0 0 26 26"><circle cx="13" cy="13" r="5.5" fill="var(--sun)"/><g stroke="var(--sun)" stroke-width="2" stroke-linecap="round"><path d="M13 2.5v3M13 20.5v3M2.5 13h3M20.5 13h3M5.6 5.6l2 2M18.4 18.4l2 2M5.6 20.4l2-2M18.4 7.6l2-2"/></g></symbol>
+  <symbol id="gem" viewBox="0 0 26 26"><path d="M13 2l9 9-9 13-9-13z" fill="var(--gem)"/><path d="M4 11h18M13 2l-4 9 4 13 4-13z" fill="none" stroke="#6f8a3e" stroke-width="1"/></symbol>
+  <symbol id="chained" viewBox="0 0 40 40">
+    <g opacity=".55"><circle cx="20" cy="20" r="7" fill="var(--sun)"/><g stroke="var(--sun)" stroke-width="2.4" stroke-linecap="round"><path d="M20 5v4M20 31v4M5 20h4M31 20h4M9.4 9.4l2.8 2.8M27.8 27.8l2.8 2.8M9.4 30.6l2.8-2.8M27.8 12.2l2.8-2.8"/></g></g>
+    <g fill="none" stroke="var(--iron)" stroke-width="1.8">
+      <ellipse cx="6" cy="6" rx="4" ry="2.3" transform="rotate(45 6 6)"/><ellipse cx="12" cy="12" rx="4" ry=".8" transform="rotate(45 12 12)"/><ellipse cx="28" cy="28" rx="4" ry=".8" transform="rotate(45 28 28)"/><ellipse cx="34" cy="34" rx="4" ry="2.3" transform="rotate(45 34 34)"/>
+      <ellipse cx="34" cy="6" rx="4" ry="2.3" transform="rotate(-45 34 6)"/><ellipse cx="28" cy="12" rx="4" ry=".8" transform="rotate(-45 28 12)"/><ellipse cx="12" cy="28" rx="4" ry=".8" transform="rotate(-45 12 28)"/><ellipse cx="6" cy="34" rx="4" ry="2.3" transform="rotate(-45 6 34)"/>
+    </g>
+    <path d="M16.5 19v-3a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="var(--iron)" stroke-width="2"/><rect x="14.5" y="18.5" width="11" height="9" rx="2" fill="var(--iron)"/><circle cx="20" cy="22.5" r="1.4" fill="var(--deep)"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Bioconnect <span>ろうそくの祭壇</span>・横長ボタン版</h1>
+  <p>気に入ってもらえた「ろうそくの祭壇」を、横長のボタンで3通りに作りました。光り方は同じで、無料のときは金色、クリスタルのときは緑色です。上のボタンで3つの場合を切り替えられます。</p>
+</header>
+
+<div class="switch" role="group" aria-label="表示する場合">
+  <span>表示：</span>
+  <button type="button" data-s="free" aria-pressed="true">No Ads あり・無料が残っている</button>
+  <button type="button" data-s="used" aria-pressed="false">No Ads あり・今日は使用済み</button>
+  <button type="button" data-s="locked" aria-pressed="false">No Ads なし</button>
+</div>
+
+<div class="grid" id="grid" data-state="free">
+<section class="opt">
+  <span class="tag">CANDLE 1</span><h2>両脇にろうそく</h2>
+  <div class="screen alt c1">
+    <p class="score">SCORE<b>1,240</b></p>
+    <h3 class="title">The Meadow Falls Still</h3>
+    <p class="omen">But it is only pretending.<span class="aside">(probably.)</span></p>
+    <div class="row"><i class="candle" aria-hidden="true"></i><div class="slots"><button class="big chained" type="button" aria-label="Wait for Dawn is chained. Hush the meadow to free it."><span class="lbl-dawn"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><svg class="chains" aria-hidden="true"></svg></button><button class="big" type="button"><span class="lbl-free"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><span class="lbl-crystal"><svg class="ico"><use href="#gem"/></svg><span><strong>Offer 1 Crystal</strong><em>you have 4</em></span></span></button></div><i class="candle" style="--d:-.8s" aria-hidden="true"></i></div>
+    <p class="unlock">hush the meadow to free the dawn</p>
+    <button class="end" type="button">Let it rest · end the game</button>
+  </div>
+  <p class="note">元の案2にいちばん近い形。<b>ボタンの左右にろうそくが1本ずつ</b>立って、ボタンを照らします。シンプルで、横幅の狭いスマホでも崩れにくいです。</p>
+</section>
+
+<section class="opt">
+  <span class="tag">CANDLE 2</span><h2>ボタンの上にろうそく</h2>
+  <div class="screen alt c2">
+    <p class="score">SCORE<b>1,240</b></p>
+    <h3 class="title">The Meadow Falls Still</h3>
+    <p class="omen">But it is only pretending.<span class="aside">(probably.)</span></p>
+    <div class="slots"><button class="big chained" type="button" aria-label="Wait for Dawn is chained. Hush the meadow to free it."><span class="lbl-dawn"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><svg class="chains" aria-hidden="true"></svg></button><button class="big" type="button"><span class="wax" aria-hidden="true"></span><span class="perch" aria-hidden="true"><span><i class="candle"></i><span class="drip"><i></i><i></i><i></i></span></span><span><i class="candle s" style="--d:-.6s"></i><span class="drip"><i></i><i></i><i></i></span></span></span><span class="lbl-free"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><span class="lbl-crystal"><svg class="ico"><use href="#gem"/></svg><span><strong>Offer 1 Crystal</strong><em>you have 4</em></span></span></button></div>
+    <p class="unlock">hush the meadow to free the dawn</p>
+    <button class="end" type="button">Let it rest · end the game</button>
+  </div>
+  <p class="note">ろうそくが<b>ボタンの上に直接立っていて、ろうが垂れている</b>形。ボタン自体が祭壇の石の台になります。いちばん個性が強く、ハロウィンらしさも一番です。</p>
+</section>
+
+<section class="opt">
+  <span class="tag">CANDLE 3</span><h2>燭台と古い本</h2>
+  <div class="screen c3">
+    <div class="stand" aria-hidden="true"><div class="tops"><i class="candle s"></i><i class="candle t" style="--d:-.5s"></i><i class="candle s" style="--d:-1.1s"></i></div><div class="arm"></div><div class="stem"></div><div class="base"></div></div>
+    <p class="score">SCORE<b>1,240</b></p>
+    <h3 class="title">The Meadow Falls Still</h3>
+    <p class="omen">But it is only pretending.<span class="aside">(probably.)</span></p>
+    <div class="rule" aria-hidden="true"><i></i></div>
+    <div class="slots"><button class="big chained" type="button" aria-label="Wait for Dawn is chained. Hush the meadow to free it."><span class="lbl-dawn"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><svg class="chains" aria-hidden="true"></svg></button><button class="big" type="button"><span class="lbl-free"><svg class="ico"><use href="#sun"/></svg><span><strong>Wait for Dawn</strong><em>free · once a day</em></span></span><span class="lbl-crystal"><svg class="ico"><use href="#gem"/></svg><span><strong>Offer 1 Crystal</strong><em>you have 4</em></span></span></button></div>
+    <p class="unlock">hush the meadow to free the dawn</p>
+    <button class="end" type="button">Let it rest · end the game</button>
+  </div>
+  <p class="note">上に<b>3本立ての燭台</b>を置き、画面全体を案1の「古い本のページ」の額縁にした形。案1と案2を混ぜた、落ち着いた雰囲気です。</p>
+</section>
+
+</div>
+
+<div class="foot2">
+  <h2>どれも共通</h2>
+  <ul>
+    <li>No Ads なしの人には、夜明けのボタンに鎖をかけて、その下にクリスタルのボタンを置きます（今の見本どおり）。</li>
+    <li>鎖のボタンを押すと、ショップの <b>No Ads</b> のところが開きます。</li>
+  </ul>
+</div>
+</div>
+
+<script>
+(function(){
+  var grid=document.getElementById('grid');
+  var btns=document.querySelectorAll('.switch button');
+
+  function drawChains(){
+    document.querySelectorAll('.chains').forEach(function(svg){
+      var w=svg.clientWidth,h=svg.clientHeight; if(!w||!h) return;
+      svg.setAttribute('viewBox','0 0 '+w+' '+h);
+      var ns='http://www.w3.org/2000/svg', out='';
+      var round=svg.closest('.v2');
+      var lines=round?[[0,h*.5,w,h*.5],[w*.5,0,w*.5,h]]:[[-4,h*.15,w+4,h*.85],[-4,h*.85,w+4,h*.15]];
+      lines.forEach(function(L){
+        var dx=L[2]-L[0],dy=L[3]-L[1],len=Math.hypot(dx,dy),a=Math.atan2(dy,dx)*180/Math.PI,step=11;
+        for(var d=step/2,i=0;d<len;d+=step,i++){
+          var x=L[0]+dx*d/len,y=L[1]+dy*d/len,ry=i%2?1.4:4.2;
+          var e='<ellipse cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" rx="7.5" ry="'+ry+'" transform="rotate('+a.toFixed(1)+' '+x.toFixed(1)+' '+y.toFixed(1)+')"';
+          out+=e+' class="link-s"/>'+e+' class="link"/>';
+        }
+      });
+      var cx=w/2,cy=h/2;
+      out+='<path d="M'+(cx-6)+' '+(cy-1)+'v-5a6 6 0 0 1 12 0v5" fill="none" stroke="#0b0e09" stroke-width="5.5"/>'
+         +'<path d="M'+(cx-6)+' '+(cy-1)+'v-5a6 6 0 0 1 12 0v5" fill="none" stroke="var(--iron)" stroke-width="3"/>'
+         +'<rect x="'+(cx-10)+'" y="'+(cy-2)+'" width="20" height="15" rx="3" fill="var(--iron)" stroke="#0b0e09" stroke-width="1.5"/>'
+         +'<circle cx="'+cx+'" cy="'+(cy+4)+'" r="2" fill="#10150e"/><rect x="'+(cx-.8)+'" y="'+(cy+4)+'" width="1.6" height="5" fill="#10150e"/>';
+      svg.innerHTML=out;
+    });
+  }
+  window.addEventListener('resize',drawChains);
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    grid.setAttribute('data-state',b.getAttribute('data-s'));
+    btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false');});
+    drawChains();
+  });});
+  drawChains();
+})();
+</script>
