@@ -2239,3 +2239,75 @@ body.is-celebrating { overflow: hidden; }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
 #shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }
+
+/* ---------- Crystal shop: concept A1 "Tarot Grid" (concepts/crystal-shop-v1) ----------
+   Night colors from eldritch.css on every skin. Ids and data-product stay the same. */
+.economy-card.shop-card {
+  --s-ink: #ece4c8; --s-mute: #a39c7c; --s-moss: #a8c66c; --s-moss-d: #6f8a3e; --s-deep: #10150e;
+  --s-cell: #1f2918; --s-cell-up: #2b3822; --s-gem: #c9e88a; --s-gem-d: #7fa548; --s-sun: #f1c66a;
+  --s-serif: "IM Fell English", Georgia, serif; --s-caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --s-type: "Special Elite", "Courier New", monospace;
+  display: flex; flex-direction: column; gap: 12px; width: min(100%, 430px); padding: 14px 16px 18px;
+  color: var(--s-ink); font-family: var(--s-serif); border: 0; border-radius: 22px;
+  background: radial-gradient(60% 22% at 50% 0%, rgba(141, 104, 150, .22), transparent 70%), linear-gradient(#1b2418, #10150e);
+  box-shadow: 0 0 0 1px rgba(236, 228, 200, .16), 0 18px 50px rgba(0, 0, 0, .6);
+}
+#shopModal { background: rgba(11, 14, 9, .78); }
+.shop-card p { margin: 0; }
+.shop-head { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 6px 10px; }
+.shop-head h2 { margin: 0; font-family: var(--s-caps); font-weight: 400; font-size: 26px; line-height: 1.05; letter-spacing: .02em; }
+.shop-lede, .shop-wallet { grid-column: 1 / -1; }
+.shop-card .shop-lede { font-style: italic; color: var(--s-mute); font-size: 14.5px; }
+.shop-close { width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--s-cell); color: var(--s-mute); font: 22px/1 var(--s-serif); cursor: pointer; box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .18); }
+.shop-card .shop-wallet { display: inline-flex; align-items: center; gap: 8px; width: fit-content; padding: 5px 12px 5px 10px; border-radius: 999px; background: rgba(201, 232, 138, .08); box-shadow: inset 0 0 0 1px rgba(201, 232, 138, .35); color: var(--s-gem); font: 13px var(--s-type); }
+.shop-wallet::before { content: ""; width: 12px; height: 16px; background: var(--s-gem); clip-path: polygon(50% 0, 92% 38%, 50% 100%, 8% 38%); }
+.shop-wallet:empty { display: none; }
+/* gems: the revive button's diamond, with a lit face */
+.shop-gem { display: inline-block; width: 16px; height: 20px; flex: none; background: linear-gradient(115deg, #eef8d6 0 28%, var(--s-gem) 29% 62%, var(--s-gem-d) 63%); clip-path: polygon(50% 0, 92% 38%, 50% 100%, 8% 38%); filter: drop-shadow(0 0 6px rgba(201, 232, 138, .55)); }
+.shop-pile { display: grid; place-items: center; width: 100%; height: 62px; background: radial-gradient(50% 50% at 50% 60%, rgba(201, 232, 138, .16), transparent 70%); }
+.shop-pile-in { position: relative; display: block; }
+.shop-pile-in .shop-gem { position: absolute; }
+.shop-claim { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 9px 12px; text-align: left; color: inherit; font: inherit; cursor: pointer; border: 1px dashed rgba(201, 232, 138, .45); border-radius: 14px; background: rgba(201, 232, 138, .05); }
+.shop-claim[hidden] { display: none; }
+.shop-claim strong { display: block; font-weight: 400; font-size: 16px; }
+.shop-claim em { display: block; font-style: normal; font-size: 12px; color: var(--s-mute); }
+.shop-claim-go { margin-left: auto; font: 12px var(--s-type); color: var(--s-gem); white-space: nowrap; }
+.shop-card .shop-label { margin-bottom: -4px; font: 12px var(--s-type); letter-spacing: .12em; text-transform: uppercase; color: var(--s-moss); }
+.crystal-products.shop-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+.shop-pack { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 10px 12px; border-radius: 16px; text-align: center; background: linear-gradient(180deg, var(--s-cell-up), var(--s-cell)); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .14), 0 6px 16px rgba(0, 0, 0, .35); }
+.shop-pack::before { content: ""; position: absolute; inset: 5px; border-radius: 12px; border: 1px solid rgba(236, 228, 200, .08); pointer-events: none; }
+.shop-qty { font: 26px/1 var(--s-caps); }
+.shop-qty small { display: block; margin-top: 2px; font: italic 13px var(--s-serif); color: var(--s-mute); }
+.shop-bonus { min-height: 14px; font: 11px var(--s-type); letter-spacing: .06em; text-transform: uppercase; color: var(--s-sun); }
+.shop-pack--best { box-shadow: inset 0 0 0 1.5px rgba(241, 198, 106, .7), 0 6px 18px rgba(0, 0, 0, .4); }
+.shop-ribbon { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px; background: var(--s-sun); color: var(--s-deep); font: 10.5px var(--s-type); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.shop-price { position: relative; width: 100%; min-height: 44px; padding: 0 16px; border: 0; border-radius: 999px; cursor: pointer; background: var(--s-moss); color: var(--s-deep); font: 18px var(--s-caps); box-shadow: 0 3px 0 var(--s-moss-d); }
+.shop-price:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 var(--s-moss-d); }
+.shop-price:disabled { cursor: default; opacity: .55; }
+.shop-price--gold { background: var(--s-sun); box-shadow: 0 3px 0 #a7802f; }
+.no-ads-product.shop-noads { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 4px 12px; padding: 14px; border-radius: 18px; background: radial-gradient(80% 60% at 15% 0%, rgba(241, 198, 106, .2), transparent 70%), linear-gradient(180deg, #2c2819, #1d1a11); box-shadow: 0 0 0 1px rgba(241, 198, 106, .4), 0 10px 26px rgba(0, 0, 0, .4); }
+.shop-noads ul, .shop-noads .shop-price, .shop-noads #dailyInfo { grid-column: 1 / -1; }
+.shop-noads h3 { margin: 0; font: 21px var(--s-caps); }
+.shop-once { font: 11px var(--s-type); letter-spacing: .08em; text-transform: uppercase; color: var(--s-sun); }
+.shop-noads ul { display: grid; gap: 4px; margin: 6px 0 8px; padding: 0; list-style: none; font-size: 14px; }
+.shop-noads li { display: flex; gap: 8px; align-items: baseline; }
+.shop-noads li::before { content: "✦"; color: var(--s-sun); font-size: 11px; }
+.shop-card #dailyInfo { font-size: 13px; color: var(--s-sun); text-align: center; }
+.shop-card #dailyInfo:empty { display: none; }
+.shop-sun { width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle, var(--s-sun) 0 30%, transparent 31%), repeating-conic-gradient(var(--s-sun) 0 9deg, transparent 9deg 45deg);
+  -webkit-mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); }
+.shop-card .economy-status { font: 12px/1.45 var(--s-type); color: var(--s-gem); text-align: center; }
+.shop-card .economy-status:empty { display: none; }
+.shop-card .shop-fine { font: 11px/1.5 var(--s-type); color: var(--s-mute); text-align: center; }
+.shop-account { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid rgba(236, 228, 200, .12); }
+.shop-card #accountLabel { font-size: 14px; color: var(--s-mute); }
+.shop-card #authControls { display: grid; gap: 8px; }
+.shop-card #authControls[hidden], .shop-card #codeControls[hidden] { display: none; }
+.shop-card label { margin: 4px 0 0; color: var(--s-mute); }
+.shop-card input { margin-top: 4px; background: var(--s-cell); color: var(--s-ink); border-color: rgba(236, 228, 200, .25); }
+.shop-card .btn { background: var(--s-cell); color: var(--s-ink); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .18); }
+.shop-card .economy-actions { margin: 0; }
+.shop-card .record-list { margin: 0; color: var(--s-mute); }
+.shop-card .record-list:empty { display: none; }
+.shop-card button:focus-visible { outline: 2px solid var(--s-moss); outline-offset: 3px; }
+@media (max-width: 360px) { .economy-card.shop-card { padding: 12px; } .shop-head h2 { font-size: 22px; } .shop-pile { height: 52px; } }

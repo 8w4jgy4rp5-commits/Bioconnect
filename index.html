@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bioconnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23eef6e4'/><path d='M16 3.5v25M3.5 16h25' stroke='%23d5e5c2' stroke-width='1.2'/><path d='M8.6 12.6V8.2' stroke='%235a9e4b' stroke-width='1.5' stroke-linecap='round'/><path d='M8.6 10.4c-2 0-3.2-1.4-3.4-3.3 2 .1 3.2 1.4 3.4 3.3z' fill='%236fbb56'/><path d='M8.6 9.6c.2-1.9 1.4-3.2 3.4-3.3-.2 1.9-1.4 3.3-3.4 3.3z' fill='%236fbb56'/><path d='M20.2 25.4c0-2.6 2-4.6 4.4-4.6s4.4 2 4.4 4.6z' fill='%23e08a4a'/><path d='M22.3 21.6l-1.1-3.1 2.9 1.5zm4.6 0l1.1-3.1-2.9 1.5z' fill='%23e08a4a'/><circle cx='23' cy='24' r='.7' fill='%23fff'/><circle cx='25.8' cy='24' r='.7' fill='%23fff'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=cac56ba1" />
+  <link rel="stylesheet" href="style.css?v=2d24ff62" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="pop.css?v=caf4fa1f" />
-  <link rel="stylesheet" href="eldritch.css?v=955b4b0c" />
+  <link rel="stylesheet" href="pop.css?v=134cbcd5" />
+  <link rel="stylesheet" href="eldritch.css?v=64856d0a" />
   <!-- Cozy Eldritch is the standard look. ?skin=pop switches to the old
        pop look and remembers it in this browser; ?skin=eldritch switches
        back. Runs before first paint so the page never flashes the other look. -->
@@ -33,7 +33,7 @@
   <!-- cobbleworks:seo:start -->
     <meta name="description" content="Grow a food chain, then keep it fed. A real-time high-score puzzle." />
     <link rel="canonical" href="https://8w4jgy4rp5-commits.github.io/Bioconnect/" />
-    <link rel="stylesheet" href="shared/app-footer.css?v=b19b426b" />
+    <link rel="stylesheet" href="shared/app-footer.css?v=f718ffb4" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Bioconnect" />
     <meta property="og:description" content="Grow a food chain, then keep it fed. A real-time high-score puzzle." />
@@ -493,34 +493,49 @@
 <div class="seal-toasts" id="sealToasts" aria-live="polite"></div>
 
 <div class="economy-modal" id="shopModal" hidden>
-  <section class="economy-card" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
-    <div class="economy-head"><h2 id="shopTitle">Crystals &amp; No Ads</h2><button class="btn" id="shopClose" aria-label="Close store" type="button">Close</button></div>
-    <p id="accountLabel"></p><p id="walletLabel"></p>
-    <div id="authControls">
-      <button class="btn" id="googleSignIn" type="button">Sign in with Google</button>
-      <label>Email <input id="signInEmail" type="email" autocomplete="email" required></label>
-      <button class="btn" id="sendCodeBtn" type="button">Send sign-in code</button>
-      <div id="codeControls" hidden><label>Email code <input id="signInCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8"></label><button class="btn" id="verifyCodeBtn" type="button">Verify code</button></div>
+  <section class="economy-card shop-card" role="dialog" aria-modal="true" aria-labelledby="shopTitle">
+    <div class="shop-head"><h2 id="shopTitle">Crystals &amp; No Ads</h2><button class="shop-close" id="shopClose" aria-label="Close store" type="button">×</button>
+      <p class="shop-lede">The meadow trades in small, glowing things.</p>
+      <p class="shop-wallet" id="walletLabel"></p></div>
+    <button class="shop-claim" id="claimBtn" type="button"><span class="shop-gem" aria-hidden="true"></span><span><strong>3 free Crystals</strong><em>once per account</em></span><span class="shop-claim-go" aria-hidden="true">Claim ›</span></button>
+    <p class="shop-label">Crystals · 1 = one revival</p>
+    <div class="crystal-products shop-grid">
+      <article class="shop-pack"><span class="shop-pile" aria-hidden="true"><span class="shop-pile-in" style="width:20px;height:26px"><span class="shop-gem" style="left:0px;top:0px;width:20px;height:26px"></span></span></span><span class="shop-qty">5<small>Crystals</small></span><span class="shop-bonus"></span><button class="shop-price" data-product="crystals5" type="button" aria-label="Buy 5 Crystals for US$1">$1</button></article>
+      <article class="shop-pack"><span class="shop-pile" aria-hidden="true"><span class="shop-pile-in" style="width:40px;height:30px"><span class="shop-gem" style="left:0px;top:6px;width:18px;height:24px"></span><span class="shop-gem" style="left:18px;top:0px;width:22px;height:28px"></span></span></span><span class="shop-qty">11<small>Crystals</small></span><span class="shop-bonus">+1 bonus</span><button class="shop-price" data-product="crystals11" type="button" aria-label="Buy 11 Crystals for US$2">$2</button></article>
+      <article class="shop-pack"><span class="shop-pile" aria-hidden="true"><span class="shop-pile-in" style="width:56px;height:40px"><span class="shop-gem" style="left:0px;top:14px;width:18px;height:24px"></span><span class="shop-gem" style="left:34px;top:12px;width:20px;height:26px"></span><span class="shop-gem" style="left:14px;top:0px;width:26px;height:34px"></span></span></span><span class="shop-qty">30<small>Crystals</small></span><span class="shop-bonus">+5 bonus</span><button class="shop-price" data-product="crystals30" type="button" aria-label="Buy 30 Crystals for US$5">$5</button></article>
+      <article class="shop-pack shop-pack--best"><span class="shop-ribbon">Most glow</span><span class="shop-pile" aria-hidden="true"><span class="shop-pile-in" style="width:72px;height:48px"><span class="shop-gem" style="left:0px;top:22px;width:16px;height:22px"></span><span class="shop-gem" style="left:54px;top:22px;width:16px;height:22px"></span><span class="shop-gem" style="left:10px;top:8px;width:20px;height:28px"></span><span class="shop-gem" style="left:42px;top:8px;width:20px;height:28px"></span><span class="shop-gem" style="left:22px;top:0px;width:28px;height:38px"></span></span></span><span class="shop-qty">65<small>Crystals</small></span><span class="shop-bonus">+15 bonus</span><button class="shop-price" data-product="crystals65" type="button" aria-label="Buy 65 Crystals for US$10">$10</button></article>
     </div>
-    <button class="btn" id="googleLink" type="button" hidden>Link Google to this account</button>
-    <p id="googleLinkInfo" hidden></p>
-    <div class="economy-actions"><button class="btn" id="claimBtn" type="button">Claim 3 free Crystals · once per account</button><button class="btn" id="refreshWallet" type="button">Refresh account</button><button class="btn" id="signOutBtn" type="button" hidden>Sign out</button></div>
-    <div class="crystal-products"><button class="btn" data-product="crystals5" type="button">5 Crystals · US$1</button><button class="btn" data-product="crystals11" type="button">11 Crystals · US$2</button><button class="btn" data-product="crystals30" type="button">30 Crystals · US$5</button><button class="btn" data-product="crystals65" type="button">65 Crystals · US$10</button></div>
-    <div class="no-ads-product"><h3>No Ads · US$3 · one-time purchase</h3><p>Remove all ads, including optional rewarded ads. Get one free revival per day, resetting at 4:00 AM New York time (daylight saving time applies). Unused daily revivals do not carry over.</p><p>One revival per game, with any method. After your daily free revival is used, each revival costs 1 Crystal. Normal play needs no sign-in.</p><button class="btn btn--primary" data-product="no_ads" type="button">Buy No Ads · US$3</button><p id="dailyInfo"></p></div>
+    <div class="no-ads-product shop-noads"><span class="shop-sun" aria-hidden="true"></span><div><h3>No Ads</h3><span class="shop-once">One-time · keep forever</span></div>
+      <ul><li>No ads, ever. Not even optional ones.</li><li>One free revival every day, at dawn.</li></ul>
+      <button class="shop-price shop-price--gold" data-product="no_ads" type="button" aria-label="Buy No Ads for US$3, one-time purchase">$3</button><p id="dailyInfo"></p></div>
     <p class="economy-status" id="shopStatus" role="status" aria-live="polite">Sign in is required for purchases and the free Crystal claim.</p>
+    <p class="shop-fine">One revival per game, with any method. After a daily free revival is used, each revival costs 1 Crystal. The daily revival resets at 4:00 AM New York time (daylight saving time applies) and does not carry over.</p>
+    <div class="shop-account" id="shopAccount">
+      <p class="shop-label">Account · only to buy or claim</p>
+      <p id="accountLabel"></p>
+      <div id="authControls">
+        <button class="btn" id="googleSignIn" type="button">Sign in with Google</button>
+        <label>Email <input id="signInEmail" type="email" autocomplete="email" required></label>
+        <button class="btn" id="sendCodeBtn" type="button">Send sign-in code</button>
+        <div id="codeControls" hidden><label>Email code <input id="signInCode" inputmode="numeric" autocomplete="one-time-code" maxlength="8"></label><button class="btn" id="verifyCodeBtn" type="button">Verify code</button></div>
+      </div>
+      <button class="btn" id="googleLink" type="button" hidden>Link Google to this account</button>
+      <p id="googleLinkInfo" hidden></p>
+      <div class="economy-actions"><button class="btn" id="refreshWallet" type="button">Refresh account</button><button class="btn" id="signOutBtn" type="button" hidden>Sign out</button></div>
+    </div>
     <div id="recordList" class="record-list" aria-label="Saved game records"></div>
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared/supabase-config.js?v=da53bf22"></script>
-<script src="shared/app-sync.js?v=d012ffb0"></script>
-<script src="audio-synth.js?v=a2d22b34"></script>
-<script src="audio.js?v=2fd8deac"></script>
-<script src="shared/monetization-config.js?v=a274550b"></script>
-<script src="monetization.js?v=5b34beec"></script>
-<script src="script.js?v=b19921b6"></script>
-<script src="watch.js?v=5a051aed"></script>
-<script src="skin.js?v=5406c35f"></script>
+<script src="shared/app-sync.js?v=9086a61a"></script>
+<script src="audio-synth.js?v=eea2c7b8"></script>
+<script src="audio.js?v=b89e0fec"></script>
+<script src="shared/monetization-config.js?v=017021bd"></script>
+<script src="monetization.js?v=849abf74"></script>
+<script src="script.js?v=645eaf48"></script>
+<script src="watch.js?v=cb2e678f"></script>
+<script src="skin.js?v=126147c3"></script>
 <!-- cobbleworks:footer:start -->
   <footer class="cw-footer">
     <a href="https://8w4jgy4rp5-commits.github.io/App-Sharing-/" target="_blank" rel="noopener noreferrer">Made on CobbleWorks — browse other mini apps</a>

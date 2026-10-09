@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2 Ledger List</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="shop.css">
+<style>
+/* A2: an old book's page. No Ads sits on top as the one big card,
+   then the four Crystal packs as one row each, like lines in a ledger. */
+.page { border-radius: 18px; padding: 6px 14px 10px; background: linear-gradient(180deg, #2c2819, #1d1a11); box-shadow: 0 0 0 1px rgba(91, 82, 54, .9), inset 0 0 0 4px #1d1a11, inset 0 0 0 5px rgba(91, 82, 54, .6), 0 10px 26px rgba(0, 0, 0, .4); }
+.page h2 { margin: 10px 0 2px; text-align: center; font-family: var(--caps); font-weight: 400; font-size: 19px; color: var(--ink); }
+.rule { display: flex; align-items: center; gap: 8px; color: var(--parch-line); font-size: 10px; margin: 0 0 4px; }
+.rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: var(--parch-line); }
+.row { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid rgba(91, 82, 54, .55); }
+.row:first-of-type { border-top: 0; }
+.row .art { height: 40px; display: grid; place-items: center; }
+.row strong { display: block; font-weight: 400; font-size: 19px; line-height: 1.1; }
+.row em { display: block; font-style: italic; font-size: 13px; color: var(--mute); }
+.row .bonus { margin-left: 6px; }
+.row .price { min-width: 74px; }
+.row--best { margin: 2px -8px 0; padding: 10px 8px; border-radius: 12px; border-top-color: transparent; background: rgba(241, 198, 106, .08); box-shadow: inset 0 0 0 1px rgba(241, 198, 106, .45); }
+.row--best + .row { border-top-color: transparent; }
+.noads { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: center; }
+.noads ul, .noads .price { grid-column: 1 / -1; }
+.noads .price { width: 100%; }
+</style>
+</head>
+<body>
+<main class="shop" aria-labelledby="t">
+  <header class="shop-head">
+    <h1 id="t">Crystals &amp; No Ads</h1>
+    <button class="close" type="button" aria-label="Close store">×</button>
+    <span class="wallet"><span class="gem gem--glow" aria-hidden="true"></span>You hold 0 Crystals</span>
+  </header>
+
+  <article class="noads">
+    <span class="sun" aria-hidden="true"></span>
+    <div><h2>Hush the Meadow</h2><span class="tag-once">NO ADS · ONE-TIME</span></div>
+    <ul>
+      <li>No ads, ever. Not even optional ones.</li>
+      <li>One free revival every day, at dawn.</li>
+    </ul>
+    <button class="price price--gold" type="button">$3 · keep forever</button>
+  </article>
+
+  <section class="page" aria-labelledby="c">
+    <h2 id="c">Crystals</h2>
+    <p class="rule" aria-hidden="true">◆</p>
+    <div class="row">
+      <span class="art" aria-hidden="true"><span class="gem gem--glow" style="width:18px;height:24px"></span></span>
+      <span><strong>5 Crystals</strong><em>5 revivals</em></span>
+      <button class="price" type="button">$1</button>
+    </div>
+    <div class="row">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:36px;height:28px"><span class="gem gem--glow" style="left:0;top:5px;width:16px;height:22px"></span><span class="gem gem--glow" style="left:16px;top:0;width:20px;height:26px"></span></span></span>
+      <span><strong>11 Crystals<span class="bonus">+1</span></strong><em>11 revivals</em></span>
+      <button class="price" type="button">$2</button>
+    </div>
+    <div class="row">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:46px;height:34px"><span class="gem gem--glow" style="left:0;top:12px;width:15px;height:20px"></span><span class="gem gem--glow" style="left:30px;top:12px;width:15px;height:20px"></span><span class="gem gem--glow" style="left:11px;top:0;width:22px;height:30px"></span></span></span>
+      <span><strong>30 Crystals<span class="bonus">+5</span></strong><em>30 revivals</em></span>
+      <button class="price" type="button">$5</button>
+    </div>
+    <div class="row row--best">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:52px;height:38px"><span class="gem gem--glow" style="left:0;top:16px;width:14px;height:19px"></span><span class="gem gem--glow" style="left:38px;top:16px;width:14px;height:19px"></span><span class="gem gem--glow" style="left:8px;top:5px;width:17px;height:23px"></span><span class="gem gem--glow" style="left:27px;top:5px;width:17px;height:23px"></span><span class="gem gem--glow" style="left:15px;top:0;width:22px;height:30px"></span></span></span>
+      <span><strong>65 Crystals<span class="bonus">+15</span></strong><em>most glow for the coin</em></span>
+      <button class="price" type="button">$10</button>
+    </div>
+  </section>
+
+  <button class="claim" type="button">
+    <span class="gem gem--glow" aria-hidden="true"></span>
+    <span><strong>3 free Crystals</strong><em>once per account</em></span>
+    <span class="go">Claim ›</span>
+  </button>
+
+  <p class="fine">One revival per game. Daily revival resets 4:00 AM New York time.<br>Sign in only when you buy or claim. Play never needs it.</p>
+</main>
+</body>
+</html>

@@ -1,0 +1,66 @@
+/* Crystal shop concepts (2026-10-09). Cozy Eldritch colors copied from
+   eldritch.css and concepts/revive-ui-v1, so nothing new is invented.
+   Every mock is a 390px-wide phone screen. Prices are dummies. */
+:root {
+  color-scheme: dark;
+  --ink: #ece4c8; --mute: #a39c7c; --moss: #a8c66c; --moss-d: #6f8a3e; --deep: #10150e;
+  --cell: #1f2918; --cell-up: #2b3822; --plum: #6b4a72; --plum2: #8d6896;
+  --gem: #c9e88a; --gem-d: #7fa548; --sun: #f1c66a; --iron: #8a8676; --parch: #2a2619; --parch-line: #5b5236;
+  --serif: "IM Fell English", Georgia, serif;
+  --caps: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --type: "Special Elite", "Courier New", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  min-height: 100dvh; color: var(--ink); font-family: var(--serif);
+  background:
+    radial-gradient(60% 30% at 50% 0%, rgba(141, 104, 150, .22), transparent 70%),
+    radial-gradient(60% 40% at 50% 60%, rgba(168, 198, 108, .10), transparent 70%),
+    linear-gradient(#1b2418, #10150e);
+  background-color: var(--deep);
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--moss); outline-offset: 3px; }
+
+.shop { max-width: 430px; margin: 0 auto; padding: 14px 16px 28px; display: flex; flex-direction: column; gap: 14px; }
+
+/* head: title, wallet, close */
+.shop-head { display: grid; grid-template-columns: 1fr auto; align-items: start; gap: 6px 10px; }
+.shop-head h1 { margin: 0; font-family: var(--caps); font-weight: 400; font-size: 27px; line-height: 1.05; letter-spacing: .02em; }
+.shop-head .lede { grid-column: 1 / -1; margin: 0; font-style: italic; color: var(--mute); font-size: 14.5px; }
+.close { width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--cell); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .18); font-size: 22px; line-height: 1; color: var(--mute); }
+.wallet { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px 6px 10px; border-radius: 999px; background: rgba(201, 232, 138, .08); box-shadow: inset 0 0 0 1px rgba(201, 232, 138, .35); font-family: var(--type); font-size: 13px; color: var(--gem); width: fit-content; }
+
+/* gems drawn like the revive icon (same diamond, same green) */
+.gem { display: inline-block; width: 16px; height: 20px; background: linear-gradient(115deg, #eef8d6 0 28%, var(--gem) 29% 62%, var(--gem-d) 63%); clip-path: polygon(50% 0, 92% 38%, 50% 100%, 8% 38%); flex: none; }
+.gem--glow { filter: drop-shadow(0 0 6px rgba(201, 232, 138, .55)); }
+.pile { position: relative; display: block; }
+.pile .gem { position: absolute; }
+
+/* sun from the Wait for Dawn button */
+.sun { display: inline-block; width: 30px; height: 30px; border-radius: 50%; flex: none;
+  background: radial-gradient(circle, var(--sun) 0 30%, transparent 31%), repeating-conic-gradient(var(--sun) 0 9deg, transparent 9deg 45deg);
+  -webkit-mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); mask: radial-gradient(circle, #000 0 30%, transparent 31% 41%, #000 42%); }
+
+.price { border: 0; border-radius: 999px; min-height: 44px; padding: 0 16px; background: var(--moss); color: var(--deep); font-family: var(--caps); font-size: 18px; box-shadow: 0 3px 0 var(--moss-d); }
+.price:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--moss-d); }
+.price--gold { background: var(--sun); box-shadow: 0 3px 0 #a7802f; }
+.bonus { font-family: var(--type); font-size: 11px; letter-spacing: .06em; color: var(--sun); }
+.small { font-size: 12.5px; color: var(--mute); line-height: 1.45; margin: 0; }
+.small b { color: var(--ink); font-weight: 400; }
+.fine { font-family: var(--type); font-size: 11px; color: var(--mute); text-align: center; margin: 4px 0 0; line-height: 1.5; }
+
+/* the free claim: a folded note */
+.claim { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 10px 12px; border: 1px dashed rgba(201, 232, 138, .45); border-radius: 14px; background: rgba(201, 232, 138, .05); }
+.claim strong { display: block; font-weight: 400; font-size: 16px; }
+.claim em { display: block; font-style: normal; font-size: 12px; color: var(--mute); }
+.claim .go { margin-left: auto; font-family: var(--type); font-size: 12px; color: var(--gem); white-space: nowrap; }
+
+/* No Ads card shared bits */
+.noads { position: relative; border-radius: 18px; padding: 14px; background: radial-gradient(80% 60% at 15% 0%, rgba(241, 198, 106, .2), transparent 70%), linear-gradient(180deg, #2c2819, #1d1a11); box-shadow: 0 0 0 1px rgba(241, 198, 106, .4), 0 10px 26px rgba(0, 0, 0, .4); }
+.noads h2 { margin: 0; font-family: var(--caps); font-weight: 400; font-size: 21px; }
+.noads ul { margin: 8px 0 12px; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 14px; }
+.noads li { display: flex; gap: 8px; align-items: baseline; }
+.noads li::before { content: "✦"; color: var(--sun); font-size: 11px; }
+.tag-once { font-family: var(--type); font-size: 11px; color: var(--sun); letter-spacing: .08em; }

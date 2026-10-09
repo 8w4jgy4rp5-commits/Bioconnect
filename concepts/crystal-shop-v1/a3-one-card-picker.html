@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A3 One Card Picker</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="shop.css">
+<style>
+/* A3: one big card at a time. Pick a pack from the four chips;
+   the card and its one Buy button change. No Ads is a slim card below. */
+.hero { position: relative; border-radius: 22px; padding: 16px 16px 16px; text-align: center; overflow: hidden;
+  background: radial-gradient(60% 46% at 50% 36%, rgba(201, 232, 138, .22), transparent 70%), linear-gradient(180deg, var(--cell-up), var(--cell));
+  box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .16), 0 10px 26px rgba(0, 0, 0, .4); }
+.hero::before { content: ""; position: absolute; inset: 7px; border-radius: 16px; border: 1px solid rgba(236, 228, 200, .08); pointer-events: none; }
+.hero .art { display: block; position: relative; height: 112px; margin: 6px auto 4px; width: 150px; }
+.hero .art .gem { position: absolute; transition: opacity .2s, transform .2s; }
+.hero .art .gem[data-off] { opacity: 0; transform: scale(.4); }
+.hero .qty { font-family: var(--caps); font-size: 44px; line-height: 1; }
+.hero .qty small { font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--mute); margin-left: 6px; }
+.hero .sub { margin: 4px 0 12px; font-size: 14px; color: var(--mute); min-height: 21px; }
+.hero .price { width: 100%; font-size: 21px; min-height: 50px; }
+.chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 12px; }
+.chip { min-height: 44px; border: 0; border-radius: 12px; background: rgba(16, 21, 14, .6); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .14); font-family: var(--caps); font-size: 18px; line-height: 1; display: grid; place-items: center; gap: 1px; padding: 4px 0; }
+.chip span { font-family: var(--type); font-size: 10px; color: var(--mute); }
+.chip[aria-pressed="true"] { background: rgba(201, 232, 138, .14); box-shadow: inset 0 0 0 1.5px var(--gem); color: var(--gem); }
+.noads { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; }
+.noads h2 { font-size: 19px; }
+.noads .small { margin-top: 2px; }
+.noads .price { padding: 0 14px; }
+</style>
+</head>
+<body>
+<main class="shop" aria-labelledby="t">
+  <header class="shop-head">
+    <h1 id="t">Crystals &amp; No Ads</h1>
+    <button class="close" type="button" aria-label="Close store">×</button>
+    <span class="wallet"><span class="gem gem--glow" aria-hidden="true"></span>You hold 0 Crystals</span>
+  </header>
+
+  <section class="hero" aria-label="Crystals">
+    <span class="art" aria-hidden="true">
+      <span class="gem gem--glow" data-n="5" style="left:2px;top:64px;width:26px;height:36px"></span>
+      <span class="gem gem--glow" data-n="5" style="left:122px;top:64px;width:26px;height:36px"></span>
+      <span class="gem gem--glow" data-n="3" style="left:22px;top:38px;width:32px;height:44px"></span>
+      <span class="gem gem--glow" data-n="3" style="left:96px;top:38px;width:32px;height:44px"></span>
+      <span class="gem gem--glow" data-n="2" style="left:86px;top:20px;width:30px;height:40px"></span>
+      <span class="gem gem--glow" data-n="1" style="left:50px;top:0;width:50px;height:68px"></span>
+    </span>
+    <p class="qty"><span id="qty">11</span><small>Crystals</small></p>
+    <p class="sub" id="sub"><span class="bonus">+1 BONUS</span> · 11 revivals</p>
+    <button class="price" type="button" id="buy">Buy for $2</button>
+    <div class="chips" role="group" aria-label="Pack size">
+      <button class="chip" type="button" data-pack="0" aria-pressed="false">5<span>$1</span></button>
+      <button class="chip" type="button" data-pack="1" aria-pressed="true">11<span>$2</span></button>
+      <button class="chip" type="button" data-pack="2" aria-pressed="false">30<span>$5</span></button>
+      <button class="chip" type="button" data-pack="3" aria-pressed="false">65<span>$10</span></button>
+    </div>
+  </section>
+
+  <article class="noads">
+    <span class="sun" aria-hidden="true"></span>
+    <div><h2>No Ads</h2><p class="small">No ads, ever. <b>A free revival every dawn.</b></p></div>
+    <button class="price price--gold" type="button">$3</button>
+  </article>
+
+  <button class="claim" type="button">
+    <span class="gem gem--glow" aria-hidden="true"></span>
+    <span><strong>3 free Crystals</strong><em>once per account</em></span>
+    <span class="go">Claim ›</span>
+  </button>
+
+  <p class="fine">One revival per game. Daily revival resets 4:00 AM New York time.<br>Sign in only when you buy or claim. Play never needs it.</p>
+</main>
+<script>
+// Dummy picker: static data only, nothing is bought.
+const packs = [
+  { qty: 5, price: '$1', bonus: '', gems: 1 },
+  { qty: 11, price: '$2', bonus: '+1 BONUS', gems: 2 },
+  { qty: 30, price: '$5', bonus: '+5 BONUS', gems: 3 },
+  { qty: 65, price: '$10', bonus: '+15 BONUS', gems: 5 }
+];
+function pick(i) {
+  const p = packs[i];
+  document.getElementById('qty').textContent = p.qty;
+  document.getElementById('buy').textContent = 'Buy for ' + p.price;
+  const sub = document.getElementById('sub');
+  sub.replaceChildren();
+  if (p.bonus) { const b = document.createElement('span'); b.className = 'bonus'; b.textContent = p.bonus; sub.append(b, ' · '); }
+  sub.append(p.qty + ' revivals');
+  document.querySelectorAll('.hero .art .gem').forEach(g => g.toggleAttribute('data-off', Number(g.dataset.n) > p.gems));
+  document.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(Number(c.dataset.pack) === i)));
+}
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => pick(Number(c.dataset.pack))));
+const start = Number(new URLSearchParams(location.search).get("pack") ?? 1);
+pick(packs[start] ? start : 1);
+</script>
+</body>
+</html>

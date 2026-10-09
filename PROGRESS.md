@@ -1,5 +1,12 @@
 # Bioconnect 進捗
 
+## 2026-10-09 — クリスタルショップの中身を A1「Tarot Grid」に
+- 決定: 入手・交換・入口は DEVELOPMENT の記録どおり。雰囲気はE（Cozy Eldritch）、形はカード型。`concepts/crystal-shop-v1/` の3案（A1 Tarot Grid / A2 Ledger List / A3 One Card Picker）からユーザーが A1 を選択。
+- 変更: index.html のショップ（#shopModal）を 所持数 → 無料3個 → クリスタル2×2カード（宝石の山・+1/+5/+15 bonus・65個に Most glow）→ No Ads カード → 注意書き → 一番下にサインイン欄、の順に組み替え。id と data-product は不変。style.css に `.shop-card` 一式（全スキンで夜の配色）。monetization.js は所持数の文言（You hold N Crystals / No Crystals yet）、No Ads 購入済みで「Owned」、ログインが必要なときサインイン欄へスクロール、の3点だけ。購入・広告は無効のまま、本番は storeEnabled:false で非表示のまま。
+- 検証: node rules.test.js 258件、npm test 成功。test:browser は15件成功後、「repeat Crystal purchase」付近（browser-check.cjs 71行）で BioEconomy 未定義により停止。変更前のコードでも同じ箇所で止まるので、この環境（クラウドのChromium）由来と判断。Chromium 390×844 / 320×568 / ?skin=pop で撮影、横はみ出しなし、開くと閉じるボタンにフォーカス・Escで閉じて元のボタンへ戻る、ページエラーなし。
+- 未確認: 実機、ログイン後（所持数あり・No Ads Owned）の見た目、test:browser の残り（手元のChromeで要再実行）。390×844 ではショップ内のスクロールが必要（No Ads の価格ボタンまでは1画面に入る）。
+- 次: 手元で `npm run test:browser` を通す。pop スキン用にショップの色を合わせるかは試遊後に判断。
+
 ## 2026-10-09 — 本番ではショップと復活ボタンを隠す
 - 本番Supabaseに課金の仕組みがまだ無く、購入・広告もオフなので、公開サイトでは押しても使えないボタンになっていた。
 - shared/monetization-config.js に storeEnabled: false を追加。false のあいだ公開サイトでは「Crystals & No Ads」（タイトル・メニュー）と復活ボタンをすべて隠す。localhost では常に表示（テスト・sandbox用）。課金開始時に true にする。

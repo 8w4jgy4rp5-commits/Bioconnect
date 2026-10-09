@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A1 Tarot Grid</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="shop.css">
+<style>
+/* A1: crystals first, as four tall "tarot" cards in a 2×2 grid.
+   The pile of gems grows with the pack. No Ads is one wide card below. */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 10px 12px; border-radius: 16px; text-align: center;
+  background: linear-gradient(180deg, var(--cell-up), var(--cell)); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .14), 0 6px 16px rgba(0, 0, 0, .35); }
+.card::before { content: ""; position: absolute; inset: 5px; border-radius: 12px; border: 1px solid rgba(236, 228, 200, .08); pointer-events: none; }
+.card .art { height: 66px; width: 100%; display: grid; place-items: center; background: radial-gradient(50% 50% at 50% 60%, rgba(201, 232, 138, .16), transparent 70%); }
+.card .qty { font-family: var(--caps); font-size: 26px; line-height: 1; }
+.card .qty small { display: block; font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--mute); margin-top: 2px; }
+.card .price { width: 100%; }
+.card .bonus { min-height: 14px; }
+.card--best { box-shadow: inset 0 0 0 1.5px rgba(241, 198, 106, .7), 0 6px 18px rgba(0, 0, 0, .4); }
+.ribbon { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); padding: 2px 10px; border-radius: 999px; background: var(--sun); color: var(--deep); font-family: var(--type); font-size: 10.5px; letter-spacing: .06em; white-space: nowrap; }
+.noads { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center; }
+.noads ul, .noads .price, .noads .small { grid-column: 1 / -1; }
+.noads .price { width: 100%; }
+.section-label { margin: 4px 0 -4px; font-family: var(--type); font-size: 12px; letter-spacing: .12em; color: var(--moss); }
+</style>
+</head>
+<body>
+<main class="shop" aria-labelledby="t">
+  <header class="shop-head">
+    <h1 id="t">Crystals &amp; No Ads</h1>
+    <button class="close" type="button" aria-label="Close store">×</button>
+    <p class="lede">The meadow trades in small, glowing things.</p>
+    <span class="wallet"><span class="gem gem--glow" aria-hidden="true"></span>You hold 0 Crystals</span>
+  </header>
+
+  <button class="claim" type="button">
+    <span class="gem gem--glow" aria-hidden="true"></span>
+    <span><strong>3 free Crystals</strong><em>once per account</em></span>
+    <span class="go">Claim ›</span>
+  </button>
+
+  <p class="section-label">CRYSTALS · 1 = ONE REVIVAL</p>
+  <div class="grid">
+    <article class="card">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:20px;height:26px"><span class="gem gem--glow" style="left:0;top:0;width:20px;height:26px"></span></span></span>
+      <span class="qty">5<small>Crystals</small></span>
+      <span class="bonus"></span>
+      <button class="price" type="button">$1</button>
+    </article>
+    <article class="card">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:40px;height:30px"><span class="gem gem--glow" style="left:0;top:6px;width:18px;height:24px"></span><span class="gem gem--glow" style="left:18px;top:0;width:22px;height:28px"></span></span></span>
+      <span class="qty">11<small>Crystals</small></span>
+      <span class="bonus">+1 BONUS</span>
+      <button class="price" type="button">$2</button>
+    </article>
+    <article class="card">
+      <span class="art" aria-hidden="true"><span class="pile" style="width:56px;height:40px"><span class="gem gem--glow" style="left:0;top:14px;width:18px;height:24px"></span><span class="gem gem--glow" style="left:34px;top:12px;width:20px;height:26px"></span><span class="gem gem--glow" style="left:14px;top:0;width:26px;height:34px"></span></span></span>
+      <span class="qty">30<small>Crystals</small></span>
+      <span class="bonus">+5 BONUS</span>
+      <button class="price" type="button">$5</button>
+    </article>
+    <article class="card card--best">
+      <span class="ribbon">MOST GLOW</span>
+      <span class="art" aria-hidden="true"><span class="pile" style="width:72px;height:48px"><span class="gem gem--glow" style="left:0;top:22px;width:16px;height:22px"></span><span class="gem gem--glow" style="left:54px;top:22px;width:16px;height:22px"></span><span class="gem gem--glow" style="left:10px;top:8px;width:20px;height:28px"></span><span class="gem gem--glow" style="left:42px;top:8px;width:20px;height:28px"></span><span class="gem gem--glow" style="left:22px;top:0;width:28px;height:38px"></span></span></span>
+      <span class="qty">65<small>Crystals</small></span>
+      <span class="bonus">+15 BONUS</span>
+      <button class="price" type="button">$10</button>
+    </article>
+  </div>
+
+  <article class="noads">
+    <span class="sun" aria-hidden="true"></span>
+    <div><h2>No Ads</h2><span class="tag-once">ONE-TIME · KEEP FOREVER</span></div>
+    <ul>
+      <li>No ads, ever. Not even optional ones.</li>
+      <li>One free revival every day, at dawn.</li>
+    </ul>
+    <button class="price price--gold" type="button">$3</button>
+  </article>
+
+  <p class="fine">One revival per game. Daily revival resets 4:00 AM New York time.<br>Sign in only when you buy or claim. Play never needs it.</p>
+</main>
+</body>
+</html>

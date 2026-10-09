@@ -72,7 +72,7 @@ window.BioEconomy = (() => {
     const storeOn = cfg.storeEnabled === true || loopback;
     for (const id of ['shopBtn', 'startShopBtn']) if ($(id)) $(id).hidden = !storeOn;
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
-    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : 'Sign in to claim 3 free Crystals or purchase';
+    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `You hold ${wallet.crystals} Crystal${wallet.crystals === 1 ? '' : 's'}${paid ? ' · No Ads owned' : ''}` : 'Account balance unavailable') : 'No Crystals yet';
     if ($('authControls')) $('authControls').hidden = !!session;
     if ($('googleLink')) {
       $('googleLink').hidden = !session || !!test || googleLinked(session.user);
@@ -88,6 +88,8 @@ window.BioEconomy = (() => {
     if ($('claimBtn')) { $('claimBtn').hidden = !!wallet?.welcome_claimed; $('claimBtn').disabled = busy; }
     if ($('dailyInfo')) $('dailyInfo').textContent = paid ? (wallet.daily_available ? 'Your daily revival is available.' : 'Daily revival used. Next reset: 4:00 AM New York time.') : '';
     for (const btn of document.querySelectorAll('[data-product]')) btn.disabled = busy || !!pending || (btn.dataset.product === 'no_ads' && paid);
+    const noAds = document.querySelector('[data-product="no_ads"]');
+    if (noAds) { noAds.textContent = paid ? 'Owned' : '$3'; noAds.setAttribute('aria-label', paid ? 'No Ads owned' : 'Buy No Ads for US$3, one-time purchase'); }
     if ($('reviveCrystal')) {
       const used = !s?.over || s.revived || !storeOn;
       // One revive button at a time: a pending retry first, then the daily
@@ -161,7 +163,8 @@ window.BioEconomy = (() => {
   }
   function requireLogin() {
     if (uid()) return true;
-    openShop(); message('Sign in to purchase or claim your free Crystals.'); return false;
+    openShop(); message('Sign in to purchase or claim your free Crystals.');
+    $('shopAccount')?.scrollIntoView({ block: 'nearest' }); return false;
   }
   async function claim() {
     if (!requireLogin()) return;
