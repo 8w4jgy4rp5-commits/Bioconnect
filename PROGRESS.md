@@ -1,5 +1,10 @@
 # Bioconnect 進捗
 
+## 2026-10-09 — 本番ではショップと復活ボタンを隠す
+- 本番Supabaseに課金の仕組みがまだ無く、購入・広告もオフなので、公開サイトでは押しても使えないボタンになっていた。
+- shared/monetization-config.js に storeEnabled: false を追加。false のあいだ公開サイトでは「Crystals & No Ads」（タイトル・メニュー）と復活ボタンをすべて隠す。localhost では常に表示（テスト・sandbox用）。課金開始時に true にする。
+- 検証: rules 258件、npm test、test:browser 35件成功。localhost以外の名前で開き、タイトル・ゲームオーバーにショップ／復活ボタンが出ず「Let it rest · new game」だけになることを撮影で確認。
+
 ## 2026-10-09 — 収益化（クリスタル・No Ads・復活）を公開リポジトリへ
 - 収益化のコード・Supabase SQL／Edge Functions・ローカル模擬テストを公開。購入と広告は shared/monetization-config.js で無効のまま（実際のお金・広告は動かない）。
 - 復活画面を「燭台と古い本」に実装（index.html／monetization.js の draw()／style.css／eldritch.css）。押せるボタンは1つ、No Adsなしの人には鎖をかけた夜明けを上に出す。復活処理 revive() そのものは変更なし。

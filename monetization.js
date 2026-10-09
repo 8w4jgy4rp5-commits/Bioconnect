@@ -68,6 +68,9 @@ window.BioEconomy = (() => {
       }
     }
     const paid = !!wallet?.no_ads;
+    // Until the live backend sells, the store and revivals stay out of sight there.
+    const storeOn = cfg.storeEnabled === true || loopback;
+    for (const id of ['shopBtn', 'startShopBtn']) if ($(id)) $(id).hidden = !storeOn;
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
     if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : 'Sign in to claim 3 free Crystals or purchase';
     if ($('authControls')) $('authControls').hidden = !!session;
@@ -86,7 +89,7 @@ window.BioEconomy = (() => {
     if ($('dailyInfo')) $('dailyInfo').textContent = paid ? (wallet.daily_available ? 'Your daily revival is available.' : 'Daily revival used. Next reset: 4:00 AM New York time.') : '';
     for (const btn of document.querySelectorAll('[data-product]')) btn.disabled = busy || !!pending || (btn.dataset.product === 'no_ads' && paid);
     if ($('reviveCrystal')) {
-      const used = !s?.over || s.revived;
+      const used = !s?.over || s.revived || !storeOn;
       // One revive button at a time: a pending retry first, then the daily
       // dawn, then a Crystal, then a rewarded ad, then a way to the store.
       const adOk = !paid && known && !(session && !wallet) && (!!test || cfg.adsEnabled);

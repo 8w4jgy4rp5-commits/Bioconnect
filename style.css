@@ -2238,3 +2238,4 @@ body.is-celebrating { overflow: hidden; }
 .revive-hush { margin: -3px 0 2px; font-size: 11px; text-align: center; color: var(--ink-soft); }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
+#shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }
