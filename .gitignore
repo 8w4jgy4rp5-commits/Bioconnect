@@ -12,3 +12,6 @@ output/edge-deploy/
 private-notes/
 test/mobile-gateway.cjs
 test/mobile-gateway.test.cjs
+
+# Claude Code team agents/skills (private)
+.claude/
