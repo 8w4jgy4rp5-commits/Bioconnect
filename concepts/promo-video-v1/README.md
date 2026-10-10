@@ -18,12 +18,15 @@
 - `index.html`: 試聴・プレビュー。「Intro」で映像＋音、「BGM only」で曲だけ（ループ2回）。
 - `promo-audio.js`: 曲と効果音。リアルタイム再生とオフライン書き出しで同じものを使う。
 - `promo-intro.js`: 冒頭の映像。`render(t)` が時刻 t の1コマを描く（状態を持たない）。
-- `sprites/`: ゲーム本体の描画（標準スキン）から書き出した各動物のタイル画像。`export-sprites.cjs` で再生成。
+- `promo-art.js`: ゲーム本体を見えない iframe で読み込み、`paintAnimal()`（しぐさ込み）と style.css の待機モーション・呼吸をそのまま借りて描く。動物の動きはゲームと同じ。
+- `hires/`: 動画用の高画質な動物の絵。ゲームは絵を約110pxに縮めて持つので、拡大するとぼやける。元の大きな原画を、ゲームの絵と同じ枠・余白に置き直したもの（`make-hires.py`、ゲームの絵との差を表示して確認）。ウサギ・キツネはパーツの元絵が小さいため対象外（やや柔らかい）。
+- `sprites/`: 上の列の小さなアイコン用。`export-sprites.cjs` で再生成。
 - `render.cjs`: 1コマずつ撮影して `out/promo-intro.mp4` と `out/bgm-preview.mp4` を作る（ffmpeg 必要）。
 
 ## 作り直し方
 ```
 python -m http.server 8770 --bind 127.0.0.1      # リポジトリ直下で
-node concepts/promo-video-v1/export-sprites.cjs   # 動物の絵が変わったとき
+node concepts/promo-video-v1/export-sprites.cjs   # 動物の絵が変わったとき（アイコン）
+python concepts/promo-video-v1/make-hires.py      # 動物の絵が変わったとき（高画質版。原画の対応表は中に書いてある）
 node concepts/promo-video-v1/render.cjs
 ```

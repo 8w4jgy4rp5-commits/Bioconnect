@@ -20,7 +20,7 @@ window.PromoIntro = (() => {
   const DURATION = CUE.endBeat * BEAT;
 
   const W = 1080, H = 1920, CX = W / 2, CY = 1010;
-  const APART = 270, MEET = 80;
+  const TILE_PX = 720, APART = 270, MEET = 80;
 
   let root, els = {};
   function mount(stage) {
@@ -41,10 +41,16 @@ window.PromoIntro = (() => {
     els.burst = make('pi-burst');
     els.ring = make('pi-ring');
     els.sparks = Array.from({ length: 14 }, () => make('pi-spark'));
-    els.ghost = make('pi-ghost', stage, 'img'); els.ghost.src = 'sprites/elephant.png'; els.ghost.alt = '';
-    els.left = make('pi-tile', stage, 'img'); els.right = make('pi-tile', stage, 'img');
-    els.center = make('pi-tile', stage, 'img');
-    [els.left, els.right, els.center].forEach(n => { n.alt = ''; });
+    els.ghost = make('pi-ghost', stage, 'img'); els.ghost.src = 'hires/elephant-calm.png'; els.ghost.alt = '';
+    // the game's own animals, idles and gestures included (promo-art.js)
+    els.tiles = [0, 1, 2].map(i => {
+      const t = PromoArt.tile(TILE_PX);
+      t.root.classList.add('pi-tile');
+      if (i === 1) t.root.style.setProperty('--twin', '1');   // the right twin breathes out of step
+      stage.appendChild(t.root);
+      return t;
+    });
+    [els.left, els.right, els.center] = els.tiles.map(t => t.root);
     els.name = make('pi-name');
     els.next = make('pi-next'); els.next.textContent = 'Next is…?';
     els.q = make('pi-q'); els.q.textContent = '?';
@@ -59,10 +65,6 @@ window.PromoIntro = (() => {
   function place(n, x, y, scale = 1, rot = 0, opacity = 1) {
     n.style.transform = `translate(${x}px,${y}px) translate(-50%,-50%) rotate(${rot}deg) scale(${scale})`;
     n.style.opacity = opacity;
-  }
-  function setKind(n, kind) {
-    const src = 'sprites/' + kind + '.png';
-    if (n.dataset.kind !== kind) { n.src = src; n.dataset.kind = kind; }
   }
 
   // which merge segment we are in: the animal on show and how far along
@@ -107,14 +109,26 @@ window.PromoIntro = (() => {
     const born = seg.kind > 0 ? clamp(seg.sinceMerge / Math.min(.6, span * .5)) : 1;
     const bounce = seg.kind > 0 ? backOut(born) : 1;
     const showPair = seg.kind === 0 || p > .3 || frozen;
-    const bob = frozen ? 0 : Math.sin(t * 6) * 6;
     // at the freeze the tigers sink and shrink to make room for the shadow
     const sink = frozen ? easeOut(clamp((beat - CUE.freezeBeat) * BEAT / .35)) : 0;
-    const ty = CY + sink * 380, ts = 1 - sink * .3;
-    setKind(els.left, kind); setKind(els.right, kind); setKind(els.center, kind);
+    const ty = CY + sink * 420, ts = 1 - sink * .4;
+    // each animal's own gesture, played once while it is on show: at its
+    // real speed when there is time, hurried up to 4x when there is not,
+    // and left to the idle alone when even that is too fast to read
+    let motion = null;
+    const g = PromoArt.gestureLength(kind);
+    if (g) {
+      if (frozen) motion = PromoArt.gesture(kind, (beat - CUE.freezeBeat) * BEAT * 2 / g);
+      else if (seg.kind > 0) {
+        const speed = Math.max(1, g / (span * BEAT * .9));
+        if (speed <= 4) motion = PromoArt.gesture(kind, (b - seg.start) * BEAT * speed / g);
+      }
+    }
+    for (const tl of els.tiles) { tl.set(kind); tl.paint(motion); }
     if (showPair) {
-      place(els.left, CX - gap * ts, ty + bob, ts, -4, 1);
-      place(els.right, CX + gap * ts, ty - bob, ts, 4, 1);
+      const g2 = frozen ? 250 + (1 - sink) * (APART + 90 - 250) : gap;   // held apart while frozen
+      place(els.left, CX - g2, ty, ts, 0, 1);
+      place(els.right, CX + g2, ty, ts, 0, 1);
       els.right.style.transform += ' scaleX(-1)';
       place(els.center, CX, CY, 1, 0, 0);
     } else {

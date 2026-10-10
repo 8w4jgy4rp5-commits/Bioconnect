@@ -15,6 +15,7 @@ const URL = 'http://127.0.0.1:8770/concepts/promo-video-v1/index.html?render';
   const browser = await chromium.launch({ executablePath: process.env.CHROME || '/opt/pw-browsers/chromium' });
   const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   await page.goto(URL);
+  await page.waitForFunction(() => window.promoReady, null, { timeout: 30000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForFunction(() => [...document.images].every(i => i.complete));
 
