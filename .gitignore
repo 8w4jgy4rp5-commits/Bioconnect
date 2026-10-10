@@ -15,3 +15,7 @@ test/mobile-gateway.test.cjs
 
 # Claude Code team agents/skills (private)
 .claude/
+
+# promo video: per-frame renders and raw audio (rebuilt by render.cjs)
+concepts/promo-video-v1/out/frames/
+concepts/promo-video-v1/out/*.wav
