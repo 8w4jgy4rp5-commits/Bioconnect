@@ -104,11 +104,14 @@ body.render .frame{width:1080px;border-radius:0;box-shadow:none}
   // for render.cjs: draw any moment, and render the soundtrack offline
   window.promoFrame = t => { PromoIntro.render(t); PromoArt.seek(t); };
   window.promoReady = true;
-  window.promoAudio = async (which) => {
+  // which: 'intro', 'bgm', or 'full' with `play` (the play section's cues
+  // from play-render.cjs, in seconds from the start of the video)
+  window.promoAudio = async (which, play) => {
     const rate = 48000, intro = which === 'intro';
-    const secs = intro ? PromoIntro.DURATION + 1.5 : PromoSound.LOOP_BEATS * PromoSound.BEAT * 2 + 2.5;
+    const secs = which === 'full' ? play.length + 1 : intro ? PromoIntro.DURATION + 1.5 : PromoSound.LOOP_BEATS * PromoSound.BEAT * 2 + 2.5;
     const off = new OfflineAudioContext(2, Math.ceil(rate * secs), rate);
-    if (intro) PromoSound.scheduleIntro(off, 0, PromoIntro.CUE); else PromoSound.scheduleLoop(off, 0, 2);
+    if (which === 'full') PromoSound.scheduleFull(off, 0, PromoIntro.CUE, play);
+    else if (intro) PromoSound.scheduleIntro(off, 0, PromoIntro.CUE); else PromoSound.scheduleLoop(off, 0, 2);
     const buf = await off.startRendering();
     const L = buf.getChannelData(0), R = buf.getChannelData(1), n = buf.length;
     const out = new DataView(new ArrayBuffer(44 + n * 4));

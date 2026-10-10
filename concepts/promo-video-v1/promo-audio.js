@@ -59,7 +59,9 @@ window.PromoSound = (() => {
 
     // music and effects are separate buses so the music can be cut dead
     const music = ctx.createGain(); music.gain.value = .8;
-    music.connect(master); music.connect(verb);
+    // slow motion muffles the music, as if heard under water
+    const musicLP = ctx.createBiquadFilter(); musicLP.type = 'lowpass'; musicLP.frequency.value = 18000; musicLP.Q.value = .7;
+    music.connect(musicLP); musicLP.connect(master); musicLP.connect(verb);
     const sfx = ctx.createGain(); sfx.gain.value = 1;
     sfx.connect(master);
     const sfxVerb = ctx.createGain(); sfxVerb.gain.value = .5;
@@ -205,8 +207,68 @@ window.PromoSound = (() => {
       music.gain.setValueAtTime(music.gain.value, t - .005);
       music.gain.linearRampToValueAtTime(0, t + .03);
     }
+    function startMusic(t) { music.gain.setValueAtTime(0, t - .01); music.gain.linearRampToValueAtTime(.8, t + .02); }
+    function muffle(t0, t1) {             // slow-motion window
+      musicLP.frequency.setValueAtTime(18000, t0 - .15);
+      musicLP.frequency.exponentialRampToValueAtTime(500, t0 + .1);
+      musicLP.frequency.setValueAtTime(500, t1 - .1);
+      musicLP.frequency.exponentialRampToValueAtTime(18000, t1 + .15);
+    }
+    function tap(t) {                      // "kotsu": a fingertip on wood
+      const g = ctx.createGain(); g.connect(sfx); env(g, t, .001, .14, .03);
+      osc('sine', 1900, t, t + .05, g).frequency.exponentialRampToValueAtTime(900, t + .03);
+    }
+    function chomp(t) {                    // "paku!": a low, quick bite
+      const g = ctx.createGain(); g.connect(sfx); g.connect(sfxVerb); env(g, t, .003, .7, .14);
+      osc('sine', 320, t, t + .18, g).frequency.exponentialRampToValueAtTime(90, t + .11);
+      const cg = ctx.createGain(), bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 1.5; bp.connect(cg); cg.connect(sfx);
+      env(cg, t, .002, .45, .06); noise(t, .08, bp);
+      const g2 = ctx.createGain(); g2.connect(sfx); env(g2, t + .09, .002, .35, .07);
+      osc('triangle', 260, t + .09, t + .18, g2).frequency.exponentialRampToValueAtTime(110, t + .15);
+    }
+    function whoosh(t, len = .45) {        // fast-forward: a tape winding up
+      const g = ctx.createGain(), bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass'; bp.Q.value = 3; bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(6000, t + len);
+      bp.connect(g); g.connect(sfx); g.connect(sfxVerb);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.4, t + len * .8); g.gain.exponentialRampToValueAtTime(0.0001, t + len + .08);
+      noise(t, len + .1, bp);
+      const o = ctx.createGain(); o.connect(sfx); o.gain.setValueAtTime(0.0001, t); o.gain.exponentialRampToValueAtTime(.08, t + len * .8); o.gain.exponentialRampToValueAtTime(0.0001, t + len + .05);
+      osc('sawtooth', 120, t, t + len + .1, o).frequency.exponentialRampToValueAtTime(900, t + len);
+    }
+    function fanfare(t) {                  // the elephant: a timpani roll, then the organ
+      for (let i = 0; i < 14; i++) {       // the roll swells into the hit
+        const at = t - .7 + i * .05, g = ctx.createGain(); g.connect(sfx); env(g, at, .003, .05 + i * .02, .12);
+        osc('sine', 82, at, at + .16, g).frequency.exponentialRampToValueAtTime(68, at + .12);
+      }
+      thump(t, 1, sfx, 95, 40); thump(t, .6, sfxVerb, 95, 40);
+      [50, 57, 62, 66, 69, 74, 78, 81].forEach((m, i) => {   // D major, organ-ish
+        const g = ctx.createGain(), lp = ctx.createBiquadFilter();
+        lp.type = 'lowpass'; lp.frequency.value = 3200; lp.connect(g); g.connect(sfx); g.connect(sfxVerb);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(.032, t + .04);
+        g.gain.setValueAtTime(.032, t + 1.6); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.2);
+        osc('square', hz(m), t, t + 3.3, lp); osc('sine', hz(m) * 2, t, t + 3.3, lp);
+      });
+      for (let i = 0; i < 12; i++) {       // sparkles
+        const at = t + .15 + i * .11, m = [86, 90, 93, 98, 93, 102][i % 6] + (i > 5 ? 12 : 0);
+        const g = ctx.createGain(); g.connect(sfx); g.connect(sfxVerb); env(g, at, .002, .06, .35);
+        osc('sine', hz(m), at, at + .4, g);
+      }
+    }
+    function sparkle(t) {
+      [93, 98, 102, 105].forEach((m, i) => {
+        const at = t + i * .06, g = ctx.createGain(); g.connect(sfx); g.connect(sfxVerb); env(g, at, .002, .08, .5);
+        osc('sine', hz(m), at, at + .6, g);
+      });
+    }
+    function bell(t) {                     // "goon": one church-ish bell
+      [[1, .3, 4], [2.0, .16, 2.6], [2.76, .12, 2], [5.4, .06, 1.2], [.5, .2, 4.5]].forEach(([k, a, d]) => {
+        const g = ctx.createGain(); g.connect(sfx); g.connect(sfxVerb); env(g, t, .004, a, d);
+        osc('sine', hz(50) * k, t, t + d + .1, g);
+      });
+    }
     function stopAll(t) { masterGain.gain.setValueAtTime(masterGain.gain.value, t); masterGain.gain.linearRampToValueAtTime(0, t + .05); }
-    return { playMusic, pop, heartbeat, shine, cutMusic, stopAll, musicBeat };
+    return { playMusic, pop, heartbeat, shine, cutMusic, startMusic, muffle, tap, chomp, whoosh, fanfare, sparkle, bell, stopAll, musicBeat };
   }
 
   // ---- the intro's sound, on the same beat grid as promo-intro.js ----
@@ -220,10 +282,28 @@ window.PromoSound = (() => {
     s.shine(t0 + cue.flashBeat * BEAT);
     return s;
   }
+  // The whole video: the intro, then the play section from `play` (times
+  // in seconds from the start of the video, worked out by play-render.cjs).
+  function scheduleFull(ctx, t0, cue, play) {
+    const s = scheduleIntro(ctx, t0, cue);
+    const at = x => t0 + x;
+    s.startMusic(at(play.musicStart));
+    s.playMusic(at(play.musicStart), 0, Math.ceil((play.musicStop - play.musicStart) / BEAT));
+    s.cutMusic(at(play.musicStop));
+    for (const x of play.taps) s.tap(at(x));
+    for (const [x, n] of play.pops) s.pop(at(x), n, .4);
+    for (const x of play.whooshes) s.whoosh(at(x));
+    for (const [a, b] of play.slow) s.muffle(at(a), at(b));
+    for (const x of play.chomps) s.chomp(at(x));
+    if (play.fanfare != null) s.fanfare(at(play.fanfare));
+    if (play.reveal != null) s.sparkle(at(play.reveal));
+    if (play.bell != null) s.bell(at(play.bell));
+    return s;
+  }
   function scheduleLoop(ctx, t0, loops = 1) {
     const s = create(ctx);
     s.playMusic(t0, 0, LOOP_BEATS * loops);
     return s;
   }
-  return { BPM, BEAT, LOOP_BEATS, create, scheduleIntro, scheduleLoop };
+  return { BPM, BEAT, LOOP_BEATS, create, scheduleIntro, scheduleFull, scheduleLoop };
 })();

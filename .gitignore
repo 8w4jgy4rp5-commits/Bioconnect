@@ -19,3 +19,5 @@ test/mobile-gateway.test.cjs
 # promo video: per-frame renders and raw audio (rebuilt by render.cjs)
 concepts/promo-video-v1/out/frames/
 concepts/promo-video-v1/out/*.wav
+concepts/promo-video-v1/out/play-frames/
+concepts/promo-video-v1/out/test-*.jpg

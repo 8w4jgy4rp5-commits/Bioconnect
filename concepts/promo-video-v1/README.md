@@ -22,11 +22,20 @@
 - `hires/`: 動画用の高画質な動物の絵。ゲームは絵を約110pxに縮めて持つので、拡大するとぼやける。元の大きな原画を、ゲームの絵と同じ枠・余白に置き直したもの（`make-hires.py`、ゲームの絵との差を表示して確認）。ウサギ・キツネはパーツの元絵が小さいため対象外（やや柔らかい）。
 - `sprites/`: 上の列の小さなアイコン用。`export-sprites.cjs` で再生成。
 - `render.cjs`: 1コマずつ撮影して `out/promo-intro.mp4` と `out/bgm-preview.mp4` を作る（ffmpeg 必要）。
+- `promo-play.js`: プレイ部分で `index.html?watch` に差し込む。合体・捕食の記録と、指マーク・EAT!・SLOW-MO・早送りバッジ・隅のゾウのシルエット・最後のロゴ画面を重ねる。ゲームの処理は記録するだけで変えない。
+- `play-render.cjs`: ボットの記録済みの試合を本物の盤面で再生し、ページの時計を手で進めて1コマずつ撮る。場面ごとの速さ（等速・早送り・スロー）は中の `CUTS` で決める。冒頭とつなぎ、全体の音（`scheduleFull`）を付けて `out/promo-full.mp4` を作る。
+  - `--log` で合体・捕食の時刻一覧を出す（ルールやボットの記録を変えたら、これで場面を選び直す）。`--test 3,12.5` で指定の瞬間だけ `out/test-*.jpg` に撮る。
+  - 注意: ページの時計は `pauseAt` で止めてから手で進める（止めないと撮影中に実時間が漏れて、試合の時刻がずれる）。ボットの手順ファイルは実時間で届くので、届いてから PLAY を押す。
 
 ## 作り直し方
 ```
 python -m http.server 8770 --bind 127.0.0.1      # リポジトリ直下で
 node concepts/promo-video-v1/export-sprites.cjs   # 動物の絵が変わったとき（アイコン）
 python concepts/promo-video-v1/make-hires.py      # 動物の絵が変わったとき（高画質版。原画の対応表は中に書いてある）
-node concepts/promo-video-v1/render.cjs
+node concepts/promo-video-v1/render.cjs        # 冒頭（out/frames/ を作る）
+node concepts/promo-video-v1/play-render.cjs   # プレイ部分 + 全体（out/promo-full.mp4）
 ```
+
+## プレイ部分の構成（約21秒）
+序盤の植え付け（2.5倍速、指マーク）→ 早送り → シマウマ誕生の4連鎖（等速）→ 早送り → オオカミ誕生の5連鎖（等速）→ 早送り → キツネがウサギを食べる（0.4倍スロー＋ズーム＋EAT!、音楽がこもる）→ 早送り → クマ誕生（等速）→ ロゴ画面（鐘の音）→ ゾウのシルエットに色がつく（ジャーン）。
+ゾウそのものは育てない（本人「ゾウまで作らなくても、動物を作っている様子を面白く、爽快感をもって見せればよい」）。冒頭の「Next is…?」の答えは最後のロゴ画面で見せる。
