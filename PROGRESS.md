@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — Managed Payments に合わせた表示の見直しと本番手順書
+
+- legal/commerce・terms・privacy: 「Sold through Link」（Link＝Stripeが支払いの販売者として課金・売上税・領収書・支払い問い合わせと返金を担当）を明記。価格は税抜きで、税は支払い画面で加算と記載し、税の空欄とDraft表示を削除。noindexは維持。
+- index.html: 購入確認の Payment 欄を Link 表記へ。
+- docs/production-launch.md: 本番のStripe（商品5つ・webhook 4イベント）、本番Supabase（SQL 2つ、関数2つ、Secrets、SMTP）、売り始める日、止め方を本人向けに整理。
+- 根拠: Stripe公式（Managed Payments の仕組み・対象条件・税）。日本国内向け取引の税は対象外、手数料+3.5%、本番は審査あり。docs.stripe.com はこの環境から直接読めず、検索結果の要約で確認。
+- 未確認: 本番アカウントでのManaged Payments可否。法務の最終確認。
+
 ## 2026-10-11 — 「Continue to payment」後の待ち時間を分かるように
 
 - 本人報告: 押してからStripe画面まで間があり戸惑う。
