@@ -6,12 +6,25 @@
 - 設定ガイド: 受け付け方法は「構築済みの決済」、決済タイプはフルページ（コードは session.url へ移動する方式）。Stripe Taxの「税金を徴収していますか」は Managed Payments のため設定不要と案内（公式画面で未確認）。返金設定は「Email me for approval」。Adaptive Pricing（現地通貨表示）はオフを推奨（本人の設定結果は未確認）。
 - 次: 本番Supabase（xyumhzecqhpzzzzylbwn）の現状確認 → migrations適用 → Secrets・Edge配備・Webhook登録。CHECKOUT_ENABLEDと購入スイッチは最後まで入れない。
 
-## 2026-10-11 — 販売者情報の税表現をManaged Paymentsに合わせる
+## 2026-10-11 — 法的ページの税表現（別会話と重複、mainの版を採用）
 
-- 背景: 本番でStripe Managed Payments（Stripeの販売代行。客には「Sold through Link」と表示され、Link が売上税の計算・納付、領収書、決済まわりの問い合わせを担う）を使う。Stripe公式資料はクラウド環境から直接開けず、検索結果の要約で確認（how-it-works・サポートページ）。
-- 変更: legal/commerce.html の税の空欄を記入（価格は税抜、所在地の売上税は支払い画面で加算され支払い前に合計表示）。支払い方法をLink（販売代行）に、決済・領収書の問い合わせ先にLink supportを追加（別タブ、noopener noreferrer）。空欄がなくなったのでDraft表示を削除。terms・privacy にも Link と売上税の記述を追加。noindexは維持。
-- 検証: Chromium 375pxで3ページの横はみ出しなし、JS例外0、表示を撮影で確認。
-- 未確認・要判断: Managed Paymentsでは客がLinkへ返金を申請でき、Stripeの返金設定が「Refund without emailing me」だとStripeが判断して返金する／48時間返答しないと返金されうる（サポートページの記述、要原文確認）。当方の「返金不可」と食い違わないよう、本番の返金設定は「Email me for approval」にすると本人が決定（DEVELOPMENTに記録）。法務の最終確認の代わりではない。commit/pushなし。
+- この会話でも legal/ 3ページの税・Link表記を書いたが、別の会話が同じ内容をmainへ公開済み（0a38092）だったため、mainの版を採用して自分の変更は捨てた。本番の返金設定は「Email me for approval」と本人決定（DEVELOPMENT）。
+
+## 引き継ぎ（2026-10-11 時点・次の会話はここから）
+
+- 状態: TEST（bioconnect-sandbox＋Stripeサンドボックス、Managed Payments）で5商品の購入と全額返金の取り消しまで本人確認済み。本番は購入OFF・ショップ非表示のまま。
+- 公開: 法的3ページのManaged Payments（Sold through Link）対応、購入確認のPayment欄、docs/production-launch.md を本人承認でmainへ反映済み。
+- 本人の手作業（手順は docs/production-launch.md）: 本番StripeでManaged Paymentsが使えるか確認（審査・手数料+3.5%）→商品5つ・webhook 4イベント→本番SupabaseにSQL 2つ・関数2つ・Secrets→SMTP→売り始める日に CHECKOUT_ENABLED とAIへの購入ON依頼→スマホで購入と返金。
+- AIの次の作業候補: 本番手順の付き添い。ショップ画面のデザイン。
+- 注意: 本人のWindowsには別AIの変更が git stash（other AI reversal work 2026-10-11）に残る（コード部分は取り込み済み）。PowerShellでは npm.cmd を使い、最初に cd C:\Users\tians\Bioconnect。npm test の stamp 1件失敗はクラウド環境だけの改行差と推定。
+
+## 2026-10-11 — Managed Payments に合わせた表示の見直しと本番手順書
+
+- legal/commerce・terms・privacy: 「Sold through Link」（Link＝Stripeが支払いの販売者として課金・売上税・領収書・支払い問い合わせと返金を担当）を明記。価格は税抜きで、税は支払い画面で加算と記載し、税の空欄とDraft表示を削除。noindexは維持。
+- index.html: 購入確認の Payment 欄を Link 表記へ。
+- docs/production-launch.md: 本番のStripe（商品5つ・webhook 4イベント）、本番Supabase（SQL 2つ、関数2つ、Secrets、SMTP）、売り始める日、止め方を本人向けに整理。
+- 根拠: Stripe公式（Managed Payments の仕組み・対象条件・税）。日本国内向け取引の税は対象外、手数料+3.5%、本番は審査あり。docs.stripe.com はこの環境から直接読めず、検索結果の要約で確認。
+- 未確認: 本番アカウントでのManaged Payments可否。法務の最終確認。
 
 ## 2026-10-11 — 「Continue to payment」後の待ち時間を分かるように
 
