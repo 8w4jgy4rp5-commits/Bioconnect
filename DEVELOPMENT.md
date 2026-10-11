@@ -1,8 +1,12 @@
 # Bioconnect 開発方針
 
+## 2026-10-11 — Managed Paymentsの返金申請は毎回本人が確認
+
+本人決定: Stripe（本番・TEST）のManaged Payments返金設定は「Email me for approval」（客がLinkへ返金を申請するたびに本人へ確認が来る）。「返金不可（法令で必要な場合を除く）」の方針と食い違わないようにするため。返答がないとStripeが返金しうる期限（サポートページでは48時間）があるので、メールを見落とさない。販売者情報・規約・プライバシーの税とLinkの記述は2026-10-11に記入済み。
+
 ## 2026-10-11 — Stripe Managed Payments（本人が有効化したと認識）
 
-TESTのStripeはManaged Payments（Stripeが税の計算・納付を担う）で動かす。Checkoutは価格IDを使い、税は価格に上乗せ（tax_behavior=exclusive）。付与の判定は税抜きの価格で行う。Managedでは custom_text 等の一部項目が使えないため、返金条件はショップの確認画面で示す。本番は PAYMENTS_LIVE=true でも CHECKOUT_ENABLED=true と MANAGED_PAYMENTS=true がそろうまで購入を受け付けない。Managed Payments採用に伴う販売者情報ページ・税の表現の見直しは未着手。
+TESTのStripeはManaged Payments（Stripeが税の計算・納付を担う）で動かす。Checkoutは価格IDを使い、税は価格に上乗せ（tax_behavior=exclusive）。付与の判定は税抜きの価格で行う。Managedでは custom_text 等の一部項目が使えないため、返金条件はショップの確認画面で示す。本番は PAYMENTS_LIVE=true でも CHECKOUT_ENABLED=true と MANAGED_PAYMENTS=true がそろうまで購入を受け付けない。Managed Payments採用に伴う販売者情報ページ・税の表現は2026-10-11に記入済み。
 
 ## 2026-10-11 — 販売者は日本在住の個人、まず米国向け・No Adsも返金不可
 

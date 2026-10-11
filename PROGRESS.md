@@ -1,5 +1,18 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — 本番Stripeに5商品を登録（本人作業）
+
+- 本人がStripe本番（live）で 5/11/30/65 Crystals・No Ads の価格を作成（USD、一回限り、外税、税コード txcd_10202000、Managed Payments利用対象）。5 Crystalsは前日に本番で作成済みのものを画面で確認して流用。No Adsの単価$3.00も本人確認済み。価格IDはチャットで受け取り、本番SupabaseのSecrets（STRIPE_PRICE_*）へは未登録。
+- 設定ガイド: 受け付け方法は「構築済みの決済」、決済タイプはフルページ（コードは session.url へ移動する方式）。Stripe Taxの「税金を徴収していますか」は Managed Payments のため設定不要と案内（公式画面で未確認）。返金設定は「Email me for approval」。Adaptive Pricing（現地通貨表示）はオフを推奨（本人の設定結果は未確認）。
+- 次: 本番Supabase（xyumhzecqhpzzzzylbwn）の現状確認 → migrations適用 → Secrets・Edge配備・Webhook登録。CHECKOUT_ENABLEDと購入スイッチは最後まで入れない。
+
+## 2026-10-11 — 販売者情報の税表現をManaged Paymentsに合わせる
+
+- 背景: 本番でStripe Managed Payments（Stripeの販売代行。客には「Sold through Link」と表示され、Link が売上税の計算・納付、領収書、決済まわりの問い合わせを担う）を使う。Stripe公式資料はクラウド環境から直接開けず、検索結果の要約で確認（how-it-works・サポートページ）。
+- 変更: legal/commerce.html の税の空欄を記入（価格は税抜、所在地の売上税は支払い画面で加算され支払い前に合計表示）。支払い方法をLink（販売代行）に、決済・領収書の問い合わせ先にLink supportを追加（別タブ、noopener noreferrer）。空欄がなくなったのでDraft表示を削除。terms・privacy にも Link と売上税の記述を追加。noindexは維持。
+- 検証: Chromium 375pxで3ページの横はみ出しなし、JS例外0、表示を撮影で確認。
+- 未確認・要判断: Managed Paymentsでは客がLinkへ返金を申請でき、Stripeの返金設定が「Refund without emailing me」だとStripeが判断して返金する／48時間返答しないと返金されうる（サポートページの記述、要原文確認）。当方の「返金不可」と食い違わないよう、本番の返金設定は「Email me for approval」にすると本人が決定（DEVELOPMENTに記録）。法務の最終確認の代わりではない。commit/pushなし。
+
 ## 2026-10-11 — 「Continue to payment」後の待ち時間を分かるように
 
 - 本人報告: 押してからStripe画面まで間があり戸惑う。
