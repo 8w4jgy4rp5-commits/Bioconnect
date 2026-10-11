@@ -6,7 +6,8 @@
 - 本人報告: TESTゲーム（npm.cmd run sandbox:payments）で5 Crystalsをテストカードで購入でき、Refreshで反映。AIの直接観測ではない。
 - 途中の問題と対処: (1) 別AIのcheckoutが custom_text をManagedでも送り503 → Managedでは送らない。(2) 失敗時と同じ注文番号の再利用でStripeの冪等キーエラー → checkoutが order_expired を返し、ショップが新しい注文で始め直す（edge-checkにテスト追加）。(3) PowerShellのnpm実行ポリシー → npm.cmd か node で直接実行。
 - TESTの設定で分かったこと: 価格IDは STRIPE_PRICE_CRYSTALS5 だけ登録済み。11/30/65 Crystals と No Ads は「Product price not configured」で買えない。
-- 次: (1) Stripeサンドボックスで全額返金し、5個減ることを確認（返金・チャージバック処理の実確認）。(2) 残り4商品の商品・価格（税コード付き、tax_behavior=exclusive）を作り価格IDを登録。(3) stash内の別AIの index.html・docs・記録の確認。(4) Managed Payments採用に合わせ販売者情報ページ・税表現を見直し。(5) 本番Supabaseへの導入、SMTP、実機確認、購入ON。
+- 追記: 本人がStripeサンドボックスで同じ支払いを全額返金し、Refreshで40→35個に戻ったと報告（charge.refunded→取り消しの実接続確認。本人報告）。チャージバックの実確認は未実施。
+- 次: (2) 残り4商品の商品・価格（税コード付き、tax_behavior=exclusive）を作り価格IDを登録。(3) stash内の別AIの index.html・docs・記録の確認。(4) Managed Payments採用に合わせ販売者情報ページ・税表現を見直し。(5) 本番Supabaseへの導入、SMTP、実機確認、購入ON。
 - 本人Windowsの main には今回のコードはまだない。git pull で取り込む（stashは残したまま）。
 
 ## 2026-10-11 — 別AIのManaged Payments対応を取り込み、TESTのCheckout失敗を修正
