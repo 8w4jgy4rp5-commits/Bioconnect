@@ -14,6 +14,7 @@ async function main() {
   const revive = (u,r,source='crystal') => rpc(u,'public.bioconnect_revive($1,$2)',[r,source]);
   const order = (u,sku,request=randomUUID()) => db.as(null,'select public.bioconnect_order($1,$2,$3) as result',[u,request,sku],'service_role').then(scalar);
   const fulfill = (o,session,event,amount,currency='usd') => db.as(null,'select public.bioconnect_fulfill($1,$2,$3,$4,$5,$6,$7)',[o.id,o.owner_id,session,event,o.sku,amount,currency],'service_role');
+  const reverse = (o,session,event,reason='refund',owner=o.owner_id) => db.as(null,'select public.bioconnect_reverse($1,$2,$3,$4,$5)',[o.id,owner,session,event,reason],'service_role');
   try {
     await check('anonymous claim rejected', async () => { await assert.rejects(db.as(null,'select public.bioconnect_claim_welcome()',[],'anon'),/permission denied/); });
     await check('browser cannot edit money or fulfill payment', async () => {
@@ -82,6 +83,41 @@ async function main() {
       await db.query("update bioconnect_private.accounts set free_day='2020-01-01' where owner_id=$1",[ids.a]);
       assert.equal((await wallet(ids.a)).daily_available,true);
       await revive(ids.a,randomUUID(),'daily'); await assert.rejects(revive(ids.a,randomUUID(),'daily'),/Daily revival unavailable/);
+    });
+    await check('browser cannot reverse orders; owner and session cannot be spoofed', async () => {
+      await assert.rejects(db.as(ids.a,'select public.bioconnect_reverse($1,$2,$3,$4,$5)',[paid.id,ids.a,'cs_a','evt_r','refund']),/permission denied/);
+      await assert.rejects(reverse(paid,'cs_a','evt_r','refund',ids.b),/Order mismatch/);
+      await assert.rejects(reverse(paid,'cs_other','evt_r'),/Session mismatch/);
+      await assert.rejects(reverse(paid,'cs_a','evt_r','gift'),/Invalid reversal/);
+    });
+    await check('refund and dispute on one Crystal order take back once', async () => {
+      const o=await order(ids.b,'crystals5'); await fulfill(o,'cs_b5','evt_b5',100);
+      const before=(await wallet(ids.b)).crystals;
+      await Promise.all([...Array.from({length:5},(_,i)=>reverse(o,'cs_b5','evt_rf'+i)),reverse(o,'cs_b5','evt_dp','dispute')]);
+      assert.equal((await wallet(ids.b)).crystals,before-5);
+      await fulfill(o,'cs_b5','evt_b5_again',100); assert.equal((await wallet(ids.b)).crystals,before-5);
+    });
+    await check('spent Crystals floor at zero after a refund', async () => {
+      const o=await order(ids.b,'crystals30'); await fulfill(o,'cs_b30','evt_b30',500);
+      await db.query('update bioconnect_private.accounts set crystals=3 where owner_id=$1',[ids.b]);
+      await reverse(o,'cs_b30','evt_b30_dispute','dispute');
+      const b=await wallet(ids.b); assert.equal(b.crystals,0); assert.equal(b.no_ads,false);
+    });
+    await check('No Ads refund revokes ad removal and daily revival, and it can be bought again', async () => {
+      await db.query('update bioconnect_private.accounts set free_day=null where owner_id=$1',[ids.a]);
+      const crystals=(await wallet(ids.a)).crystals;
+      await reverse(noads,'cs_noads','evt_noads_refund');
+      const a=await wallet(ids.a); assert.equal(a.no_ads,false); assert.equal(a.daily_available,false); assert.equal(a.crystals,crystals);
+      await assert.rejects(revive(ids.a,randomUUID(),'daily'),/Daily revival unavailable/);
+      const again=await order(ids.a,'no_ads'); assert.notEqual(again.id,noads.id);
+      await fulfill(again,'cs_noads2','evt_noads2',300); assert.equal((await wallet(ids.a)).no_ads,true);
+    });
+    await check('a reversal arriving before payment confirmation never grants', async () => {
+      const o=await order(ids.b,'crystals11'); const before=(await wallet(ids.b)).crystals;
+      await reverse(o,'cs_b11','evt_b11_refund'); await fulfill(o,'cs_b11','evt_b11',200);
+      assert.equal((await wallet(ids.b)).crystals,before);
+      const n=await order(ids.b,'no_ads'); await reverse(n,'cs_bn','evt_bn_refund');
+      const next=await order(ids.b,'no_ads'); assert.notEqual(next.id,n.id);
     });
     await check('4AM New York boundaries and both DST transitions', async () => {
       for(const [instant,day] of [

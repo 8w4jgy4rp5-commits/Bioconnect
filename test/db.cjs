@@ -32,7 +32,9 @@ async function createDB(postgres = false) {
     raw = (sql,args) => args ? engine.query(sql,args) : engine.exec(sql).then(res => res.at(-1));
   }
   await raw(bootstrap);
-  await raw(fs.readFileSync(path.join(__dirname, '../supabase/migrations/202610050001_monetization.sql'),'utf8'));
+  const migrations = path.join(__dirname, '../supabase/migrations');
+  for (const file of fs.readdirSync(migrations).filter(f => f.endsWith('.sql')).sort())
+    await raw(fs.readFileSync(path.join(migrations, file),'utf8'));
   await raw(`insert into auth.users values ('${ids.a}'),('${ids.b}')`);
   let queue = Promise.resolve();
   const query = (sql,args) => raw(sql,args);

@@ -15,13 +15,17 @@ async function main(){
   const env={STRIPE_SECRET_KEY:'sk_test_local_fixture',STRIPE_WEBHOOK_SECRET:secret,BIOCONNECT_SITE_URL:site,PAYMENTS_LIVE:'false'};
   const stripe=new Stripe(env.STRIPE_SECRET_KEY), sessions=new Map();
   const admin={auth:{getUser:async jwt=>({data:{user:jwt==='valid-a'?{id:ids.a}:null},error:jwt==='valid-a'?null:Error('bad token')})},rpc:async(name,args)=>{
-    const params=name==='bioconnect_order'?['p_owner','p_request','p_sku']:['p_order','p_owner','p_session','p_event','p_sku','p_amount','p_currency'];
+    const params=name==='bioconnect_order'?['p_owner','p_request','p_sku']:name==='bioconnect_reverse'?['p_order','p_owner','p_session','p_event','p_reason']:['p_order','p_owner','p_session','p_event','p_sku','p_amount','p_currency'];
     try{const rows=await db.as(null,'select public.'+name+'('+params.map((_,i)=>'$'+(i+1)).join(',')+') as result',params.map(p=>args[p]),'service_role');return {data:rows[0].result,error:null};}
     catch(error){return {data:null,error};}
   }};
   let capturedCreate=null;
   stripe.checkout.sessions.create=async(params,options)=>{capturedCreate={params,options};return {url:'https://checkout.stripe.com/c/pay/local-test',id:'cs_local'};};
   stripe.checkout.sessions.retrieve=async id=>{if(!sessions.has(id))throw Error('No fixture');return sessions.get(id);};
+  const charges=new Map(),disputes=new Map();
+  stripe.charges.retrieve=async id=>{if(!charges.has(id))throw Error('No fixture');return charges.get(id);};
+  stripe.disputes.retrieve=async id=>{if(!disputes.has(id))throw Error('No fixture');return disputes.get(id);};
+  stripe.checkout.sessions.list=async({payment_intent})=>({data:[...sessions.values()].filter(x=>x.payment_intent===payment_intent)});
   function load(f,requireFn,deno){const module={exports:{}};const code=ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,esModuleInterop:true}}).outputText;
     new Function('require','exports','module','Deno',code)(requireFn,module.exports,module,deno);return module.exports;}
   let handler;const deno={env:{get:k=>env[k]},serve:fn=>handler=fn};
@@ -57,6 +61,26 @@ async function main(){
     assert.equal((await notify('evt_different')).status,200);
     account=await db.query('select crystals from bioconnect_private.accounts where owner_id=$1',[ids.a]);assert.equal(account.rows[0].crystals,5);
     console.log('ok real webhook handler: raw signature, environment, unpaid/paid, mismatch and duplicate delivery');
+    async function notice(id,type,objectId,live=false){
+      const payload=JSON.stringify({id,type,livemode:live,data:{object:{id:objectId}}});
+      return webhook(new Request('https://edge.test/webhook',{method:'POST',headers:{'stripe-signature':stripe.webhooks.generateTestHeaderString({payload,secret})},body:payload}));
+    }
+    const crystals=async()=>(await db.query('select crystals from bioconnect_private.accounts where owner_id=$1',[ids.a])).rows[0].crystals;
+    base.payment_intent='pi_fixture';
+    charges.set('ch_partial',{id:'ch_partial',refunded:false,payment_intent:'pi_fixture'});
+    assert.equal((await notice('evt_partial','charge.refunded','ch_partial')).status,200);assert.equal(await crystals(),5);
+    charges.set('ch_other',{id:'ch_other',refunded:true,payment_intent:'pi_not_ours'});
+    assert.equal((await notice('evt_other','charge.refunded','ch_other')).status,200);assert.equal(await crystals(),5);
+    assert.equal((await notice('evt_refund_live','charge.refunded','ch_partial',true)).status,400);
+    base.metadata.owner_id=ids.b;charges.set('ch_full',{id:'ch_full',refunded:true,payment_intent:'pi_fixture'});
+    assert.equal((await notice('evt_refund','charge.refunded','ch_full')).status,400);assert.equal(await crystals(),5);
+    base.metadata.owner_id=ids.a;
+    assert.equal((await notice('evt_refund','charge.refunded','ch_full')).status,200);assert.equal(await crystals(),0);
+    disputes.set('dp_fixture',{id:'dp_fixture',payment_intent:'pi_fixture'});
+    assert.equal((await notice('evt_dispute','charge.dispute.created','dp_fixture')).status,200);
+    assert.equal((await notice('evt_refund','charge.refunded','ch_full')).status,200);assert.equal(await crystals(),0);
+    assert.equal((await notice('evt_missing','charge.dispute.created','dp_missing')).status,500);
+    console.log('ok real webhook handler: full refund and dispute take back once; partial refunds and other payments ignored');
   }finally{await db.close();}
 }
 main().catch(e=>{console.error(e);process.exitCode=1});
