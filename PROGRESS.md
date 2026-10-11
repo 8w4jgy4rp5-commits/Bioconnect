@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 引き継ぎ（2026-10-11 時点・次の会話はここから）
+
+- 状態: TEST（bioconnect-sandbox＋Stripeサンドボックス、Managed Payments）で5商品の購入と全額返金の取り消しまで本人確認済み。本番は購入OFF・ショップ非表示のまま。
+- 未公開: 法的3ページのManaged Payments（Sold through Link）対応、購入確認のPayment欄、docs/production-launch.md は作業ブランチ claude/affectionate-johnson-95ab3v のみ。mainへ入れるかは本人の返事待ち。
+- 本人の手作業（手順は docs/production-launch.md）: 本番StripeでManaged Paymentsが使えるか確認（審査・手数料+3.5%）→商品5つ・webhook 4イベント→本番SupabaseにSQL 2つ・関数2つ・Secrets→SMTP→売り始める日に CHECKOUT_ENABLED とAIへの購入ON依頼→スマホで購入と返金。
+- AIの次の作業候補: 本人の返事次第でmainへ反映。本番手順の付き添い。ショップ画面のデザイン。
+- 注意: 本人のWindowsには別AIの変更が git stash（other AI reversal work 2026-10-11）に残る（コード部分は取り込み済み）。PowerShellでは npm.cmd を使い、最初に cd C:\Users\tians\Bioconnect。npm test の stamp 1件失敗はクラウド環境だけの改行差と推定。
+
 ## 2026-10-11 — Managed Payments に合わせた表示の見直しと本番手順書
 
 - legal/commerce・terms・privacy: 「Sold through Link」（Link＝Stripeが支払いの販売者として課金・売上税・領収書・支払い問い合わせと返金を担当）を明記。価格は税抜きで、税は支払い画面で加算と記載し、税の空欄とDraft表示を削除。noindexは維持。
