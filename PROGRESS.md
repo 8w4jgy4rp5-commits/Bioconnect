@@ -1,5 +1,10 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — 法的ページと確認画面をmainへ公開
+
+- 本人承認でmainへfast-forward push（69e3d61）。GitHub Pagesの配信処理の開始を確認。クラウド環境からgithub.ioへは接続不可のため、公開ページの表示は未確認（本人がブラウザで確認）。本番の購入・ショップはstoreEnabled=falseで非表示のまま。Supabase・Stripeの設定変更なし。
+- 本人補足: Stripeアカウントは登録済み。次は本人がStripe管理画面で本番支払いの有効化状態・ウェブサイト欄・明細書表記を確認。
+
 ## 2026-10-11 — 法的ページへ販売者情報を記入
 
 - 本人提供: 販売者 生方 天、連絡先 ubu_ten0315@icloud.com、販売開始予定 2026-10-12。legal/ の3ページに記入（公開ページに載る前提で本人が提供）。terms・privacyのDraft表示を削除。commerce は税の表現だけ空欄のためDraft表示を残す。
