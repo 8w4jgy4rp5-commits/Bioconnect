@@ -6,7 +6,7 @@ window.BioEconomy = (() => {
   const test = loopback ? window.__BIOCONNECT_TEST_ADAPTER__ : null;
   let session = null, wallet = null, known = false, epoch = 0, busy = false;
   let panel = null, adPanel = null, adActive = false, pending = null, refreshTimer = 0, opener = null;
-  let authEmail = '', checkoutRequest = null, confirming = null;
+  let authEmail = '', checkoutRequest = null, confirming = null, leaving = false;
   // Shown on the review step only; the server keeps its own fixed prices.
   const products = { crystals5: ['5 Crystals', 'US$1.00'], crystals11: ['11 Crystals', 'US$2.00'],
     crystals30: ['30 Crystals', 'US$5.00'], crystals65: ['65 Crystals', 'US$10.00'],
@@ -94,7 +94,8 @@ window.BioEconomy = (() => {
     if ($('claimBtn')) { $('claimBtn').hidden = !!wallet?.welcome_claimed; $('claimBtn').disabled = busy; }
     if ($('dailyInfo')) $('dailyInfo').textContent = paid ? (wallet.daily_available ? 'Your daily revival is available.' : 'Daily revival used. Next reset: 4:00 AM New York time.') : '';
     for (const btn of document.querySelectorAll('[data-product]')) btn.disabled = busy || !!pending || (btn.dataset.product === 'no_ads' && paid);
-    if ($('confirmBuy')) $('confirmBuy').disabled = busy || !!pending || !confirming || (confirming === 'no_ads' && paid);
+    if ($('confirmBuy')) $('confirmBuy').disabled = busy || leaving || !!pending || !confirming || (confirming === 'no_ads' && paid);
+    if ($('confirmBack')) $('confirmBack').disabled = busy || leaving;
     if ($('reviveCrystal')) {
       const used = !s?.over || s.revived || !storeOn;
       // One revive button at a time: a pending retry first, then the daily
@@ -181,12 +182,13 @@ window.BioEconomy = (() => {
     if (!Object.hasOwn(products, sku)) return;
     confirming = sku;
     $('confirmItem').textContent = products[sku][0];
-    $('confirmPrice').textContent = products[sku][1] + ' (US dollars)';
+    $('confirmPrice').textContent = products[sku][1] + ' (US dollars), plus any sales tax for your location, shown on the payment page before you pay';
     $('checkoutConfirm').hidden = false; draw();
     $('checkoutConfirm').scrollIntoView({ block: 'nearest' }); $('confirmTitle').focus();
   }
   function cancelConfirm() {
     confirming = null;
+    if ($('confirmBuy')) $('confirmBuy').textContent = 'Continue to payment';
     if ($('checkoutConfirm')) $('checkoutConfirm').hidden = true;
   }
   async function buy(sku) {
@@ -230,7 +232,7 @@ window.BioEconomy = (() => {
         localStorage.setItem(key, JSON.stringify({ id: checkoutRequest, order: result.order_id }));
         // Keep a game snapshot over the hosted checkout navigation.
         sessionStorage.setItem('bioconnect:return-game', JSON.stringify(game().snapshot()));
-        location.assign(url.href);
+        leaving = true; location.assign(url.href);
       } else throw new Error('Invalid checkout destination.');
     });
   }
@@ -474,7 +476,17 @@ window.BioEconomy = (() => {
     $('googleSignIn').onclick = googleLogin; $('sendCodeBtn').onclick = sendCode; $('verifyCodeBtn').onclick = verifyCode;
     $('refreshWallet').onclick = () => exclusive(refresh);
     document.querySelectorAll('[data-product]').forEach(btn => btn.onclick = () => confirmPurchase(btn.dataset.product));
-    $('confirmBuy').onclick = () => { const sku = confirming; cancelConfirm(); if (sku) buy(sku); };
+    // Creating the payment page takes a few seconds: keep the review visible and say so at once.
+    $('confirmBuy').onclick = async () => {
+      const sku = confirming;
+      if (!sku || busy || leaving) return;
+      $('confirmBuy').textContent = 'Opening secure payment…'; $('confirmBuy').disabled = true;
+      message('Opening the secure payment page…');
+      await buy(sku);
+      if (!leaving) cancelConfirm();
+    };
+    // Back from Stripe may restore this page from the browser cache, mid-"Opening".
+    window.addEventListener('pageshow', e => { if (e.persisted && leaving) { leaving = false; cancelConfirm(); draw(); } });
     $('confirmBack').onclick = () => { const sku = confirming; cancelConfirm(); document.querySelector(`[data-product="${sku}"]`)?.focus(); };
     $('reviveCrystal').onclick = () => revive('crystal'); $('reviveDaily').onclick = () => revive('daily'); $('reviveAd').onclick = () => revive('ad');
     $('reviveFind').onclick = openShop;

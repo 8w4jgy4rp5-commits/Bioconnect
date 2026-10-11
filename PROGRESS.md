@@ -1,5 +1,12 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — 「Continue to payment」後の待ち時間を分かるように
+
+- 本人報告: 押してからStripe画面まで間があり戸惑う。
+- 変更（monetization.js）: 押した瞬間にボタンを「Opening secure payment…」にして無効化、確認画面は表示したまま、状態欄に「Opening the secure payment page…」。準備中はBackも無効。失敗時は元に戻し理由を表示。Stripeから戻る（bfcache）と元の状態へ。価格欄に「所在地の売上税が支払い画面で加わることがある」を追記（Managed Payments対応）。
+- 本人作業: Stripeサンドボックスに11/30/65 Crystals・No Adsの商品と価格（txcd_10202000、外税、一回限り、USD）を作成。価格IDをTEST SupabaseのSecretsへ登録し、本人が購入成功を報告（本人報告）。
+- 検証: 遅延させた模擬checkoutで表示・二重押し防止・戻る・失敗表示を確認、JS例外0。test:browser 35件成功。
+
 ## 2026-10-11 — TESTでManaged Paymentsの購入成功（まとめ）
 
 - 本人操作: TEST Supabaseに 202610110001_reversals.sql を適用、checkout と stripe-webhook を本リポジトリ版で再配備、Stripeサンドボックスのwebhook送信先へ charge.refunded と charge.dispute.created を追加。
