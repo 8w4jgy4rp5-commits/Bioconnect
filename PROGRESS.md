@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — 本番Supabaseに課金用DBを適用（本人作業）
+
+- 本番（xyumhzecqhpzzzzylbwn）で事前確認: bioconnect_private 0、bioconnect_関数 0、auth.users 4。
+- 本人がSQL Editorで 202610050001_monetization.sql → 202610110001_reversals.sql を実行し、両方成功と報告。1回目は貼り付けが途中で切れて文法エラー（構文エラーのため何も実行されない）。その際ダッシュボードが PL/pgSQL の `select * into a` を表作成と誤認し `ALTER TABLE a/used ENABLE ROW LEVEL SECURITY` を自動追記していた。自動RLSの確認が出たら付けずに実行する。
+- 確認クエリ: schema 1、bioconnect_関数 7、reversed列 1、誤って作られた表 a/used 0（本人報告）。
+- Edge Functions: 本人がWindowsで git pull → npm.cmd run bundle:edge（checkout 1115d3…、stripe-webhook 858d87…。クラウドでCRLFに揃えて作った値と一致）し、本番に checkout と stripe-webhook を配備（本人報告）。Verify JWT オフは要確認。
+- 次: Stripe本番webhook（4イベント）→ Secrets。CHECKOUT_ENABLEDは入れない。
+
 ## 2026-10-11 — 本番Stripeに5商品を登録（本人作業）
 
 - 本人がStripe本番（live）で 5/11/30/65 Crystals・No Ads の価格を作成（USD、一回限り、外税、税コード txcd_10202000、Managed Payments利用対象）。5 Crystalsは前日に本番で作成済みのものを画面で確認して流用。No Adsの単価$3.00も本人確認済み。価格IDはチャットで受け取り、本番SupabaseのSecrets（STRIPE_PRICE_*）へは未登録。
