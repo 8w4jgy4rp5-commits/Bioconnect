@@ -44,11 +44,35 @@ Deno.serve(async req => {
     const m = session.metadata;
     if (session.mode !== 'payment' || session.status !== 'complete' || !m || !Object.hasOwn(catalog, m.sku) ||
       m.owner_id !== session.client_reference_id || session.currency !== 'usd' ||
-      session.amount_total !== catalog[m.sku].amount || session.livemode !== event.livemode)
+      session.livemode !== event.livemode)
       return new Response('Payment mismatch', { status: 400 });
+    const amount = catalog[m.sku].amount;
+    // Inspect the retrieved session, not the redirect or current launch switch.
+    // Older direct-payment sessions remain fulfillable after switching modes.
+    if (session.managed_payments?.enabled === true) {
+      // Managed Payments adds tax on top of the price: check price + tax, grant by price.
+      const tax = session.total_details?.amount_tax;
+      if (m.payment_mode !== 'managed' || !/^price_[A-Za-z0-9]+$/.test(m.price_id || '') ||
+        session.amount_subtotal !== amount || typeof tax !== 'number' || !Number.isSafeInteger(tax) || tax < 0 ||
+        session.total_details?.amount_discount !== 0 || session.total_details?.amount_shipping !== 0 ||
+        !Number.isSafeInteger(session.amount_total) || session.amount_total !== amount + tax)
+        return new Response('Payment mismatch', { status: 400 });
+      const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 2 });
+      const item = items.data[0];
+      if (items.has_more || items.data.length !== 1 || !item || item.quantity !== 1 ||
+        item.currency !== 'usd' || item.amount_subtotal !== amount || item.amount_discount !== 0 ||
+        item.amount_tax !== tax || item.amount_total !== session.amount_total ||
+        item.price?.id !== m.price_id || item.price.currency !== 'usd' ||
+        item.price.unit_amount !== amount || item.price.type !== 'one_time' ||
+        item.price.recurring || item.price.tax_behavior !== 'exclusive' ||
+        item.price.livemode !== event.livemode)
+        return new Response('Payment mismatch', { status: 400 });
+    } else if (m.payment_mode === 'managed' || session.amount_total !== amount) {
+      return new Response('Payment mismatch', { status: 400 });
+    }
     const { error } = await admin().rpc('bioconnect_fulfill', { p_order: m.order_id,
       p_owner: m.owner_id, p_session: session.id, p_event: event.id, p_sku: m.sku,
-      p_amount: session.amount_total, p_currency: session.currency });
+      p_amount: amount, p_currency: session.currency });
     if (error) throw error;
     return new Response('Confirmed', { status: 200 });
   } catch { return new Response('Confirmation failed; retry webhook', { status: 500 }); }

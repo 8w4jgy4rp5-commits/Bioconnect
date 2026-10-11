@@ -54,6 +54,8 @@ window.BioEconomy = (() => {
   }
   const recoveryKey = owner => 'bioconnect:revival-pending:' + owner;
   const message = value => { if ($('shopStatus')) $('shopStatus').textContent = value; if ($('reviveStatus')) $('reviveStatus').textContent = value; };
+  // The store status sits below the products; bring a refusal into view so a tap never looks ignored.
+  const notice = value => { message(value); if (panel) $('shopStatus')?.scrollIntoView({ block: 'nearest' }); };
   function saveRecovery(value) {
     // A durable pre-consumption snapshot is mandatory. Storage failure aborts spending.
     localStorage.setItem(recoveryKey(value.owner), JSON.stringify(value));
@@ -161,7 +163,7 @@ window.BioEconomy = (() => {
   async function exclusive(action) {
     if (busy) return;
     busy = true; pause(); draw();
-    try { await action(); } catch (err) { message(err.message || 'Service unavailable. Please retry.'); }
+    try { await action(); } catch (err) { notice(err.message || 'Service unavailable. Please retry.'); }
     finally { busy = false; draw(); }
   }
   function requireLogin() {
@@ -175,7 +177,7 @@ window.BioEconomy = (() => {
   // Final review before leaving for Stripe: item, price, payment, delivery, refunds.
   function confirmPurchase(sku) {
     if (!requireLogin()) return;
-    if (!test && !cfg.paymentsEnabled) { message('Purchases are not enabled yet.'); return; }
+    if (!test && !cfg.paymentsEnabled) { notice('Purchases are not enabled yet.'); return; }
     if (!Object.hasOwn(products, sku)) return;
     confirming = sku;
     $('confirmItem').textContent = products[sku][0];

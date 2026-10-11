@@ -1,5 +1,9 @@
 # Bioconnect 開発方針
 
+## 2026-10-11 — Stripe Managed Payments（本人が有効化したと認識）
+
+TESTのStripeはManaged Payments（Stripeが税の計算・納付を担う）で動かす。Checkoutは価格IDを使い、税は価格に上乗せ（tax_behavior=exclusive）。付与の判定は税抜きの価格で行う。Managedでは custom_text 等の一部項目が使えないため、返金条件はショップの確認画面で示す。本番は PAYMENTS_LIVE=true でも CHECKOUT_ENABLED=true と MANAGED_PAYMENTS=true がそろうまで購入を受け付けない。Managed Payments採用に伴う販売者情報ページ・税の表現の見直しは未着手。
+
 ## 2026-10-11 — 販売者は日本在住の個人、まず米国向け・No Adsも返金不可
 
 本人決定: 販売者は日本在住の個人で、最初は米国の利用者へ売る。No AdsもCrystalと同じく「法令で必要な場合を除き返金不可」（2026-10-09の「No Adsへ広げない」はこの決定で上書き）。英語の販売者情報（特定商取引法に基づく表記）・利用規約・プライバシーポリシーを legal/ に下書きとして置く。氏名・メール・開始日・税の表現は本人が埋めるまで黄色の空欄のままにし、noindexにする。住所と電話は「請求があれば遅滞なく開示」とする。Stripeへ移る前に、品名・数量・価格・支払時期・受け取り時期・返金条件と3ページへのリンクを見せる確認画面を必ず挟む。法務の最終確認の代わりにはしない。

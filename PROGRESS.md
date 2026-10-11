@@ -1,5 +1,23 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — TESTでManaged Paymentsの購入成功（まとめ）
+
+- 本人操作: TEST Supabaseに 202610110001_reversals.sql を適用、checkout と stripe-webhook を本リポジトリ版で再配備、Stripeサンドボックスのwebhook送信先へ charge.refunded と charge.dispute.created を追加。
+- 本人報告: TESTゲーム（npm.cmd run sandbox:payments）で5 Crystalsをテストカードで購入でき、Refreshで反映。AIの直接観測ではない。
+- 途中の問題と対処: (1) 別AIのcheckoutが custom_text をManagedでも送り503 → Managedでは送らない。(2) 失敗時と同じ注文番号の再利用でStripeの冪等キーエラー → checkoutが order_expired を返し、ショップが新しい注文で始め直す（edge-checkにテスト追加）。(3) PowerShellのnpm実行ポリシー → npm.cmd か node で直接実行。
+- TESTの設定で分かったこと: 価格IDは STRIPE_PRICE_CRYSTALS5 だけ登録済み。11/30/65 Crystals と No Ads は「Product price not configured」で買えない。
+- 次: (1) Stripeサンドボックスで全額返金し、5個減ることを確認（返金・チャージバック処理の実確認）。(2) 残り4商品の商品・価格（税コード付き、tax_behavior=exclusive）を作り価格IDを登録。(3) stash内の別AIの index.html・docs・記録の確認。(4) Managed Payments採用に合わせ販売者情報ページ・税表現を見直し。(5) 本番Supabaseへの導入、SMTP、実機確認、購入ON。
+- 本人Windowsの main には今回のコードはまだない。git pull で取り込む（stashは残したまま）。
+
+## 2026-10-11 — 別AIのManaged Payments対応を取り込み、TESTのCheckout失敗を修正
+
+- 観測: TEST購入で checkout が503。ログは「You cannot use custom_text with Managed Payments.」。TESTに配備されていたcheckoutは別AIの未コミット版（Managed Payments対応、stripe 23.0.0）で、リポジトリと違っていた。本人のWindowsの未コミット変更は `git stash`（other AI reversal work 2026-10-11）へ退避済み。コード差分だけ本人から受け取り取り込み。
+- 取り込み: _shared/payment.ts（stripe 23.0.0）、checkout（本番はCHECKOUT_ENABLEDが必要、MANAGED_PAYMENTSでSTRIPE_PRICE_*の価格を検証して使う）、webhook（Managedは小計=価格・合計=価格+税・明細を照合し、付与は価格で判定）、edge-checkの該当テスト。package.jsonのstripeを23.0.0へ。
+- 修正: custom_text はManagedでは送らない（直接決済のときだけ、ショップと同じ「Purchases are non-refundable…」）。Managedで送らない項目のテストにcustom_textを追加。返金取り消しのテストにManagedの支払いを追加。
+- その他: ショップで購入できない理由が画面外に出て「反応しない」ように見えたため、メッセージ位置へスクロールするようにした（monetization.js）。
+- 検証: edge-check全群成功、monetization 25件、test:browser 35件（クラウドChromium）。stampの1件失敗は以前から。
+- 未確認: TESTへの再配備と実返金。stash内の別AIの index.html・docs・PROGRESS/DEVELOPMENT の内容（Managed Payments導入手順など）はまだ見ていない。
+
 ## 2026-10-11 — 法的ページと確認画面をmainへ公開
 
 - 本人承認でmainへfast-forward push（69e3d61）。GitHub Pagesの配信処理の開始を確認。クラウド環境からgithub.ioへは接続不可のため、公開ページの表示は未確認（本人がブラウザで確認）。本番の購入・ショップはstoreEnabled=falseで非表示のまま。Supabase・Stripeの設定変更なし。

@@ -1,4 +1,4 @@
-import Stripe from 'npm:stripe@18.5.0';
+import Stripe from 'npm:stripe@23.0.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 export { Stripe, createClient };
 export const catalog: Record<string, { amount: number; label: string }> = {
