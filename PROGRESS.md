@@ -1,5 +1,28 @@
 # Bioconnect 進捗
 
+## 2026-10-11 — 法的ページへ販売者情報を記入
+
+- 本人提供: 販売者 生方 天、連絡先 ubu_ten0315@icloud.com、販売開始予定 2026-10-12。legal/ の3ページに記入（公開ページに載る前提で本人が提供）。terms・privacyのDraft表示を削除。commerce は税の表現だけ空欄のためDraft表示を残す。
+- 英語表記の読み（ローマ字）は未記入。noindexは維持。購入・本番ボタンは無効のまま（storeEnabled/paymentsEnabled=false）。commit/pushなし。
+
+## 2026-10-11 — 購入確認画面と販売者情報・規約・プライバシーの下書き
+
+- 本人決定: 日本在住の個人として、まず米国へ販売。No Adsも返金不可。
+- 追加: legal/commerce.html（特定商取引法に基づく表記・英語）、legal/terms.html、legal/privacy.html、legal/legal.css。氏名・メール・開始日・税の表現は黄色の空欄。noindex。
+- 変更: index.html のショップに確認画面（#checkoutConfirm）と法的ページへのリンク、返金表示を「Purchases are non-refundable…」へ。monetization.js は商品ボタン→確認→「Continue to payment」で従来のbuy()。Back・ショップを閉じる・アカウント切替で確認を閉じる。style.css に確認画面の見た目。stampは変更した style.css と monetization.js だけ更新。
+- テスト: test/browser-check.cjs の購入操作に確認ボタンのクリックを追加し、支払後の再読込を待つ処理を2か所追加。
+- 検証: クラウドのChromium（Playwright付属1194）で test:browser 35件成功を2回。375×812・320×568 × eldritch/pop で確認画面の表示・横はみ出しなし・フォーカス移動・Backで閉じることを撮影で確認。法的3ページも375pxで横はみ出しなし。JS例外0。monetization 25件・edge 4群も引き続き成功。
+- 未確認: Windows Chrome・WebKit・実機、実Stripe経由の購入。npm test の stamp 1件失敗は以前から（変更していないファイルの改行コード差と推定）。
+- 次: 本人が空欄（氏名・メール・開始日・税）を決める。続いてショップ画面のデザイン。commit/pushなし。
+
+## 2026-10-11 — 返金・チャージバックで購入分を取り消す
+
+- 本人決定: Crystalは残高から引いて0で止める、No Adsは取り消す、アカウントはそのまま。
+- 追加: supabase/migrations/202610110001_reversals.sql（bioconnect_reverse、取り消し済み注文は付与しない・共有しない）。stripe-webhookで charge.refunded（全額のみ）と charge.dispute.created を受け、Stripe APIで再取得してから取り消す。test/db.cjs はmigrationsフォルダの全SQLを順に読む。
+- 検証: test/monetization.test.cjs 25件成功（取り消し5件を追加: ブラウザから実行不可・なりすまし拒否、返金と異議が重なっても一度、0で止まる、No Ads取り消しと再購入、先に届いた取り消し）。test/edge-check.cjs 4群成功（型検査、一部返金・他の支払いは無視、本番/テスト不一致拒否、所有者不一致拒否、再送で二重に引かない）。git diff --check成功。
+- 未確認: 実PostgreSQLの同時接続テスト（クラウド環境にlibicuがなく起動不可。Windowsで npm run test:postgres を実行）。TEST Supabaseへの適用、Stripe Webhookへの2イベント追加、Sandboxでの実返金。npm test の stamp 1件失敗は今回の変更前から（クラウドの改行コード由来と推定。Windowsで node stamp.js --check を確認）。
+- 次: 購入直前の確認表示と販売者情報・規約・プライバシーのページ。commit/pushなし。
+
 ## 2026-10-09 — 本人依頼のcommit・push
 
 本人が今回変更のcommit・pushを明示依頼。対象はindex.htmlのCrystal返金注意書きとdocs/monetization.md・PROGRESS.md・DEVELOPMENT.mdの公開用記録4件。private-notes/、本人gateway、output証跡はGit対象外を維持。直前検証はrules258件、stamp/diff、Chrome320px両スキン、独立レビュー成功。公開版の購入・広告OFFと本番ボタン非表示を維持する。実行結果・SHA・配信確認は非公開接続記録へ追記する。

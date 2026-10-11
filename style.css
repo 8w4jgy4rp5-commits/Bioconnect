@@ -2203,6 +2203,15 @@ body.is-celebrating { overflow: hidden; }
 .economy-status { min-height:1.5em; font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
 .no-ads-product { padding:12px; border-radius:12px; background:#e8efd8; }
 .no-ads-product h3 { margin:0; font-size:17px; }
+.checkout-confirm { margin:12px 0; padding:12px; border:2px solid #668666; border-radius:12px; background:#fffdf5; }
+.checkout-confirm[hidden] { display:none; }
+.checkout-confirm h3 { margin:0 0 6px; font-size:17px; }
+.checkout-confirm dl { margin:0; font-size:14px; line-height:1.45; }
+.checkout-confirm dl > div { display:grid; grid-template-columns:76px 1fr; gap:8px; padding:5px 0; border-bottom:1px solid #d9e2cc; }
+.checkout-confirm dt { font-weight:700; }
+.checkout-confirm dd { margin:0; }
+.legal-links { font-size:13px; }
+.legal-links a { color:inherit; }
 .gameover-card { max-height:95%; overflow:auto; }
 .gameover-card .go-note { margin:8px 0; }
 .record-list { margin-top:16px; font-size:13px; }

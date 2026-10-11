@@ -6,7 +6,11 @@ window.BioEconomy = (() => {
   const test = loopback ? window.__BIOCONNECT_TEST_ADAPTER__ : null;
   let session = null, wallet = null, known = false, epoch = 0, busy = false;
   let panel = null, adPanel = null, adActive = false, pending = null, refreshTimer = 0, opener = null;
-  let authEmail = '', checkoutRequest = null;
+  let authEmail = '', checkoutRequest = null, confirming = null;
+  // Shown on the review step only; the server keeps its own fixed prices.
+  const products = { crystals5: ['5 Crystals', 'US$1.00'], crystals11: ['11 Crystals', 'US$2.00'],
+    crystals30: ['30 Crystals', 'US$5.00'], crystals65: ['65 Crystals', 'US$10.00'],
+    no_ads: ['No Ads (one-time purchase)', 'US$3.00'] };
   const $ = id => document.getElementById(id);
   const client = () => typeof supabaseClient !== 'undefined' ? supabaseClient : null;
   const game = () => window.BioGame;
@@ -88,6 +92,7 @@ window.BioEconomy = (() => {
     if ($('claimBtn')) { $('claimBtn').hidden = !!wallet?.welcome_claimed; $('claimBtn').disabled = busy; }
     if ($('dailyInfo')) $('dailyInfo').textContent = paid ? (wallet.daily_available ? 'Your daily revival is available.' : 'Daily revival used. Next reset: 4:00 AM New York time.') : '';
     for (const btn of document.querySelectorAll('[data-product]')) btn.disabled = busy || !!pending || (btn.dataset.product === 'no_ads' && paid);
+    if ($('confirmBuy')) $('confirmBuy').disabled = busy || !!pending || !confirming || (confirming === 'no_ads' && paid);
     if ($('reviveCrystal')) {
       const used = !s?.over || s.revived || !storeOn;
       // One revive button at a time: a pending retry first, then the daily
@@ -139,7 +144,7 @@ window.BioEconomy = (() => {
     session = next; known = true;
     game()?.accountChanged(owner);
     if (previous !== owner) {
-      epoch++; wallet = null; checkoutRequest = null; authEmail = '';
+      epoch++; wallet = null; checkoutRequest = null; authEmail = ''; cancelConfirm();
       // Supabase callbacks must not await other Supabase auth operations.
       if (owner) {
         try {
@@ -166,6 +171,21 @@ window.BioEconomy = (() => {
   async function claim() {
     if (!requireLogin()) return;
     await exclusive(async () => { wallet = await rpc('bioconnect_claim_welcome'); message('Your 3 free Crystals are ready.'); });
+  }
+  // Final review before leaving for Stripe: item, price, payment, delivery, refunds.
+  function confirmPurchase(sku) {
+    if (!requireLogin()) return;
+    if (!test && !cfg.paymentsEnabled) { message('Purchases are not enabled yet.'); return; }
+    if (!Object.hasOwn(products, sku)) return;
+    confirming = sku;
+    $('confirmItem').textContent = products[sku][0];
+    $('confirmPrice').textContent = products[sku][1] + ' (US dollars)';
+    $('checkoutConfirm').hidden = false; draw();
+    $('checkoutConfirm').scrollIntoView({ block: 'nearest' }); $('confirmTitle').focus();
+  }
+  function cancelConfirm() {
+    confirming = null;
+    if ($('checkoutConfirm')) $('checkoutConfirm').hidden = true;
   }
   async function buy(sku) {
     if (!requireLogin()) return;
@@ -348,7 +368,7 @@ window.BioEconomy = (() => {
   }
   function closeShop() {
     if (!panel || busy) return;
-    panel.hidden = true; panel = null; game()?.resumeIfAllowed(); opener?.focus();
+    cancelConfirm(); panel.hidden = true; panel = null; game()?.resumeIfAllowed(); opener?.focus();
   }
   async function googleLogin() {
     if (test) { await test.signIn('google'); return; }
@@ -451,7 +471,9 @@ window.BioEconomy = (() => {
     $('googleLink').onclick = linkGoogle;
     $('googleSignIn').onclick = googleLogin; $('sendCodeBtn').onclick = sendCode; $('verifyCodeBtn').onclick = verifyCode;
     $('refreshWallet').onclick = () => exclusive(refresh);
-    document.querySelectorAll('[data-product]').forEach(btn => btn.onclick = () => buy(btn.dataset.product));
+    document.querySelectorAll('[data-product]').forEach(btn => btn.onclick = () => confirmPurchase(btn.dataset.product));
+    $('confirmBuy').onclick = () => { const sku = confirming; cancelConfirm(); if (sku) buy(sku); };
+    $('confirmBack').onclick = () => { const sku = confirming; cancelConfirm(); document.querySelector(`[data-product="${sku}"]`)?.focus(); };
     $('reviveCrystal').onclick = () => revive('crystal'); $('reviveDaily').onclick = () => revive('daily'); $('reviveAd').onclick = () => revive('ad');
     $('reviveFind').onclick = openShop;
     $('reviveDawnLocked').onclick = () => { openShop(); document.querySelector('.no-ads-product')?.scrollIntoView({ block: 'nearest' }); };

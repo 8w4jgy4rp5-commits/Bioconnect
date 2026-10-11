@@ -30,7 +30,7 @@ async function main(){
       await titlePage.waitForFunction(()=>BioEconomy.summary().wallet!==null);
       const titleBefore=await titlePage.evaluate(()=>BioGame.snapshot());
       assert.equal(titleBefore.startScreenVisible,true);
-      await titlePage.locator('[data-product="crystals5"]').click();await titlePage.locator('#unpaid').click();
+      await titlePage.locator('[data-product="crystals5"]').click();await titlePage.locator('#confirmBuy').click();await titlePage.locator('#unpaid').click();
       await titlePage.locator('#shopModal').waitFor({state:'visible'});
       assert.deepEqual(await titlePage.evaluate(()=>BioGame.snapshot()),titleBefore);
       ok('title Checkout return retains all game fields and title state');
@@ -66,10 +66,10 @@ async function main(){
     await page.locator('#shopClose').click();await page.locator('#menuClose').click();await stage();
     await page.locator('#reviveCrystal').click();await page.locator('#reviveResume').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),2);assert.equal(await page.locator('[data-ad="complete"]').count(),0);ok('Crystal revival spends one without an ad');
     await page.locator('#reviveResume').click();await shop();
-    await page.locator('[data-product="crystals5"]').click();await page.locator('#unpaid').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===2);ok('checkout return alone grants nothing');
-    await page.locator('[data-product="crystals5"]').click();await page.locator('#pay').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===7);ok('confirmed simulated payment grants five');
-    await page.locator('[data-product="crystals5"]').click();await page.locator('#pay').click();await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===12);ok('repeat Crystal purchase creates a new order after confirmation');
-    await page.locator('[data-product="no_ads"]').click();await page.locator('#pay').click();await page.waitForFunction(()=>BioEconomy.summary().wallet?.no_ads);await page.screenshot({path:path.join(out,'no-ads-store-mobile.png')});ok('one-time entitlement loads after confirmed simulated payment');
+    await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();await page.locator('#unpaid').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===2);ok('checkout return alone grants nothing');
+    await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();await page.locator('#pay').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===7);ok('confirmed simulated payment grants five');
+    await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();await page.locator('#pay').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===12);ok('repeat Crystal purchase creates a new order after confirmation');
+    await page.locator('[data-product="no_ads"]').click();await page.locator('#confirmBuy').click();await page.locator('#pay').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.no_ads);await page.screenshot({path:path.join(out,'no-ads-store-mobile.png')});ok('one-time entitlement loads after confirmed simulated payment');
     await page.locator('#shopClose').click();await page.evaluate(()=>newGame());await stage();assert.equal(await page.locator('#reviveAd').isVisible(),false);
     await page.locator('#reviveDaily').click();await page.locator('#reviveResume').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),12);ok('purchaser daily revival without spending or ads');
     await page.locator('#reviveResume').click();await stage();await page.locator('#goAgain').click();await page.locator('#countdown').waitFor({state:'hidden'});assert.equal(await page.locator('[data-ad="complete"]').count(),0);ok('purchaser New Game skips all ads');
@@ -110,7 +110,7 @@ async function main(){
     assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),2);assert.equal(await page.evaluate(()=>state.over&&!state.revived),true);assert.equal(await page.evaluate(()=>BioEconomy.summary().pending),false);ok('account switch while initial wallet awaits cannot consume the new account');
     await page.evaluate(()=>window.__BIOCONNECT_TEST_ADAPTER__.signIn());await page.waitForFunction(()=>BioEconomy.summary().wallet?.no_ads);await shop();
     const ordersBefore=(await server.db.query('select count(*)::int as n from bioconnect_private.orders where owner_id=$1',['00000000-0000-4000-8000-000000000002'])).rows[0].n;
-    await holdWalletWhileSwitching(()=>page.locator('[data-product="crystals5"]').click());
+    await holdWalletWhileSwitching(async()=>{await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();});
     const ordersAfter=(await server.db.query('select count(*)::int as n from bioconnect_private.orders where owner_id=$1',['00000000-0000-4000-8000-000000000002'])).rows[0].n;
     assert.equal(ordersBefore,ordersAfter);assert.ok(!page.url().includes('checkout-page'));ok('account switch while purchase wallet awaits creates no order for the new account');
     assert.deepEqual(errors,[]);ok('no game JavaScript exceptions');

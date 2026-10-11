@@ -1,5 +1,13 @@
 # 収益化の設計・接続手順（2026-10-05）
 
+## 2026-10-11 — 購入前の確認画面と法的表示の下書き
+
+商品ボタンは直接Stripeへ行かず、ショップ内の「Review your purchase」を開く。品名・数量1・価格（USD）・支払時期・受け取り・返金条件、Terms／Privacy／Seller informationへのリンク（別タブ、noopener noreferrer）を示し、「Continue to payment」で初めてcheckoutを呼ぶ。表示価格は monetization.js の表示専用の表で、請求額はサーバー固定のまま。下書きページは legal/commerce.html・terms.html・privacy.html。販売開始前に氏名・連絡先メール・開始日・税表現を埋め、noindexを外すか判断する。
+
+## 2026-10-11 — 返金・チャージバックの取り消し処理
+
+`supabase/migrations/202610110001_reversals.sql` を 202610050001 の後に適用する。`bioconnect_reverse` はservice_roleのみ実行可。webhookは `charge.refunded`（全額返金のみ）と `charge.dispute.created` を受け、Stripe APIで返金/異議を再取得し、payment_intentからCheckout sessionを探して注文を特定する。Crystalは購入分を引いて0で止め、No Adsは取り消す。同じ注文は一度だけ。支払確認より先に取り消し通知が届いた注文は、その後も付与しない。TEST/本番のStripe Webhook送信先に上の2イベントを追加する必要がある（未設定）。
+
 ## 2026-10-09 — Crystal購入の返金表示
 
 購入したCrystalsの通常返金を受け付けない本人方針に基づき、ショップのCrystal商品ボタン前に次を表示する。
@@ -58,7 +66,8 @@ New Game広告のno-fill／SDK失敗は新規ゲームへ進む。報酬広告�
 - `shared/monetization-config.js`: 公開してよい有効化スイッチのみ。秘密情報なし。
 - `supabase/migrations/202610050001_monetization.sql`: private schemaの残高・配布・権利・日次使用・復活領収・注文・通知履歴。
 - `supabase/functions/checkout`: 検証したJWTの本人を注文所有者にする。価格はサーバー固定、カード単発Checkout、注文IDの冪等キー。
-- `supabase/functions/stripe-webhook`: raw本文の署名、test/live、Stripe APIから取得した`payment_status=paid`、金額／通貨／所有者／商品を照合して付与。
+- `supabase/functions/stripe-webhook`: raw本文の署名、test/live、Stripe APIから取得した`payment_status=paid`、金額／通貨／所有者／商品を照合して付与。全額返金・チャージバックでは購入分を取り消す（2026-10-11）。
+- `supabase/migrations/202610110001_reversals.sql`: 返金・チャージバック時の取り消し。
 - `test/`: 使い捨てDB、ローカル代替、実ブラウザ確認。実環境の権利を作るものではない。
 
 privateテーブルへのブラウザのCRUDと、注文作成／付与RPCのブラウザ実行権限はない。
@@ -89,10 +98,10 @@ privateテーブルへのブラウザのCRUDと、注文作成／付与RPCのブ
 5. **メールコード**: SupabaseのMagic Link email templateをリンクではなく `{{ .Token }}` を含むコード本文にする。アプリはsignInWithOtp→verifyOtp(type=email)。本番一般利用者には独自SMTPを設定する。Supabase標準SMTPはチーム登録先だけ・現在2通/時・本番用途非推奨なので、それだけでは一般公開に足りない。SMTP送信ドメインと到達を本人のメールで確認する。
 6. **Edge secrets**: `supabase/.env.example`を参考にTESTの`STRIPE_SECRET_KEY=sk_test_...`、`STRIPE_WEBHOOK_SECRET=whsec_...`、`BIOCONNECT_SITE_URL=<正しい末尾/付きURL>`、`PAYMENTS_LIVE=false`を登録する。SupabaseのURL／service_roleはEdge内のみ。フロントにはTESTのpublishable keyだけを入れる。
 7. **Edge起動**: TESTへcheckoutとstripe-webhookを配備する。両方verify_jwt=falseだが、checkoutは`auth.getUser(jwt)`、WebhookはStripe署名を必須にしている。公開URLのOriginと一致するテストフロントを使う。CLI例: `supabase functions serve --env-file supabase/.env.test`、`supabase functions deploy checkout`、`supabase functions deploy stripe-webhook`（CLIは未実行、専用TESTへDashboard配備済み）。
-8. **Stripe Sandbox**: webhook送信先をTESTの`/functions/v1/stripe-webhook`に登録し、checkout.session.completed／async_payment_succeededを受ける。テストカード4242 4242 4242 4242、拒否・3DS・通知再送・通信喪失で確認。CLIなら`stripe listen --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook`から表示されるwhsecをTEST secretsへ。専用TESTへの実API／公式Sandbox接続は完了。5個と買い切りの成功、11個の拒否・キャンセル、通知再送を実確認。3DS／通信喪失E2Eは未実施。
+8. **Stripe Sandbox**: webhook送信先をTESTの`/functions/v1/stripe-webhook`に登録し、checkout.session.completed／async_payment_succeeded、charge.refunded／charge.dispute.createdを受ける。テストカード4242 4242 4242 4242、拒否・3DS・通知再送・通信喪失で確認。CLIなら`stripe listen --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook`から表示されるwhsecをTEST secretsへ。専用TESTへの実API／公式Sandbox接続は完了。5個と買い切りの成功、11個の拒否・キャンセル、通知再送を実確認。3DS／通信喪失E2Eは未実施。
 9. **Google広告**: AdSense／H5 Games Ads参加申請、サイト審査、割当publisher ID、対象ドメインの確認をする。GitHub Pagesの `/Bioconnect/ads.txt` はホストの `/ads.txt` と別なので、必要ならユーザーサイトのルートリポジトリか独自ドメインで置く。独自ドメイン取得は費用があるため本人の判断。現URLの承認は未確認。承認後もまず`adTestMode=true`で公式模擬広告を検証する。
 10. **広告同意**: 対象地域に応じたプライバシー表示とGoogle認証CMP／TCFの導入を行う。EEA／英国／スイス向けにはGoogle指定の認証CMPが必要。今回広告が無効なのでCMPも未接続。自動広告などゲーム外の広告を追加せず、購入者の全広告非表示を維持する。
-11. **本番前**: TEST Auth実往復、別端末ログイン、公式Sandbox決済・再送、Google公式テスト、スマホ／Safari実機を確認する。返金・チャージバック時の権利取消と消費済みクリスタル対応は運営方針を決めて別途実装する（今回の付与・消費仕様にはない）。同意・販売表示も含めてレビュー後、本人の別依頼でのみlive鍵／スイッチ／公開を変更する。
+11. **本番前**: TEST Auth実往復、別端末ログイン、公式Sandbox決済・再送、Google公式テスト、スマホ／Safari実機を確認する。返金・チャージバック時の取り消しは2026-10-11に実装済み（TEST未適用）。同意・販売表示も含めてレビュー後、本人の別依頼でのみlive鍵／スイッチ／公開を変更する。
 
 ## 再実行と検証の区別
 

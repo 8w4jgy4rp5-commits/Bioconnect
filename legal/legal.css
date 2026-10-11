@@ -1,0 +1,18 @@
+/* Shared look for the legal pages. No scripts: plain, readable text. */
+:root { --bg:#fff8e8; --ink:#243c2e; --mute:#5b6b5f; --line:#c9d6bd; --link:#2f6b3f; --todo:#fde3a7; }
+@media (prefers-color-scheme: dark) { :root { --bg:#141a14; --ink:#e7eadf; --mute:#a9b2a3; --line:#34402f; --link:#9fd38a; --todo:#5a4512; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:26px; line-height:1.25; margin:8px 0 4px; }
+h2 { font-size:18px; margin:28px 0 6px; }
+p, li { overflow-wrap:anywhere; }
+a { color:var(--link); }
+.updated, .back { color:var(--mute); font-size:14px; }
+.draft { background:var(--todo); padding:10px 12px; border-radius:8px; font-size:14px; }
+.todo { background:var(--todo); padding:0 4px; border-radius:4px; }
+dl { margin:0; border-top:1px solid var(--line); }
+dl > div { display:grid; grid-template-columns:minmax(120px,34%) 1fr; gap:4px 16px; padding:10px 0; border-bottom:1px solid var(--line); }
+dt { font-weight:600; }
+dd { margin:0; }
+@media (max-width:480px) { dl > div { grid-template-columns:1fr; } }
