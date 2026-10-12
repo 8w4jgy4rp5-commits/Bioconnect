@@ -319,6 +319,11 @@ window.BioSound = (() => {
         const steps = Math.min(11, Math.max(1, Math.floor(Number(count) || 1)));
         for (let i = 0; i < steps; i++) pop(time + .105 + i * .145, i, .18 / (1 + i * .055));
         if (kind === 'finish') [74,78,81].forEach((n, i) => wood(n, time + .16 + steps * .145 + i * .10, .07, effects));
+        else if (steps >= 3) {
+          const notes = steps >= 7 ? [74,78,81,86] : steps >= 5 ? [74,78,81] : [74,78];
+          const end = time + .105 + (steps - 1) * .145;
+          notes.forEach((note, i) => wood(note, end + .055 + i * .075, .045, effects));
+        }
       } else if (kind === 'ready') {
         wood(69, time, .075, effects); wood(69, time + .22, .055, effects);
       } else if (kind === 'go') {

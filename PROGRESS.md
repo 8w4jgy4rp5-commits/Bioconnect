@@ -1,5 +1,14 @@
 # Bioconnect 進捗
 
+## 2026-10-12 — 連鎖の盛り上がりと褒め言葉
+
+- 本人が提案①＋③を選択。1回の配置の合体を数え、3〜4連鎖 GREAT!、5〜6連鎖 AMAZING!、7以上 INCREDIBLE!。途中は Chain ×N、最後だけ褒め言葉＋N CHAIN を約1秒表示。
+- script.js / style.css: 既存の145ms間隔に合わせて輪の光を強め、3段目から粒子、7連鎖以上の最後は盤面の縁が光る。操作を止めず、次の配置（合体なしも含む）・New Game・復活で残った演出を取り消す。reduce motionでは移動・粒子を省き文字を表示。ゾウの全画面祝いは維持。
+- audio-synth.js: 3/5/7連鎖の最後に2/3/4音の短い決め音。既存の音ON/OFFに従う。ルール・得点・手札の確率は変更なし。
+- 検証: rules.test.js 258件成功、JS構文確認成功。Chromeでeldritch/pop × 320/375/1000pxの2/3/5/7連鎖を実際のplaceTileで発生させ、文言・表示数・はみ出し・消去・連続配置・reduce motionの36項目を確認。最初の隔離検証は外部SDKを遮断したため認証由来の例外が発生、追加検証では検証ページのみ認証scriptを省いた。追加の375px確認9項目は成功・JS例外0。非合体の次手・New Game・OfflineAudioContextの音生成とピークを確認。画面証跡は output/playwright/chain-effects/。
+- 未確認: 本人の試遊での気持ちよさ、実機での見え方・聴感。本人からcommit・push・公開の明示依頼を受け、mainからGitHub Pagesへ公開を進める。stamp.jsでキャッシュ更新（元から不一致だったmonetization.jsの識別子も現在の内容に一致）。他作業のPROGRESSとconcepts/shop-ui-v1/等は保持。
+
+
 ## 引き継ぎ（2026-10-11 時点・次の会話はここから）
 
 - 状態: TEST（bioconnect-sandbox＋Stripeサンドボックス、Managed Payments）で5商品の購入と全額返金の取り消しまで本人確認済み。本番は購入OFF・ショップ非表示のまま。

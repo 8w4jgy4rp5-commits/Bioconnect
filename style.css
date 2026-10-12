@@ -2248,3 +2248,59 @@ body.is-celebrating { overflow: hidden; }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
 #shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }
+
+/* Chains build locally, then finish with one readable praise badge. */
+.ring {
+  border-width: calc(3px + var(--chain-power, 0) * .35px);
+  box-shadow: 0 0 calc(var(--chain-power, 0) * 3px) var(--warm);
+}
+.fx-chain { z-index: 3; white-space: nowrap; }
+.fx-chain[data-tier="1"] { background: #417c58; box-shadow: 0 4px 18px #417c5866; }
+.fx-chain[data-tier="2"] { background: #7550a1; box-shadow: 0 4px 22px #9266c577; }
+.fx-chain[data-tier="3"] { background: #81551c; box-shadow: 0 4px 26px #e5b85699; }
+.fx-chain--praise {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 8px 18px 7px;
+  border: 1px solid #fff7;
+  border-radius: 16px;
+  animation: chain-praise 1s ease-out forwards;
+}
+.fx-chain--praise strong { font-size: clamp(17px, 5vw, 25px); line-height: 1.15; letter-spacing: .035em; }
+.fx-chain--praise small { font-size: 10px; letter-spacing: .18em; }
+.chain-spark {
+  position: absolute;
+  width: var(--spark-size);
+  height: var(--spark-size);
+  border-radius: 50%;
+  background: #e5f9c2;
+  box-shadow: 0 0 6px #b5ed8c;
+  animation: chain-spark-out .7s ease-out forwards;
+}
+.chain-spark[data-tier="2"] { background: #e9d4ff; box-shadow: 0 0 7px #c396f5; }
+.chain-spark[data-tier="3"] { background: #fff0b5; box-shadow: 0 0 8px #ffd66e; }
+.chain-edge {
+  position: absolute;
+  inset: 2px;
+  border: 2px solid #e6c577;
+  border-radius: inherit;
+  box-shadow: inset 0 0 22px #e6c57777;
+  animation: chain-edge-out .95s ease-out forwards;
+}
+@keyframes chain-praise {
+  0% { opacity: 0; transform: translateX(-50%) scale(.75); }
+  16% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  30%, 76% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(1); }
+}
+@keyframes chain-spark-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.2); }
+}
+@keyframes chain-edge-out { 0% { opacity: 0; } 18% { opacity: .9; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .fx-chain--praise { animation: none; opacity: 1; }
+  .chain-spark, .chain-edge { display: none; }
+}

@@ -1331,6 +1331,7 @@ function placeTile(i) {
   // hand is where the thing you are waiting for actually is.
   if (!state.stock.length) { nudgeHand(); return; }
 
+  cancelChain();
   const dealtKind = state.stock.shift();
   state.cells[i] = makeTile(dealtKind);
   // A rabbit or fox from the hand (rules 18) is a discovery too, so the
@@ -3106,6 +3107,7 @@ function fxAdd(node, life) {
 }
 
 function clearFx() {
+  cancelChain();
   if (!el.fx) return;
   el.fx.textContent = '';
 }
@@ -3128,16 +3130,48 @@ function popScore(i, amount, kind) {
 // A chain is the one thing in the game that is purely a good decision —
 // luck deals the tile, but only the player picks the square that makes
 // it land twice. So it gets said out loud.
-function showChain(steps) {
+function showChain(steps, final = false) {
   if (!el.fx) return;
-  // One badge at a time. The next rung replaces this one 145ms later, so
-  // the number counts up in place instead of three badges stacking in the
-  // same spot and reading as a smear.
   for (const old of el.fx.querySelectorAll('.fx-chain')) old.remove();
+  const tier = steps >= 7 ? 3 : steps >= 5 ? 2 : steps >= 3 ? 1 : 0;
+  const praise = final && tier;
   const tag = document.createElement('span');
-  tag.className = 'fx-chain';
-  tag.textContent = 'Chain ×' + steps;
-  fxAdd(tag, 1200);
+  tag.className = 'fx-chain' + (praise ? ' fx-chain--praise' : '');
+  tag.dataset.tier = tier;
+  if (praise) {
+    const title = document.createElement('strong');
+    title.textContent = ['', 'GREAT!', 'AMAZING!', 'INCREDIBLE!'][tier];
+    const count = document.createElement('small');
+    count.textContent = steps + ' CHAIN';
+    tag.append(title, count);
+  } else tag.textContent = 'Chain ×' + steps;
+  fxAdd(tag, praise ? 1050 : 1200);
+}
+
+// Decoration uses a fixed radial pattern, never the game's random source.
+function chainSparkles(i, steps, final) {
+  const at = fxAt(i);
+  if (!at) return;
+  const tier = steps >= 7 ? 3 : steps >= 5 ? 2 : 1;
+  const count = final ? 8 + tier * 4 : 4 + tier * 2;
+  const reach = Math.min(at.w * (final ? 1.15 + tier * .2 : .65), 110);
+  for (let n = 0; n < count; n++) {
+    const angle = n / count * Math.PI * 2 + steps * .4;
+    const spark = document.createElement('span');
+    spark.className = 'chain-spark';
+    spark.dataset.tier = tier;
+    spark.style.left = at.x + 'px';
+    spark.style.top = at.y + 'px';
+    spark.style.setProperty('--dx', Math.cos(angle) * reach + 'px');
+    spark.style.setProperty('--dy', Math.sin(angle) * reach + 'px');
+    spark.style.setProperty('--spark-size', (n % 3 === 0 ? 6 : 3) + 'px');
+    fxAdd(spark, 720);
+  }
+  if (final && tier === 3) {
+    const edge = document.createElement('span');
+    edge.className = 'chain-edge';
+    fxAdd(edge, 1000);
+  }
 }
 
 // ---------- Replaying the chain ----------
@@ -3168,7 +3202,7 @@ function cancelChain() {
   for (const t of chainTimers) clearTimeout(t);
   chainTimers = [];
   if (!el.fx) return;
-  for (const n of el.fx.querySelectorAll('.ghost, .ring')) n.remove();
+  for (const n of el.fx.querySelectorAll('.ghost, .ring, .fx-chain, .chain-spark, .chain-edge')) n.remove();
 }
 
 // The tiles that are gone, shown going. A ghost leaves the square it
@@ -3195,11 +3229,12 @@ function ghostInto(from, to, kind) {
 // Where it landed. Sized to the square that kept the result, so an
 // elephant's ring is twice the size of a rabbit's without a word
 // anywhere saying that it is bigger.
-function ringAt(i) {
+function ringAt(i, steps = 1) {
   const at = fxAt(i);
   if (!at) return;
   const ring = document.createElement('span');
   ring.className = 'ring';
+  ring.style.setProperty('--chain-power', Math.min(steps - 1, 6));
   ring.style.left = at.x + 'px';
   ring.style.top = at.y + 'px';
   ring.style.width = at.w + 'px';
@@ -3231,10 +3266,11 @@ function replayChain(grew, before) {
     chainTimers.push(setTimeout(function () {
       if (!still) {
         for (const g of step.from) if (g !== step.at) ghostInto(g, step.at, step.was);
-        ringAt(step.at);
+        ringAt(step.at, n + 1);
+        if (n >= 2) chainSparkles(step.at, n + 1, n === grew.length - 1);
       }
       if (gain >= 1) popScore(step.at, gain, step.kind);
-      if (n > 0) showChain(n + 1);
+      if (n > 0) showChain(n + 1, n === grew.length - 1);
     }, chainStepAt(n)));
   }
 }
