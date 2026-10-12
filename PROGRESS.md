@@ -6,7 +6,11 @@
 - 本人がSQL Editorで 202610050001_monetization.sql → 202610110001_reversals.sql を実行し、両方成功と報告。1回目は貼り付けが途中で切れて文法エラー（構文エラーのため何も実行されない）。その際ダッシュボードが PL/pgSQL の `select * into a` を表作成と誤認し `ALTER TABLE a/used ENABLE ROW LEVEL SECURITY` を自動追記していた。自動RLSの確認が出たら付けずに実行する。
 - 確認クエリ: schema 1、bioconnect_関数 7、reversed列 1、誤って作られた表 a/used 0（本人報告）。
 - Edge Functions: 本人がWindowsで git pull → npm.cmd run bundle:edge（checkout 1115d3…、stripe-webhook 858d87…。クラウドでCRLFに揃えて作った値と一致）し、本番に checkout と stripe-webhook を配備（本人報告）。Verify JWT オフは要確認。
-- 次: Stripe本番webhook（4イベント）→ Secrets。CHECKOUT_ENABLEDは入れない。
+- Stripe本番webhook（4イベント、送信先 /functions/v1/stripe-webhook）と本番Secrets（STRIPE_SECRET_KEY、STRIPE_WEBHOOK_SECRET、BIOCONNECT_SITE_URL、PAYMENTS_LIVE=true、MANAGED_PAYMENTS=true、STRIPE_PRICE_*×5）を本人が登録（本人報告）。CHECKOUT_ENABLEDは未登録。クラウド環境からsupabase.coへは接続不可（プロキシ拒否）のため、関数の応答確認は本人のPowerShellで行う。
+- 応答確認（本人のPowerShell）: 最初 checkout が「Missing authorization header」（Verify JWT がオン）→ 本人がオフにして、checkout「Purchases are not enabled yet.」、stripe-webhook「Invalid signature or configuration」を確認。配備・JWTオフ・サイトURL・PAYMENTS_LIVE・CHECKOUT_ENABLED未設定の門が正しく働いている。
+- 本番Auth: Supabaseは独自SMTPがないとメール文面を編集できず、標準のMagic Link文面にはコード（{{ .Token }}）がないため、メールのコードログインには独自SMTPが前提。本人決定でiCloud SMTP（smtp.mail.me.com:587、送信元 ubu_ten0315@icloud.com、App用パスワード）を設定し、Magic Linkの文面をコード式（件名 Your Bioconnect sign-in code）に変更（本人報告）。- 送信テスト: 未確認のユーザー（Inviteで作成・初回ログインの新規プレイヤー）には Magic Link ではなく「Confirm signup」の文面が送られる。標準文面はリンクだけでコードがないため、Confirm signup もコード式（{{ .Token }}）に変更。/auth/v1/otp を本人のPowerShell（Invoke-RestMethod。curl.exeはPowerShellの引用符でJSONが崩れた）から呼び、件名「Your Bioconnect sign-in code」とコード入りメールの到着を本人が確認。
+- URL Configuration: Redirect URLs に https://8w4jgy4rp5-commits.github.io/Bioconnect/ を追加済み（画面で確認）。旧App-Sharing-のページと開発用localhostは残す（旧ページのログインを壊さないため）。index.html付きで開いた場合に備え `…/Bioconnect/**` の追加と、Site URL（現在 …/App-Sharing-/）をBioconnectへ変えることを推奨（本人の実施結果は未確認）。
+- 次: 売り始める日（CHECKOUT_ENABLED、storeEnabled/paymentsEnabled、スマホで購入と返金）。 → 売り始める日（CHECKOUT_ENABLED、storeEnabled/paymentsEnabled、スマホで購入と返金）。
 
 ## 2026-10-11 — 本番Stripeに5商品を登録（本人作業）
 
