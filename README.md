@@ -45,7 +45,7 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 ## 収益化の状態（2026-10-09）
 
 クリスタル（5/$1・11/$2・30/$5・65/$10）、買い切りNo Ads（$3、毎日1回の無料復活つき）、1ゲーム1回の復活を実装済み。通常プレイはログイン不要。
-購入と広告は `shared/monetization-config.js` で無効のまま。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
+ショップ入口は2026-10-13の本人依頼で再表示。購入と広告は `shared/monetization-config.js` で無効のまま。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
 ローカル確認: `npm ci` → `npm run test:server` → http://127.0.0.1:8778/ 。検証は `npm test` / `npm run test:browser`。
 非公開の作業記録（TEST環境・ログイン設定・端末やVPNの手順・アカウントの状態）は `private-notes/` に置く。Git対象外なので公開リポジトリへ入れない。
 

@@ -54,7 +54,7 @@ TEST認証戻り先2件の保存と別端末Googleログイン・ゲーム復帰
 
 - ゲームオーバーの復活は、押せる大きいボタンを常に1つだけ見せる。優先順は 確認待ちの再試行 → No Adsの毎日無料（Wait for Dawn） → クリスタル1個以上（Offer 1 Crystal） → 広告（No Adsなし・広告が使える時） → Find Crystals（ショップを開く）。
 - No Adsを持っていない人には、鎖をかけた「Wait for Dawn」を上に出し、押すとショップのNo Adsを開く。課金をせかす文言・カウントダウン・赤い警告は使わない。
-- 候補と却下理由は concepts/revive-ui-v1/。ショップの中のデザインは未定。
+- 候補と却下理由は concepts/revive-ui-v1/。ショップの中は concepts/shop-ui-v1/simple.html の SIMPLE 2「静かな標本箱」を採用（2026-10-13）: No Ads を最上部、Crystals は木箱の区画（絵・個数・値段のみ）。標準スキンは eldritch.css、数字は古書体だと読みにくいので普通の書体。
 
 ## 公開してよい記録・しない記録
 
@@ -330,3 +330,8 @@ return LADDER[Math.max(2, high - (Math.random() < 0.2 ? 1 : 0))];
 ## 2026-09-28 音の方針
 
 草原と動物のゆるさを音でも維持する。参考作品から具体的な旋律や音源を流用せず、オリジナル曲「Meadow Steps」を使用。木琴風の旋律と柔らかな伴奏を重ね、配置は「ざっ」、連鎖は段数ごとの「ぽんっ」。音楽と効果音は独立して初期Offを維持し、ガイド・タブ非表示・終了では止める。音源の外部依存は加えない。制作・検証の詳細は docs/audio-design.md、試聴は concepts/audio-v1/index.html。聴感は本人の試聴を元に詰める。
+
+
+## 2026-10-13 — ショップを再表示
+
+本人依頼により、2026-10-09のショップ非表示方針を更新し storeEnabled=true とする。ショップ表示と購入・広告の有効化は別の設定として扱う。今回の依頼は表示の復帰で、paymentsEnabled / adsEnabled は false のまま。

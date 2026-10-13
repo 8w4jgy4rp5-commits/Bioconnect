@@ -2203,6 +2203,27 @@ body.is-celebrating { overflow: hidden; }
 .economy-status { min-height:1.5em; font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
 .no-ads-product { padding:12px; border-radius:12px; background:#e8efd8; }
 .no-ads-product h3 { margin:0; font-size:17px; }
+/* Store layout (concepts/shop-ui-v1/simple.html, SIMPLE 2): No Ads first, then
+   four Crystal compartments holding only gems, amount and price. */
+.shop-account p { margin:2px 0; }
+.no-ads-product { margin:14px 0 0; padding:14px; border:2px solid #b49cc0; }
+.no-ads-main { display:flex; align-items:center; gap:12px; }
+.no-ads-ico { width:34px; height:34px; flex:none; color:#6b4a72; }
+.no-ads-words { min-width:0; flex:1; }
+.no-ads-words h3 { font-size:20px; }
+.no-ads-words p { margin:2px 0 0; }
+.economy-card .no-ads-buy { width:auto; flex:none; min-width:76px; font-size:17px; font-weight:700; border-radius:999px; }
+.no-ads-terms { margin:10px 0 0; font-size:12px !important; opacity:.8; }
+#dailyInfo:empty { display:none; }
+.shop-section { margin:18px 0 0; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.75; }
+#crystalRefundPolicy { margin:2px 0 0; font-size:12px; opacity:.8; }
+.crystal-products { gap:6px; }
+.economy-card .crystal-pack { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px 12px; border-radius:6px; }
+.pack-gems { width:60px; height:44px; }
+.pack-amt { font-size:24px; font-weight:700; line-height:1; }
+.pack-price { margin-top:6px; padding:2px 14px; border-radius:4px; background:#243c2e; color:#fff8e8; font-size:15px; font-weight:700; }
+.crystal-pack:disabled { opacity:.55; }
+.economy-card .shop-claim { font-weight:700; }
 .checkout-confirm { margin:12px 0; padding:12px; border:2px solid #668666; border-radius:12px; background:#fffdf5; }
 .checkout-confirm[hidden] { display:none; }
 .checkout-confirm h3 { margin:0 0 6px; font-size:17px; }
