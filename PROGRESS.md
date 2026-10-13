@@ -1646,3 +1646,4 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証結果: rules.test.js 258件成功、既存Chromiumブラウザ検証35件成功（決済等は模擬）。外部通信を遮断した非loopbackホスト名で375px/1000pxのタイトル・ゲーム内メニューからショップを開き、5商品表示・購入広告OFF・JS例外0を確認。公開サイトへの反映とiPhone実機は未実施。
 
 - 公開: 本人からショップ公開の明示依頼を取得。採用済みショップデザインと入口再表示をmainへ反映する。購入の有効化は明日以降との本人方針に従い paymentsEnabled=false、広告もfalseを維持。未追跡の検討用モックとother-ai.patchは公開対象に含めない。
+- 追記: ユーザー「ショップをもう出していいよ」。storeEnabled=true（別の会話で手元変更済み）と新ショップ画面をコミット・push。paymentsEnabled / adsEnabled は false のまま（ショップは見えるが購入・広告は無効）。直前検証: rules 258件、monetization 25件、browser-check 35件、stamp確認。
