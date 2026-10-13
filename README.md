@@ -58,7 +58,8 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 
 ## ファイル案内
 - `index.html` / `style.css` / `script.js` / `audio.js` / `audio-synth.js`: ゲーム本体。
-- `concepts/growing-band-v1/index.html`: 動物ごとに楽器が増える現在のBGMの試聴。音の設計・検証は `docs/audio-design.md`。
+- `concepts/tiptoe-game-v1/index.html`: 動画のTiptoe Hollowに合わせた現在のBGMと新旧比較の試聴。音の設計・検証は `docs/audio-design.md`。
+- `concepts/growing-band-v1/`: 以前のMeadow Stepsの合奏音源・検討記録。
 - `concepts/audio-v1/index.html`: 以前の固定伴奏BGMと効果音の試聴。
 - `img/`: ゲーム用画像。原画があれば `img/ref/` も保存対象。
 - `concepts/animal-art-v1/`: 動物の原画・候補・比較画像・書き出し道具。

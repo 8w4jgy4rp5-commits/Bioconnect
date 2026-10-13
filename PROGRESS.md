@@ -1,5 +1,15 @@
 # Bioconnect 進捗
 
+## 2026-10-12 — 動画の「Tiptoe Hollow」をゲームBGMへ編曲
+
+- 本人指定の完成動画: claude/festive-brahmagupta-r7zj7r / concepts/promo-video-v1/out/promo-full.mp4（29.3秒）。mainには動画がなく、該当ブランチのREADME・promo-audio.jsからオリジナル曲と楽譜を確認。参考コミット ce0b04fbca5f02d97dcbece91350f5f1ea0c66c5。
+- audio-synth.js: 96 BPM・D majorのMeadow Stepsから、120 BPM・D minorのTiptoe Hollow — Meadow Bandへ。動画の最初の8小節のモチーフと和声を使い、後半8小節に応答を追加（32秒）。口笛のすくい上げとビブラート、チューバ風の低音、チェンバロの裏拍、控えめなテルミン風の滑り。タイトルは同じモチーフの84 BPMオルゴール。
+- 動物初登場で10パートが次の小節頭から参加する仕様を維持。低音・金管・高音ベルの音域/長さ/音量を新しい主旋律に合わせた。配置・連鎖・ゾウ等の効果音は変更なし。
+- concepts/tiptoe-game-v1/: 新旧/動画原曲を比較できる試聴ページ、変更直前のsynthと動画の参考ソース、書き出し用render.cjs、README。ゲームに動画の外部依存は追加しない。
+- 検証: rules.test.js 258件成功、JS構文/差分確認成功。Chrome OfflineAudioContextで19ケース（11編成段階・新旧曲・タイトル・動画原曲・効果音との混合/ストレス）。有限で非無音、最大ピーク0.6105、最大ループ境界差0.004166。実ブラウザで試聴の4曲切替/Stop、375pxはみ出しなし、ゲーム開始・動物参加・広告ミュート・リセット確認、JS例外0。WAVと測定値は output/playwright/tiptoe-music/。
+- 未確認: 本人の聴感と実機の音量・Safari。2026-10-13に本人から公開依頼。最新mainのCNAMEを保持してBGM変更をcommit/pushし、GitHub Pagesで公開を進める。他作業のショップ案とPROGRESS末尾は維持。
+
+
 ## 2026-10-12 — 連鎖の盛り上がりと褒め言葉
 
 - 本人が提案①＋③を選択。1回の配置の合体を数え、3〜4連鎖 GREAT!、5〜6連鎖 AMAZING!、7以上 INCREDIBLE!。途中は Chain ×N、最後だけ褒め言葉＋N CHAIN を約1秒表示。

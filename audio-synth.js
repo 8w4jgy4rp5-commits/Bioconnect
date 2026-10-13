@@ -1,10 +1,10 @@
-// Bioconnect: "Meadow Steps", an original score and procedural instruments.
+// Bioconnect: "Tiptoe Hollow — Meadow Band", adapted from our promo score.
 // No recordings, samples, or melodies from another game are used.
 // Kept separate from playback so previews render the very same instruments.
 window.BioSound = (() => {
-  const BPM = 96, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
+  const BPM = 120, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
   // The title screen plays the same tune, slower, as a music box.
-  const TITLE_BEAT = 60 / 78;
+  const TITLE_BEAT = 60 / 84;
   // Each newly encountered species joins the band once during this run.
   const INSTRUMENTS = Object.freeze([
     { kind: 'rabbit', name: 'Piano' },
@@ -19,32 +19,47 @@ window.BioSound = (() => {
     { kind: 'elephant', name: 'Timpani' }
   ]);
 
-  const chords = [
-    [50,57,61,66], [47,54,57,62], [52,55,59,66], [45,55,59,64],
-    [50,57,61,66], [43,54,57,62], [52,55,59,62], [45,55,61,64],
-    [47,54,57,62], [43,54,57,62], [50,57,61,66], [45,55,59,64],
-    [52,55,59,66], [43,54,57,62], [45,55,61,64], [50,57,61,66]
+  // Source: promo-video-v1/promo-audio.js, "Tiptoe Hollow" (our original).
+  // Keep its D-minor oom-pah and whistled motif; the second eight bars
+  // answer the first so a long game has room to breathe.
+  const HOLLOW_BARS = [
+    { root:38, fifth:45, chord:[62,65,69] },
+    { root:38, fifth:45, chord:[62,65,69] },
+    { root:43, fifth:50, chord:[62,67,70] },
+    { root:45, fifth:52, chord:[61,64,67] },
+    { root:38, fifth:45, chord:[62,65,69] },
+    { root:46, fifth:53, chord:[62,65,70] },
+    { root:43, fifth:45, chord:[62,67,70], chord2:[61,64,67] },
+    { root:38, fifth:45, chord:[62,65,69] }
   ];
-  // Beat positions include space for the player's actions; the second half
-  // answers the first rather than repeating a short arpeggio indefinitely.
+  // [position in bar, MIDI note, length in beats]
   const phrases = [
-    [[0,69],[.75,74],[1.5,73],[2.5,66]],
-    [[.5,69],[1.5,66],[3,62]],
-    [[0,67],[1.5,71],[2.25,69],[3.5,66]],
-    [[.5,64],[2,69]],
-    [[0,66],[.75,69],[2,76],[3,73]],
-    [[.5,74],[1.5,71],[3,69]],
-    [[0,67],[1.25,66],[2.5,64]],
-    [[.5,61],[2,64],[3.5,69]],
-    [[0,74],[1,78],[2.5,76],[3.25,73]],
-    [[.5,71],[1.5,69],[3,66]],
-    [[0,69],[1.25,73],[2.5,74]],
-    [[.5,76],[2,71],[3.25,69]],
-    [[0,67],[.75,71],[2,74],[3.25,71]],
-    [[.5,69],[1.5,66],[3,62]],
-    [[0,64],[1.5,69],[2.5,73]],
-    [[0,74],[1.5,69],[2.5,66]]
+    [[0,69,.4],[1,74,.4],[1.5,76,.4],[2,77,1.5]],
+    [[0,76,.4],[.5,74,.4],[1,73,.4],[1.5,74,2]],
+    [[0,70,.4],[1,74,.4],[1.5,76,.4],[2,79,1.5]],
+    [[0,77,.4],[.5,76,.4],[1,74,.4],[1.5,73,1.2],[3,69,.9]],
+    [[0,69,.4],[1,74,.4],[1.5,76,.4],[2,77,.9],[3,81,.9]],
+    [[0,82,1],[1,81,.45],[1.5,79,.45],[2,77,1.5]],
+    [[0,79,.45],[.5,77,.45],[1,76,.45],[1.5,74,.45],[2,73,.45],[2.5,76,.45],[3,79,.9]],
+    [[0,74,1.6]],
+    [[0,69,.4],[1,74,.4],[1.5,76,.4],[2,77,.9],[3,74,.6]],
+    [[0,76,.4],[.5,74,.4],[1,73,.4],[1.5,74,1.5],[3.5,69,.35]],
+    [[0,70,.4],[1,74,.4],[1.5,76,.4],[2,79,.9],[3,77,.6]],
+    [[0,77,.4],[.5,76,.4],[1,74,.4],[1.5,73,1.2],[3,69,.9]],
+    [[0,74,.4],[.5,76,.4],[1,77,.8],[2,81,.9],[3,77,.6]],
+    [[0,82,.9],[1,81,.4],[1.5,79,.4],[2,77,.9],[3,74,.7]],
+    [[0,79,.45],[.5,77,.45],[1,76,.45],[1.5,74,.45],[2,73,.45],[2.5,76,.45],[3,73,.8]],
+    [[0,74,1.6]]
   ];
+  const chords = Array.from({length:BARS}, (_, i) => {
+    const bar = HOLLOW_BARS[i % 8];
+    return [bar.root + 12, ...bar.chord];
+  });
+  function harmony(bar, within) {
+    const score = HOLLOW_BARS[bar % 8];
+    return score.chord2 && within >= 2
+      ? [57, ...score.chord2] : chords[bar];
+  }
   const hz = midi => 440 * 2 ** ((midi - 69) / 12);
 
   function create(ctx, destination = ctx.destination) {
@@ -72,15 +87,18 @@ window.BioSound = (() => {
       param.linearRampToValueAtTime(0, time + duration + .02);
     }
 
-    function voice(source, bus, time, duration, volume, attack = .008, filter = null, hold = 0) {
-      const gain = ctx.createGain(), nodes = [source, gain];
+    function voice(source, bus, time, duration, volume, attack = .008, filter = null, hold = 0, companions = []) {
+      const gain = ctx.createGain(), nodes = [source, gain, ...companions];
       envelope(gain.gain, time, attack, duration, volume, hold);
       if (filter) { source.connect(filter); filter.connect(gain); nodes.push(filter); }
       else source.connect(gain);
       gain.connect(bus);
       const entry = { source, gain, bus: bus === effects ? effects : music, time };
       voices.add(entry);
-      source.onended = () => { nodes.forEach(node => node.disconnect()); voices.delete(entry); };
+      source.onended = () => {
+        for (const node of companions) if (typeof node.stop === 'function') { try { node.stop(); } catch (_) {} }
+        nodes.forEach(node => node.disconnect()); voices.delete(entry);
+      };
       source.start(time); source.stop(time + duration + .03);
     }
 
@@ -116,22 +134,57 @@ window.BioSound = (() => {
       tone(f * 3.01, time, .16, volume * .07, music, 'sine', .002);
     }
 
-    // Opening arrangement: melody an octave up with a soft echo, a slow
-    // swelling pad in place of the bass, and no brushed percussion, so the
-    // title feels like the meadow before morning rather than the game.
+    // The same minor-key motif, quietly explored on a music box.
     function titleBeat(beat, time) {
-      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = harmony(bar, within);
       for (const [position, midi] of phrases[bar]) {
         if (Math.floor(position) === within) {
           const t = time + (position - within) * TITLE_BEAT;
-          box(midi + 12, t, .05);
-          box(midi + 12, t + TITLE_BEAT * .75, .011);
+          box(midi, t, .043);
+          box(midi, t + TITLE_BEAT * .75, .008);
         }
       }
       if (within === 0) {
-        notes.slice(1).forEach((midi, i) => tone(hz(midi), time + i * .05, TITLE_BEAT * 4.2, .009, music, 'triangle', .6));
-        tone(hz(notes[0]), time, TITLE_BEAT * 3.8, .045, music, 'sine', .35);
+        notes.slice(1).forEach((midi, i) => tone(hz(midi - 12), time + i * .05, TITLE_BEAT * 3.8, .006, music, 'triangle', .3));
+        tone(hz(notes[0] - 12), time, TITLE_BEAT * 2.8, .027, music, 'sine', .12);
       }
+    }
+
+    // Whistled notes enter from below. A little vibrato gives the tune
+    // the promo's hesitant, comic personality rather than a pure beep.
+    function whistle(midi, time, duration, volume = .078, toMidi = null) {
+      const source = ctx.createOscillator(), lfo = ctx.createOscillator(), depth = ctx.createGain();
+      source.type = 'sine';
+      source.frequency.setValueAtTime(hz(midi - .65), time);
+      source.frequency.exponentialRampToValueAtTime(hz(midi), time + .045);
+      if (toMidi !== null) source.frequency.exponentialRampToValueAtTime(hz(toMidi), time + duration * .82);
+      lfo.frequency.value = toMidi === null ? 5.4 : 6.2;
+      depth.gain.setValueAtTime(0, time);
+      depth.gain.linearRampToValueAtTime(hz(midi) * (toMidi === null ? .009 : .02), time + Math.min(duration, .28));
+      lfo.connect(depth); depth.connect(source.frequency);
+      lfo.start(time); lfo.stop(time + duration + .03);
+      voice(source, music, time, duration, volume, .025, null, Math.max(.03, duration - .06), [lfo, depth]);
+      if (toMidi === null) rustle(time, .08, .004, hz(midi) * 2, music);
+    }
+
+    function tuba(midi, time, duration, volume = .075) {
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.type = 'sawtooth';
+      source.frequency.setValueAtTime(hz(midi) * .985, time);
+      source.frequency.exponentialRampToValueAtTime(hz(midi), time + .035);
+      filter.type = 'lowpass'; filter.Q.value = .65;
+      filter.frequency.setValueAtTime(850, time);
+      filter.frequency.exponentialRampToValueAtTime(260, time + duration);
+      voice(source, music, time, duration, volume, .012, filter);
+      tone(hz(midi) / 2, time, duration, volume * .25, music, 'sine', .012);
+    }
+
+    function harpsichord(midi, time, volume = .018) {
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.type = 'sawtooth'; source.frequency.value = hz(midi);
+      filter.type = 'bandpass'; filter.frequency.value = 1900; filter.Q.value = .55;
+      voice(source, music, time, .32, volume, .003, filter);
+      tone(hz(midi) * 1.004, time, .22, volume * .25, music, 'triangle', .003);
     }
 
     const layers = new Map();
@@ -220,7 +273,7 @@ window.BioSound = (() => {
     }
 
     function ensembleBeat(beat, time, kinds) {
-      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = harmony(bar, within);
       const active = new Set(kinds);
       const play = (kind, midi, offset, duration, volume) => {
         if (active.has(kind)) instrument(kind,midi,time + offset * BEAT,duration,volume);
@@ -237,13 +290,13 @@ window.BioSound = (() => {
       }
       if (within === 1) play('zebra',notes[2],.5,.7,.04);
       if (within === 3) play('zebra',notes[1],.5,.38,.032);
-      if (within === 0 || within === 2) play('buffalo',notes[0] + (within === 2 ? 7 : 0),0,.8,.065);
-      if (within === 0) play('wolf',notes[3] + (bar % 2 ? 0 : 7),.14,.48,.038);
-      if (within === 3) play('wolf',notes[2] + 12,.2,.42,.026);
-      if (within === 0) play('bear',notes[1] - 12,.05,2.1,.044);
+      if (within === 0 || within === 2) play('buffalo',notes[0] - 12 + (within === 2 ? 7 : 0),0,.5,.042);
+      if (within === 0 && bar % 2) play('wolf',notes[3],.14,.34,.028);
+      if (within === 3 && bar % 2) play('wolf',notes[2],.2,.3,.021);
+      if (within === 0) play('bear',notes[1] - 12,.05,1.6,.032);
       if (within === 2) play('lion',notes[2] - 12,.03,1.0,.042);
-      if (within === 0) play('tiger',notes[3] + 24,.75,1.4,.025);
-      if (within === 3) play('tiger',notes[2] + 24,.7,1.4,.019);
+      if (within === 0) play('tiger',notes[3] + 12,.75,.9,.02);
+      if (within === 3) play('tiger',notes[2] + 12,.7,.9,.016);
       if (within === 0) play('elephant',notes[0] - 12,0,.85,.07);
       if (within === 2) play('elephant',notes[0] - 5,.5,.85,.045);
     }
@@ -253,28 +306,33 @@ window.BioSound = (() => {
       setEnsemble([kind], time);
       const low = ['buffalo','bear','lion','elephant'].includes(kind);
       const high = kind === 'tiger';
-      [62,66,69,66].forEach((midi,i) => instrument(kind,midi + (low ? -12 : high ? 12 : 0),time + i * .65,.6,.11));
+      [62,65,69,65].forEach((midi,i) => instrument(kind,midi + (low ? -12 : high ? 12 : 0),time + i * .65,.6,.11));
     }
 
     function musicBeat(index, time, theme = 'game', kinds = []) {
-      if (theme === 'title') return titleBeat(((index % BEATS) + BEATS) % BEATS, time);
-      setEnsemble(kinds, time);
       const beat = ((index % BEATS) + BEATS) % BEATS;
-      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
-      const sway = .018 * Math.sin(bar * 1.7 + within);
-      for (const [position, midi] of phrases[bar]) {
-        if (Math.floor(position) === within) {
-          const offset = position - within;
-          const t = time + offset * BEAT + (offset > 0 ? .018 : 0);
-          wood(midi, t, .074 + sway * .6);
-          // A quiet resonant answer softens the dry synthesized attack.
-          wood(midi - 12, t + .115, .012);
-        }
+      if (theme === 'rest') return;
+      if (theme === 'title') return titleBeat(beat, time);
+      setEnsemble(kinds, time);
+      const bar = Math.floor(beat / 4), within = beat % 4;
+      const score = HOLLOW_BARS[bar % 8], notes = harmony(bar, within);
+      const root = score.chord2 && within >= 2 ? 45 : score.root;
+      if (within === 0 || within === 2) {
+        tuba(within === 0 ? root : score.chord2 ? root : score.fifth, time, BEAT * .7);
+        tone(105, time, .16, .035, music, 'sine', .004, 43);
       }
+      if (within === 1 || within === 3) notes.slice(1).forEach((midi, i) => harpsichord(midi, time + i * .008));
+      if (within === 3 && bar % 2) tuba(root + 2, time + BEAT * .5, BEAT * .35, .04);
+      rustle(time + BEAT * .5, .045, .007, 6500, music);
+      // The whistled motif is present from the first plant, as in the video.
+      for (const [position, midi, length] of phrases[bar]) {
+        if (Math.floor(position) === within) whistle(midi, time + (position - within) * BEAT, length * BEAT);
+      }
+      if ((bar % 8 === 3 || bar % 8 === 7) && within === 2) {
+        whistle(bar % 8 === 3 ? 69 : 74, time, BEAT * 1.8, .022, bar % 8 === 3 ? 86 : 62);
+      }
+      if (bar % 8 >= 4) tone(hz(notes[1 + (within + 1) % 3] + 12), time + BEAT * .5, .17, .014, music, 'triangle', .003);
       ensembleBeat(beat, time, kinds);
-      // Brushed seeds instead of a sharp hi-hat or a heavy drum loop.
-      rustle(time + BEAT * .56, .09, .013, 3300, music);
-      if (within === 1 || within === 3) tone(190, time, .09, .017, music, 'sine', .004, 130);
     }
 
     function plant(time) {
@@ -364,5 +422,5 @@ window.BioSound = (() => {
     return { musicBeat, effect, cancel, setEnsemble, instrumentPreview };
   }
   const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
-  return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Meadow Steps' };
+  return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Tiptoe Hollow — Meadow Band' };
 })();
