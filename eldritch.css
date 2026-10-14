@@ -287,3 +287,31 @@
 .skin-eldritch .revive-btn strong { font-size: 17px; }
 .skin-eldritch .gameover-card .economy-status { margin: 0; font-size: 11px; color: var(--el-mute); font-family: var(--el-type); }
 .skin-eldritch .gameover-card .economy-status:empty { display: none; }
+
+/* ---------- store: a quiet specimen box (concepts/shop-ui-v1/simple.html, SIMPLE 2) ---------- */
+.skin-eldritch .shop-card { background: #1a130c; color: var(--el-ink); border: 0; border-radius: 22px; padding: 24px 22px 18px;
+  box-shadow: inset 0 0 0 8px #2e2317, inset 0 0 0 9px #4f3d2a, 0 18px 50px rgba(0, 0, 0, .55); }
+.skin-eldritch .shop-card h2, .skin-eldritch .shop-card h3 { font-family: var(--el-caps); font-weight: 400; letter-spacing: .02em; }
+.skin-eldritch .shop-card p, .skin-eldritch .shop-card label { color: var(--el-mute); }
+.skin-eldritch .shop-card #walletLabel { color: var(--el-ink); font-size: 16px; }
+.skin-eldritch .shop-card input { background: #120d08; color: var(--el-ink); border-color: #4f3d2a; }
+.skin-eldritch .shop-card .no-ads-product { background: #2a2030; border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1.5px rgba(141, 104, 150, .8); animation: el-noads 4s ease-in-out infinite; }
+@keyframes el-noads { 50% { box-shadow: inset 0 0 0 2px #a07aa8, 0 0 22px rgba(141, 104, 150, .35); } }
+.skin-eldritch .shop-card .no-ads-ico { color: var(--el-ink); }
+.skin-eldritch .shop-card .no-ads-words h3 { font-size: 21px; color: var(--el-ink); }
+.skin-eldritch .shop-card .no-ads-words p { color: var(--el-ink); opacity: .85; }
+.skin-eldritch .shop-card .no-ads-buy { background: var(--el-plum2); color: #fff; box-shadow: none; font-family: inherit; }
+.skin-eldritch .shop-card .crystal-products { padding: 4px; gap: 4px; background: #2e2317; border-radius: 4px; }
+.skin-eldritch .shop-card .crystal-pack { background: #e9e2d0; color: #2c2a1d; box-shadow: none; border-radius: 2px; }
+.skin-eldritch .shop-card .crystal-pack:hover { background: #f3eee2; }
+.skin-eldritch .shop-card .crystal-pack::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #9a2f22; }
+.skin-eldritch .shop-card .pack-price { background: #2c2a1d; color: #f3eee2; }
+.skin-eldritch .shop-card .shop-claim { background: none; box-shadow: none; color: var(--el-ink); text-decoration: underline; text-underline-offset: 4px; }
+.skin-eldritch .shop-card .checkout-confirm { background: #231b12; border-color: #4f3d2a; color: var(--el-ink); }
+.skin-eldritch .shop-card .checkout-confirm dl > div { border-color: #3a2c1d; }
+.skin-eldritch .shop-card .checkout-confirm dd { color: var(--el-mute); }
+@media (prefers-reduced-motion: reduce) { .skin-eldritch .shop-card .no-ads-product { animation: none; } }
+@media (max-width: 360px) { .skin-eldritch .shop-card { padding: 18px 14px 14px; } }
+/* the old-book face has old-style figures (1 reads as I, 0 as o): prices and counts use a plain face */
+.skin-eldritch .shop-card .pack-amt, .skin-eldritch .shop-card .pack-price, .skin-eldritch .shop-card .no-ads-buy, .skin-eldritch .shop-card #walletLabel { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; font-weight: 700; }
+.skin-eldritch .shop-card #walletLabel { font-weight: 600; }

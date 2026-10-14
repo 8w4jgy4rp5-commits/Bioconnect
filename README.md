@@ -45,7 +45,7 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 ## 収益化の状態（2026-10-09）
 
 クリスタル（5/$1・11/$2・30/$5・65/$10）、買い切りNo Ads（$3、毎日1回の無料復活つき）、1ゲーム1回の復活を実装済み。通常プレイはログイン不要。
-購入と広告は `shared/monetization-config.js` で無効のまま。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
+ショップ入口は2026-10-13の本人依頼で再表示。購入と広告は `shared/monetization-config.js` で無効のまま。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
 ローカル確認: `npm ci` → `npm run test:server` → http://127.0.0.1:8778/ 。検証は `npm test` / `npm run test:browser`。
 非公開の作業記録（TEST環境・ログイン設定・端末やVPNの手順・アカウントの状態）は `private-notes/` に置く。Git対象外なので公開リポジトリへ入れない。
 
@@ -58,7 +58,8 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 
 ## ファイル案内
 - `index.html` / `style.css` / `script.js` / `audio.js` / `audio-synth.js`: ゲーム本体。
-- `concepts/growing-band-v1/index.html`: 動物ごとに楽器が増える現在のBGMの試聴。音の設計・検証は `docs/audio-design.md`。
+- `concepts/tiptoe-game-v1/index.html`: 動画のTiptoe Hollowに合わせた現在のBGMと新旧比較の試聴。音の設計・検証は `docs/audio-design.md`。
+- `concepts/growing-band-v1/`: 以前のMeadow Stepsの合奏音源・検討記録。
 - `concepts/audio-v1/index.html`: 以前の固定伴奏BGMと効果音の試聴。
 - `img/`: ゲーム用画像。原画があれば `img/ref/` も保存対象。
 - `concepts/animal-art-v1/`: 動物の原画・候補・比較画像・書き出し道具。

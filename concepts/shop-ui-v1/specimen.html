@@ -1,0 +1,267 @@
+<title>Bioconnect Specimen Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&family=Homemade+Apple&family=Zen+Maru+Gothic:wght@400;700&display=swap">
+<style>
+/* Layout: the original specimen idea plus three variations, phone mocks side by side.
+   Single dark look on purpose: the game's standard skin is Cozy Eldritch. */
+:root{
+  color-scheme:dark;
+  --ink:#ece4c8; --mute:#a39c7c; --moss:#a8c66c; --deep:#10150e; --cell:#1f2918;
+  --plum:#6b4a72; --plum2:#8d6896; --gem:#c9e88a; --sun:#f1c66a; --wax:#9a2f22;
+  --paper:#e6dbb9; --paper-ink:#2c2a1d; --paper-mute:#6b6142; --wood:#3a2c1d; --wood-l:#5b4630;
+  --serif:"IM Fell English",Georgia,serif; --caps:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --type:"Special Elite","Courier New",monospace; --hand:"Homemade Apple","Segoe Script",cursive;
+  --jp:"Zen Maru Gothic","Hiragino Sans",system-ui,sans-serif;
+}
+body{background:radial-gradient(70% 30% at 50% 0%,rgba(141,104,150,.18),transparent 70%),linear-gradient(#1b2418,var(--deep));background-color:var(--deep);color:var(--ink);font-family:var(--jp);padding-block:32px 56px;padding-inline:16px;line-height:1.6}
+.wrap{max-width:1600px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-family:var(--caps);font-weight:400;font-size:clamp(28px,4vw,40px);margin:0;letter-spacing:.03em;text-wrap:balance}
+header h1 span{color:var(--moss)}
+header p{margin:6px 0 0;color:var(--mute);max-width:70ch;font-size:14.5px}
+header p b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:36px 24px;align-items:start}
+.opt{display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{font-family:var(--type);font-size:12px;letter-spacing:.1em;color:var(--moss)}
+.opt--base .tag{color:var(--mute)}
+.opt h2{font-size:19px;margin:-6px 0 0;font-weight:700}
+.notes{font-size:13.5px;color:var(--mute);margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.notes b{color:var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.phone{width:100%;max-width:360px;border-radius:26px;padding:20px 18px 16px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;font-family:var(--serif);box-shadow:0 0 0 1px rgba(236,228,200,.12),0 18px 50px rgba(0,0,0,.5)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top h3{margin:0;font:italic 400 21px/1.1 var(--serif)}
+.close{background:none;border:0;font:13px var(--type);color:var(--mute);padding:6px 4px}
+.wallet{display:flex;align-items:center;gap:8px;font-size:15px}
+.wallet b{font:400 22px/1 var(--caps)}
+.wallet small{margin-left:auto;font:11px var(--type);color:var(--mute)}
+.ico{width:20px;height:20px;flex:none}
+.fine{margin:0;font:10.5px/1.45 var(--type);color:var(--mute);text-align:center}
+.fine u{text-decoration:none;border-bottom:1px dotted currentColor}
+
+/* ---------- base: the original idea 2 ---------- */
+.s0{background:radial-gradient(100% 60% at 50% 30%,#2a2219,#14100c);box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 8px var(--wood),inset 0 0 0 9px var(--wood-l),0 18px 50px rgba(0,0,0,.5)}
+.s0 .drawer{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;padding:6px 2px}
+.spec{position:relative;border:0;background:var(--paper);color:var(--paper-ink);padding:10px 8px 8px;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;transform:rotate(var(--r,0deg));transition:transform .2s}
+.spec:hover{transform:rotate(0) scale(1.03)}
+.pin::before{content:"";position:absolute;top:-5px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e9e9e9,#7d7a6c);box-shadow:0 2px 2px rgba(0,0,0,.5);z-index:2}
+.spec svg{width:70px;height:52px}
+.lat{font:italic 14px/1.15 var(--serif)}
+.no{font:10px var(--type);letter-spacing:.06em;color:var(--paper-mute)}
+.stamp{margin-top:4px;font:12px var(--type);color:var(--wax);border:1.5px solid var(--wax);border-radius:3px;padding:0 6px;transform:rotate(-4deg)}
+.scrawl{font:10px var(--type);color:var(--paper-mute)}
+.s0 .jar{display:flex;gap:12px;align-items:center;border:0;text-align:left;background:var(--paper);color:var(--paper-ink);padding:10px 12px;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.5);transform:rotate(-.6deg)}
+.s0 .jar svg{width:40px;height:50px;flex:none}
+.s0 .jar strong{display:block;font:italic 16px var(--serif)}
+.s0 .jar em{display:block;font-style:normal;font:11px/1.35 var(--type);color:var(--paper-mute)}
+.s0 .claim{background:none;border:0;color:var(--paper);font:italic 14px var(--serif);text-decoration:underline dotted;text-underline-offset:4px;padding:2px}
+
+/* ---------- A  Bell Jars ---------- */
+.sa{background:radial-gradient(70% 35% at 50% 40%,rgba(168,198,108,.12),transparent 70%),linear-gradient(#18140f,#0e0c09);box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 8px var(--wood),inset 0 0 0 9px var(--wood-l),0 18px 50px rgba(0,0,0,.5)}
+.sa .shelf{display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;padding-top:4px}
+.bell{position:relative;border:0;background:none;padding:0 0 4px;display:flex;flex-direction:column;align-items:center;gap:0;transition:transform .25s}
+.bell:hover{transform:translateY(-3px)}
+.bell .glass{position:relative;width:86%;aspect-ratio:1/1.05;border-radius:50% 50% 6px 6px / 60% 60% 6px 6px;background:radial-gradient(60% 50% at 50% 75%,rgba(201,232,138,var(--glow,.14)),transparent 70%),rgba(236,228,200,.04);box-shadow:inset 0 0 0 1.5px rgba(236,228,200,.32),inset 8px 0 14px -10px rgba(236,228,200,.5);display:grid;place-items:end center;padding-bottom:10%}
+.bell .glass::before{content:"";position:absolute;top:-7px;left:50%;width:12px;height:9px;margin-left:-6px;border-radius:50% 50% 2px 2px;background:#7d7a6c}
+.bell .glass::after{content:"";position:absolute;left:16%;top:18%;width:7%;height:38%;border-radius:999px;background:linear-gradient(rgba(255,255,255,.28),transparent)}
+.bell .glass svg{width:72%;height:auto;filter:drop-shadow(0 0 6px rgba(201,232,138,.35))}
+.bell .base{width:100%;height:9px;border-radius:2px;background:linear-gradient(var(--wood-l),var(--wood));box-shadow:0 3px 6px rgba(0,0,0,.6)}
+.bell .tagline{position:relative;margin-top:7px;background:#cdbf98;color:var(--paper-ink);padding:3px 10px 4px 14px;border-radius:2px 8px 8px 2px;clip-path:polygon(10px 0,100% 0,100% 100%,10px 100%,0 50%);display:flex;flex-direction:column;align-items:center;line-height:1.15;transform:rotate(var(--r,0deg))}
+.bell .tagline .lat{font-size:13px}
+.bell .tagline .pr{font:12px var(--type);color:var(--wax)}
+.bell--big .glass{--glow:.28;animation:hum 5s ease-in-out infinite}
+@keyframes hum{50%{box-shadow:inset 0 0 0 1.5px rgba(201,232,138,.55),inset 8px 0 14px -10px rgba(236,228,200,.5),0 0 22px rgba(201,232,138,.18)}}
+.sa .hushjar{display:flex;gap:12px;align-items:center;text-align:left;border:0;border-radius:10px;padding:10px 12px;background:rgba(107,74,114,.18);box-shadow:inset 0 0 0 1px rgba(141,104,150,.6)}
+.sa .hushjar svg{width:38px;height:48px;flex:none}
+.sa .hushjar strong{display:block;font:italic 16px var(--serif)}
+.sa .hushjar em{display:block;font-style:normal;font:11px/1.35 var(--type);color:var(--mute)}
+.sa .hushjar .pr{margin-left:auto;font:13px var(--type);color:var(--plum2);white-space:nowrap}
+.sa .claim{border:0;background:none;padding:6px;font:italic 14px var(--serif);color:var(--moss)}
+.sa .claim span{display:block;font:10.5px var(--type);color:var(--mute)}
+
+/* ---------- B  Field Notebook ---------- */
+.sb{background:#1b170f;padding:14px}
+.sb .page{position:relative;border-radius:4px 14px 14px 4px;background:repeating-linear-gradient(transparent 0 23px,rgba(92,120,150,.22) 23px 24px),#ddd1ad;color:var(--paper-ink);padding:16px 14px 14px 30px;display:flex;flex-direction:column;gap:12px;box-shadow:inset 0 0 40px rgba(90,70,30,.35)}
+.sb .page::before{content:"";position:absolute;left:20px;top:0;bottom:0;width:1px;background:rgba(160,60,50,.45)}
+.sb .page::after{content:"";position:absolute;left:5px;top:16px;bottom:16px;width:8px;background:radial-gradient(circle,#1b170f 3px,transparent 3.5px) 0 0/8px 26px repeat-y}
+.sb .top h3{font-size:20px}
+.sb .close{color:var(--paper-mute)}
+.sb .wallet small{color:var(--paper-mute)}
+.sb .hand{font:12px/1.6 var(--hand);color:#3d4f7a}
+.sb .pressed{display:grid;grid-template-columns:1fr 1fr;gap:14px 10px}
+.card{position:relative;border:0;background:#f3ecd6;color:var(--paper-ink);padding:12px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;box-shadow:0 2px 4px rgba(60,40,10,.35);transform:rotate(var(--r,0deg));transition:transform .2s}
+.card:hover{transform:rotate(0) scale(1.03)}
+.card::before,.card::after{content:"";position:absolute;width:30px;height:11px;background:rgba(214,196,140,.75);top:-4px}
+.card::before{left:-6px;transform:rotate(-30deg)}
+.card::after{right:-6px;transform:rotate(30deg)}
+.card svg{width:62px;height:46px}
+.card .ruler{width:80%;height:6px;margin:2px 0;background:repeating-linear-gradient(90deg,var(--paper-mute) 0 1px,transparent 1px 6px) bottom/100% 4px no-repeat,repeating-linear-gradient(90deg,var(--paper-mute) 0 1px,transparent 1px 30px) bottom/100% 6px no-repeat}
+.card .pr{margin-top:3px;font:12px var(--type);background:var(--paper-ink);color:#f3ecd6;padding:0 7px;border-radius:2px}
+.card .hand{position:absolute;right:-4px;bottom:-16px;font-size:10px;transform:rotate(-6deg);white-space:nowrap}
+.sb .silence{display:flex;gap:10px;align-items:center;text-align:left;border:0;background:none;padding:6px 4px;border-top:1px dashed var(--paper-mute);border-bottom:1px dashed var(--paper-mute);color:var(--paper-ink)}
+.sb .silence svg{width:36px;height:36px;flex:none}
+.sb .silence strong{display:block;font:italic 16px var(--serif)}
+.sb .silence em{display:block;font-style:normal;font:11px/1.35 var(--type);color:var(--paper-mute)}
+.sb .silence .pr{margin-left:auto;font:13px var(--type);color:var(--wax);border:1.5px solid var(--wax);border-radius:3px;padding:0 6px;transform:rotate(-5deg);white-space:nowrap}
+.sb .claim{border:0;background:none;padding:0;text-align:left;font:12px var(--hand);color:#3d4f7a;text-decoration:underline;text-underline-offset:5px}
+.sb .fine{color:var(--paper-mute)}
+
+/* ---------- C  Insect Box ---------- */
+.sc{background:#1d150d;box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 10px #4a3622,inset 0 0 0 11px #6e5236,inset 0 0 0 13px #2a1e12,0 18px 50px rgba(0,0,0,.5);padding:26px 22px 18px}
+.sc .glassbox{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#2a1e12;border-radius:2px}
+.sc .glassbox::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.07) 38%,transparent 46%,transparent 60%,rgba(255,255,255,.04) 64%,transparent 68%)}
+.cmp{position:relative;border:0;background:radial-gradient(circle at 50% 40%,#f1ece0,#d9d0bc);color:var(--paper-ink);padding:14px 6px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;box-shadow:inset 0 0 10px rgba(80,60,30,.35);transition:background .2s}
+.cmp:hover{background:radial-gradient(circle at 50% 40%,#fbf7ec,#e4dcc9)}
+.cmp svg{width:64px;height:48px;filter:drop-shadow(0 3px 2px rgba(60,40,10,.35))}
+.cmp .pin::before{top:24px}
+.cmp .pinhead{position:absolute;top:12px;left:50%;width:7px;height:7px;margin-left:-3.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e05a48,#7a1d14)}
+.cmp .label{margin-top:3px;width:92%;border:1px solid var(--paper-ink);background:#fbf8ef;padding:2px 4px;display:flex;flex-direction:column;line-height:1.2}
+.cmp .label .no{font-size:9px}
+.cmp .label .lat{font-size:12.5px}
+.cmp .label .pr{font:11.5px var(--type);color:var(--wax)}
+.cmp--sealed{grid-column:span 2;flex-direction:row;gap:12px;text-align:left;padding:10px 12px;background:repeating-linear-gradient(45deg,#d9d0bc 0 6px,#d2c8b2 6px 12px)}
+.cmp--sealed:hover{background:repeating-linear-gradient(45deg,#e4dcc9 0 6px,#ddd4bf 6px 12px)}
+.cmp--sealed .wax{flex:none;width:46px;height:46px;border-radius:47% 53% 50% 48% / 52% 46% 54% 48%;display:grid;place-items:center;background:radial-gradient(circle at 38% 32%,#a07aa8,var(--plum) 60%,#3c2842);color:#f2e6f4;font:11px var(--type);box-shadow:0 2px 3px rgba(0,0,0,.45)}
+.cmp--sealed strong{display:block;font:italic 16px var(--serif)}
+.cmp--sealed em{display:block;font-style:normal;font:11px/1.35 var(--type);color:var(--paper-mute)}
+.sc .brass{align-self:center;font:11px var(--caps);letter-spacing:.14em;color:#2a1e12;background:linear-gradient(#d9b86a,#9c7a34);padding:2px 12px;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,.6)}
+.sc .claim{display:flex;gap:8px;align-items:center;justify-content:center;border:0;background:none;padding:4px;font:italic 14px var(--serif);color:var(--sun)}
+
+/* ---------- No Ads, made louder: top of the shop, full width, bigger price, a ONE-TIME tag ---------- */
+.noads{position:relative;padding-top:16px!important;padding-bottom:14px!important;transform:none!important}
+.noads strong{font-size:19px!important}
+.noads em{font-size:11.5px!important}
+.noads svg{width:48px!important;height:58px!important}
+.ribbon{position:absolute;top:-1px;left:14px;font:10px var(--type);letter-spacing:.14em;padding:1px 8px 2px;border-radius:0 0 4px 4px;background:var(--rb,var(--plum2));color:var(--rb-ink,#f2e6f4)}
+@keyframes noadsGlow{50%{box-shadow:var(--glow-on)}}
+.s0 .jar.noads{--glow-on:0 3px 8px rgba(0,0,0,.5),0 0 0 2px var(--wax),0 0 24px rgba(224,87,60,.3);--rb:var(--wax);box-shadow:0 3px 8px rgba(0,0,0,.5),0 0 0 2px rgba(154,47,34,.6);animation:noadsGlow 3.5s ease-in-out infinite}
+.stamp.big{margin-left:auto;font-size:16px;padding:2px 8px;flex:none}
+.sa .hushjar.noads{--glow-on:inset 0 0 0 1.5px #b996c2,0 0 26px rgba(141,104,150,.45);background:linear-gradient(120deg,rgba(107,74,114,.45),rgba(107,74,114,.15));box-shadow:inset 0 0 0 1.5px rgba(141,104,150,.8);animation:noadsGlow 3.5s ease-in-out infinite}
+.sa .hushjar.noads .pr{font-size:18px;color:#d9bfe0}
+.sb .silence.noads{--rb:var(--wax);--rb-ink:#f3ecd6;--glow-on:0 0 0 2px var(--wax);border:0;background:#f3ecd6;padding:16px 12px 12px;box-shadow:0 2px 4px rgba(60,40,10,.35),0 0 0 1.5px rgba(154,47,34,.5);animation:noadsGlow 3.5s ease-in-out infinite}
+.sb .silence.noads .pr{font-size:17px}
+.sb .silence.noads svg{width:42px!important;height:42px!important}
+.sealedbox{padding:4px;background:#2a1e12;border-radius:2px;display:flex}
+.sealedbox .cmp--sealed{flex:1;--glow-on:inset 0 0 0 2px #a07aa8,inset 0 0 18px rgba(107,74,114,.35);box-shadow:inset 0 0 0 1.5px rgba(107,74,114,.7);animation:noadsGlow 3.5s ease-in-out infinite}
+.sealedbox .cmp--sealed .wax{width:58px;height:58px;font-size:14px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gem" viewBox="0 0 26 26"><path d="M13 2l9 9-9 13-9-13z" fill="var(--gem)"/><path d="M4 11h18M13 2l-4 9 4 13 4-13z" fill="none" stroke="#6f8a3e" stroke-width="1"/></symbol>
+  <symbol id="g1" viewBox="0 0 70 52"><use href="#gem" x="22" y="12" width="26" height="30"/></symbol>
+  <symbol id="g2" viewBox="0 0 70 52"><use href="#gem" x="12" y="16" width="22" height="26"/><use href="#gem" x="32" y="8" width="26" height="32"/></symbol>
+  <symbol id="g3" viewBox="0 0 70 52"><use href="#gem" x="6" y="20" width="20" height="24"/><use href="#gem" x="44" y="18" width="20" height="24"/><use href="#gem" x="21" y="4" width="28" height="38"/></symbol>
+  <symbol id="g4" viewBox="0 0 70 52"><use href="#gem" x="1" y="24" width="18" height="22"/><use href="#gem" x="51" y="24" width="18" height="22"/><use href="#gem" x="11" y="10" width="20" height="28"/><use href="#gem" x="39" y="10" width="20" height="28"/><use href="#gem" x="23" y="0" width="24" height="40"/></symbol>
+  <symbol id="jar" viewBox="0 0 40 50"><rect x="9" y="2" width="22" height="6" rx="1" fill="#6b6142"/><path d="M7 10h26v34a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="rgba(44,42,29,.12)" stroke="#2c2a1d" stroke-width="1.5"/><path d="M14 30c3 3 9 3 12 0" fill="none" stroke="#2c2a1d" stroke-width="1.5" stroke-linecap="round"/><rect x="11" y="18" width="18" height="7" fill="#e6dbb9" stroke="#2c2a1d" stroke-width=".8"/></symbol>
+  <symbol id="jarDark" viewBox="0 0 40 50"><rect x="9" y="2" width="22" height="6" rx="1" fill="#7d7a6c"/><path d="M7 10h26v34a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="rgba(141,104,150,.18)" stroke="#ece4c8" stroke-width="1.3"/><path d="M14 30c3 3 9 3 12 0" fill="none" stroke="#ece4c8" stroke-width="1.5" stroke-linecap="round"/><path d="M15 34l-1 3M20 35v3M25 34l1 3" stroke="#ece4c8" stroke-width="1.1" stroke-linecap="round"/></symbol>
+  <symbol id="hushInk" viewBox="0 0 36 36"><path d="M5 17c4 6 22 6 26 0" fill="none" stroke="#2c2a1d" stroke-width="1.8" stroke-linecap="round"/><path d="M10 21l-2 4M15 23l-1 4M21 23l1 4M26 21l2 4" stroke="#2c2a1d" stroke-width="1.4" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Specimen shop · <span>3 more</span></h1>
+  <p>案2「標本の引き出し」を元にした3案です。左端は比べるための元の案2です。<b>No Ads は全案で上に移して大きくしました。</b>中身は今のショップと同じです：<b>持っている数・無料3個（1アカウント1回）・5/11/30/65 Crystals（US$1/2/5/10）・No Ads（US$3）・返金の注意</b>。静止モックなので、ボタンを押しても何も起きません。</p>
+</header>
+
+<div class="grid">
+
+<!-- base -->
+<article class="opt opt--base">
+  <div class="tag">BASE · IDEA 2</div>
+  <h2>元の案：標本の引き出し</h2>
+  <div class="phone s0">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button" style="color:var(--paper)">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> in your collection<small>signed in</small></div>
+    <button class="jar noads" type="button"><span class="ribbon">ONE-TIME</span><svg><use href="#jar"/></svg><span><strong>Silentium pratense · No Ads</strong><em>no ads at all. one free revival a day.<br>a jar of quiet.</em></span><span class="stamp big">US$3</span></button>
+    <div class="drawer">
+      <button class="spec pin" type="button" style="--r:-2deg"><svg><use href="#g1"/></svg><span class="lat">Crystallum parvum</span><span class="no">No. 5 · ×5</span><span class="stamp">US$1</span></button>
+      <button class="spec pin" type="button" style="--r:1.5deg"><svg><use href="#g2"/></svg><span class="lat">Crystallum vulgare</span><span class="no">No. 11 · ×11</span><span class="stamp">US$2</span></button>
+      <button class="spec pin" type="button" style="--r:1deg"><svg><use href="#g3"/></svg><span class="lat">Crystallum magnum</span><span class="no">No. 30 · ×30</span><span class="stamp">US$5</span></button>
+      <button class="spec pin" type="button" style="--r:-1.5deg"><svg><use href="#g4"/></svg><span class="lat">Crystallum giganteum</span><span class="no">No. 65 · ×65</span><span class="stamp">US$10</span><span class="scrawl">(it hums at night)</span></button>
+    </div>
+        <button class="claim" type="button">A free specimen awaits: claim 3 Crystals (once per account)</button>
+    <p class="fine" style="color:#b9ad89">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes"><li>明るい紙ラベルが暗い引き出しに並ぶ。ゲーム本体より少し浮くのが前回の気になる所。</li></ul>
+</article>
+
+<!-- A -->
+<article class="opt">
+  <div class="tag">2A · BELL JARS</div>
+  <h2>ガラスの釣鐘</h2>
+  <div class="phone sa">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> in your collection<small>signed in</small></div>
+    <button class="hushjar noads" type="button"><span class="ribbon">ONE-TIME</span><svg><use href="#jarDark"/></svg><span><strong>Silentium pratense</strong><em>No Ads. one free revival a day.<br>(do not open the jar.)</em></span><span class="pr">US$3</span></button>
+    <div class="shelf">
+      <button class="bell" type="button"><span class="glass"><svg viewBox="0 0 70 52"><use href="#g1"/></svg></span><span class="base"></span><span class="tagline" style="--r:-3deg"><span class="lat">C. parvum · 5</span><span class="pr">US$1</span></span></button>
+      <button class="bell" type="button"><span class="glass"><svg viewBox="0 0 70 52"><use href="#g2"/></svg></span><span class="base"></span><span class="tagline" style="--r:2deg"><span class="lat">C. vulgare · 11</span><span class="pr">US$2</span></span></button>
+      <button class="bell" type="button"><span class="glass"><svg viewBox="0 0 70 52"><use href="#g3"/></svg></span><span class="base"></span><span class="tagline" style="--r:2deg"><span class="lat">C. magnum · 30</span><span class="pr">US$5</span></span></button>
+      <button class="bell bell--big" type="button"><span class="glass"><svg viewBox="0 0 70 52"><use href="#g4"/></svg></span><span class="base"></span><span class="tagline" style="--r:-2deg"><span class="lat">C. giganteum · 65</span><span class="pr">US$10</span></span></button>
+    </div>
+        <button class="claim" type="button">Claim 3 free Crystals<span>once per account. the glass was already open.</span></button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>暗い棚にガラスの釣鐘を4つ。中でクリスタルが淡く光り、紐でつけた小さな札に名前と値段。65個の釣鐘だけゆっくり明るくなる。</li>
+    <li><b>良い所：</b>明るい紙は小さな札だけなので、ゲームの暗い緑から浮かない。いちばん「不気味で上品」。</li>
+    <li><b>気になる所：</b>値段の文字が小さめ。実装時は札を少し大きくする。</li>
+  </ul>
+</article>
+
+<!-- B -->
+<article class="opt">
+  <div class="tag">2B · FIELD NOTEBOOK</div>
+  <h2>博物学者のフィールドノート</h2>
+  <div class="phone sb">
+    <div class="page">
+      <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+      <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> collected so far<small>signed in</small></div>
+    <button class="silence noads" type="button"><span class="ribbon">ONE-TIME</span><svg><use href="#hushInk"/></svg><span><strong>Notes on silence · No Ads</strong><em>no ads. one free revival a day.</em></span><span class="pr">US$3</span></button>
+      <div class="hand">Day 41. found more in the meadow. they hum.</div>
+      <div class="pressed">
+        <button class="card" type="button" style="--r:-1.5deg"><svg><use href="#g1"/></svg><span class="ruler"></span><span class="lat">C. parvum</span><span class="no">×5</span><span class="pr">US$1</span></button>
+        <button class="card" type="button" style="--r:1.5deg"><svg><use href="#g2"/></svg><span class="ruler"></span><span class="lat">C. vulgare</span><span class="no">×11</span><span class="pr">US$2</span></button>
+        <button class="card" type="button" style="--r:1deg"><svg><use href="#g3"/></svg><span class="ruler"></span><span class="lat">C. magnum</span><span class="no">×30</span><span class="pr">US$5</span></button>
+        <button class="card" type="button" style="--r:-1deg"><svg><use href="#g4"/></svg><span class="ruler"></span><span class="lat">C. giganteum</span><span class="no">×65</span><span class="pr">US$10</span><span class="hand">it moved?</span></button>
+      </div>
+            <button class="claim" type="button">→ claim 3 free Crystals (once per account)</button>
+      <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+    </div>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>リング綴じのノートに、テープで貼った標本カード。定規の目盛り、青インクの手書きメモ（「動いた？」）。</li>
+    <li><b>良い所：</b>いちばん人の気配があり、ほっこり。手書きメモを日替わりにする遊びも足せる。</li>
+    <li><b>気になる所：</b>ページ全体が明るい紙なので、案2よりさらにゲームから浮く。手書き書体は読みにくいので飾りだけに使う。</li>
+  </ul>
+</article>
+
+<!-- C -->
+<article class="opt">
+  <div class="tag">2C · INSECT BOX</div>
+  <h2>昆虫標本箱</h2>
+  <div class="phone sc">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> in your collection<small>signed in</small></div>
+    <div class="sealedbox"><button class="cmp cmp--sealed noads" type="button"><span class="ribbon">ONE-TIME</span><span class="wax">US$3</span><span><strong>Silentium · No Ads</strong><em>sealed compartment. no ads, one free revival a day.</em></span></button></div>
+    <div class="brass">COLLECTIO PRATENSIS</div>
+    <div class="glassbox">
+      <button class="cmp" type="button"><i class="pinhead"></i><svg><use href="#g1"/></svg><span class="label"><span class="no">BC-005</span><span class="lat">C. parvum</span><span class="pr">5 · US$1</span></span></button>
+      <button class="cmp" type="button"><i class="pinhead"></i><svg><use href="#g2"/></svg><span class="label"><span class="no">BC-011</span><span class="lat">C. vulgare</span><span class="pr">11 · US$2</span></span></button>
+      <button class="cmp" type="button"><i class="pinhead"></i><svg><use href="#g3"/></svg><span class="label"><span class="no">BC-030</span><span class="lat">C. magnum</span><span class="pr">30 · US$5</span></span></button>
+      <button class="cmp" type="button"><i class="pinhead"></i><svg><use href="#g4"/></svg><span class="label"><span class="no">BC-065</span><span class="lat">C. giganteum</span><span class="pr">65 · US$10</span></span></button>
+    </div>
+    <button class="claim" type="button"><svg class="ico"><use href="#gem"/></svg>Claim 3 free Crystals · once per account</button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>真鍮の銘板つきの木箱。綿を敷いた区画にクリスタルを赤いピンで留め、整理番号ラベル（BC-005 など）。ガラスの反射が斜めに入る。No Ads は紫の封蝋で閉じた区画。</li>
+    <li><b>良い所：</b>5つの商品が1つの箱に収まり、まとまりが強い。番号＝個数なので、ラベルだけで中身が分かる。</li>
+    <li><b>気になる所：</b>箱の中は明るい綿なので、案2と同じく少し浮く（面積は小さい）。</li>
+  </ul>
+</article>
+
+</div>
+</div>

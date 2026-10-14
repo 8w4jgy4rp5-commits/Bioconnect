@@ -1,0 +1,177 @@
+<title>Bioconnect Simple Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&family=Zen+Maru+Gothic:wght@400;700&display=swap">
+<style>
+/* Layout: three calmer versions of the specimen shop, phone mocks side by side.
+   Rules: two typefaces, straight cards, three things per card, one glow (No Ads). */
+:root{
+  color-scheme:dark;
+  --ink:#ece4c8; --mute:#a39c7c; --moss:#a8c66c; --deep:#10150e; --cell:#1f2918; --cell-up:#2b3822;
+  --plum:#6b4a72; --plum2:#8d6896; --gem:#c9e88a; --wax:#9a2f22;
+  --paper:#e6dbb9; --paper-ink:#2c2a1d; --paper-mute:#6b6142; --wood:#2e2317; --wood-l:#4f3d2a;
+  --caps:"IM Fell English SC",Georgia,serif;
+  --sans:"Alegreya Sans","Segoe UI",system-ui,sans-serif;
+  --jp:"Zen Maru Gothic","Hiragino Sans",system-ui,sans-serif;
+}
+body{background:radial-gradient(70% 30% at 50% 0%,rgba(141,104,150,.18),transparent 70%),linear-gradient(#1b2418,var(--deep));background-color:var(--deep);color:var(--ink);font-family:var(--jp);padding-block:32px 56px;padding-inline:16px;line-height:1.6}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-family:var(--caps);font-weight:400;font-size:clamp(28px,4vw,40px);margin:0;letter-spacing:.03em;text-wrap:balance}
+header h1 span{color:var(--moss)}
+header p{margin:6px 0 0;color:var(--mute);max-width:70ch;font-size:14.5px}
+header p b{color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:36px 24px;align-items:start}
+.opt{display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{font-family:var(--sans);font-size:12px;letter-spacing:.12em;color:var(--moss)}
+.opt h2{font-size:19px;margin:-6px 0 0;font-weight:700}
+.notes{font-size:13.5px;color:var(--mute);margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.notes b{color:var(--ink)}
+.rec{display:inline-block;margin-left:6px;font:700 11px var(--jp);color:var(--deep);background:#f1c66a;border-radius:999px;padding:1px 9px;vertical-align:3px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* shared phone skeleton: same order and spacing in all three */
+.phone{width:100%;max-width:360px;border-radius:26px;padding:20px 18px 16px;display:flex;flex-direction:column;gap:16px;font-family:var(--sans);box-shadow:0 0 0 1px rgba(236,228,200,.12),0 18px 50px rgba(0,0,0,.5)}
+.top{display:flex;justify-content:space-between;align-items:center}
+.top h3{margin:0;font:400 22px/1.1 var(--caps);letter-spacing:.02em}
+.close{background:none;border:0;font-size:15px;color:var(--mute);padding:6px 2px}
+.wallet{display:flex;align-items:center;gap:8px;font-size:16px;color:var(--mute)}
+.wallet b{font:700 22px/1 var(--sans);color:var(--ink)}
+.ico{width:20px;height:20px;flex:none}
+.section{margin:0 0 -8px;font-size:12px;letter-spacing:.12em;color:var(--mute)}
+.packs{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pack{border:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px 12px;transition:background .2s}
+.pack svg{width:60px;height:44px}
+.pack .amt{font:700 24px/1 var(--sans)}
+.pack .amt small{font-size:13px;font-weight:500;opacity:.7;margin-left:3px}
+.pack .pr{margin-top:4px;font-size:15px;font-weight:700;border-radius:999px;padding:3px 16px}
+.noads{border:0;display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;border-radius:14px}
+.noads .txt{min-width:0}
+.noads strong{display:block;font:400 21px/1.1 var(--caps)}
+.noads em{display:block;font-style:normal;font-size:14px;line-height:1.35;opacity:.85}
+.noads .pr{margin-left:auto;flex:none;font-size:17px;font-weight:700;border-radius:999px;padding:6px 14px}
+.noads svg{width:34px;height:34px;flex:none}
+@keyframes breathe{50%{box-shadow:var(--glow)}}
+.claim{border:0;background:none;font-size:15px;padding:4px;text-decoration:underline;text-underline-offset:4px}
+.fine{margin:0;font-size:12px;line-height:1.5;color:var(--mute);text-align:center}
+.fine u{text-decoration:none;border-bottom:1px solid rgba(163,156,124,.5)}
+
+/* ---------- S1  calm glass (from 2A) ---------- */
+.p1{background:linear-gradient(#17140f,#0f0d0a)}
+.p1 .pack{border-radius:14px;background:#1d1a14;box-shadow:inset 0 0 0 1px rgba(236,228,200,.12)}
+.p1 .pack:hover{background:#262219}
+.p1 .pack .dome{width:72px;height:60px;border-radius:36px 36px 6px 6px;display:grid;place-items:end center;padding-bottom:6px;box-shadow:inset 0 0 0 1.5px rgba(236,228,200,.25),inset 0 -14px 18px -10px rgba(201,232,138,.25)}
+.p1 .pack .pr{background:var(--moss);color:var(--deep)}
+.p1 .noads{--glow:inset 0 0 0 1.5px #b996c2,0 0 24px rgba(141,104,150,.45);background:#2a2030;box-shadow:inset 0 0 0 1.5px rgba(141,104,150,.8);animation:breathe 4s ease-in-out infinite}
+.p1 .noads .pr{background:var(--plum2);color:#fff}
+.p1 .claim{color:var(--moss)}
+
+/* ---------- S2  calm specimen box (from 2C) ---------- */
+.p2{background:#1a130c;box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 8px var(--wood),inset 0 0 0 9px var(--wood-l),0 18px 50px rgba(0,0,0,.5);padding:24px 22px 18px}
+.p2 .packs{gap:4px;padding:4px;background:var(--wood);border-radius:4px}
+.p2 .pack{position:relative;background:#e9e2d0;color:var(--paper-ink);border-radius:2px}
+.p2 .pack:hover{background:#f3eee2}
+.p2 .pack::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--wax);margin-bottom:-2px}
+.p2 .pack .pr{background:var(--paper-ink);color:#f3eee2;border-radius:3px}
+.p2 .noads{--glow:inset 0 0 0 2px #a07aa8,0 0 22px rgba(141,104,150,.35);background:#2a2030;box-shadow:inset 0 0 0 1.5px rgba(141,104,150,.8);border-radius:6px;animation:breathe 4s ease-in-out infinite}
+.p2 .noads .pr{background:var(--plum2);color:#fff;border-radius:4px}
+.p2 .claim{color:var(--ink)}
+
+/* ---------- S3  calm labels (from 2) ---------- */
+.p3{background:#1f1a12}
+.p3 .pack{background:var(--paper);color:var(--paper-ink);border-radius:6px;box-shadow:0 2px 0 rgba(0,0,0,.35)}
+.p3 .pack:hover{background:#efe6c7}
+.p3 .pack .pr{color:var(--wax);border:2px solid var(--wax);border-radius:4px;padding:1px 12px}
+.p3 .noads{--glow:0 0 0 2px var(--wax),0 0 22px rgba(224,87,60,.3);background:var(--paper);color:var(--paper-ink);box-shadow:0 0 0 2px rgba(154,47,34,.5);border-radius:8px;animation:breathe 4s ease-in-out infinite}
+.p3 .noads .pr{background:var(--wax);color:#f6dccb}
+.p3 .claim{color:var(--paper)}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gem" viewBox="0 0 26 26"><path d="M13 2l9 9-9 13-9-13z" fill="var(--gem)"/><path d="M4 11h18M13 2l-4 9 4 13 4-13z" fill="none" stroke="#6f8a3e" stroke-width="1"/></symbol>
+  <symbol id="g1" viewBox="0 0 70 52"><use href="#gem" x="22" y="12" width="26" height="30"/></symbol>
+  <symbol id="g2" viewBox="0 0 70 52"><use href="#gem" x="12" y="16" width="22" height="26"/><use href="#gem" x="32" y="8" width="26" height="32"/></symbol>
+  <symbol id="g3" viewBox="0 0 70 52"><use href="#gem" x="6" y="20" width="20" height="24"/><use href="#gem" x="44" y="18" width="20" height="24"/><use href="#gem" x="21" y="4" width="28" height="38"/></symbol>
+  <symbol id="g4" viewBox="0 0 70 52"><use href="#gem" x="1" y="24" width="18" height="22"/><use href="#gem" x="51" y="24" width="18" height="22"/><use href="#gem" x="11" y="10" width="20" height="28"/><use href="#gem" x="39" y="10" width="20" height="28"/><use href="#gem" x="23" y="0" width="24" height="40"/></symbol>
+  <symbol id="hush" viewBox="0 0 34 34"><path d="M4 15c4 6 22 6 26 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 19l-2 4M14 21l-1 4M20 21l1 4M25 19l2 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Specimen shop · <span>simpler</span></h1>
+  <p>「ごちゃごちゃして見える」という意見を受けて、標本の案を整理した3案です。<b>書体は2つ、カードはまっすぐ、1枚に入れるのは「絵・個数・値段」だけ、光るのは No Ads だけ</b>。3案とも並び順と余白は同じで、違うのは枠と色です。静止モックなので、ボタンを押しても何も起きません。</p>
+</header>
+
+<div class="grid">
+
+<article class="opt">
+  <div class="tag">SIMPLE 1 · FROM 2A</div>
+  <h2>静かなガラス<span class="rec">おすすめ</span></h2>
+  <div class="phone p1">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg>You have <b>4</b></div>
+    <button class="noads" type="button"><svg><use href="#hush"/></svg><span class="txt"><strong>No Ads</strong><em>One-time purchase. No ads, plus one free revival a day.</em></span><span class="pr">US$3</span></button>
+    <p class="section">CRYSTALS</p>
+    <div class="packs">
+      <button class="pack" type="button"><span class="dome"><svg><use href="#g1"/></svg></span><span class="amt">5</span><span class="pr">US$1</span></button>
+      <button class="pack" type="button"><span class="dome"><svg><use href="#g2"/></svg></span><span class="amt">11</span><span class="pr">US$2</span></button>
+      <button class="pack" type="button"><span class="dome"><svg><use href="#g3"/></svg></span><span class="amt">30</span><span class="pr">US$5</span></button>
+      <button class="pack" type="button"><span class="dome"><svg><use href="#g4"/></svg></span><span class="amt">65</span><span class="pr">US$10</span></button>
+    </div>
+    <button class="claim" type="button">Claim 3 free Crystals (once per account)</button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>残したもの：</b>暗い色と、クリスタルを包むガラスの丸い枠だけ。</li>
+    <li><b>良い所：</b>ゲームの暗い画面からいちばん浮かない。値段は緑の丸いボタンで、押せることがすぐ分かる。</li>
+  </ul>
+</article>
+
+<article class="opt">
+  <div class="tag">SIMPLE 2 · FROM 2C</div>
+  <h2>静かな標本箱</h2>
+  <div class="phone p2">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg>You have <b>4</b></div>
+    <button class="noads" type="button"><svg><use href="#hush"/></svg><span class="txt"><strong>No Ads</strong><em>One-time purchase. No ads, plus one free revival a day.</em></span><span class="pr">US$3</span></button>
+    <p class="section">CRYSTALS</p>
+    <div class="packs">
+      <button class="pack" type="button"><svg><use href="#g1"/></svg><span class="amt">5</span><span class="pr">US$1</span></button>
+      <button class="pack" type="button"><svg><use href="#g2"/></svg><span class="amt">11</span><span class="pr">US$2</span></button>
+      <button class="pack" type="button"><svg><use href="#g3"/></svg><span class="amt">30</span><span class="pr">US$5</span></button>
+      <button class="pack" type="button"><svg><use href="#g4"/></svg><span class="amt">65</span><span class="pr">US$10</span></button>
+    </div>
+    <button class="claim" type="button">Claim 3 free Crystals (once per account)</button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>残したもの：</b>木の箱の枠と、各区画の赤いピンの頭だけ。</li>
+    <li><b>良い所：</b>4つの商品が箱にまとまって見える。明るい区画なので文字がいちばん読みやすい。</li>
+  </ul>
+</article>
+
+<article class="opt">
+  <div class="tag">SIMPLE 3 · FROM 2</div>
+  <h2>静かなラベル</h2>
+  <div class="phone p3">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg>You have <b>4</b></div>
+    <button class="noads" type="button"><svg><use href="#hush"/></svg><span class="txt"><strong>No Ads</strong><em>One-time purchase. No ads, plus one free revival a day.</em></span><span class="pr">US$3</span></button>
+    <p class="section">CRYSTALS</p>
+    <div class="packs">
+      <button class="pack" type="button"><svg><use href="#g1"/></svg><span class="amt">5</span><span class="pr">US$1</span></button>
+      <button class="pack" type="button"><svg><use href="#g2"/></svg><span class="amt">11</span><span class="pr">US$2</span></button>
+      <button class="pack" type="button"><svg><use href="#g3"/></svg><span class="amt">30</span><span class="pr">US$5</span></button>
+      <button class="pack" type="button"><svg><use href="#g4"/></svg><span class="amt">65</span><span class="pr">US$10</span></button>
+    </div>
+    <button class="claim" type="button">Claim 3 free Crystals (once per account)</button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>残したもの：</b>紙のラベルと、赤いスタンプ風の値段だけ。傾き・ピン・ラテン語は外した。</li>
+    <li><b>良い所：</b>元の案2の雰囲気にいちばん近い。紙が明るいので、暗いゲームからは少し浮く。</li>
+  </ul>
+</article>
+
+</div>
+</div>

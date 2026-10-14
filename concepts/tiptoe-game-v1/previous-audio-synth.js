@@ -1,0 +1,368 @@
+// Bioconnect: "Meadow Steps", an original score and procedural instruments.
+// No recordings, samples, or melodies from another game are used.
+// Kept separate from playback so previews render the very same instruments.
+window.BioSound = (() => {
+  const BPM = 96, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
+  // The title screen plays the same tune, slower, as a music box.
+  const TITLE_BEAT = 60 / 78;
+  // Each newly encountered species joins the band once during this run.
+  const INSTRUMENTS = Object.freeze([
+    { kind: 'rabbit', name: 'Piano' },
+    { kind: 'fox', name: 'Pizzicato strings' },
+    { kind: 'deer', name: 'Flute' },
+    { kind: 'zebra', name: 'Clarinet' },
+    { kind: 'buffalo', name: 'Double bass' },
+    { kind: 'wolf', name: 'Trumpet' },
+    { kind: 'bear', name: 'Cello' },
+    { kind: 'lion', name: 'French horn' },
+    { kind: 'tiger', name: 'Glockenspiel' },
+    { kind: 'elephant', name: 'Timpani' }
+  ]);
+
+  const chords = [
+    [50,57,61,66], [47,54,57,62], [52,55,59,66], [45,55,59,64],
+    [50,57,61,66], [43,54,57,62], [52,55,59,62], [45,55,61,64],
+    [47,54,57,62], [43,54,57,62], [50,57,61,66], [45,55,59,64],
+    [52,55,59,66], [43,54,57,62], [45,55,61,64], [50,57,61,66]
+  ];
+  // Beat positions include space for the player's actions; the second half
+  // answers the first rather than repeating a short arpeggio indefinitely.
+  const phrases = [
+    [[0,69],[.75,74],[1.5,73],[2.5,66]],
+    [[.5,69],[1.5,66],[3,62]],
+    [[0,67],[1.5,71],[2.25,69],[3.5,66]],
+    [[.5,64],[2,69]],
+    [[0,66],[.75,69],[2,76],[3,73]],
+    [[.5,74],[1.5,71],[3,69]],
+    [[0,67],[1.25,66],[2.5,64]],
+    [[.5,61],[2,64],[3.5,69]],
+    [[0,74],[1,78],[2.5,76],[3.25,73]],
+    [[.5,71],[1.5,69],[3,66]],
+    [[0,69],[1.25,73],[2.5,74]],
+    [[.5,76],[2,71],[3.25,69]],
+    [[0,67],[.75,71],[2,74],[3.25,71]],
+    [[.5,69],[1.5,66],[3,62]],
+    [[0,64],[1.5,69],[2.5,73]],
+    [[0,74],[1.5,69],[2.5,66]]
+  ];
+  const hz = midi => 440 * 2 ** ((midi - 69) / 12);
+
+  function create(ctx, destination = ctx.destination) {
+    const master = ctx.createGain(), compressor = ctx.createDynamicsCompressor();
+    const music = ctx.createGain(), effects = ctx.createGain();
+    music.gain.value = 1.6; effects.gain.value = .8; master.gain.value = .86;
+    compressor.threshold.value = -14; compressor.knee.value = 12;
+    compressor.ratio.value = 3; compressor.attack.value = .006; compressor.release.value = .15;
+    music.connect(master); effects.connect(master); master.connect(compressor); compressor.connect(destination);
+    const voices = new Set();
+    // Seeded noise keeps preview exports reproducible without an audio asset.
+    const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    let seed = 194628;
+    for (let i = 0; i < data.length; i++) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      data[i] = seed / 2147483648 - 1;
+    }
+
+    function envelope(param, time, attack, duration, volume, hold = 0) {
+      param.setValueAtTime(0, time);
+      param.linearRampToValueAtTime(volume, time + attack);
+      if (hold > attack) param.setValueAtTime(volume * .9, time + hold);
+      param.exponentialRampToValueAtTime(.00001, time + duration);
+      param.linearRampToValueAtTime(0, time + duration + .02);
+    }
+
+    function voice(source, bus, time, duration, volume, attack = .008, filter = null, hold = 0) {
+      const gain = ctx.createGain(), nodes = [source, gain];
+      envelope(gain.gain, time, attack, duration, volume, hold);
+      if (filter) { source.connect(filter); filter.connect(gain); nodes.push(filter); }
+      else source.connect(gain);
+      gain.connect(bus);
+      const entry = { source, gain, bus: bus === effects ? effects : music, time };
+      voices.add(entry);
+      source.onended = () => { nodes.forEach(node => node.disconnect()); voices.delete(entry); };
+      source.start(time); source.stop(time + duration + .03);
+    }
+
+    function tone(freq, time, duration, volume, bus, type = 'sine', attack = .008, endHz = null) {
+      const source = ctx.createOscillator();
+      source.type = type;
+      source.frequency.setValueAtTime(freq, time);
+      if (endHz) source.frequency.exponentialRampToValueAtTime(endHz, time + Math.min(duration, .13));
+      voice(source, bus, time, duration, volume, attack);
+    }
+
+    function rustle(time, duration, volume, frequency, bus) {
+      const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter();
+      source.buffer = noise;
+      filter.type = 'bandpass'; filter.Q.value = .65;
+      filter.frequency.setValueAtTime(frequency, time);
+      filter.frequency.exponentialRampToValueAtTime(frequency * .55, time + duration);
+      voice(source, bus, time, duration, volume, .022, filter);
+    }
+
+    function wood(midi, time, volume = .09, bus = music) {
+      const f = hz(midi);
+      tone(f, time, .72, volume, bus);
+      tone(f * 2, time, .23, volume * .18, bus);
+      tone(f * 3.98, time, .105, volume * .07, bus, 'sine', .004);
+    }
+
+    // A music box: bright, short-ringing, with a faint bell overtone.
+    function box(midi, time, volume) {
+      const f = hz(midi);
+      tone(f, time, 1.25, volume, music, 'sine', .003);
+      tone(f * 2, time, .42, volume * .22, music, 'sine', .003);
+      tone(f * 3.01, time, .16, volume * .07, music, 'sine', .002);
+    }
+
+    // Opening arrangement: melody an octave up with a soft echo, a slow
+    // swelling pad in place of the bass, and no brushed percussion, so the
+    // title feels like the meadow before morning rather than the game.
+    function titleBeat(beat, time) {
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      for (const [position, midi] of phrases[bar]) {
+        if (Math.floor(position) === within) {
+          const t = time + (position - within) * TITLE_BEAT;
+          box(midi + 12, t, .05);
+          box(midi + 12, t + TITLE_BEAT * .75, .011);
+        }
+      }
+      if (within === 0) {
+        notes.slice(1).forEach((midi, i) => tone(hz(midi), time + i * .05, TITLE_BEAT * 4.2, .009, music, 'triangle', .6));
+        tone(hz(notes[0]), time, TITLE_BEAT * 3.8, .045, music, 'sine', .35);
+      }
+    }
+
+    const layers = new Map();
+    for (const { kind } of INSTRUMENTS) {
+      const bus = ctx.createGain();
+      bus.gain.value = 0;
+      bus.connect(music);
+      layers.set(kind, bus);
+    }
+    let ensembleKey = '';
+    const waves = new Map();
+
+    function setEnsemble(kinds, time = ctx.currentTime) {
+      const chosen = new Set(kinds);
+      const active = INSTRUMENTS.filter(i => chosen.has(i.kind));
+      const key = active.map(i => i.kind).join(',');
+      if (key === ensembleKey) return;
+      ensembleKey = key;
+      // Let the ensemble get richer without making ten parts ten times louder.
+      const level = 1 / Math.sqrt(1 + Math.max(0, active.length - 2) * .15);
+      for (const { kind } of INSTRUMENTS) {
+        const gain = layers.get(kind).gain;
+        if (gain.cancelAndHoldAtTime) gain.cancelAndHoldAtTime(time);
+        else { const value = gain.value; gain.cancelScheduledValues(time); gain.setValueAtTime(value, time); }
+        gain.linearRampToValueAtTime(chosen.has(kind) ? level : 0, time + .55);
+      }
+    }
+
+    // Sustained instruments have shaped harmonics and a held breath; struck
+    // instruments lose their upper partials early. These are synth timbres,
+    // not recordings of acoustic instruments.
+    function held(midi, time, duration, volume, bus, profile, attack, cutoff) {
+      if (!waves.has(profile)) {
+        const partials = {
+          flute: [0,1,.12,.04,.015], clarinet: [0,1,.05,.55,.02,.25,.01,.1],
+          trumpet: [0,1,.85,.65,.42,.28,.18,.1,.05],
+          cello: [0,1,.5,.3,.2,.13,.08], horn: [0,1,.4,.2,.09,.03]
+        }[profile];
+        waves.set(profile, ctx.createPeriodicWave(new Float32Array(partials.length), new Float32Array(partials)));
+      }
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.setPeriodicWave(waves.get(profile));
+      source.frequency.setValueAtTime(hz(midi), time);
+      filter.type = 'lowpass'; filter.Q.value = .55;
+      filter.frequency.setValueAtTime(cutoff * .65, time);
+      filter.frequency.linearRampToValueAtTime(cutoff, time + attack * 2);
+      filter.frequency.linearRampToValueAtTime(cutoff * .78, time + duration);
+      voice(source, bus, time, duration, volume, attack, filter, duration * .55);
+    }
+
+    function instrument(kind, midi, time, duration, volume) {
+      const bus = layers.get(kind);
+      if (!bus) return;
+      const f = hz(midi);
+      switch (kind) {
+        case 'rabbit': // Hammer attack, then the upper strings decay first.
+          tone(f, time, duration, volume, bus, 'sine', .003);
+          tone(f * 2.002, time, duration * .42, volume * .4, bus, 'sine', .002);
+          tone(f * 3.995, time, duration * .18, volume * .16, bus, 'sine', .002);
+          tone(f * 7, time, .035, volume * .045, bus, 'sine', .001);
+          break;
+        case 'fox':
+          tone(f, time, .28, volume, bus, 'triangle', .003);
+          tone(f * 2.01, time, .09, volume * .18, bus, 'sine', .002);
+          break;
+        case 'deer': held(midi,time,duration,volume,bus,'flute',.065,4200); break;
+        case 'zebra': held(midi,time,duration,volume,bus,'clarinet',.035,2600); break;
+        case 'buffalo':
+          tone(f,time,.8,volume,bus,'triangle',.012);
+          tone(f * 2,time,.2,volume * .13,bus,'sine',.006);
+          break;
+        case 'wolf': held(midi,time,duration,volume,bus,'trumpet',.04,3400); break;
+        case 'bear': held(midi,time,duration,volume,bus,'cello',.16,1500); break;
+        case 'lion': held(midi,time,duration,volume,bus,'horn',.09,1700); break;
+        case 'tiger':
+          tone(f,time,1.4,volume,bus,'sine',.002);
+          tone(f * 2.76,time,.38,volume * .22,bus,'sine',.001);
+          tone(f * 5.4,time,.09,volume * .07,bus,'sine',.001);
+          break;
+        case 'elephant':
+          tone(f * 1.12,time,.85,volume,bus,'sine',.004,f);
+          tone(f * 1.53,time,.25,volume * .25,bus,'sine',.003,f * 1.5);
+          rustle(time,.035,volume * .06,500,bus);
+          break;
+      }
+    }
+
+    function ensembleBeat(beat, time, kinds) {
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      const active = new Set(kinds);
+      const play = (kind, midi, offset, duration, volume) => {
+        if (active.has(kind)) instrument(kind,midi,time + offset * BEAT,duration,volume);
+      };
+      // Different registers and spaces: a conversation, not ten copies of
+      // the melody. Every unlocked part has an audible role in every bar.
+      if (within === 1 || within === 3) {
+        [notes[1],notes[2],notes[3]].forEach((midi,i) => play('rabbit',midi,.04 + i * .025,1.1,.029));
+      }
+      if (within === 0 || within === 2) play('fox',notes[within === 0 ? 2 : 3] + 12,.5,.28,.045);
+      if (within === 2) {
+        play('deer',notes[3] + 12,.12,.52,.042);
+        play('deer',notes[2] + 12,1.02,.5,.034);
+      }
+      if (within === 1) play('zebra',notes[2],.5,.7,.04);
+      if (within === 3) play('zebra',notes[1],.5,.38,.032);
+      if (within === 0 || within === 2) play('buffalo',notes[0] + (within === 2 ? 7 : 0),0,.8,.065);
+      if (within === 0) play('wolf',notes[3] + (bar % 2 ? 0 : 7),.14,.48,.038);
+      if (within === 3) play('wolf',notes[2] + 12,.2,.42,.026);
+      if (within === 0) play('bear',notes[1] - 12,.05,2.1,.044);
+      if (within === 2) play('lion',notes[2] - 12,.03,1.0,.042);
+      if (within === 0) play('tiger',notes[3] + 24,.75,1.4,.025);
+      if (within === 3) play('tiger',notes[2] + 24,.7,1.4,.019);
+      if (within === 0) play('elephant',notes[0] - 12,0,.85,.07);
+      if (within === 2) play('elephant',notes[0] - 5,.5,.85,.045);
+    }
+
+    function instrumentPreview(kind, time = ctx.currentTime + .02) {
+      if (!layers.has(kind)) return;
+      setEnsemble([kind], time);
+      const low = ['buffalo','bear','lion','elephant'].includes(kind);
+      const high = kind === 'tiger';
+      [62,66,69,66].forEach((midi,i) => instrument(kind,midi + (low ? -12 : high ? 12 : 0),time + i * .65,.6,.11));
+    }
+
+    function musicBeat(index, time, theme = 'game', kinds = []) {
+      if (theme === 'title') return titleBeat(((index % BEATS) + BEATS) % BEATS, time);
+      setEnsemble(kinds, time);
+      const beat = ((index % BEATS) + BEATS) % BEATS;
+      const bar = Math.floor(beat / 4), within = beat % 4, notes = chords[bar];
+      const sway = .018 * Math.sin(bar * 1.7 + within);
+      for (const [position, midi] of phrases[bar]) {
+        if (Math.floor(position) === within) {
+          const offset = position - within;
+          const t = time + offset * BEAT + (offset > 0 ? .018 : 0);
+          wood(midi, t, .074 + sway * .6);
+          // A quiet resonant answer softens the dry synthesized attack.
+          wood(midi - 12, t + .115, .012);
+        }
+      }
+      ensembleBeat(beat, time, kinds);
+      // Brushed seeds instead of a sharp hi-hat or a heavy drum loop.
+      rustle(time + BEAT * .56, .09, .013, 3300, music);
+      if (within === 1 || within === 3) tone(190, time, .09, .017, music, 'sine', .004, 130);
+    }
+
+    function plant(time) {
+      // Three overlapping swishes: leaves brushing past, then settling.
+      rustle(time, .22, .29, 2300, effects);
+      rustle(time + .038, .17, .15, 3900, effects);
+      rustle(time + .086, .12, .12, 1350, effects);
+      tone(155, time + .018, .10, .028, effects, 'sine', .012, 100);
+    }
+
+    function pop(time, step = 0, volume = .2) {
+      const pitch = [0,2,4,7,9,12,14,16,19,21,24][Math.min(10, Math.max(0, step))];
+      const f = hz(62 + pitch);
+      tone(f * 1.65, time, .23, volume, effects, 'sine', .004, f * .78);
+      tone(f * 2.03, time, .067, volume * .11, effects, 'sine', .003, f * 1.3);
+      rustle(time, .045, .023, 1150, effects);
+    }
+
+    // A muted horn that sags: the pitch slides down through the note and
+    // a slow wobble rides on it, like a deflating "wah".
+    function sag(midi, time, duration, volume, drop, wobble = 0) {
+      const source = ctx.createOscillator(), filter = ctx.createBiquadFilter();
+      source.type = 'sawtooth';
+      source.frequency.setValueAtTime(hz(midi), time);
+      source.frequency.exponentialRampToValueAtTime(hz(midi - drop), time + duration);
+      filter.type = 'lowpass'; filter.Q.value = 4;
+      filter.frequency.setValueAtTime(1500, time);
+      filter.frequency.exponentialRampToValueAtTime(420, time + duration);
+      if (wobble) {
+        const lfo = ctx.createOscillator(), depth = ctx.createGain();
+        lfo.frequency.value = 5.5; depth.gain.value = wobble;
+        lfo.connect(depth); depth.connect(source.frequency);
+        lfo.start(time); lfo.stop(time + duration + .03);
+        lfo.onended = () => { lfo.disconnect(); depth.disconnect(); };
+      }
+      voice(source, effects, time, duration, volume, .03, filter);
+    }
+
+    function effect(kind, count = 1, time = ctx.currentTime + .012) {
+      if (kind === 'place') plant(time);
+      else if (kind === 'merge' || kind === 'finish') {
+        const steps = Math.min(11, Math.max(1, Math.floor(Number(count) || 1)));
+        for (let i = 0; i < steps; i++) pop(time + .105 + i * .145, i, .18 / (1 + i * .055));
+        if (kind === 'finish') [74,78,81].forEach((n, i) => wood(n, time + .16 + steps * .145 + i * .10, .07, effects));
+        else if (steps >= 3) {
+          const notes = steps >= 7 ? [74,78,81,86] : steps >= 5 ? [74,78,81] : [74,78];
+          const end = time + .105 + (steps - 1) * .145;
+          notes.forEach((note, i) => wood(note, end + .055 + i * .075, .045, effects));
+        }
+      } else if (kind === 'ready') {
+        wood(69, time, .075, effects); wood(69, time + .22, .055, effects);
+      } else if (kind === 'go') {
+        [66,69,74].forEach((n, i) => wood(n, time + i * .09, .085, effects));
+      } else if (kind === 'gameover') {
+        // wah, wah, wah, waaaah: three falling steps, then a long droop
+        [55, 54, 53].forEach((n, i) => sag(n, time + i * .42, .36, .05, .6));
+        sag(52, time + 1.26, 1.15, .055, 2.5, 4);
+      } else if (kind === 'eat') {
+        pop(time, 0, .052);
+      } else if (kind === 'preview') {
+        pop(time, 0, .14);
+      } else if (kind === 'fanfare') {
+        // The elephant: a rising run, then a held chord with a low answer.
+        [62,66,69,74,78,81].forEach((n, i) => wood(n, time + i * .085, .085, effects));
+        const hold = time + 6 * .085 + .06;
+        [74,78,81,86].forEach((n, i) => wood(n, hold + i * .012, .09, effects));
+        tone(hz(50), hold, 1.1, .11, effects, 'sine', .02);
+        [0,1,2].forEach(i => pop(hold + .45 + i * .16, 6 + i * 2, .12));
+      }
+    }
+
+    function cancel(busName) {
+      const bus = busName === 'music' ? music : busName === 'effects' ? effects : null;
+      const now = ctx.currentTime;
+      for (const entry of voices) {
+        if (bus && entry.bus !== bus) continue;
+        const param = entry.gain.gain;
+        if (entry.time > now) {
+          param.cancelScheduledValues(now); param.setValueAtTime(0, now);
+        } else if (param.cancelAndHoldAtTime) param.cancelAndHoldAtTime(now);
+        else { const value = param.value; param.cancelScheduledValues(now); param.setValueAtTime(value, now); }
+        param.linearRampToValueAtTime(0, now + .02);
+        entry.source.stop(now + .025);
+      }
+    }
+
+    return { musicBeat, effect, cancel, setEnsemble, instrumentPreview };
+  }
+  const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
+  return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Meadow Steps' };
+})();

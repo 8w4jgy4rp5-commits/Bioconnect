@@ -1,5 +1,23 @@
 # Bioconnect 進捗
 
+## 2026-10-12 — 動画の「Tiptoe Hollow」をゲームBGMへ編曲
+
+- 本人指定の完成動画: claude/festive-brahmagupta-r7zj7r / concepts/promo-video-v1/out/promo-full.mp4（29.3秒）。mainには動画がなく、該当ブランチのREADME・promo-audio.jsからオリジナル曲と楽譜を確認。参考コミット ce0b04fbca5f02d97dcbece91350f5f1ea0c66c5。
+- audio-synth.js: 96 BPM・D majorのMeadow Stepsから、120 BPM・D minorのTiptoe Hollow — Meadow Bandへ。動画の最初の8小節のモチーフと和声を使い、後半8小節に応答を追加（32秒）。口笛のすくい上げとビブラート、チューバ風の低音、チェンバロの裏拍、控えめなテルミン風の滑り。タイトルは同じモチーフの84 BPMオルゴール。
+- 動物初登場で10パートが次の小節頭から参加する仕様を維持。低音・金管・高音ベルの音域/長さ/音量を新しい主旋律に合わせた。配置・連鎖・ゾウ等の効果音は変更なし。
+- concepts/tiptoe-game-v1/: 新旧/動画原曲を比較できる試聴ページ、変更直前のsynthと動画の参考ソース、書き出し用render.cjs、README。ゲームに動画の外部依存は追加しない。
+- 検証: rules.test.js 258件成功、JS構文/差分確認成功。Chrome OfflineAudioContextで19ケース（11編成段階・新旧曲・タイトル・動画原曲・効果音との混合/ストレス）。有限で非無音、最大ピーク0.6105、最大ループ境界差0.004166。実ブラウザで試聴の4曲切替/Stop、375pxはみ出しなし、ゲーム開始・動物参加・広告ミュート・リセット確認、JS例外0。WAVと測定値は output/playwright/tiptoe-music/。
+- 未確認: 本人の聴感と実機の音量・Safari。2026-10-13に本人から公開依頼。最新mainのCNAMEを保持してBGM変更をcommit/pushし、GitHub Pagesで公開を進める。他作業のショップ案とPROGRESS末尾は維持。
+
+
+## 2026-10-12 — 連鎖の盛り上がりと褒め言葉
+
+- 本人が提案①＋③を選択。1回の配置の合体を数え、3〜4連鎖 GREAT!、5〜6連鎖 AMAZING!、7以上 INCREDIBLE!。途中は Chain ×N、最後だけ褒め言葉＋N CHAIN を約1秒表示。
+- script.js / style.css: 既存の145ms間隔に合わせて輪の光を強め、3段目から粒子、7連鎖以上の最後は盤面の縁が光る。操作を止めず、次の配置（合体なしも含む）・New Game・復活で残った演出を取り消す。reduce motionでは移動・粒子を省き文字を表示。ゾウの全画面祝いは維持。
+- audio-synth.js: 3/5/7連鎖の最後に2/3/4音の短い決め音。既存の音ON/OFFに従う。ルール・得点・手札の確率は変更なし。
+- 検証: rules.test.js 258件成功、JS構文確認成功。Chromeでeldritch/pop × 320/375/1000pxの2/3/5/7連鎖を実際のplaceTileで発生させ、文言・表示数・はみ出し・消去・連続配置・reduce motionの36項目を確認。最初の隔離検証は外部SDKを遮断したため認証由来の例外が発生、追加検証では検証ページのみ認証scriptを省いた。追加の375px確認9項目は成功・JS例外0。非合体の次手・New Game・OfflineAudioContextの音生成とピークを確認。画面証跡は output/playwright/chain-effects/。
+- 未確認: 本人の試遊での気持ちよさ、実機での見え方・聴感。本人からcommit・push・公開の明示依頼を受け、mainからGitHub Pagesへ公開を進める。stamp.jsでキャッシュ更新（元から不一致だったmonetization.jsの識別子も現在の内容に一致）。他作業のPROGRESSとconcepts/shop-ui-v1/等は保持。
+
 ## 2026-10-11 — 本番Supabaseに課金用DBを適用（本人作業）
 
 - 本番（xyumhzecqhpzzzzylbwn）で事前確認: bioconnect_private 0、bioconnect_関数 0、auth.users 4。
@@ -1621,3 +1639,32 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - ユーザー「画面のみみずがでかすぎて邪魔」。A（後ろへ回す）/B（小さく）/C（消す）からAを選択。
 - 変更: `.el-tentacles` の z-index 2→0。盤面（z-index 1、背景78%不透明）の後ろになり、縁からはみ出た部分だけ見え、マスの隙間からうっすら透ける。マスを覆わない。花を持つ小枝（.el-gift）は前のまま。
 - 検証: node rules.test.js 257件成功。390×844で撮影し、左端・右上の触手がマスに重ならないことを確認。
+
+## 2026-10-11 ショップ画面のカード型デザイン5案（concepts/shop-ui-v1/）
+- ユーザー「ショップのデザインを考えよう。カード方式で5種類、今までのコンセプトに合うように」。
+- 作成: `concepts/shop-ui-v1/index.html`（静止モック5案・Cozy Eldritch調）と README。ゲーム本体のコードは変更なし。
+- 案: タロット / 標本の引き出し / 種の小袋 / 盤面のマス / 燭台と封蝋の台帳（おすすめ）。
+- 未確認: 実ブラウザでの見た目チェックはしていない（モックのみ）。採用案は未決定。
+- 次: ユーザーが案を選んだら、index.html の #shopModal と eldritch.css に反映し、320px幅と両スキンで確認。
+- 追記: ユーザーが案2（標本の引き出し）を気に入り、派生3案（ガラスの釣鐘 / フィールドノート / 昆虫標本箱）を `concepts/shop-ui-v1/specimen.html` に作成。ゲーム本体は変更なし。実ブラウザでの見た目チェックは未実施。採用案は未決定。
+- 追記: No Ads をもっと目立たせたいとの依頼。specimen.html の4案すべてで No Ads を残高のすぐ下（最上部）へ移し、横幅いっぱい・文字と値段を大きく・「ONE-TIME」の札・ゆっくり光る縁取りに。根拠のない「お得」表記は付けていない。実ブラウザでの見た目チェックは未実施。
+- 追記(2026-10-12): 「複雑すぎる（clutter）」との意見を受け、シンプル版3案を `concepts/shop-ui-v1/simple.html` に作成（書体2つ・傾きなし・カードは絵/個数/値段のみ・光るのはNo Adsだけ）。ゲーム本体は変更なし。実ブラウザ確認は未実施。採用案は未決定。
+
+## 2026-10-13 ショップ画面を「静かな標本箱」に（index.html / style.css / eldritch.css）
+- ユーザー決定: concepts/shop-ui-v1/simple.html の SIMPLE 2（いちばん読みやすい）。
+- 変更: #shopModal の並びを 残高 → サインイン → No Ads（最上部・大きい・US$3ボタン）→ CRYSTALS見出し＋返金注意 → 4区画（絵・個数・値段）→ 無料3個 → 確認画面・状態・記録・規約 に。id と data-product は不変、No Ads の詳しい条件文は小さい文字で全文残した。SVGの宝石アイコンを sprite-defs に追加。標準スキン（eldritch）は木箱の枠・赤いピン・紫の No Ads（ゆっくり光る、動き軽減で停止）。古書体の数字が「1→I」「0→o」に見えたため、個数・値段・残高は普通の書体。pop スキンは同じ並びで明るい色。
+- 検証: node rules.test.js 258件成功、stamp 更新、node test/browser-check.cjs 35件成功（購入確認・No Ads・320px含む）。Chromium で eldritch 375/320px・pop 375px、未サインイン/サインイン後を撮影し、横はみ出しなし（scrollWidth=clientWidth）と表示を確認。
+- 未確認: 実機（iPhone/Android）での見た目。No Ads 購入済み時（ボタン無効）の見た目は撮影していない。
+- 次: 実機で確認。必要なら No Ads 購入済みの表示（「Owned」など）を検討。
+
+
+## 2026-10-13 — ショップ入口を再表示
+
+- 本人依頼により shared/monetization-config.js の storeEnabled を true に変更。タイトルとゲーム内メニューのショップ入口、および既存の復活UIを表示する。
+- paymentsEnabled / adsEnabled は false を維持。実課金の有効化や公開・commit・pushはこの変更に含まない。
+- index.html の配信キャッシュ識別子を更新。既存のショップUI変更は保持。検証結果は下記へ追記。
+
+- 検証結果: rules.test.js 258件成功、既存Chromiumブラウザ検証35件成功（決済等は模擬）。外部通信を遮断した非loopbackホスト名で375px/1000pxのタイトル・ゲーム内メニューからショップを開き、5商品表示・購入広告OFF・JS例外0を確認。公開サイトへの反映とiPhone実機は未実施。
+
+- 公開: 本人からショップ公開の明示依頼を取得。採用済みショップデザインと入口再表示をmainへ反映する。購入の有効化は明日以降との本人方針に従い paymentsEnabled=false、広告もfalseを維持。未追跡の検討用モックとother-ai.patchは公開対象に含めない。
+- 追記: ユーザー「ショップをもう出していいよ」。storeEnabled=true（別の会話で手元変更済み）と新ショップ画面をコミット・push。paymentsEnabled / adsEnabled は false のまま（ショップは見えるが購入・広告は無効）。直前検証: rules 258件、monetization 25件、browser-check 35件、stamp確認。

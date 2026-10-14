@@ -2203,6 +2203,27 @@ body.is-celebrating { overflow: hidden; }
 .economy-status { min-height:1.5em; font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
 .no-ads-product { padding:12px; border-radius:12px; background:#e8efd8; }
 .no-ads-product h3 { margin:0; font-size:17px; }
+/* Store layout (concepts/shop-ui-v1/simple.html, SIMPLE 2): No Ads first, then
+   four Crystal compartments holding only gems, amount and price. */
+.shop-account p { margin:2px 0; }
+.no-ads-product { margin:14px 0 0; padding:14px; border:2px solid #b49cc0; }
+.no-ads-main { display:flex; align-items:center; gap:12px; }
+.no-ads-ico { width:34px; height:34px; flex:none; color:#6b4a72; }
+.no-ads-words { min-width:0; flex:1; }
+.no-ads-words h3 { font-size:20px; }
+.no-ads-words p { margin:2px 0 0; }
+.economy-card .no-ads-buy { width:auto; flex:none; min-width:76px; font-size:17px; font-weight:700; border-radius:999px; }
+.no-ads-terms { margin:10px 0 0; font-size:12px !important; opacity:.8; }
+#dailyInfo:empty { display:none; }
+.shop-section { margin:18px 0 0; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.75; }
+#crystalRefundPolicy { margin:2px 0 0; font-size:12px; opacity:.8; }
+.crystal-products { gap:6px; }
+.economy-card .crystal-pack { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px 12px; border-radius:6px; }
+.pack-gems { width:60px; height:44px; }
+.pack-amt { font-size:24px; font-weight:700; line-height:1; }
+.pack-price { margin-top:6px; padding:2px 14px; border-radius:4px; background:#243c2e; color:#fff8e8; font-size:15px; font-weight:700; }
+.crystal-pack:disabled { opacity:.55; }
+.economy-card .shop-claim { font-weight:700; }
 .checkout-confirm { margin:12px 0; padding:12px; border:2px solid #668666; border-radius:12px; background:#fffdf5; }
 .checkout-confirm[hidden] { display:none; }
 .checkout-confirm h3 { margin:0 0 6px; font-size:17px; }
@@ -2248,3 +2269,59 @@ body.is-celebrating { overflow: hidden; }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
 #shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }
+
+/* Chains build locally, then finish with one readable praise badge. */
+.ring {
+  border-width: calc(3px + var(--chain-power, 0) * .35px);
+  box-shadow: 0 0 calc(var(--chain-power, 0) * 3px) var(--warm);
+}
+.fx-chain { z-index: 3; white-space: nowrap; }
+.fx-chain[data-tier="1"] { background: #417c58; box-shadow: 0 4px 18px #417c5866; }
+.fx-chain[data-tier="2"] { background: #7550a1; box-shadow: 0 4px 22px #9266c577; }
+.fx-chain[data-tier="3"] { background: #81551c; box-shadow: 0 4px 26px #e5b85699; }
+.fx-chain--praise {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  padding: 8px 18px 7px;
+  border: 1px solid #fff7;
+  border-radius: 16px;
+  animation: chain-praise 1s ease-out forwards;
+}
+.fx-chain--praise strong { font-size: clamp(17px, 5vw, 25px); line-height: 1.15; letter-spacing: .035em; }
+.fx-chain--praise small { font-size: 10px; letter-spacing: .18em; }
+.chain-spark {
+  position: absolute;
+  width: var(--spark-size);
+  height: var(--spark-size);
+  border-radius: 50%;
+  background: #e5f9c2;
+  box-shadow: 0 0 6px #b5ed8c;
+  animation: chain-spark-out .7s ease-out forwards;
+}
+.chain-spark[data-tier="2"] { background: #e9d4ff; box-shadow: 0 0 7px #c396f5; }
+.chain-spark[data-tier="3"] { background: #fff0b5; box-shadow: 0 0 8px #ffd66e; }
+.chain-edge {
+  position: absolute;
+  inset: 2px;
+  border: 2px solid #e6c577;
+  border-radius: inherit;
+  box-shadow: inset 0 0 22px #e6c57777;
+  animation: chain-edge-out .95s ease-out forwards;
+}
+@keyframes chain-praise {
+  0% { opacity: 0; transform: translateX(-50%) scale(.75); }
+  16% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  30%, 76% { opacity: 1; transform: translateX(-50%) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-6px) scale(1); }
+}
+@keyframes chain-spark-out {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.2); }
+}
+@keyframes chain-edge-out { 0% { opacity: 0; } 18% { opacity: .9; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .fx-chain--praise { animation: none; opacity: 1; }
+  .chain-spark, .chain-edge { display: none; }
+}

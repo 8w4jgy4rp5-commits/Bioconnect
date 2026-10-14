@@ -32,7 +32,7 @@ window.BioAudio = (() => {
     }
   }
 
-  // The title plays a music-box arrangement of the meadow tune, the
+  // The title plays a music-box arrangement of Tiptoe Hollow, the
   // countdown is quiet ('rest'), and the game plays the full band.
   // Otherwise only a hidden tab silences it.
   function sync() {

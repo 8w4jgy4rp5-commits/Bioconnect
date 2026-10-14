@@ -1,0 +1,299 @@
+<title>Bioconnect Shop Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&family=Zen+Maru+Gothic:wght@400;700&display=swap">
+<style>
+/* Layout: five phone-sized shop mocks side by side, each with a short note.
+   Single dark look on purpose: the game's standard skin is Cozy Eldritch. */
+:root{
+  color-scheme:dark;
+  --ink:#ece4c8; --mute:#a39c7c; --moss:#a8c66c; --moss-d:#6f8a3e; --deep:#10150e;
+  --cell:#1f2918; --cell-up:#2b3822; --plum:#6b4a72; --plum2:#8d6896;
+  --gem:#c9e88a; --sun:#f1c66a; --blood:#e0573c; --wax:#9a2f22; --paper:#e6dbb9; --paper-ink:#2c2a1d;
+  --serif:"IM Fell English",Georgia,serif; --caps:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --type:"Special Elite","Courier New",monospace; --jp:"Zen Maru Gothic","Hiragino Sans",system-ui,sans-serif;
+}
+body{background:radial-gradient(70% 30% at 50% 0%,rgba(141,104,150,.18),transparent 70%),linear-gradient(#1b2418,var(--deep));background-color:var(--deep);color:var(--ink);font-family:var(--jp);padding-block:32px 56px;padding-inline:16px;line-height:1.6}
+.wrap{max-width:1880px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+header h1{font-family:var(--caps);font-weight:400;font-size:clamp(28px,4vw,40px);margin:0;letter-spacing:.03em;text-wrap:balance}
+header h1 span{color:var(--moss)}
+header p{margin:6px 0 0;color:var(--mute);max-width:70ch;font-size:14.5px}
+header p b{color:var(--ink);font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:36px 24px;align-items:start}
+.opt{display:flex;flex-direction:column;gap:12px;min-width:0}
+.tag{font-family:var(--type);font-size:12px;letter-spacing:.1em;color:var(--moss)}
+.opt h2{font-size:19px;margin:-6px 0 0;font-weight:700}
+.notes{font-size:13.5px;color:var(--mute);margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.notes b{color:var(--ink)}
+.rec{display:inline-block;margin-left:6px;font:700 11px var(--jp);color:var(--deep);background:var(--sun);border-radius:999px;padding:1px 9px;vertical-align:3px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--moss);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* one phone frame shared by all five */
+.phone{width:100%;max-width:360px;border-radius:26px;padding:16px 14px 14px;display:flex;flex-direction:column;gap:12px;position:relative;overflow:hidden;font-family:var(--serif);box-shadow:0 0 0 1px rgba(236,228,200,.12),0 18px 50px rgba(0,0,0,.5)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.top h3{margin:0;font-family:var(--caps);font-weight:400;font-size:21px;letter-spacing:.03em;line-height:1.1}
+.close{background:none;border:0;font:13px var(--type);color:var(--mute);padding:6px 4px}
+.wallet{display:flex;align-items:center;gap:8px;font-size:15px}
+.wallet b{font-family:var(--caps);font-weight:400;font-size:22px;line-height:1}
+.wallet small{margin-left:auto;font:11px var(--type);color:var(--mute)}
+.ico{width:20px;height:20px;flex:none}
+.aside{display:block;font:11px var(--type);font-style:normal;color:var(--mute)}
+.fine{margin:0;font:10.5px/1.45 var(--type);color:var(--mute);text-align:center}
+.fine u{text-decoration:none;border-bottom:1px dotted currentColor}
+
+/* ---------- 1  Tarot of the Meadow ---------- */
+.s1{background:radial-gradient(80% 40% at 50% 0%,rgba(141,104,150,.28),transparent 70%),#151b12}
+.s1 .claim{display:flex;align-items:center;gap:10px;background:none;border:1px dashed rgba(168,198,108,.5);border-radius:10px;padding:8px 12px;text-align:left;color:var(--moss)}
+.s1 .claim span{font-size:14px;line-height:1.2}
+.s1 .deck{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tarot{position:relative;border:0;padding:8px 8px 10px;border-radius:10px;background:linear-gradient(#272a1b,#1a1d13);box-shadow:inset 0 0 0 1px #8a7a45,inset 0 0 0 4px #1a1d13,inset 0 0 0 5px rgba(138,122,69,.55);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;transition:transform .25s}
+.tarot:hover{transform:translateY(-3px) rotate(-1deg)}
+.tarot .num{font:13px var(--caps);color:#c8b36a;letter-spacing:.12em}
+.tarot .win{width:100%;aspect-ratio:1/1;border-radius:50% 50% 6px 6px;background:radial-gradient(circle at 50% 70%,rgba(168,198,108,.25),transparent 70%),#10140d;display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(138,122,69,.5)}
+.tarot .win img{width:78%;height:auto;filter:sepia(.35) saturate(.8)}
+.tarot .name{font:15px var(--caps);margin-top:4px}
+.tarot .amt{font-size:13px;color:var(--mute);font-style:italic;line-height:1.1}
+.tarot .price{margin-top:5px;font:13px var(--type);color:var(--deep);background:#c8b36a;border-radius:4px;padding:2px 10px}
+.tarot--elder{animation:elderglow 4s ease-in-out infinite}
+.tarot--elder .price{background:var(--gem)}
+@keyframes elderglow{50%{box-shadow:inset 0 0 0 1px #c9e88a,inset 0 0 0 4px #1a1d13,inset 0 0 0 5px rgba(201,232,138,.6),0 0 22px rgba(201,232,138,.25)}}
+.s1 .hush{display:flex;gap:12px;align-items:center;text-align:left;border:0;border-radius:10px;padding:12px;background:linear-gradient(90deg,#2a1f2e,#1d1820);box-shadow:inset 0 0 0 1px var(--plum2)}
+.s1 .hush svg{width:44px;height:44px;flex:none}
+.s1 .hush strong{display:block;font:400 17px var(--caps)}
+.s1 .hush em{display:block;font-style:normal;font:11.5px/1.35 var(--type);color:var(--mute)}
+.s1 .hush .price{margin-left:auto;font:13px var(--type);background:var(--plum2);color:var(--ink);border-radius:4px;padding:2px 9px;white-space:nowrap}
+
+/* ---------- 2  Specimen Cabinet ---------- */
+.s2{background:radial-gradient(100% 60% at 50% 30%,#2a2219,#14100c);box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 8px #3a2c1d,inset 0 0 0 9px #5b4630,0 18px 50px rgba(0,0,0,.5);padding:22px 20px 18px}
+.s2 .top h3{font-family:var(--serif);font-style:italic}
+.s2 .drawer{display:grid;grid-template-columns:1fr 1fr;gap:16px 12px;padding:6px 2px}
+.spec{position:relative;border:0;background:var(--paper);color:var(--paper-ink);padding:10px 8px 8px;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;transform:rotate(var(--r,0deg));transition:transform .2s}
+.spec:hover{transform:rotate(0) scale(1.03)}
+.spec::before{content:"";position:absolute;top:-5px;left:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e9e9e9,#7d7a6c);box-shadow:0 2px 2px rgba(0,0,0,.5)}
+.spec svg{width:70px;height:52px}
+.spec .lat{font:italic 14px var(--serif);line-height:1.15}
+.spec .no{font:10px var(--type);letter-spacing:.06em;color:#6b6142}
+.spec .stamp{margin-top:4px;font:12px var(--type);color:var(--wax);border:1.5px solid var(--wax);border-radius:3px;padding:0 6px;transform:rotate(-4deg)}
+.spec .scrawl{font:10px var(--type);color:#6b6142}
+.s2 .jar{display:flex;gap:12px;align-items:center;border:0;text-align:left;background:var(--paper);color:var(--paper-ink);padding:10px 12px;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.5);transform:rotate(-.6deg)}
+.s2 .jar svg{width:40px;height:50px;flex:none}
+.s2 .jar strong{display:block;font:italic 16px var(--serif)}
+.s2 .jar em{display:block;font-style:normal;font:11px/1.35 var(--type);color:#6b6142}
+.s2 .claim{background:none;border:0;color:var(--paper);font:italic 14px var(--serif);text-decoration:underline dotted;text-underline-offset:4px;padding:2px}
+
+/* ---------- 3  Seed Packets ---------- */
+.s3{background:repeating-linear-gradient(90deg,rgba(255,255,255,.015) 0 2px,transparent 2px 9px),#1c2016}
+.s3 .rack{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.packet{position:relative;border:0;padding:20px 8px 9px;border-radius:3px 3px 6px 6px;background:var(--pk);color:#1b1a12;display:flex;flex-direction:column;align-items:center;gap:1px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25);transition:transform .2s}
+.packet:hover{transform:translateY(-4px)}
+.packet::before{content:"";position:absolute;inset:0 0 auto 0;height:14px;background:linear-gradient(to bottom right,transparent 49%,rgba(0,0,0,.18) 50%) left/50% 100% no-repeat,linear-gradient(to bottom left,transparent 49%,rgba(0,0,0,.18) 50%) right/50% 100% no-repeat}
+.packet .co{font:9px var(--type);letter-spacing:.14em;opacity:.75}
+.packet .pic{width:100%;aspect-ratio:4/3;margin:3px 0;border-radius:50% / 40%;background:rgba(255,255,255,.35);display:grid;place-items:center;overflow:hidden;box-shadow:inset 0 0 0 1.5px rgba(27,26,18,.6)}
+.packet .pic img{width:70%;filter:sepia(.5) contrast(1.05)}
+.packet .kind{font:16px var(--caps);line-height:1.05}
+.packet .amt{font:italic 13px var(--serif)}
+.packet .price{margin-top:4px;font:13px var(--type);border-top:1.5px dashed rgba(27,26,18,.5);padding-top:3px;width:100%}
+.s3 .claim{display:flex;gap:10px;align-items:center;border:0;border-radius:6px;padding:9px 12px;text-align:left;background:var(--cell-up);color:var(--moss);font-size:14px}
+.s3 .quiet{display:flex;gap:12px;align-items:center;text-align:left;border:0;padding:12px 12px 12px 14px;border-radius:4px;background:#d9cfae;color:#1b1a12;box-shadow:0 4px 0 rgba(0,0,0,.25);position:relative}
+.s3 .quiet::after{content:"US$3";position:absolute;right:10px;top:-10px;font:12px var(--type);color:var(--ink);background:var(--plum);border-radius:50%;width:44px;height:44px;display:grid;place-items:center;transform:rotate(12deg)}
+.s3 .quiet strong{display:block;font:400 17px var(--caps)}
+.s3 .quiet em{display:block;font-style:normal;font:11px/1.35 var(--type);opacity:.8;padding-right:28px}
+
+/* ---------- 4  Board Tiles ---------- */
+.s4{background:radial-gradient(60% 40% at 50% 46%,rgba(168,198,108,.16),transparent 70%),linear-gradient(#1b2418,#10150e)}
+.s4 .score{display:flex;justify-content:space-between;align-items:end}
+.s4 .score div{font:11px var(--type);color:var(--mute);letter-spacing:.08em}
+.s4 .score b{display:block;font:400 30px/1 var(--caps);color:var(--ink);letter-spacing:.04em}
+.s4 .board{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:6px;border-radius:14px;background:rgba(0,0,0,.28);box-shadow:inset 0 0 0 1px rgba(236,228,200,.12)}
+.tile{position:relative;border:0;border-radius:10px;background:var(--cell);box-shadow:inset 0 0 0 1px rgba(168,198,108,.18);padding:10px 8px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:background .2s}
+.tile:hover{background:var(--cell-up)}
+.tile svg.cl{width:64px;height:48px}
+.tile .amt{font:400 20px/1 var(--caps)}
+.tile .bonus{position:absolute;top:6px;left:6px;font:10px var(--type);color:var(--deep);background:var(--moss);border-radius:999px;padding:0 6px}
+.tile .price{font:12.5px var(--type);color:var(--moss)}
+.tile .eye{position:absolute;top:7px;right:8px;width:16px;height:9px;border-radius:50%;background:var(--ink);overflow:hidden;animation:blink 5s infinite var(--d,0s)}
+.tile .eye::after{content:"";position:absolute;left:5px;top:1.5px;width:6px;height:6px;border-radius:50%;background:#10150e}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+.tile .googly{position:absolute;bottom:20px;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px #000}
+.tile .googly::after{content:"";position:absolute;width:6px;height:6px;border-radius:50%;background:#000;left:var(--x,4px);top:var(--y,5px)}
+.tile--wide{grid-column:span 2;flex-direction:row;gap:12px;text-align:left;padding:12px;background:linear-gradient(90deg,#2a2131,var(--cell));box-shadow:inset 0 0 0 1px rgba(141,104,150,.6)}
+.tile--wide:hover{background:linear-gradient(90deg,#33283b,var(--cell-up))}
+.tile--wide strong{display:block;font:400 17px var(--caps)}
+.tile--wide em{display:block;font-style:normal;font:11px/1.35 var(--type);color:var(--mute)}
+.tile--wide .price{margin-left:auto;white-space:nowrap;color:var(--plum2);font-size:14px}
+.tile--claim{grid-column:span 2;flex-direction:row;justify-content:center;gap:8px;background:transparent;box-shadow:inset 0 0 0 1.5px rgba(168,198,108,.4);border-style:dashed;color:var(--moss);font-size:14px;padding:9px}
+.s4 .ticker{margin:0;font:italic 14px var(--serif);text-align:center}
+
+/* ---------- 5  Candlelit Ledger ---------- */
+.s5{background:#231f15;box-shadow:0 0 0 1px rgba(236,228,200,.12),inset 0 0 0 7px #231f15,inset 0 0 0 8px #5b5236,inset 0 0 0 11px #231f15,inset 0 0 0 12px #5b5236,0 18px 50px rgba(0,0,0,.5);padding:22px 22px 18px}
+.s5 .candles{display:flex;justify-content:center;gap:16px;align-items:end;height:40px;margin-bottom:-4px}
+.s5 .candle{position:relative;width:8px;height:var(--h,22px);background:linear-gradient(#efe6c9,#c9bd98);border-radius:2px 2px 0 0}
+.s5 .candle::before{content:"";position:absolute;left:50%;bottom:100%;width:8px;height:13px;margin-left:-4px;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:radial-gradient(circle at 50% 70%,#fff4c8,#f1c66a 45%,rgba(224,87,60,.6) 75%,transparent 80%);animation:flick 2.4s ease-in-out infinite var(--d,0s);transform-origin:50% 100%}
+@keyframes flick{50%{transform:scale(.88,1.08) rotate(2deg)}}
+.s5 .top{justify-content:center;text-align:center;flex-direction:column;gap:2px}
+.s5 .top h3{font-size:22px}
+.s5 .close{position:absolute;right:20px;top:18px}
+.s5 .rule{display:flex;align-items:center;gap:8px;color:#8a7a45;font-size:10px}
+.s5 .rule::before,.s5 .rule::after{content:"";flex:1;height:1px;background:#5b5236}
+.s5 .wallet{justify-content:center}
+.s5 .wallet small{margin-left:8px}
+.plate{display:flex;align-items:center;gap:12px;border:0;text-align:left;padding:9px 8px 9px 10px;border-radius:6px;background:#2d2819;box-shadow:inset 0 0 0 1px #5b5236;transition:box-shadow .25s}
+.plate:hover{box-shadow:inset 0 0 0 1px var(--gem),0 0 20px rgba(201,232,138,.15)}
+.plate .med{width:42px;height:42px;flex:none;border-radius:50%;display:grid;place-items:center;background:#1a170f;box-shadow:inset 0 0 0 1px #8a7a45}
+.plate .med svg{width:30px;height:24px}
+.plate strong{display:block;font:400 17px/1.1 var(--caps)}
+.plate em{display:block;font-style:normal;font:10.5px var(--type);color:var(--mute)}
+.seal{margin-left:auto;flex:none;width:52px;height:52px;border-radius:47% 53% 50% 48% / 52% 46% 54% 48%;display:grid;place-items:center;background:radial-gradient(circle at 38% 32%,#c24a37,var(--wax) 60%,#6c1f17);color:#f6dccb;font:12px var(--type);box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 0 0 4px rgba(0,0,0,.15)}
+.seal--gold{background:radial-gradient(circle at 38% 32%,#f6d98a,#c99a3a 60%,#7d5c1c);color:#2a1f08}
+.s5 .unchain{display:flex;gap:12px;align-items:center;border:0;text-align:left;padding:10px;border-radius:6px;background:#1d1a12;box-shadow:inset 0 0 0 1px #7d7a6c}
+.s5 .unchain svg{width:42px;height:42px;flex:none}
+.s5 .unchain strong{display:block;font:400 17px var(--caps)}
+.s5 .unchain em{display:block;font-style:normal;font:10.5px/1.35 var(--type);color:var(--mute)}
+.s5 .claim{background:none;border:0;color:var(--sun);font:italic 15px var(--serif);padding:4px}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="gem" viewBox="0 0 26 26"><path d="M13 2l9 9-9 13-9-13z" fill="var(--gem)"/><path d="M4 11h18M13 2l-4 9 4 13 4-13z" fill="none" stroke="#6f8a3e" stroke-width="1"/></symbol>
+  <symbol id="g1" viewBox="0 0 70 52"><use href="#gem" x="22" y="12" width="26" height="30"/></symbol>
+  <symbol id="g2" viewBox="0 0 70 52"><use href="#gem" x="12" y="16" width="22" height="26"/><use href="#gem" x="32" y="8" width="26" height="32"/></symbol>
+  <symbol id="g3" viewBox="0 0 70 52"><use href="#gem" x="6" y="20" width="20" height="24"/><use href="#gem" x="44" y="18" width="20" height="24"/><use href="#gem" x="21" y="4" width="28" height="38"/></symbol>
+  <symbol id="g4" viewBox="0 0 70 52"><use href="#gem" x="1" y="24" width="18" height="22"/><use href="#gem" x="51" y="24" width="18" height="22"/><use href="#gem" x="11" y="10" width="20" height="28"/><use href="#gem" x="39" y="10" width="20" height="28"/><use href="#gem" x="23" y="0" width="24" height="40"/></symbol>
+  <symbol id="hushEye" viewBox="0 0 44 44"><path d="M6 22c5 6 27 6 32 0" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/><g stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round"><path d="M12 26l-2 4M18 28l-1 4M26 28l1 4M32 26l2 4"/></g><text x="31" y="15" font-family="Special Elite,monospace" font-size="9" fill="var(--mute)">z</text><text x="36" y="9" font-family="Special Elite,monospace" font-size="7" fill="var(--mute)">z</text></symbol>
+  <symbol id="chainBroken" viewBox="0 0 42 42"><g fill="none" stroke="#9d9a88" stroke-width="3"><rect x="3" y="15" width="15" height="10" rx="5" transform="rotate(-20 10 20)"/><rect x="24" y="17" width="15" height="10" rx="5" transform="rotate(-20 31 22)"/></g><g stroke="var(--sun)" stroke-width="1.6" stroke-linecap="round"><path d="M21 9v4M21 31v4M15 11l2 3M27 11l-2 3"/></g></symbol>
+  <symbol id="jar" viewBox="0 0 40 50"><rect x="9" y="2" width="22" height="6" rx="1" fill="#6b6142"/><path d="M7 10h26v34a4 4 0 01-4 4H11a4 4 0 01-4-4z" fill="rgba(44,42,29,.12)" stroke="#2c2a1d" stroke-width="1.5"/><path d="M14 30c3 3 9 3 12 0" fill="none" stroke="#2c2a1d" stroke-width="1.5" stroke-linecap="round"/><rect x="11" y="18" width="18" height="7" fill="#e6dbb9" stroke="#2c2a1d" stroke-width=".8"/></symbol>
+</svg>
+
+<div class="wrap">
+<header>
+  <h1>Shop <span>cards</span> · 5 ideas</h1>
+  <p>ショップ画面「Crystals &amp; No Ads」をカード型にした5案です。中身はすべて今のショップと同じです：<b>持っている数・無料3個（1アカウント1回）・5/11/30/65 Crystals（US$1/2/5/10）・No Ads（US$3）・返金の注意</b>。どれも静止モックで、まだゲームには入れていません。ボタンを押しても何も起きません。</p>
+</header>
+
+<div class="grid">
+
+<!-- 1 -->
+<article class="opt">
+  <div class="tag">IDEA 1 · TAROT</div>
+  <h2>草原のタロット</h2>
+  <div class="phone s1">
+    <div class="top"><h3>Arcana of the Meadow</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> Crystals<small>signed in</small></div>
+    <button class="claim" type="button"><svg class="ico"><use href="#gem"/></svg><span>Claim 3 free Crystals<span class="aside">once per account. the soil insists.</span></span></button>
+    <div class="deck">
+      <button class="tarot" type="button"><span class="num">III</span><span class="win"><img src="img/rabbit.png" alt=""></span><span class="name">The Rabbit</span><span class="amt">5 Crystals</span><span class="price">US$1</span></button>
+      <button class="tarot" type="button"><span class="num">IV</span><span class="win"><img src="img/fox.png" alt=""></span><span class="name">The Fox</span><span class="amt">11 Crystals</span><span class="price">US$2</span></button>
+      <button class="tarot" type="button"><span class="num">VIII</span><span class="win"><img src="img/wolf.png" alt=""></span><span class="name">The Wolf</span><span class="amt">30 Crystals</span><span class="price">US$5</span></button>
+      <button class="tarot tarot--elder" type="button"><span class="num">XII</span><span class="win"><img src="img/elephant.png" alt=""></span><span class="name">The Elder</span><span class="amt">65 Crystals</span><span class="price">US$10</span></button>
+    </div>
+    <button class="hush" type="button"><svg><use href="#hushEye"/></svg><span><strong>The Hush · No Ads</strong><em>one free revival a day. the meadow sleeps.</em></span><span class="price">US$3</span></button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>縦長のタロットカード2×2。番号は食物連鎖の段（ウサギ III・キツネ IV・オオカミ VIII・ゾウ XII）。大きいパックほど上位の動物。</li>
+    <li><b>合う所：</b>不気味さと占いの相性が良く、スクショ映えする。ゾウのカードだけゆっくり光る。</li>
+    <li><b>気になる所：</b>カードが大きく、小さいスマホではスクロールが増える。</li>
+  </ul>
+</article>
+
+<!-- 2 -->
+<article class="opt">
+  <div class="tag">IDEA 2 · SPECIMEN</div>
+  <h2>標本の引き出し</h2>
+  <div class="phone s2">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button" style="color:var(--paper)">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> in your collection<small>signed in</small></div>
+    <div class="drawer">
+      <button class="spec" type="button" style="--r:-2deg"><svg><use href="#g1"/></svg><span class="lat">Crystallum parvum</span><span class="no">No. 5 · ×5</span><span class="stamp">US$1</span></button>
+      <button class="spec" type="button" style="--r:1.5deg"><svg><use href="#g2"/></svg><span class="lat">Crystallum vulgare</span><span class="no">No. 11 · ×11</span><span class="stamp">US$2</span></button>
+      <button class="spec" type="button" style="--r:1deg"><svg><use href="#g3"/></svg><span class="lat">Crystallum magnum</span><span class="no">No. 30 · ×30</span><span class="stamp">US$5</span></button>
+      <button class="spec" type="button" style="--r:-1.5deg"><svg><use href="#g4"/></svg><span class="lat">Crystallum giganteum</span><span class="no">No. 65 · ×65</span><span class="stamp">US$10</span><span class="scrawl">(it hums at night)</span></button>
+    </div>
+    <button class="jar" type="button"><svg><use href="#jar"/></svg><span><strong>Silentium pratense · No Ads</strong><em>a jar of quiet. one free revival a day. US$3, once.</em></span></button>
+    <button class="claim" type="button">A free specimen awaits: claim 3 Crystals (once per account)</button>
+    <p class="fine" style="color:#b9ad89">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>木の引き出しに、紙ラベルの標本カードをピンで留める。ラテン語風の名前と、赤いスタンプの値段。</li>
+    <li><b>合う所：</b>以前の案C「標本ノート」の空気。クリスタルの粒の数で量の差が一目で分かる。動物の絵がいらない。</li>
+    <li><b>気になる所：</b>明るい紙が並ぶので、ゲーム本体（暗い緑）より少し浮く。</li>
+  </ul>
+</article>
+
+<!-- 3 -->
+<article class="opt">
+  <div class="tag">IDEA 3 · SEED PACKETS</div>
+  <h2>種の小袋</h2>
+  <div class="phone s3">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> Crystals<small>signed in</small></div>
+    <button class="claim" type="button"><svg class="ico"><use href="#gem"/></svg>Free sample: claim 3 Crystals · once per account</button>
+    <div class="rack">
+      <button class="packet" type="button" style="--pk:#b9c98a"><span class="co">MEADOW SEED CO.</span><span class="pic"><img src="img/rabbit.png" alt=""></span><span class="kind">Sprout</span><span class="amt">5 Crystals</span><span class="price">US$1</span></button>
+      <button class="packet" type="button" style="--pk:#d9b77a"><span class="co">MEADOW SEED CO.</span><span class="pic"><img src="img/fox.png" alt=""></span><span class="kind">Thicket</span><span class="amt">11 Crystals</span><span class="price">US$2</span></button>
+      <button class="packet" type="button" style="--pk:#a9a3b8"><span class="co">MEADOW SEED CO.</span><span class="pic"><img src="img/wolf.png" alt=""></span><span class="kind">Wildwood</span><span class="amt">30 Crystals</span><span class="price">US$5</span></button>
+      <button class="packet" type="button" style="--pk:#c79a8c"><span class="co">MEADOW SEED CO.</span><span class="pic"><img src="img/elephant.png" alt=""></span><span class="kind">Ancient</span><span class="amt">65 Crystals</span><span class="price">US$10</span></button>
+    </div>
+    <button class="quiet" type="button"><span><strong>Quiet Meadow · No Ads</strong><em>plant once, never see an ad again. one free revival a day.</em></span></button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>古い種の袋をカードに。上に折り返しの三角、真ん中に楕円の絵、下に点線と値段。</li>
+    <li><b>合う所：</b>「芽から育てる」ゲームと直結。いちばん親しみやすく、ほっこり寄り。</li>
+    <li><b>気になる所：</b>不気味さは弱め。色が4色に増えるのでゲーム全体の色数が増える。</li>
+  </ul>
+</article>
+
+<!-- 4 -->
+<article class="opt">
+  <div class="tag">IDEA 4 · BOARD TILES</div>
+  <h2>盤面のマス</h2>
+  <div class="phone s4">
+    <div class="top"><h3>Crystals &amp; No Ads</h3><button class="close" type="button">Close</button></div>
+    <div class="score"><div>YOUR CRYSTALS<b>4</b></div><div style="text-align:right">signed in</div></div>
+    <div class="board">
+      <button class="tile tile--claim" type="button"><svg class="ico"><use href="#gem"/></svg>Claim 3 free · once per account</button>
+      <button class="tile" type="button"><i class="eye" aria-hidden="true"></i><svg class="cl"><use href="#g1"/></svg><span class="amt">5</span><span class="price">US$1</span></button>
+      <button class="tile" type="button"><span class="bonus">+10%</span><i class="eye" style="--d:-1.7s" aria-hidden="true"></i><svg class="cl"><use href="#g2"/></svg><span class="amt">11</span><span class="price">US$2</span></button>
+      <button class="tile" type="button"><span class="bonus">+20%</span><i class="googly" style="left:22px" aria-hidden="true"></i><i class="googly" style="left:37px;--x:2px;--y:2px" aria-hidden="true"></i><svg class="cl"><use href="#g3"/></svg><span class="amt">30</span><span class="price">US$5</span></button>
+      <button class="tile" type="button"><span class="bonus">+30%</span><i class="eye" style="--d:-3.1s" aria-hidden="true"></i><svg class="cl"><use href="#g4"/></svg><span class="amt">65</span><span class="price">US$10</span></button>
+      <button class="tile tile--wide" type="button"><svg class="ico" style="width:40px;height:40px"><use href="#hushEye"/></svg><span><strong>No Ads</strong><em>no ads at all. one free revival a day.</em></span><span class="price">US$3</span></button>
+    </div>
+    <p class="ticker">Pick a square.<span class="aside">(it's watching. it means well.)</span></p>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>ゲームの盤面そのもの。商品がマス、空きマスと同じ目がまばたく。No Ads はゾウのように2マス分。</li>
+    <li><b>合う所：</b>今のゲーム画面と見た目がつながり、別画面に来た感じがしない。「+10%/+20%/+30%」は 5個/US$1 と比べたおまけの割合（実際の値）。</li>
+    <li><b>気になる所：</b>演出は控えめで、ショップならではの特別感は弱い。</li>
+  </ul>
+</article>
+
+<!-- 5 -->
+<article class="opt">
+  <div class="tag">IDEA 5 · CANDLELIT LEDGER</div>
+  <h2>燭台と封蝋の台帳<span class="rec">おすすめ</span></h2>
+  <div class="phone s5">
+    <div class="candles" aria-hidden="true"><i class="candle" style="--h:18px"></i><i class="candle" style="--h:28px;--d:-.8s"></i><i class="candle" style="--h:18px;--d:-1.5s"></i></div>
+    <button class="close" type="button">Close</button>
+    <div class="top"><h3>The Meadow's Ledger</h3><span class="aside">crystals &amp; no ads</span></div>
+    <div class="wallet"><svg class="ico"><use href="#gem"/></svg><b>4</b> Crystals<small>signed in</small></div>
+    <div class="rule" aria-hidden="true">◆</div>
+    <button class="plate" type="button"><span class="med"><svg><use href="#g1"/></svg></span><span><strong>5 Crystals</strong><em>a pocketful</em></span><span class="seal">US$1</span></button>
+    <button class="plate" type="button"><span class="med"><svg><use href="#g2"/></svg></span><span><strong>11 Crystals</strong><em>a handful · +10% extra</em></span><span class="seal">US$2</span></button>
+    <button class="plate" type="button"><span class="med"><svg><use href="#g3"/></svg></span><span><strong>30 Crystals</strong><em>a hoard · +20% extra</em></span><span class="seal">US$5</span></button>
+    <button class="plate" type="button"><span class="med"><svg><use href="#g4"/></svg></span><span><strong>65 Crystals</strong><em>an elder's tithe · +30% extra</em></span><span class="seal">US$10</span></button>
+    <div class="rule" aria-hidden="true">◆</div>
+    <button class="unchain" type="button"><svg><use href="#chainBroken"/></svg><span><strong>Unchain the Dawn · No Ads</strong><em>no ads. one free revival a day.<br>hush the meadow to free the dawn.</em></span><span class="seal seal--gold">US$3</span></button>
+    <button class="claim" type="button">Claim 3 free Crystals · once per account</button>
+    <p class="fine">Purchases are non-refundable, except where required by applicable law.<br><u>Terms</u> · <u>Privacy</u> · <u>Seller information</u></p>
+  </div>
+  <ul class="notes">
+    <li><b>形：</b>採用済みの復活画面（燭台と古い本）と同じ額縁。商品は横長カードを縦に並べ、値段は封蝋のボタン。</li>
+    <li><b>合う所：</b>復活画面の「鎖のボタン → No Ads」から来た人が同じ世界の続きに着く。1列なので320pxのスマホでも崩れにくい。絵の追加がいらない。</li>
+    <li><b>気になる所：</b>カード感は5案でいちばん控えめ。</li>
+  </ul>
+</article>
+
+</div>
+</div>
