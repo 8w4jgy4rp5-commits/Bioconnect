@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 2026-10-12 — 独自ドメイン bioconnectpazzle.com へ移る準備（index.html / sitemap.xml）
+
+- 本人がCloudflareで bioconnectpazzle.com を取得。DNSに A×4（185.199.108〜111.153）と CNAME www→8w4jgy4rp5-commits.github.io を DNS only で登録、GitHub Pages の Custom domain に登録し DNS check successful（本人報告）。Enforce HTTPS は証明書の発行待ちで未チェック。Saveで main に CNAME ファイルが自動追加されるはず（未取り込み）。
+- 変更（ローカル）: index.html の canonical・og:url・構造化データの url、sitemap.xml を https://bioconnectpazzle.com/ に。
+- 検証: node rules.test.js 257件成功・1件失敗（stamp一致。変更前から同じ失敗で、クラウドの改行差と推定）。
+- 2026-10-14: 本人がEnforce HTTPSを有効化。mainを取り込み（CNAME、標本箱ショップ、連鎖演出、BGM。別の会話で storeEnabled=true になっており、本番でショップ表示・購入は無効のまま）。本人承認でmainへ公開。stampの番号はWindowsで計算した値のまま（クラウドでは改行差で1件不一致）。
+- 次:Supabase の Site URL・Redirect URLs（https://bioconnectpazzle.com/ と /**）、Secrets の BIOCONNECT_SITE_URL を新ドメインに、checkout の応答確認をやり直す（Origin が新ドメイン）。Google Search Console に新ドメインを追加。README の本番URL。旧URLのlocalStorageは移らない。
+
 ## 2026-10-12 — 動画の「Tiptoe Hollow」をゲームBGMへ編曲
 
 - 本人指定の完成動画: claude/festive-brahmagupta-r7zj7r / concepts/promo-video-v1/out/promo-full.mp4（29.3秒）。mainには動画がなく、該当ブランチのREADME・promo-audio.jsからオリジナル曲と楽譜を確認。参考コミット ce0b04fbca5f02d97dcbece91350f5f1ea0c66c5。

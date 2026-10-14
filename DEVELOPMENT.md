@@ -1,5 +1,9 @@
 # Bioconnect 開発方針
 
+## 2026-10-12 — 広告審査のため独自ドメインを取得する
+
+本人決定: Google AdSense（H5 Games Ads）はドメイン単位でサイトを登録し、ルートに ads.txt と確認タグが必要。github.io のサブフォルダ（/Bioconnect/）では置けず、共有ドメインが受け付けられるかも不明なため、独自ドメインを取得してGitHub Pagesに設定する（費用は本人が了承）。本人が bioconnectpazzle.com を取得（2026-10-12）。URLが変わると Supabase の Redirect URLs・Site URL、Secrets の BIOCONNECT_SITE_URL、index.html の canonical/og:url/構造化データ、sitemap.xml を直す必要があるため、購入スイッチ（CHECKOUT_ENABLED）を入れる前に行う。ブラウザ保存（localStorage）はオリジンごとなので、旧URLのベスト記録などは新ドメインへ自動では移らない（ログイン同期分は残る）。
+
 ## 2026-10-12 — BGMは紹介動画に近い「怖いけどコミカル」な曲調
 
 本人が指定した完成版promo-full.mp4のオリジナルBGM「Tiptoe Hollow」をゲーム用に編曲。120 BPM、D minor、口笛・チューバ・チェンバロ・控えめなテルミン。動画の8小節にゲーム向けの後半8小節を足す。動物が増えると楽器が参加する設計は維持し、最初の植物だけでも動画の曲調が伝わる基礎編成を鳴らす。タイトルは同じモチーフの84 BPMオルゴール。効果音・連鎖タイミング・ルールは変えない。過去のMeadow Steps音源は比較資料として保存。現行試聴はconcepts/tiptoe-game-v1/。
