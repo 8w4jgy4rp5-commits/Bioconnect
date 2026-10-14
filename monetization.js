@@ -322,6 +322,8 @@ window.BioEconomy = (() => {
     if (googleReady) return googleReady;
     googleReady = new Promise(resolve => {
       window.adsbygoogle = window.adsbygoogle || [];
+      // Non-personalized ads only: the privacy policy promises no behavioral-ad sharing.
+      window.adsbygoogle.requestNonPersonalizedAds = 1;
       window.adBreak = window.adConfig = o => window.adsbygoogle.push(o);
       const tag = document.createElement('script'); tag.async = true; tag.crossOrigin = 'anonymous';
       tag.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + cfg.adClient;

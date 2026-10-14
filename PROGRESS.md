@@ -1,11 +1,19 @@
 # Bioconnect 進捗
 
+## 2026-10-14 — 広告の申し込み準備：非パーソナライズ広告とプライバシーポリシー（monetization.js / legal/privacy.html / index.html）
+
+- 本人決定で非パーソナライズ広告のみ（DEVELOPMENT）。monetization.js の Google SDK 読み込み前に requestNonPersonalizedAds = 1。index.html は monetization.js の ?v= だけ更新。
+- legal/privacy.html: 「Ads are not shown」を、Google AdSense の広告（任意の復活広告と新規ゲーム時の広告、No Ads所有者には出さない）、非パーソナライズのみ、頻度制限・測定・不正防止のためのCookie、EEA/英国/スイスでは同意を求める、の説明に置き換え。提供者一覧に Google AdSense。施行日を2026-10-14に。
+- 検証: node --check monetization.js 成功。node rules.test.js 257件成功・1件失敗（既知のstamp改行差）。Chromium 375pxで法的3ページの横はみ出しなし・JS例外0・表示を撮影確認。実広告SDKでの非パーソナライズ指定の効き目は未確認（承認後に公式テスト広告で確認）。広告はadsEnabled=falseのまま。
+- 本人がAdSenseに bioconnectpazzle.com を登録し ca-pub-7033615978880555 を取得。index.html に google-adsense-account の metaタグ、ルートに ads.txt（google.com, pub-…, DIRECT, f08c47fec0942fa0）を追加。shared/monetization-config.js の adClient は承認まで空のまま。
+- 次: mainへ公開（本人承認）→ 本人がAdSenseで確認・審査をリクエスト。承認後に認定CMP（EU同意）を有効化し、adTestMode=true で確認してから広告ON（本人承認）。
+
 ## 2026-10-12 — 独自ドメイン bioconnectpazzle.com へ移る準備（index.html / sitemap.xml）
 
 - 本人がCloudflareで bioconnectpazzle.com を取得。DNSに A×4（185.199.108〜111.153）と CNAME www→8w4jgy4rp5-commits.github.io を DNS only で登録、GitHub Pages の Custom domain に登録し DNS check successful（本人報告）。Enforce HTTPS は証明書の発行待ちで未チェック。Saveで main に CNAME ファイルが自動追加されるはず（未取り込み）。
 - 変更（ローカル）: index.html の canonical・og:url・構造化データの url、sitemap.xml を https://bioconnectpazzle.com/ に。
 - 検証: node rules.test.js 257件成功・1件失敗（stamp一致。変更前から同じ失敗で、クラウドの改行差と推定）。
-- 2026-10-14: 本人がEnforce HTTPSを有効化。mainを取り込み（CNAME、標本箱ショップ、連鎖演出、BGM。別の会話で storeEnabled=true になっており、本番でショップ表示・購入は無効のまま）。本人承認でmainへ公開。stampの番号はWindowsで計算した値のまま（クラウドでは改行差で1件不一致）。
+- 2026-10-14: 本人がEnforce HTTPSを有効化。mainを取り込み（CNAME、標本箱ショップ、連鎖演出、BGM。別の会話で storeEnabled=true になっており、本番でショップ表示・購入は無効のまま）。本人承認でmainへ公開（ac60096）。本人がSupabaseのSite URL・Redirect URLs（新ドメインと /**）・Secrets BIOCONNECT_SITE_URL を新ドメインへ変更し、Origin https://bioconnectpazzle.com で checkout が「Purchases are not enabled yet.」を返すことを確認（本人のPowerShell）。stampの番号はWindowsで計算した値のまま（クラウドでは改行差で1件不一致）。
 - 次:Supabase の Site URL・Redirect URLs（https://bioconnectpazzle.com/ と /**）、Secrets の BIOCONNECT_SITE_URL を新ドメインに、checkout の応答確認をやり直す（Origin が新ドメイン）。Google Search Console に新ドメインを追加。README の本番URL。旧URLのlocalStorageは移らない。
 
 ## 2026-10-12 — 動画の「Tiptoe Hollow」をゲームBGMへ編曲

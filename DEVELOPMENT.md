@@ -1,5 +1,9 @@
 # Bioconnect 開発方針
 
+## 2026-10-14 — 広告は「合わせない広告（非パーソナライズ）」のみ
+
+本人決定: Google広告は非パーソナライズ広告だけを要求する（monetization.js で adsbygoogle.requestNonPersonalizedAds = 1）。プライバシーポリシーの「行動ターゲティング広告のために情報を共有しない」を保ち、米国州法の「Do Not Sell or Share」窓口やGPC対応を不要にするため。収益は下がりうる。切り替える場合はポリシーの書き直し・オプトアウト窓口・EU同意を先に用意する。EEA/英国/スイス向けの同意（CMP）はAdSenseの「プライバシーとメッセージ」の認定CMPを使う予定。
+
 ## 2026-10-12 — 広告審査のため独自ドメインを取得する
 
 本人決定: Google AdSense（H5 Games Ads）はドメイン単位でサイトを登録し、ルートに ads.txt と確認タグが必要。github.io のサブフォルダ（/Bioconnect/）では置けず、共有ドメインが受け付けられるかも不明なため、独自ドメインを取得してGitHub Pagesに設定する（費用は本人が了承）。本人が bioconnectpazzle.com を取得（2026-10-12）。URLが変わると Supabase の Redirect URLs・Site URL、Secrets の BIOCONNECT_SITE_URL、index.html の canonical/og:url/構造化データ、sitemap.xml を直す必要があるため、購入スイッチ（CHECKOUT_ENABLED）を入れる前に行う。ブラウザ保存（localStorage）はオリジンごとなので、旧URLのベスト記録などは新ドメインへ自動では移らない（ログイン同期分は残る）。
