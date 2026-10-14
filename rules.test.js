@@ -314,6 +314,37 @@ S.stock = ['sprout'];
 const tie = X.ctx.previewGrowth(at(2, 2));
 ok('ambiguous merges use the left existing tile consistently', tie[0].at === at(1, 2));
 
+// Landing prefers the stronger neighbour even when it is on the new tile.
+for (const deerOnLeft of [false, true]) {
+  board([[0, 2, deerOnLeft ? 'deer' : 'fox'], [1, 2, 'grass'],
+         [3, 2, deerOnLeft ? 'fox' : 'deer']]);
+  S.stock = ['grass']; S.over = false;
+  const before = JSON.stringify(S);
+  const predicted = X.ctx.previewGrowth(at(2, 2));
+  const home = at(deerOnLeft ? 1 : 2, 2);
+  ok('rabbit preview favours deer over fox, deer on ' + (deerOnLeft ? 'left' : 'right'),
+     predicted.length === 1 && predicted[0].at === home);
+  ok('strong-neighbour preview does not change live state', JSON.stringify(S) === before);
+  X.ctx.placeTile(at(2, 2));
+  ok('rabbit actually lands beside deer as predicted', S.cells[home]?.kind === 'rabbit');
+}
+
+board([[0, 2, 'rabbit'], [1, 2, 'grass'], [3, 2, 'deer']]);
+S.stock = ['grass']; S.over = false;
+const chainOverStrength = X.ctx.previewGrowth(at(2, 2));
+ok('immediate chain still takes priority over a stronger neighbour',
+   chainOverStrength.length === 2 && chainOverStrength[0].at === at(1, 2));
+
+board([[0, 2, 'deer'], [1, 2, 'grass'], [3, 2, 'deer']]);
+S.stock = ['grass'];
+ok('equal neighbour strength keeps the existing reading-order tie break',
+   X.ctx.previewGrowth(at(2, 2))[0].at === at(1, 2));
+
+board([[1, 2, 'grass'], [3, 2, 'stone'], [2, 1, 'sprout']]);
+S.stock = ['grass'];
+ok('plants and blockers do not attract growth away from the existing tile',
+   X.ctx.previewGrowth(at(2, 2))[0].at === at(1, 2));
+
 // Bear milestone, dietary preference, continued play, and starvation.
 board([[1, 1, 'wolf'], [2, 1, 'wolf']]);
 const bearGrowth = X.ctx.growFrom(at(2, 1));
@@ -465,10 +496,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 20);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 21);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 20, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 21, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;

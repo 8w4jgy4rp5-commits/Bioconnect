@@ -633,7 +633,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 20;
+const RULES_VERSION = 21;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -1497,13 +1497,23 @@ function growFrom(i, cells = state.cells, preview = false) {
     // `grass | new grass | rabbit` must make its rabbit in the middle,
     // and `rabbit | grass | new grass` must make it next to the rabbit.
     // Neither "the square you placed" nor "the existing square" gets both.
-    // With nothing to join, grow toward an existing tile. Ties always use
-    // reading order, existing squares before the one just placed.
+    // With nothing to join, land beside the strongest animal touching
+    // the merging group. Equal strength keeps reading order, existing
+    // squares before the one just placed.
     const order = group.filter(function (at) { return at !== i; })
       .sort(function (a, b) { return a - b; }).concat([i]);
     const destination = order.find(function (at) {
       return neighbours(at).some(function (n) { return cells[n] && cells[n].kind === up; });
-    }) ?? order[0];
+    }) ?? order.reduce(function (best, at) {
+      const strength = function (spot) {
+        return neighbours(spot).reduce(function (highest, n) {
+          const c = cells[n];
+          return c && !group.includes(n) && isAnimal(c.kind)
+            ? Math.max(highest, rank(c.kind)) : highest;
+        }, -1);
+      };
+      return strength(at) > strength(best) ? at : best;
+    }, order[0]);
     for (const g of group) cells[g] = null;
     i = destination;
 
