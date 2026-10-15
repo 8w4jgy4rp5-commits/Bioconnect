@@ -9,9 +9,11 @@ export const catalog: Record<string, { amount: number; label: string }> = {
   no_ads: { amount: 300, label: 'Bioconnect: No Ads + Daily Revival' },
 };
 export function payments() {
-  const key = Deno.env.get('STRIPE_SECRET_KEY') || '';
-  const live = Deno.env.get('PAYMENTS_LIVE') === 'true';
-  if (!key.startsWith(live ? 'sk_live_' : 'sk_test_')) throw new Error('Payments not configured');
+  const key = (Deno.env.get('STRIPE_SECRET_KEY') || '').trim();
+  const mode = Deno.env.get('PAYMENTS_LIVE') === 'true' ? 'live' : 'test';
+  // Standard (sk_) or restricted (rk_) keys, but never the other mode's key.
+  if (!/^(sk|rk)_/.test(key) || !key.startsWith(key.slice(0, 3) + mode + '_'))
+    throw new Error('Payments not configured');
   return new Stripe(key, { httpClient: Stripe.createFetchHttpClient() });
 }
 export function admin() {

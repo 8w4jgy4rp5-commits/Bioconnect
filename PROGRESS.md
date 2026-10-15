@@ -1,5 +1,14 @@
 # Bioconnect 進捗
 
+## 2026-10-15 — 本番の初購入と返金の取り消しを確認（supabase/functions/_shared/payment.ts）
+
+- 観測: 有効化後、本人のスマホで購入できず。checkout のLogs「Checkout error Payments not configured」。本番の STRIPE_SECRET_KEY が制限付きキー（rk_live_）で、コードが sk_live_ だけを受け付けていたため。新しいStripeの画面は「シークレットキーを作成」で権限テンプレートを選ぶ制限付きキーしか作れなかった。
+- 変更: payments() が sk_ と rk_ の両方を受け付ける（本番は *_live_、TESTは *_test_ のみ。逆の環境の鍵は拒否）。前後の空白を除去。
+- 検証: npm run check:edge 9群成功（sk_test と rk_test の両方で実行）。本人が bundle 済みの全文で本番の checkout と stripe-webhook を再配備（Verify JWTオフ）。
+- 本人報告: 本番で 5 Crystals を実際に購入し付与、Stripeで全額返金し Crystals が元に戻った（charge.refunded→取り消しが本番でも動作）。
+- 未確認: チャージバック（異議申立て）の本番での動き、他の4商品の本番購入、iPhone以外の端末。
+- 次: README・DEVELOPMENT の現状更新。広告は AdSense 審査待ち。Google Search Console に新ドメイン。
+
 ## 2026-10-15 — 本番で購入を有効化（shared/monetization-config.js）
 
 - 本人が本番SupabaseのSecretsに CHECKOUT_ENABLED=true を追加し、checkout が Origin https://bioconnectpazzle.com で「Sign in required」を返すことを確認（購入窓口が開いた）。

@@ -10,7 +10,7 @@
 公開しているのはコードと検討用の画像だけで、`shared/supabase-config.js` に入っているのは
 ブラウザに配られる anon / publishable キーのみ。service_role キーはここに置かない。
 
-本番URL: https://8w4jgy4rp5-commits.github.io/Bioconnect/ 。
+本番URL: https://bioconnectpazzle.com/ （2026-10-14に独自ドメインへ移行。旧 https://8w4jgy4rp5-commits.github.io/Bioconnect/ はGitHubが自動転送）。
 この Bioconnect リポジトリの main へのpushを、GitHub Pagesが自動でビルド・公開する。
 旧 App-Sharing-/apps/ecosystem-puzzle/ は新URLへの移転案内・自動転送になっている。
 Bioconnectの変更を旧mini-app-platformへコピーしてpushする必要はない。
@@ -42,10 +42,10 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 
 移行時点の画像実装: ウサギ・キツネ・オオカミ・クマ（親子）。クマの最新作業も含めて取り込み済み。
 
-## 収益化の状態（2026-10-09）
+## 収益化の状態（2026-10-15）
 
 クリスタル（5/$1・11/$2・30/$5・65/$10）、買い切りNo Ads（$3、毎日1回の無料復活つき）、1ゲーム1回の復活を実装済み。通常プレイはログイン不要。
-ショップ入口は2026-10-13の本人依頼で再表示。購入と広告は `shared/monetization-config.js` で無効のまま。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
+ショップ入口は2026-10-13の本人依頼で再表示。2026-10-15に本番で購入を有効化（Stripe Managed Payments、本人が実購入と返金の取り消しを確認）。広告は `shared/monetization-config.js` で無効のまま、AdSense（非パーソナライズのみ）の審査待ち。本番の手順は docs/production-launch.md。仕様は DEVELOPMENT.md、設計と外部設定の一般手順は docs/monetization.md。
 ローカル確認: `npm ci` → `npm run test:server` → http://127.0.0.1:8778/ 。検証は `npm test` / `npm run test:browser`。
 非公開の作業記録（TEST環境・ログイン設定・端末やVPNの手順・アカウントの状態）は `private-notes/` に置く。Git対象外なので公開リポジトリへ入れない。
 

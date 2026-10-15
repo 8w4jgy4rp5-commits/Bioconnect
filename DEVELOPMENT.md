@@ -1,5 +1,9 @@
 # Bioconnect 開発方針
 
+## 2026-10-15 — 本番で販売開始・Stripeの鍵は制限付きキーも可
+
+本番で購入を有効化（CHECKOUT_ENABLED=true、paymentsEnabled=true）し、本人が実購入と全額返金の取り消しを確認した。Stripeの新しい管理画面では制限付きキー（rk_live_）しか作れない場合があるため、Edge Functions は sk_ と rk_ の両方を受け付ける。制限付きキーには Checkout Sessions（書き込み）、Prices・Products・Charges・Disputes（読み取り）が必要。止めるときは Secrets から CHECKOUT_ENABLED を消す（支払い済みの付与・取り消しのwebhookは動き続ける）。
+
 ## 2026-10-14 — 広告は「合わせない広告（非パーソナライズ）」のみ
 
 本人決定: Google広告は非パーソナライズ広告だけを要求する（monetization.js で adsbygoogle.requestNonPersonalizedAds = 1）。プライバシーポリシーの「行動ターゲティング広告のために情報を共有しない」を保ち、米国州法の「Do Not Sell or Share」窓口やGPC対応を不要にするため。収益は下がりうる。切り替える場合はポリシーの書き直し・オプトアウト窓口・EU同意を先に用意する。EEA/英国/スイス向けの同意（CMP）はAdSenseの「プライバシーとメッセージ」の認定CMPを使う予定。
