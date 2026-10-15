@@ -1,5 +1,20 @@
 # Bioconnect 進捗
 
+## 2026-10-15 — 本番で購入を有効化（shared/monetization-config.js）
+
+- 本人が本番SupabaseのSecretsに CHECKOUT_ENABLED=true を追加し、checkout が Origin https://bioconnectpazzle.com で「Sign in required」を返すことを確認（購入窓口が開いた）。
+- 本人の「有効にして」で paymentsEnabled を true に（storeEnabled は別の会話ですでに true）。index.html は monetization-config.js の ?v= だけ更新。adsEnabled は false のまま。
+- 検証: node --check 成功、node rules.test.js 266件成功・1件失敗（既知のstamp改行差）。クラウドからSupabase・新ドメインへ接続できないため、実際の購入は本人のスマホで確認する。
+- 次: 本人がスマホで 5 Crystals（$1＋税）を購入し付与を確認 → Stripeで全額返金し取り消しを確認。止めるときは Secrets から CHECKOUT_ENABLED を消す。
+
+## 2026-10-15 — 本番Stripeの最終確認（本人作業）
+
+- 本番Stripeのホームで設定ガイド「準備ができました」、pk_live表示、未完了の警告なしを画面で確認。
+- Adaptive Pricing（現地通貨表示）を本人が無効化。注意書き（海外売上・オーソリ率・一部の通貨/決済手段）は一般的なもので、webhookが通貨USDと金額を照合するため現地通貨決済での付与が未検証であること、販売者情報の「価格はUSD」と合わせることを理由に無効を推奨。再有効化はTESTで現地通貨の付与を確認してから。
+- 誤って開いた Connect（プラットフォーム向け）の設定はスキップ。不要。
+- Managed Payments の返金設定が「Email me for approval」であることを本人が確認。
+- ゲーム側 paymentsEnabled をオンにする操作は、本人の「本番で購入を有効にして」の合図まで行わない（先回りした変更は安全確認で止められ、何も変わっていない）。
+
 ## 2026-10-14 — 広告の申し込み準備：非パーソナライズ広告とプライバシーポリシー（monetization.js / legal/privacy.html / index.html）
 
 - 本人決定で非パーソナライズ広告のみ（DEVELOPMENT）。monetization.js の Google SDK 読み込み前に requestNonPersonalizedAds = 1。index.html は monetization.js の ?v= だけ更新。
