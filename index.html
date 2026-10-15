@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bioconnect</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23eef6e4'/><path d='M16 3.5v25M3.5 16h25' stroke='%23d5e5c2' stroke-width='1.2'/><path d='M8.6 12.6V8.2' stroke='%235a9e4b' stroke-width='1.5' stroke-linecap='round'/><path d='M8.6 10.4c-2 0-3.2-1.4-3.4-3.3 2 .1 3.2 1.4 3.4 3.3z' fill='%236fbb56'/><path d='M8.6 9.6c.2-1.9 1.4-3.2 3.4-3.3-.2 1.9-1.4 3.3-3.4 3.3z' fill='%236fbb56'/><path d='M20.2 25.4c0-2.6 2-4.6 4.4-4.6s4.4 2 4.4 4.6z' fill='%23e08a4a'/><path d='M22.3 21.6l-1.1-3.1 2.9 1.5zm4.6 0l1.1-3.1-2.9 1.5z' fill='%23e08a4a'/><circle cx='23' cy='24' r='.7' fill='%23fff'/><circle cx='25.8' cy='24' r='.7' fill='%23fff'/></svg>" />
-  <link rel="stylesheet" href="style.css?v=602f5379" />
+  <link rel="stylesheet" href="style.css?v=24292e36" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
   <link rel="stylesheet" href="pop.css?v=caf4fa1f" />
-  <link rel="stylesheet" href="eldritch.css?v=e4e06e42" />
+  <link rel="stylesheet" href="eldritch.css?v=40379e6f" />
   <!-- Cozy Eldritch is the standard look. ?skin=pop switches to the old
        pop look and remembers it in this browser; ?skin=eldritch switches
        back. Runs before first paint so the page never flashes the other look. -->
@@ -46,7 +46,7 @@
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "cb00dbf3c9fa4da7a441c76b06ef660d"}'></script>
   <!-- cobbleworks:analytics:end -->
     <!-- 初回訪問時にブラウザの言語で表示する（選択済みの設定は上書きしない） -->
-    <script src="shared/lang-detect.js?v=6723d199"></script>
+    <script src="shared/lang-detect.js?v=9a05a2d8"></script>
     <!-- 構造化データ：検索エンジンに「無料で使えるWebアプリ」だと伝える -->
     <script type="application/ld+json">
       {
@@ -310,6 +310,8 @@
         <p class="go-score">Score <strong id="goScore">0</strong></p>
         <p class="go-level" id="goLevel"></p>
         <p class="go-note" id="goNote"></p>
+        <!-- Opens a ready-made X post with this run's result; nothing is sent until the player posts it. -->
+        <button class="btn go-share" id="goShare" type="button"><svg class="go-share-x" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L2.9 2h6.4l4.4 5.9L18.9 2zm-1.1 18.1h1.7L8.3 3.8H6.5l11.3 16.3z"/></svg><span>Share on X</span></button>
         <div class="go-rule" aria-hidden="true"><i></i></div>
         <!-- One revive button at a time (draw() in monetization.js picks it).
              Without No Ads, the daily dawn sits above it in chains. -->
@@ -562,13 +564,13 @@
   </section>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="shared/supabase-config.js?v=0b5e72b8"></script>
+<script src="shared/supabase-config.js?v=da53bf22"></script>
 <script src="shared/app-sync.js?v=d012ffb0"></script>
 <script src="audio-synth.js?v=44f6ba5a"></script>
 <script src="audio.js?v=a1eeb924"></script>
-<script src="shared/monetization-config.js?v=c2e6d691"></script>
-<script src="monetization.js?v=0437f145"></script>
-<script src="script.js?v=6781d347"></script>
+<script src="shared/monetization-config.js?v=14ea265e"></script>
+<script src="monetization.js?v=a668c156"></script>
+<script src="script.js?v=eed2afb0"></script>
 <script src="watch.js?v=5a051aed"></script>
 <script src="skin.js?v=5406c35f"></script>
 <!-- cobbleworks:footer:start -->

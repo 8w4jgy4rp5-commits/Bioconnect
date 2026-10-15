@@ -2269,6 +2269,8 @@ body.is-celebrating { overflow: hidden; }
 .revive-btn--locked:not(:disabled):hover .revive-chains { animation: revive-rattle .4s ease-in-out; }
 @keyframes revive-rattle { 25% { transform: translateX(-2px) rotate(-.6deg); } 75% { transform: translateX(2px) rotate(.6deg); } }
 .revive-hush { margin: -3px 0 2px; font-size: 11px; text-align: center; color: var(--ink-soft); }
+.gameover-card .go-share { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 8px auto 2px; min-height: 40px; padding: 8px 18px; }
+.go-share-x { width: 15px; height: 15px; flex: none; }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
 #shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }

@@ -3762,6 +3762,19 @@ function hideWord() {
 
 // Play again and New game deal a fresh board and run the same
 // Ready?? / Go!! beat as the title screen, with the clock held still.
+// The X post behind "Share on X". The elephant line only shows up on the
+// rare runs that had one, since that is the result worth bragging about.
+function shareText() {
+  const shown = displayScore(state.score);
+  const lv = levelAt(shown);
+  const lines = [
+    '🌱 Bioconnect',
+    'The meadow filled in ' + seasonLabel(),
+    'Score ' + shown.toLocaleString('en-US') + ' · Level ' + lv.level + ' ' + lv.name
+  ];
+  if (state.elephants > 0) lines.push('🐘 An elephant came to my meadow!');
+  return lines.join('\n') + '\n\nhttps://bioconnectpazzle.com/';
+}
 function scoreLabel(raw, revived) { return displayScore(raw).toLocaleString() + (revived ? ' 💎' : ''); }
 function reviveRun() {
   if (!state.over || state.revived) return false;
@@ -3863,7 +3876,7 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goShare', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
@@ -3984,6 +3997,9 @@ async function init() {
   // a new game that actually started takes the menu down with it
   if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
   el.goAgain.addEventListener('click', function () { disarmNew(); if (window.BioEconomy) window.BioEconomy.newGame(); else replay(); });
+  el.goShare.addEventListener('click', function () {
+    window.open('https://x.com/intent/post?text=' + encodeURIComponent(shareText()), '_blank', 'noopener');
+  });
 
   // the little reference row under the board
   for (const node of document.querySelectorAll('.tile--mini')) {
