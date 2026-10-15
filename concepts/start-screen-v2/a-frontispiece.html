@@ -1,0 +1,40 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="common.css">
+<title>A. Frontispiece</title><style>
+/* An old book's title page: brass rules, the wordmark set like a title,
+   and the meadow as an engraved plate inside an arched window. */
+body { background: radial-gradient(120% 80% at 50% 40%, #1f2618, #0b0f09); }
+.stage { gap: 10px; }
+.page { position: absolute; inset: 8px; border-radius: 6px; pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(138,122,78,.55), inset 0 0 0 7px rgba(138,122,78,.0), inset 0 0 0 8px rgba(138,122,78,.3); }
+.rule { display: flex; align-items: center; gap: 8px; color: var(--brass); margin: 4px 40px 0; }
+.rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; }
+.rule i { width: 6px; height: 6px; background: currentColor; transform: rotate(45deg); }
+.logo { font-size: clamp(2.3rem, 7vh, 3.2rem); }
+.tagline { margin-top: 0; background: none; padding: 0; }
+.arch { position: relative; flex: 1; min-height: 0; margin: 4px 14px 0; overflow: hidden;
+  border-radius: 999px 999px 8px 8px / 46% 46% 8px 8px;
+  background: radial-gradient(40% 30% at 50% 26%, rgba(241,234,208,.18), transparent 70%), linear-gradient(#141b22, #1d2719 75%);
+  box-shadow: 0 0 0 2px var(--brass), 0 0 0 7px #151a10, 0 0 0 8px rgba(138,122,78,.5), 0 12px 30px rgba(0,0,0,.5); container-type: size; }
+.moon { position: absolute; left: 50%; top: 13%; width: 24cqw; aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #f4efd8 0 40%, #cfc7a2 72%); box-shadow: 0 0 40px 10px rgba(241,234,208,.16); }
+.arch svg { position: absolute; inset: auto 0 0; width: 100%; height: 48%; }
+.crit { bottom: var(--y); left: var(--x); translate: -50% 0; height: var(--h); }
+.caption { margin: 0; text-align: center; font-family: var(--type); font-size: .64rem; letter-spacing: .12em; color: var(--mute); }
+</style></head><body><div class="page"></div><div class="stage">
+<div data-top></div>
+<p class="rule"><i></i></p>
+<h1 data-logo></h1>
+<p class="tagline">Grow a food chain, then keep it fed.</p>
+<div class="arch" aria-hidden="true">
+  <div class="moon"></div>
+  <svg viewBox="0 0 100 50" preserveAspectRatio="none"><path d="M0 20 C25 6 70 4 100 18 V50 H0Z" fill="#24301d"/><path d="M0 34 C30 26 55 36 100 30 V50 H0Z" fill="#161f12"/></svg>
+  <img class="crit" src="../../img/elephant-calm.png" alt="" style="--x:60%;--y:32%;--h:30cqh">
+  <img class="crit" src="../../img/zebra-calm.png" alt="" style="--x:31%;--y:31%;--h:30cqh;--d:.6s">
+  <img class="crit" src="../../img/rabbit-pose.png" alt="" style="--x:84%;--y:7%;--h:14cqh;--d:1.2s">
+  <img class="crit" src="../../img/fox-pose.png" alt="" style="--x:17%;--y:7%;--h:14cqh;--d:1.8s">
+</div>
+<p class="caption">PLATE I. &nbsp;THE MEADOW, AT REST.</p>
+<div data-controls></div>
+</div><script src="common.js"></script></body></html>

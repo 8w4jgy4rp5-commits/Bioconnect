@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="common.css">
+<title>C. Specimen Cabinet</title><style>
+/* The store's specimen box, grown into the whole title: twelve pinned
+   compartments, sprout to elephant. The last one is still empty. */
+body { background: radial-gradient(80% 50% at 50% 50%, #241c12, #0e0b07); }
+.stage { gap: 10px; }
+.plate { margin: 4px auto 0; padding: 8px 22px 10px; border-radius: 6px; background: linear-gradient(#3a3020, #241d12);
+  box-shadow: inset 0 0 0 1px #8a7a4e, 0 4px 12px rgba(0,0,0,.5); }
+.logo { font-size: clamp(1.9rem, 6vh, 2.7rem); white-space: nowrap; }
+.logo > span { display: inline; } .logo .l2 { font-size: 1em; }
+.tagline { margin-top: 2px; background: none; padding: 0; font-size: .84rem; }
+.box { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 6px; padding: 12px; border-radius: 16px;
+  background: #1a130c; box-shadow: inset 0 0 0 8px #2e2317, inset 0 0 0 9px #4f3d2a, 0 18px 40px rgba(0,0,0,.55); }
+.slot { position: relative; display: grid; place-items: center; min-height: 0; border-radius: 4px; overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, #2b3822, #18200f); box-shadow: inset 0 3px 8px rgba(0,0,0,.6), inset 0 0 0 1px rgba(79,61,42,.9); }
+.slot { padding: 14% 0 22%; }
+.slot img, .slot svg { height: 100%; max-width: 86%; min-height: 0; object-fit: contain; }
+.slot .sprout { width: auto; height: 80%; margin: 0; }
+.slot .crit { position: static; animation: none; }
+.slot span { position: absolute; bottom: 3px; left: 0; right: 0; text-align: center; font-family: var(--type); font-size: .5rem; letter-spacing: .05em; color: var(--mute); }
+.slot::before { content: ""; position: absolute; top: 8%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: #c9b98a; box-shadow: 0 1px 1px #000; z-index: 1; }
+.slot.missing img { filter: brightness(0) drop-shadow(0 0 1px rgba(168,198,108,.7)); opacity: .75; }
+.slot.missing span { color: var(--moss); }
+.play { min-height: 54px; }
+</style></head><body><div class="stage">
+<div data-top></div>
+<div class="plate"><h1 data-logo></h1><p class="tagline">Grow a food chain, then keep it fed.</p></div>
+<div class="box" aria-hidden="true" id="box"></div>
+<div data-controls></div>
+</div><script src="common.js"></script><script>
+const list = [['sprout','No.01 SPROUT'],['grass','No.02 GRASS'],['rabbit-pose','No.03 RABBIT'],['fox-pose','No.04 FOX'],['deer-calm','No.05 DEER'],['zebra-calm','No.06 ZEBRA'],
+  ['buffalo-calm','No.07 BUFFALO'],['wolf-calm','No.08 WOLF'],['bear-calm','No.09 BEAR'],['lion-calm','No.10 LION'],['tiger-calm','No.11 TIGER'],['elephant-calm','No.12 ???']];
+const GRASS = '<svg viewBox="0 0 30 30"><path d="M6 28C7 18 4 12 2 8M12 28c0-9 1-15 4-22M18 28c1-8 4-13 9-17M24 28c-1-5 0-9 3-11" stroke="#a8c66c" stroke-width="2.6" stroke-linecap="round" fill="none"/></svg>';
+const box = document.getElementById('box');
+list.forEach(function (it, i) {
+  const s = document.createElement('div'); s.className = 'slot' + (i === 11 ? ' missing' : '');
+  if (it[0] === 'sprout') s.insertAdjacentHTML('beforeend', window.SPROUT);
+  else if (it[0] === 'grass') s.insertAdjacentHTML('beforeend', GRASS);
+  else { const im = document.createElement('img'); im.className = 'crit'; im.src = '../../img/' + it[0] + '.png'; im.alt = ''; s.appendChild(im); }
+  const l = document.createElement('span'); l.textContent = it[1]; s.appendChild(l); box.appendChild(s);
+});
+</script></body></html>

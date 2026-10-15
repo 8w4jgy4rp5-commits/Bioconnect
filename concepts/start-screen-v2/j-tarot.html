@@ -1,0 +1,42 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="common.css">
+<title>J. Tarot Card</title><style>
+/* One card, drawn for you: XII — twelve steps from sprout to elephant.
+   It floats and tilts a little, lit by the candles of the revive screen. */
+body { background: radial-gradient(60% 40% at 50% 50%, rgba(241,198,106,.1), transparent 70%), linear-gradient(#141b18, #0e110c); }
+.logo { font-size: clamp(2rem, 6vh, 2.8rem); margin-top: 1vh; }
+.logo > span { display: inline; } .logo .l2 { font-size: 1em; }
+.tagline { margin-top: 2px; background: none; padding: 0; }
+.table { flex: 1; min-height: 0; display: grid; place-items: center; padding: 14px 0; perspective: 800px; }
+.card { position: relative; height: 100%; max-height: 440px; aspect-ratio: .6; border-radius: 14px; padding: 9px;
+  background: linear-gradient(160deg, #2c2819, #1d1a11); container-type: size;
+  box-shadow: 0 0 0 1px #5b5236, inset 0 0 0 5px #1d1a11, inset 0 0 0 6px #8a7a4e, 0 22px 40px rgba(0,0,0,.6), 0 0 40px rgba(241,198,106,.12);
+  animation: tilt 6s ease-in-out infinite; }
+@keyframes tilt { 0%,100% { transform: rotateY(-6deg) rotateZ(-1deg) translateY(0); } 50% { transform: rotateY(6deg) rotateZ(1deg) translateY(-6px); } }
+.num, .name { position: absolute; left: 0; right: 0; margin: 0; text-align: center; font-family: var(--caps); color: #d9c48e; }
+.num { top: 4%; font-size: 9cqh; } .name { bottom: 4%; font-size: 6.4cqh; letter-spacing: .12em; }
+.art { position: absolute; left: 10%; right: 10%; top: 15%; bottom: 15%; border-radius: 50% 50% 6px 6px / 30% 30% 6px 6px; overflow: hidden;
+  background: radial-gradient(50% 30% at 50% 24%, rgba(241,234,208,.25), transparent 70%), linear-gradient(#18202a, #1f2a18 70%); box-shadow: inset 0 0 0 1px #8a7a4e; }
+.art .moon { position: absolute; left: 50%; top: 10%; width: 34%; aspect-ratio: 1; translate: -50% 0; border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #f4efd8 0 40%, #cfc7a2 72%); }
+.art .rays { position: absolute; left: 50%; top: 20%; width: 160%; aspect-ratio: 1; translate: -50% -42%;
+  background: repeating-conic-gradient(rgba(217,196,142,.12) 0 4deg, transparent 4deg 16deg); border-radius: 50%; animation: spin 60s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+.art .hill { position: absolute; left: -10%; right: -10%; bottom: 0; height: 30%; border-radius: 50% 50% 0 0; background: #1a2414; }
+.crit { left: var(--x); bottom: var(--y); translate: -50% 0; height: var(--h); }
+.corner { position: absolute; width: 10px; height: 10px; border: 1px solid #8a7a4e; transform: rotate(45deg); }
+</style></head><body><div class="stage">
+<div data-top></div>
+<h1 data-logo></h1>
+<p class="tagline">Grow a food chain, then keep it fed.</p>
+<div class="table" aria-hidden="true"><div class="card">
+  <p class="num">XII</p>
+  <div class="art"><div class="rays"></div><div class="moon"></div><div class="hill"></div>
+    <img class="crit" src="../../img/elephant-calm.png" alt="" style="--x:50%;--y:18%;--h:36%">
+    <img class="crit" src="../../img/rabbit-pose.png" alt="" style="--x:20%;--y:4%;--h:13%;--d:1s">
+    <img class="crit" src="../../img/fox-pose.png" alt="" style="--x:82%;--y:4%;--h:12%;--d:1.6s"></div>
+  <p class="name">THE MEADOW</p>
+</div></div>
+<div data-controls="(you drew this card. it drew you back.)"></div>
+</div><script src="common.js"></script></body></html>

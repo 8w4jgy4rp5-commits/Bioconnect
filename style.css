@@ -723,6 +723,9 @@ body.is-modal { overflow: hidden; }
 .start-critter--fox { --start-size: 17cqh; --start-max: 54px; }
 .start-critter--rabbit { --start-size: 18cqh; --start-max: 56px; }
 
+/* the moon silhouette belongs to the Cozy Eldritch look; eldritch.css shows it */
+.start-moonscene { display: none; }
+
 /* ---- top line ---- */
 
 .start-topline {

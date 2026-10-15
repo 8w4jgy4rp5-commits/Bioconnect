@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 2026-10-15 — オープニング H「Moon Silhouette」を公開
+
+- 依頼: 「オープニング画面のデザイン変更がマージされてないから、その他もろもろの変更を取り入れてそのままコミットプッシュしておいて」。
+- 変更: 2026-10-13 に手元で作った H（月の影絵）のオープニング（index.html / eldritch.css / style.css）と、比較用の concepts/start-screen-v2/ を最新main（b9a36fb）へ乗せて公開。合体着地点（版21）は 3fd6b40 で公開済みのため差分なし。識別子は変更した style.css / eldritch.css だけ更新。
+- 公開しないもの: other-ai.patch（未追跡のまま）、stash「other AI reversal work 2026-10-11」、古いブランチ claude/charming-pascal-e8scxo（10-09の別案。ショップは別デザインが採用済みのため取り込まない）。
+- 検証: rules.test.js 266成功 / 1失敗（stamp一致テスト。元のmain b9a36fb でも同じく失敗する既存の状態で、今回の変更由来ではない）、browser-check 35件成功。
+- 未確認: iPhone実機の見た目。
+
 ## 2026-10-15 — 本番の初購入と返金の取り消しを確認（supabase/functions/_shared/payment.ts）
 
 - 観測: 有効化後、本人のスマホで購入できず。checkout のLogs「Checkout error Payments not configured」。本番の STRIPE_SECRET_KEY が制限付きキー（rk_live_）で、コードが sk_live_ だけを受け付けていたため。新しいStripeの画面は「シークレットキーを作成」で権限テンプレートを選ぶ制限付きキーしか作れなかった。
@@ -1709,6 +1717,32 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 公開: 本人からショップ公開の明示依頼を取得。採用済みショップデザインと入口再表示をmainへ反映する。購入の有効化は明日以降との本人方針に従い paymentsEnabled=false、広告もfalseを維持。未追跡の検討用モックとother-ai.patchは公開対象に含めない。
 - 追記: ユーザー「ショップをもう出していいよ」。storeEnabled=true（別の会話で手元変更済み）と新ショップ画面をコミット・push。paymentsEnabled / adsEnabled は false のまま（ショップは見えるが購入・広告は無効）。直前検証: rules 258件、monetization 25件、browser-check 35件、stamp確認。
 
+- 公開確認: 80b9b79をmainへpush。bioconnectpazzle.comの実配信で新ショップHTML、CSS/設定の新キャッシュ識別子、storeEnabled=true・paymentsEnabled=false・adsEnabled=falseを確認。当該Pages処理は後続f9491c5の公開処理に置き換えられたため、後続の結果も確認。
+
+## 2026-10-13 — オープニング画面のデザイン10案（concepts/start-screen-v2）
+
+- 依頼: 「オープニング画面をもう少し凝らせたい。今までのニュアンスはなくさず違うデザインを10種」。
+- 変更: `concepts/start-screen-v2/` に10案（A扉絵・B目・C標本箱・D月の輪・E目の盤面・F触手カーテン・G観察ノート・H月の影絵・I地中・Jタロット）と比較ページ index.html、README を追加。標準の Cozy Eldritch の配色・古書体ロゴ・芽・動物画・苔色PLAY・ボタン類・「見られている」一言は全案で維持。ゲーム本体は未変更。
+- 検証: 実ブラウザ（Chrome/Playwright）で390×760と320×600、比較ページ1800幅を撮影。全案でJSエラーなし。B/E/F/Iは装飾が画面外へはみ出すが body の overflow:hidden で横スクロールは出ない。
+- 未確認: iPhone実機、横向き、本体に組み込んだ時のショップ入口との重なり。G（明るい紙）は他画面の暗い見た目と揃わない点に注意。Iの触手は低い画面でPLAYの後ろにかかる。
+- 次: 本人が案を選ぶ（組み合わせも可）→ 選んだ案を eldritch.css / index.html のオープニングへ組み込み、実ブラウザで確認。
+
+## 2026-10-13 — オープニングに D「Chain Around the Moon」を採用（index.html / eldritch.css / style.css）
+
+- 依頼: 「一回Dで作成しよう」。
+- 変更: タイトル画面に `.start-ring`（月の周りを 芽→ウサギ→キツネ→シカ→シマウマ→オオカミ→クマ→ライオン→ゾウ が一周、中央に "SPROUT TO ELEPHANT"）を追加。標準の Cozy Eldritch のときだけ表示し、丘・右上の月・雲は隠す。輪は丘の行に入る最大の正方形（最大400px）で、動物は輪の大きさに合わせて縮む。横向き（高さ480px以下）では輪を隠す。`?skin=pop` は従来の丘のまま（style.css で `.start-ring` を既定非表示）。script.js は未変更。`node stamp.js` で識別子更新。
+- 検証: rules.test.js 258件成功、browser-check 35件成功。実ブラウザで 390×760・320×600・1280×800・740×360（横向き）と pop 390×760 を撮影し確認。
+- 未確認: iPhone実機。320幅ではロゴが大きく輪が小さめ（ショップボタンの2行折返しは以前から）。公開・commit・push はしていない。
+- 次: 本人の実機確認。輪が小さい画面でロゴを少し縮めるか、タグラインを輪の下へ移すかを検討。
+
+## 2026-10-13 — 訂正: オープニングは H「Moon Silhouette」（D から差し替え）
+
+- 依頼: 「まちがえた、動物が黒くなる月のやつだった」→ D（月の輪）を取り外し、H を採用。
+- 変更: index.html の `.start-ring` を `.start-moonscene` に置き換え（大きな月、ゾウ・シマウマ・ライオン・ウサギの黒い影絵、黒い稜線、草むらで光る目3組）。eldritch.css の D 用スタイルを H 用に置き換え、style.css は `.start-moonscene` を既定非表示に。稜線は画面の左右端と下端まで伸ばす。横向き（高さ480px以下）では月の場面を隠す。`?skin=pop` は従来の丘のまま。script.js は未変更。`node stamp.js` で識別子更新。concepts の D 案ファイルは比較用に残す。
+- 検証: rules.test.js 258件成功、browser-check 35件成功。実ブラウザで 390×760・320×600・1280×800・740×360 と pop 390×760 を撮影確認（稜線の下端で背景が切り替わる線が出ていたのを修正済み）。
+- 未確認: iPhone実機。320幅ではロゴが大きく月が小さめ。公開・commit・push はしていない。
+- 次: 本人の実機確認。影絵の動物の選び方・大きさ、目の数を調整するか。
+
 ## 2026-10-14 — 合体の着地点は強い動物の隣を優先（版21）
 
 - 依頼: キツネとシカが近いとき、ウサギがキツネ側へ生まれてしまうため、強い動物側を優先する。
@@ -1717,3 +1751,5 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証: rules.test.js 267成功 / 0失敗（シカとキツネの左右逆、予告の非破壊性と実配置一致、連鎖優先、同順位、植物・障害物の除外）。sim.js 30 を6条件、計180試合完走（毎tickおよび2/3/4tickごとの操作）。git diff --check 成功。
 - 未確認: 本人の操作感・スマホ実機。自動試遊だけで遊びやすさの改善を断定しない。
 - 次: シカ側へ寄る挙動を本人が試遊。本人から公開依頼を取得。最新mainへ今回の修正を反映し、既存のオープニング等の未コミット変更は保持。
+
+- 公開確認（2026-10-14）: 本人の公開依頼に基づき、最新main ac60096から今回の6ファイルだけを切り出し3fd6b40としてmainへpush。Pages run 38562302824 success。本番 https://bioconnectpazzle.com/ のHTMLでscript.js?v=6781d347、JSでルール版21と強い動物優先の着地点処理を確認。既存のオープニング変更・未追跡ファイルは公開に含めず保持。公開用コードでもrules 267成功。

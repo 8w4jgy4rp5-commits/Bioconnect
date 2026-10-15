@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="common.css">
+<title>D. Chain Around the Moon</title><style>
+/* The chain walks once around the moon, growing as it goes:
+   the sprout at the bottom, the elephant nearly home. */
+body { background: radial-gradient(60% 40% at 50% 52%, rgba(241,234,208,.08), transparent 70%), linear-gradient(#141b22, #1b2418 80%); }
+.hero { margin-top: 2vh; }
+.ringwrap { flex: 1; min-height: 0; display: grid; place-items: center; }
+.ring { position: relative; height: min(100%, 88vw); max-height: 400px; aspect-ratio: 1; container-type: size; }
+.moon { position: absolute; left: 50%; top: 50%; width: 44%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle at 40% 38%, #f4efd8 0 38%, #cfc7a2 72%); box-shadow: 0 0 60px 14px rgba(241,234,208,.14); }
+.moon::before, .moon::after { content: ""; position: absolute; border-radius: 50%; background: rgba(120,112,80,.22); }
+.moon::before { width: 18%; height: 18%; top: 22%; left: 62%; } .moon::after { width: 11%; height: 11%; top: 66%; left: 24%; }
+.ring svg.path { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.crit { left: var(--x); top: var(--y); translate: -50% -55%; height: var(--h); transform-origin: 50% 80%; }
+.sm { position: absolute; left: 50%; top: 89%; translate: -50% -60%; font-size: 40cqh; line-height: 0; }
+.tip { position: absolute; left: 50%; top: 50%; translate: -50% -50%; margin: 0; font-family: var(--type); font-size: .58rem; letter-spacing: .14em; line-height: 1.6; color: #6a6346; text-align: center; }
+</style></head><body><div class="stage">
+<div data-top></div>
+<div class="hero"><h1 data-logo></h1></div>
+<div class="ringwrap" aria-hidden="true"><div class="ring">
+  <div class="moon"></div><p class="tip">SPROUT<br>TO<br>ELEPHANT</p>
+  <svg class="path" viewBox="0 0 100 100"><path d="M 50 89 A 39 39 0 1 1 50.1 89" fill="none" stroke="rgba(168,198,108,.5)" stroke-width=".7" stroke-dasharray="1.6 2.2"/></svg>
+  <div class="sm" id="sm"></div>
+  <img class="crit" src="../../img/rabbit-pose.png" alt="" style="--x:26%;--y:80%;--h:9cqh">
+  <img class="crit" src="../../img/fox-pose.png" alt="" style="--x:13%;--y:60%;--h:10cqh;--d:.3s">
+  <img class="crit" src="../../img/deer-calm.png" alt="" style="--x:13%;--y:36%;--h:14cqh;--d:.6s">
+  <img class="crit" src="../../img/zebra-calm.png" alt="" style="--x:28%;--y:17%;--h:16cqh;--d:.9s">
+  <img class="crit" src="../../img/wolf-calm.png" alt="" style="--x:53%;--y:11%;--h:14cqh;--d:1.2s">
+  <img class="crit" src="../../img/bear-calm.png" alt="" style="--x:76%;--y:18%;--h:16cqh;--d:1.5s">
+  <img class="crit" src="../../img/lion-calm.png" alt="" style="--x:89%;--y:42%;--h:16cqh;--d:1.8s">
+  <img class="crit" src="../../img/elephant-calm.png" alt="" style="--x:79%;--y:72%;--h:24cqh;--d:2.1s">
+</div></div>
+<p class="tagline" style="margin:0 auto 12px">Grow a food chain, then keep it fed.</p>
+<div data-controls></div>
+</div><script src="common.js"></script><script>document.getElementById('sm').insertAdjacentHTML('beforeend', window.SPROUT);</script></body></html>

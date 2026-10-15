@@ -1,0 +1,35 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<link rel="stylesheet" href="common.css">
+<title>B. The Eye Opens</title><style>
+/* The hill itself is an eye. The herd stands on its upper lid; it blinks
+   and glances around, and the line under PLAY apologises for it. */
+body { background: radial-gradient(70% 40% at 50% 62%, rgba(168,198,108,.14), transparent 70%), linear-gradient(#141b22, #1b2418 70%); }
+.hero { margin-top: 5vh; }
+.field { position: relative; flex: 1; min-height: 0; margin: 6px -18px 8px; container-type: size; }
+.hill { position: absolute; left: -12%; right: -12%; bottom: 0; height: 62%; border-radius: 50% 50% 0 0 / 50% 50% 0 0; background: #1a2414;
+  box-shadow: inset 0 2px 0 rgba(168,198,108,.25); }
+.eye { position: absolute; left: 50%; bottom: 8%; width: min(70cqw, 100cqh); aspect-ratio: 2.1; translate: -50% 0; }
+.white { position: absolute; inset: 0; clip-path: ellipse(50% 50% at 50% 50%); overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #f1ead0 0 45%, #bdb592 85%); animation: blink 5s infinite; }
+.iris { position: absolute; top: 50%; left: 50%; width: 44%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%;
+  background: radial-gradient(circle, #10150e 0 30%, #6f8a3e 32% 62%, #a8c66c 64%); animation: look 7s ease-in-out infinite; }
+.iris::after { content: ""; position: absolute; top: 18%; left: 24%; width: 16%; height: 16%; border-radius: 50%; background: #fff; opacity: .8; }
+@keyframes look { 0%,40% { translate: -50% -50%; } 50%,70% { translate: -15% -55%; } 80%,100% { translate: -82% -50%; } }
+.lash { position: absolute; inset: -5% -3%; pointer-events: none; }
+.lash path { fill: none; stroke: #2f3d25; stroke-width: 5; stroke-linecap: round; }
+.crit { left: var(--x); bottom: var(--y); translate: -50% 0; height: var(--h); }
+</style></head><body><div class="stage">
+<div data-top></div>
+<div class="hero"><h1 data-logo></h1><p class="tagline">Grow a food chain, then keep it fed.</p></div>
+<div class="field" aria-hidden="true">
+  <div class="hill"></div>
+  <div class="eye"><div class="white"><div class="iris"></div></div>
+    <svg class="lash" viewBox="0 0 210 100" preserveAspectRatio="none"><path d="M4 50 Q105 -46 206 50 Q105 146 4 50Z"/></svg></div>
+  <img class="crit" src="../../img/elephant-calm.png" alt="" style="--x:63%;--y:50%;--h:30cqh">
+  <img class="crit" src="../../img/zebra-calm.png" alt="" style="--x:38%;--y:49%;--h:32cqh;--d:.8s">
+  <img class="crit" src="../../img/rabbit-pose.png" alt="" style="--x:10%;--y:18%;--h:13cqh;--d:1.4s">
+  <img class="crit" src="../../img/fox-pose.png" alt="" style="--x:90%;--y:18%;--h:13cqh;--d:2s">
+</div>
+<div data-controls="(it’s watching. it means well.)"></div>
+</div><script src="common.js"></script></body></html>

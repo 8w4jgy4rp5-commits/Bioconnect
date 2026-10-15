@@ -64,6 +64,7 @@ Web版を先に育てる。ひとつの盤面で食物連鎖と爽快な合体�
 - `img/`: ゲーム用画像。原画があれば `img/ref/` も保存対象。
 - `concepts/animal-art-v1/`: 動物の原画・候補・比較画像・書き出し道具。
 - `concepts/start-screen-v1/`: タイトル画面の比較案。
+- `concepts/start-screen-v2/`: Cozy Eldritch のオープニング10案。H（月の影絵）を2026-10-13にゲームへ採用。
 - `concepts/imported-from-chatgpt/`: 別の作業フォルダにあったシカ・シマウマ・クマの画像と生成時のメモ。
 - `ASSETS.md`: 全画像の所在と、採用状況を読むための注意。
 - `shared/`: 元のプラットフォームから引き継いだ保存同期・フッター・言語設定。外のフォルダには依存しない。

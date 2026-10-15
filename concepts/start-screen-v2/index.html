@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bioconnect — opening concepts v2</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap">
+<style>
+:root { --ink:#ece4c8; --mute:#a39c7c; --moss:#a8c66c; --deep:#10150e; --line:rgba(236,228,200,.14); }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 32px 16px 56px; background: linear-gradient(#141b18, #0c0f0a); color: var(--ink); font-family: "IM Fell English", Georgia, serif; }
+header { max-width: 900px; margin: 0 auto 28px; text-align: center; }
+h1 { margin: 0 0 8px; font-family: "IM Fell English SC", Georgia, serif; font-weight: 400; font-size: 1.8rem; }
+header p { margin: 0; color: var(--mute); font-size: .95rem; line-height: 1.6; }
+.grid { display: flex; flex-wrap: wrap; gap: 32px 26px; justify-content: center; max-width: 1900px; margin: 0 auto; }
+.item { width: 320px; }
+.frame { width: 320px; height: 640px; padding: 9px; border-radius: 36px; background: #2c3329; box-shadow: 0 20px 44px rgba(0,0,0,.5); }
+.frame iframe { width: 100%; height: 100%; border: 0; border-radius: 28px; display: block; background: var(--deep); }
+h2 { margin: 14px 0 4px; font-family: "IM Fell English SC", Georgia, serif; font-weight: 400; font-size: 1.15rem; }
+h2 b { color: var(--moss); font-weight: 400; }
+.item p { margin: 0 0 8px; color: var(--mute); font-size: .88rem; line-height: 1.55; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 8px; }
+.tag { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--mute); font-family: "Special Elite", monospace; font-size: .64rem; }
+.item a { color: var(--moss); font-size: .82rem; }
+@media (max-width: 360px) { .item, .frame { width: 100%; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Bioconnect — opening screen, ten directions</h1>
+  <p>All ten keep the Cozy Eldritch look: the moss-and-moon palette, the cream old-book wordmark with its sprout, the game's own animal paintings, the moss PLAY, and the meadow that watches you a little. Only the staging changes.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+// Fixed list written here; built with DOM calls, not HTML strings.
+const items = [
+  ['a-frontispiece', 'A.', 'Frontispiece', ['Old book', 'Calm', 'Closest to now'], 'The title page of an old naturalist\'s book. Brass rules, and the meadow as an engraved plate in an arched window. The safest step up from today.'],
+  ['b-eye', 'B.', 'The Eye Opens', ['Funny', 'Memorable', 'Animated'], 'The hill is a giant eye. The herd stands on its eyelid while it blinks and glances around. "(it\'s watching. it means well.)"'],
+  ['c-cabinet', 'C.', 'Specimen Cabinet', ['Teaches the chain', 'Matches the store'], 'The store\'s specimen box as the whole title: twelve pinned compartments from sprout to elephant. The last one is still a black shadow.'],
+  ['d-moon-ring', 'D.', 'Chain Around the Moon', ['Teaches the goal', 'Symbol-like'], 'The food chain walks once around the moon, getting bigger as it goes: the sprout at the bottom, the elephant nearly home.'],
+  ['e-board-eyes', 'E.', 'Board of Eyes', ['Uses the board', 'No new art'], 'The real board, tilted into the dark. Animals sit in some squares; eyes blink in the empty ones. Closest to what you play.'],
+  ['f-curtain', 'F.', 'Tentacle Curtain', ['Theatrical', 'Big elephant'], 'A small night theatre. Plum tentacles hold back the curtains and a spotlight lands on the herd. "Tonight only · and every night."'],
+  ['g-field-journal', 'G.', 'Field Journal', ['Light paper', 'Deadpan notes'], 'The naturalist\'s notebook: taped photos and typed notes ("two of a kind become something larger. do not ask how."). The one light-coloured option.'],
+  ['h-silhouette', 'H.', 'Moon Silhouette', ['Poster', 'Minimal'], 'One huge moon with the herd cut out in black against it, and uninvited eyes glowing in the grass. Strongest as a poster or store image.'],
+  ['i-underground', 'I.', 'Underground', ['Story', 'Two layers'], 'A slice through the meadow: the herd above, roots and stones below, the title carved in the soil, and something plum asleep down there.'],
+  ['j-tarot', 'J.', 'Tarot Card', ['Mystic', 'XII = 12 animals'], 'One card, drawn for you: XII, The Meadow (twelve steps from sprout to elephant). It floats and tilts in candlelight.']
+];
+const grid = document.getElementById('grid');
+for (const [file, letter, name, tags, text] of items) {
+  const item = document.createElement('div'); item.className = 'item';
+  const frame = document.createElement('div'); frame.className = 'frame';
+  const ifr = document.createElement('iframe'); ifr.src = file + '.html'; ifr.title = letter + ' ' + name; ifr.loading = 'lazy';
+  frame.appendChild(ifr); item.appendChild(frame);
+  const h = document.createElement('h2'); const b = document.createElement('b'); b.textContent = letter + ' ';
+  h.append(b, name); item.appendChild(h);
+  const t = document.createElement('div'); t.className = 'tags';
+  for (const s of tags) { const sp = document.createElement('span'); sp.className = 'tag'; sp.textContent = s; t.appendChild(sp); }
+  item.appendChild(t);
+  const p = document.createElement('p'); p.textContent = text; item.appendChild(p);
+  const a = document.createElement('a'); a.href = file + '.html'; a.textContent = 'Open full screen'; item.appendChild(a);
+  grid.appendChild(item);
+}
+</script>
+</body>
+</html>
