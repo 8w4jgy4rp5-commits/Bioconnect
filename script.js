@@ -559,13 +559,20 @@ const HAND_BY_STAGE = [
 // and that last figure is on purpose: the elephant stays a
 // feat few runs ever reach, and stones are not slowed to get there.
 // Changing the shown scale is why RULES_VERSION moved.
+// THE HAND STOPS AT THE DEER. (2026-10-16, rules 22)
+//
+// Dealing zebras and buffalo made the late game suddenly easy: the hand
+// handed out what the player used to have to grow. Their shares are now 0
+// and their 40% falls to sprouts and grass. `node sim.js 300`: casual lion
+// 67% -> 8%, tiger 42% -> 0%; thinks-every-3 lion 91% -> 0%. If that proves
+// too hard, HAND_ZEBRA_LATE = 20 alone measured casual lion 42%, tiger 2%.
 const HAND_RABBIT_WINTER = 20;
 const HAND_FOX_WINTER = 10;
 const HAND_RABBIT_LATE = 10;
 const HAND_FOX_LATE = 12;
 const HAND_DEER_LATE = 18;
-const HAND_ZEBRA_LATE = 20;
-const HAND_BUFFALO_LATE = 20;
+const HAND_ZEBRA_LATE = 0;
+const HAND_BUFFALO_LATE = 0;
 // GRASS NEVER RUNS OUT. (2026-10-06, rules 20 kept: the score scale barely moved)
 //
 // At 95% animals the late hand dealt grass about one tile in thirty, and
@@ -633,7 +640,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 21;
+const RULES_VERSION = 22;
 
 // ---------- WHAT A SCORE MEANS ----------
 //

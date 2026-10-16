@@ -406,7 +406,7 @@ function dealAt(ticks, top) {
   }
   return n;
 }
-let sameAcrossDiscoveries = true, neverAboveBuffalo = true, foxCapUntilLate = true, zebraWidens = true;
+let sameAcrossDiscoveries = true, neverAboveDeer = true, foxCapUntilLate = true, zebraWidens = true;
 const FIRST_WINTER = (X.SEASONS - 1) * X.SEASON_LENGTH;
 const ZEBRA = X.LADDER.indexOf('zebra');
 for (const ticks of [0, 24, 25, 50, 75, 175, 10000]) {
@@ -417,14 +417,14 @@ for (const ticks of [0, 24, 25, 50, 75, 175, 10000]) {
     if (X.LADDER.indexOf(top) < ZEBRA && JSON.stringify(d) !== ref) sameAcrossDiscoveries = false;
     if (X.LADDER.indexOf(top) >= ZEBRA && JSON.stringify(d) !== wide) zebraWidens = false;
     for (const k in d) {
-      if (X.LADDER.indexOf(k) > X.LADDER.indexOf('buffalo')) neverAboveBuffalo = false;
+      if (X.LADDER.indexOf(k) > X.LADDER.indexOf('deer')) neverAboveDeer = false;
       if (ticks <= FIRST_WINTER && X.LADDER.indexOf(top) < ZEBRA && X.LADDER.indexOf(k) > X.LADDER.indexOf('fox')) foxCapUntilLate = false;
     }
   }
 }
 ok('below the zebra, discoveries never change the deal — only the clock does', sameAcrossDiscoveries);
 ok('from the zebra up, the hand deals at least the first winter row', zebraWidens);
-ok('the hand never holds anything above the buffalo', neverAboveBuffalo);
+ok('the hand never holds anything above the deer', neverAboveDeer);
 ok('nothing above the fox is dealt until the winters deepen', foxCapUntilLate);
 const spring = dealAt(0, 'sprout'), summer = dealAt(25, 'sprout'), autumn = dealAt(50, 'sprout'), winter = dealAt(FIRST_WINTER, 'sprout'), late = dealAt(10000, 'elephant');
 ok('spring deals plants only, half and half',
@@ -434,8 +434,8 @@ ok('autumn adds the first foxes', autumn.rabbit === 150 && autumn.fox === 50, JS
 ok('the first winter deals a fifth rabbits and a tenth foxes', winter.rabbit === 200 && winter.fox === 100 && !winter.deer, JSON.stringify(winter));
 ok('the late winters deal the late rabbit, fox, deer, zebra and buffalo shares',
    late.rabbit === X.HAND_RABBIT_LATE * 10 && late.fox === X.HAND_FOX_LATE * 10 &&
-   late.deer === X.HAND_DEER_LATE * 10 && late.zebra === X.HAND_ZEBRA_LATE * 10 &&
-   late.buffalo === X.HAND_BUFFALO_LATE * 10, JSON.stringify(late));
+   late.deer === X.HAND_DEER_LATE * 10 && (late.zebra || 0) === X.HAND_ZEBRA_LATE * 10 &&
+   (late.buffalo || 0) === X.HAND_BUFFALO_LATE * 10, JSON.stringify(late));
 ok('grass never runs out: every winter deal is at least the grass floor',
    winter.grass >= X.HAND_GRASS_MIN * 10 && late.grass >= X.HAND_GRASS_MIN * 10, winter.grass + ' / ' + late.grass);
 board([]); S.topKind = 'elephant'; S.ticks = 10000; S.over = false;
@@ -443,7 +443,7 @@ S.stock = ['sprout', 'grass', 'sprout']; S.next = 'grass';
 X.ctx.Math.random = () => 0.99;
 X.ctx.placeTile(at(2, 2));
 ok('late placement refills from the late deal and keeps the queue order',
-   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'buffalo', S.stock.join(',') + ' / ' + S.next);
+   S.stock.join(',') === 'grass,sprout,grass' && S.next === 'deer', S.stock.join(',') + ' / ' + S.next);
 S.stock = []; S.refill = 0; S.next = 'sprout'; S.ticks = 0; S.topKind = 'sprout';
 X.ctx.Math.random = () => 0.99;
 X.ctx.refillHand();
@@ -496,10 +496,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 21);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 22);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 21, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 22, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;
