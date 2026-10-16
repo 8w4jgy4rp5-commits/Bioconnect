@@ -2271,6 +2271,7 @@ body.is-celebrating { overflow: hidden; }
 .revive-hush { margin: -3px 0 2px; font-size: 11px; text-align: center; color: var(--ink-soft); }
 .gameover-card .go-share { display: flex; align-items: center; justify-content: center; gap: 7px; margin: 8px auto 2px; min-height: 40px; padding: 8px 18px; }
 .go-share-x { width: 15px; height: 15px; flex: none; }
+.gameover-card .go-share-hint { margin: 4px auto 0; max-width: 260px; font-size: 12px; line-height: 1.4; opacity: .8; }
 .gameover-card .go-again { background: none; box-shadow: none; color: var(--ink-soft); font-style: italic; min-height: 36px; }
 @media (prefers-reduced-motion: reduce) { .revive-btn--locked .revive-chains { animation: none !important; } }
 #shopBtn[hidden], #startShopBtn[hidden] { display: none !important; }

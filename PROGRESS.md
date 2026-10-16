@@ -1784,3 +1784,10 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 一時停止画面のボタンと一時停止ボタンに、コインブロック風の2音（B5→E6の矩形波）を合成で追加（audio-synth.js coin()、audio.js BioAudio.coin()）。voicesに登録しないので、一時停止やニューゲームのresetで自分の音が切れない。一時停止中でも鳴る。
 - タイトル・カウントダウン・ゲームオーバー・復活待ち・ゾウ祝い・メニュー/ガイド表示中は開かない。pop.cssとeldritch.cssの両方にスタイル。ルール変更なし。stamp更新。
 - 検証: rules.test.js 267成功。Chromeで開く→No→Resume→Yesの流れ、Yes後にrunIdが変わりカウントダウン後に再開、No後は同じrun、コンソールエラー0。test/monetization.test.cjs の1件失敗（0 !== 9000）は変更前から。音の聴感・スマホ実機は本人確認待ち。
+
+## 2026-10-16 — Xシェアに結果画像カード＋OG画像差し替え
+- 不具合: Xのリンクカードが CobbleWorks の画像だった（index.html の og:image が旧プラットフォームの og-image.jpg を指していた）。og-image.jpg（1200×630、B案デザイン、ぞう入り盤面）を追加し og:image / twitter:image を差し替え。Xはカード画像をキャッシュするので反映に時間がかかる場合あり。
+- 結果カード: script.js に drawShareCard を追加。A案（正方形・盤面主役）とB案（横長・数字主役）を試作し、本人がB案を選択（CARD_LAYOUT='b'、A案は1行で戻せる）。盤面はゲームオーバー時ではなく「最高位の動物が生まれた瞬間」（state.peakCells）。順位は全体ランキングが無いので自分の記録内の順位（New personal best / My #2 of 3 runs）。
+- 共有: スマホ（pointer: coarse）は共有シートで画像＋文、PCは画像をクリップボードにコピーしてXの投稿画面を開き「Ctrl+Vで貼って」と表示。画像はゲームオーバー演出中に先に作る（タップ後の待ちで共有/コピーが拒否されないため）。paintAnimal に任意の size 引数を追加。
+- 検証: rules.test.js 成功。Chromeで endRun→画像生成→Share でポップアップ・clipboard(image/png)・案内表示を確認、ページ例外0。スマホ実機の共有シートとXアプリでの画像添付は未確認。monetization.test.cjs の1件失敗（0 !== 9000）は変更前から。
+- 未決: 「ぞうを作れた人の割合」をカードに載せたい要望あり。実プレイヤーの集計データが無い（sim.js はボット）。

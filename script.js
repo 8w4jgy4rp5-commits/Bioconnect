@@ -1300,6 +1300,7 @@ function newGame() {
   state.topKind = 'sprout';
   state.seen = {};
   state.elephants = 0;
+  state.peakCells = null;
   runStartSeals = new Set(earnedSeals(currentCounts()));
   if (el.sealToasts) el.sealToasts.textContent = '';
   closeCelebration(true);
@@ -1333,6 +1334,7 @@ function placeTile(i) {
 
   cancelChain();
   const dealtKind = state.stock.shift();
+  const topBefore = state.topKind;
   state.cells[i] = makeTile(dealtKind);
   // A rabbit or fox from the hand (rules 18) is a discovery too, so the
   // growth panel and the welcome card do not wait for it to be merged.
@@ -1342,6 +1344,9 @@ function placeTile(i) {
   state.stock.push(state.next);
   state.next = rollHand();
   const grew = growFrom(i);
+  // the share card shows the meadow at the moment it reached its highest
+  // animal, not the stone-choked one that ended the run
+  if (state.topKind !== topBefore) state.peakCells = state.cells.map(function (c) { return c && Object.assign({}, c); });
   const before = state.score;
   scoreGrowth(grew);
   // What the player is told is what the scale actually moved. Late in a
@@ -1828,6 +1833,8 @@ function endRun() {
   el.goScore.textContent = scoreLabel(state.score, state.revived);
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
+  shareHint('');
+  prepareShareCard();
   if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
   // The music stops, a sad horn sags, and "Game Over" wilts over the
   // board before the score card comes up.
@@ -2477,10 +2484,11 @@ function loadSprites() {
 // Paints one animal, still, into a canvas sized `px` on a side.
 // `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
 // wears its other face, so the tile reads before the meter does.
-function paintAnimal(canvas, type, fed, motion) {
+function paintAnimal(canvas, type, fed, motion, size) {
   const rig = RIG[type];
-  const dpr = Math.min(3, window.devicePixelRatio || 1);
-  const px = canvas.clientWidth || 44;
+  // `size` paints off-screen at an exact pixel size (the share card)
+  const dpr = size ? 1 : Math.min(3, window.devicePixelRatio || 1);
+  const px = size || canvas.clientWidth || 44;
   // Do not reset the backing store for every gesture frame.
   const backing = Math.round(px * dpr);
   if (canvas.width !== backing || canvas.height !== backing) {
@@ -3817,6 +3825,273 @@ function shareText() {
   if (state.elephants > 0) lines.push('🐘 An elephant came to my meadow!');
   return lines.join('\n') + '\n\nhttps://bioconnectpazzle.com/';
 }
+
+// ---------- Share card ----------
+// An X post link can only carry text, and the link's own preview is one
+// fixed picture for everybody. So the run's picture travels as a file:
+// the share sheet on a phone, the clipboard on a desktop. It shows the
+// meadow at its best moment (peakCells), not the stone-choked one that
+// ended the run.
+const CARD_LAYOUTS = { a: { w: 1080, h: 1080 }, b: { w: 1200, h: 675 } };
+const CARD_LAYOUT = 'b';
+const CARD_INK = '#ece4c8', CARD_MUTE = '#a39c7c', CARD_MOSS = '#a8c66c', CARD_DEEP = '#10150e';
+const CARD_CAPS = '"IM Fell English SC", "IM Fell English", Georgia, serif';
+const CARD_SERIF = '"IM Fell English", Georgia, serif';
+const CARD_TYPE = '"Special Elite", "Courier New", monospace';
+let cardSymbols = null;
+let cardBlob = null;
+
+// The inline <symbol>s, turned into images a canvas can draw.
+function loadCardSymbols() {
+  if (cardSymbols) return cardSymbols;
+  const kinds = ['sprout', 'grass'].concat(BLOCKERS, LADDER.slice(2));
+  cardSymbols = Promise.all(kinds.map(function (kind) {
+    const sym = document.getElementById('art' + kind[0].toUpperCase() + kind.slice(1));
+    if (!sym) return null;
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + sym.getAttribute('viewBox') +
+      '" width="240" height="240">' + sym.innerHTML + '</svg>';
+    return new Promise(function (done) {
+      const img = new Image();
+      img.onload = function () { done([kind, img]); };
+      img.onerror = function () { done(null); };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    });
+  })).then(function (list) { return Object.fromEntries(list.filter(Boolean)); });
+  return cardSymbols;
+}
+
+function cardFonts() {
+  if (!document.fonts || !document.fonts.load) return Promise.resolve();
+  return Promise.all(['64px ' + CARD_CAPS, 'italic 30px ' + CARD_SERIF, '22px ' + CARD_TYPE].map(function (f) {
+    return document.fonts.load(f).catch(function () {});
+  }));
+}
+
+function cardArt(ctx, symbols, kind, x, y, size) {
+  if (isAnimal(kind) && spritesReady && spritesFor[kind]) {
+    const c = document.createElement('canvas');
+    paintAnimal(c, kind, 1, null, Math.round(size));
+    ctx.drawImage(c, x, y, size, size);
+    return;
+  }
+  if (!symbols[kind]) return;
+  ctx.save();
+  if (kind === 'scrub' || kind === 'stone') ctx.filter = 'grayscale(.85) brightness(.38)';
+  if (kind === 'bones') ctx.filter = 'grayscale(.7) brightness(.55) contrast(1.3)';
+  ctx.drawImage(symbols[kind], x, y, size, size);
+  ctx.restore();
+}
+
+function cardCellFill(ctx, x, y, w, h, top, bottom) {
+  const g = ctx.createRadialGradient(x + w / 2, y + h * .6, 0, x + w / 2, y + h * .6, Math.max(w, h) * .75);
+  g.addColorStop(0, top);
+  g.addColorStop(1, bottom);
+  return g;
+}
+
+function cardBoard(ctx, symbols, cells, x, y, size) {
+  const pad = size * .025, gap = size * .019;
+  const cell = (size - pad * 2 - gap * (SIZE - 1)) / SIZE;
+  ctx.save();
+  ctx.shadowColor = 'rgba(168, 198, 108, .18)';
+  ctx.shadowBlur = size * .08;
+  ctx.fillStyle = 'rgba(12, 16, 10, .92)';
+  ctx.beginPath(); ctx.roundRect(x, y, size, size, size * .045); ctx.fill();
+  ctx.restore();
+  ctx.strokeStyle = 'rgba(236, 228, 200, .18)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(x, y, size, size, size * .045); ctx.stroke();
+  for (let i = 0; i < CELLS; i++) {
+    if (isShadow(cells, i)) continue;
+    const c = cells[i];
+    const side = c ? bigSide(c.kind) : 1;
+    const cx = x + pad + (i % SIZE) * (cell + gap);
+    const cy = y + pad + ((i / SIZE) | 0) * (cell + gap);
+    const w = cell * side + gap * (side - 1);
+    const dead = c && isBlocker(c.kind);
+    ctx.save();
+    if (side > 1) { ctx.shadowColor = 'rgba(0, 0, 0, .5)'; ctx.shadowBlur = cell * .25; ctx.shadowOffsetY = cell * .08; }
+    ctx.fillStyle = dead ? '#22281c' : c ? cardCellFill(ctx, cx, cy, w, w, '#2f3d25', '#1c2416') : cardCellFill(ctx, cx, cy, w, w, '#26321d', '#171e12');
+    ctx.beginPath(); ctx.roundRect(cx, cy, w, w, cell * .18); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = 'rgba(236, 228, 200, ' + (side > 1 ? .18 : c ? .12 : .07) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(cx, cy, w, w, cell * .18); ctx.stroke();
+    if (c) {
+      const inset = w * (dead ? .07 : .05);
+      cardArt(ctx, symbols, c.kind, cx + inset, cy + inset, w - inset * 2);
+    }
+  }
+}
+
+// Where this run sits among the player's own recent runs. There is no
+// global table, so the card never pretends there is one.
+function runStanding() {
+  const runs = recordHistory.filter(function (r) { return Number(r.rules) === RULES_VERSION; });
+  if (runs.length <= 1) return 'My first meadow';
+  const place = 1 + runs.filter(function (r) { return r.runId !== state.runId && r.score > state.score; }).length;
+  if (place === 1) return 'New personal best';
+  return 'My #' + place + ' of ' + runs.length + ' runs';
+}
+
+function cardText(ctx, text, x, y, font, color, align) {
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.textAlign = align || 'left';
+  ctx.fillText(text, x, y);
+}
+
+function cardMeter(ctx, x, y, w, h, pct) {
+  ctx.fillStyle = 'rgba(236, 228, 200, .12)';
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2); ctx.fill();
+  ctx.fillStyle = CARD_MOSS;
+  ctx.beginPath(); ctx.roundRect(x, y, Math.max(h, w * pct), h, h / 2); ctx.fill();
+}
+
+function cardBackground(ctx, w, h) {
+  const base = ctx.createLinearGradient(0, 0, 0, h);
+  base.addColorStop(0, '#1b2418');
+  base.addColorStop(1, CARD_DEEP);
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, w, h);
+  const glow = ctx.createRadialGradient(w / 2, h * .46, 0, w / 2, h * .46, w * .6);
+  glow.addColorStop(0, 'rgba(168, 198, 108, .16)');
+  glow.addColorStop(1, 'rgba(168, 198, 108, 0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+  const plum = ctx.createRadialGradient(w / 2, 0, 0, w / 2, 0, w * .7);
+  plum.addColorStop(0, 'rgba(141, 104, 150, .22)');
+  plum.addColorStop(1, 'rgba(141, 104, 150, 0)');
+  ctx.fillStyle = plum;
+  ctx.fillRect(0, 0, w, h);
+}
+
+function cardLogo(ctx, symbols, x, y, size) {
+  if (symbols.sprout) ctx.drawImage(symbols.sprout, x - size * .2, y - size * 1.05, size * 1.4, size * 1.4);
+  cardText(ctx, 'Bioconnect', x + size * 1.05, y, size + 'px ' + CARD_CAPS, CARD_INK);
+}
+
+function cardPill(ctx, text, x, y, font, align) {
+  ctx.font = font;
+  const tw = ctx.measureText(text).width, h = parseInt(font.match(/(\d+)px/)[1], 10) * 1.9;
+  const w = tw + h * .9;
+  const left = align === 'right' ? x - w : align === 'center' ? x - w / 2 : x;
+  ctx.fillStyle = 'rgba(168, 198, 108, .14)';
+  ctx.strokeStyle = 'rgba(168, 198, 108, .55)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(left, y - h * .68, w, h, h / 2); ctx.fill(); ctx.stroke();
+  cardText(ctx, text, left + w / 2, y, font, CARD_MOSS, 'center');
+}
+
+// A: the meadow is the picture, the numbers sit in a strip under it.
+function drawCardA(ctx, symbols, d) {
+  const W = 1080;
+  cardLogo(ctx, symbols, 62, 92, 46);
+  cardPill(ctx, d.season, W - 62, 86, '26px ' + CARD_TYPE, 'right');
+  cardBoard(ctx, symbols, d.cells, 170, 132, 740);
+  const top = 904;
+  ctx.fillStyle = 'rgba(31, 41, 24, .9)';
+  ctx.strokeStyle = 'rgba(236, 228, 200, .16)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(62, top, W - 124, 128, 22); ctx.fill(); ctx.stroke();
+  const col = (W - 124) / 3;
+  for (let n = 1; n < 3; n++) {
+    ctx.fillStyle = 'rgba(236, 228, 200, .12)';
+    ctx.fillRect(62 + col * n, top + 22, 2, 84);
+  }
+  const mid = function (n) { return 62 + col * n + col / 2; };
+  cardText(ctx, 'SCORE', mid(0), top + 40, '20px ' + CARD_TYPE, CARD_MUTE, 'center');
+  cardText(ctx, d.score, mid(0), top + 100, '58px ' + CARD_CAPS, CARD_INK, 'center');
+  cardText(ctx, 'LEVEL ' + d.level.level, mid(1), top + 40, '20px ' + CARD_TYPE, CARD_MUTE, 'center');
+  cardText(ctx, d.level.name, mid(1), top + 84, 'italic 36px ' + CARD_SERIF, CARD_INK, 'center');
+  cardMeter(ctx, mid(1) - 110, top + 100, 220, 10, d.level.pct);
+  cardText(ctx, 'RANK', mid(2), top + 40, '20px ' + CARD_TYPE, CARD_MUTE, 'center');
+  cardText(ctx, d.standing, mid(2), top + 92, 'italic 32px ' + CARD_SERIF, CARD_MOSS, 'center');
+  if (d.elephants) cardPill(ctx, d.elephants > 1 ? d.elephants + ' elephants came!' : 'An elephant came!', W / 2 + 60, 86, 'italic 28px ' + CARD_SERIF, 'center');
+  cardText(ctx, 'bioconnectpazzle.com', W / 2, 1064, '20px ' + CARD_TYPE, CARD_MUTE, 'center');
+}
+
+// B: the numbers lead on the left, the meadow backs them up on the right.
+function drawCardB(ctx, symbols, d) {
+  const x = 64;
+  cardLogo(ctx, symbols, x, 92, 40);
+  cardPill(ctx, d.season, x, 152, '22px ' + CARD_TYPE);
+  cardText(ctx, 'SCORE', x, 222, '20px ' + CARD_TYPE, CARD_MUTE);
+  cardText(ctx, d.score, x - 4, 322, '112px ' + CARD_CAPS, CARD_INK);
+  cardText(ctx, 'Level ' + d.level.level + ' · ' + d.level.name, x, 384, 'italic 36px ' + CARD_SERIF, CARD_INK);
+  cardMeter(ctx, x, 404, 420, 10, d.level.pct);
+  cardText(ctx, d.standing, x, 466, 'italic 32px ' + CARD_SERIF, CARD_MOSS);
+  if (d.elephants) {
+    const by = 498;
+    ctx.fillStyle = 'rgba(168, 198, 108, .12)';
+    ctx.strokeStyle = 'rgba(168, 198, 108, .5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(x, by, 440, 92, 20); ctx.fill(); ctx.stroke();
+    cardArt(ctx, symbols, 'elephant', x + 8, by - 4, 96);
+    cardText(ctx, d.elephants > 1 ? d.elephants + ' elephants came' : 'An elephant came', x + 116, by + 40, 'italic 30px ' + CARD_SERIF, CARD_INK);
+    cardText(ctx, 'to my meadow', x + 116, by + 74, 'italic 30px ' + CARD_SERIF, CARD_INK);
+  }
+  cardText(ctx, 'bioconnectpazzle.com', x, 634, '20px ' + CARD_TYPE, CARD_MUTE);
+  cardBoard(ctx, symbols, d.cells, 580, 58, 560);
+}
+
+async function drawShareCard(layout) {
+  const which = CARD_LAYOUTS[layout] ? layout : CARD_LAYOUT;
+  const size = CARD_LAYOUTS[which];
+  const [symbols] = await Promise.all([loadCardSymbols(), cardFonts()]);
+  const canvas = document.createElement('canvas');
+  canvas.width = size.w;
+  canvas.height = size.h;
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'alphabetic';
+  cardBackground(ctx, size.w, size.h);
+  const d = {
+    cells: state.peakCells || state.cells,
+    score: scoreLabel(state.score, state.revived).replace(' 💎', ''),
+    level: levelAt(displayScore(state.score)),
+    season: seasonLabel(),
+    standing: runStanding(),
+    elephants: state.elephants
+  };
+  (which === 'a' ? drawCardA : drawCardB)(ctx, symbols, d);
+  return canvas;
+}
+
+// Made while "Game Over" is still on screen, so the share tap can hand
+// the file over at once: share sheets and the clipboard both refuse
+// anything that waits too long after the tap.
+function prepareShareCard() {
+  cardBlob = null;
+  const run = state.runId;
+  drawShareCard().then(function (canvas) {
+    canvas.toBlob(function (blob) { if (state.runId === run && state.over) cardBlob = blob; }, 'image/png');
+  }).catch(function () {});
+}
+
+function shareHint(text) {
+  if (!el.goShareHint) return;
+  el.goShareHint.textContent = text;
+  el.goShareHint.hidden = !text;
+}
+
+function shareRun() {
+  const text = shareText();
+  const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
+  const file = cardBlob && typeof File === 'function' ? new File([cardBlob], 'bioconnect.png', { type: 'image/png' }) : null;
+  const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+  if (file && touch && navigator.canShare && navigator.canShare({ files: [file] })) {
+    navigator.share({ files: [file], text: text }).catch(function (e) {
+      if (e && e.name !== 'AbortError') window.open(intent, '_blank', 'noopener');
+    });
+    return;
+  }
+  if (cardBlob && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
+    navigator.clipboard.write([new ClipboardItem({ 'image/png': cardBlob })]).then(function () {
+      shareHint('Picture copied. Paste it into your post (' + (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl') + '+V).');
+    }).catch(function () { shareHint(''); });
+  }
+  window.open(intent, '_blank', 'noopener');
+}
 function scoreLabel(raw, revived) { return displayScore(raw).toLocaleString() + (revived ? ' 💎' : ''); }
 function reviveRun() {
   if (!state.over || state.revived) return false;
@@ -3918,7 +4193,7 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goShare', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goShare', 'goShareHint', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
     'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
     'startHowBtn', 'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
@@ -4050,9 +4325,7 @@ async function init() {
   // a new game that actually started takes the menu down with it
   if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
   el.goAgain.addEventListener('click', function () { disarmNew(); if (window.BioEconomy) window.BioEconomy.newGame(); else replay(); });
-  el.goShare.addEventListener('click', function () {
-    window.open('https://x.com/intent/post?text=' + encodeURIComponent(shareText()), '_blank', 'noopener');
-  });
+  el.goShare.addEventListener('click', shareRun);
 
   // the little reference row under the board
   for (const node of document.querySelectorAll('.tile--mini')) {
