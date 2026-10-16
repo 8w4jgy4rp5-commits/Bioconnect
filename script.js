@@ -3822,8 +3822,42 @@ function shareText() {
     'The meadow filled in ' + seasonLabel(),
     'Score ' + shown.toLocaleString('en-US') + ' · Level ' + lv.level + ' ' + lv.name
   ];
-  if (state.elephants > 0) lines.push('🐘 An elephant came to my meadow!');
+  if (state.elephants > 0) {
+    const rare = rarityLine();
+    lines.push('🐘 An elephant came to my meadow!' + (rare ? ' (' + rare.replace(/ of meadows raise one$/, '').toLowerCase() + ' do)' : ''));
+  }
   return lines.join('\n') + '\n\nhttps://bioconnectpazzle.com/';
+}
+
+// ---------- How rare is an elephant ----------
+// Real players, counted anonymously on the server (run_outcomes). Below
+// RARITY_MIN_RUNS the number is noise, so nothing is said at all. Any
+// failure (offline, SQL not applied yet) also just says nothing.
+const RARITY_MIN_RUNS = 200;
+let elephantRarity = null;
+function outcomeClient() { return typeof supabaseClient !== 'undefined' ? supabaseClient : null; }
+function reportRunOutcome() {
+  const sb = outcomeClient();
+  if (!sb || !/^[0-9a-f-]{36}$/i.test(state.runId || '')) return Promise.resolve();
+  return Promise.resolve(sb.rpc('bioconnect_record_run', {
+    p_run: state.runId, p_rules: RULES_VERSION, p_elephant: state.elephants > 0, p_ticks: state.ticks
+  })).catch(function () {});
+}
+function loadElephantRarity() {
+  const sb = outcomeClient();
+  if (!sb) return Promise.resolve();
+  return Promise.resolve(sb.rpc('bioconnect_elephant_rate', { p_rules: RULES_VERSION })).then(function (res) {
+    const d = res && !res.error ? res.data : null;
+    if (d && d.runs >= RARITY_MIN_RUNS) elephantRarity = { runs: d.runs, elephants: d.elephants };
+  }).catch(function () {});
+}
+// '' when there is nothing honest to say, or when it would not be rare.
+function rarityLine() {
+  const r = elephantRarity;
+  if (!r || !r.runs || !r.elephants) return '';
+  const pct = r.elephants * 100 / r.runs;
+  if (pct >= 50) return '';
+  return pct < 1 ? 'Fewer than 1% of meadows raise one' : 'Only ' + Math.round(pct) + '% of meadows raise one';
 }
 
 // ---------- Share card ----------
@@ -4026,10 +4060,15 @@ function drawCardB(ctx, symbols, d) {
     ctx.fillStyle = 'rgba(168, 198, 108, .12)';
     ctx.strokeStyle = 'rgba(168, 198, 108, .5)';
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(x, by, 440, 92, 20); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(x, by, 470, 92, 20); ctx.fill(); ctx.stroke();
     cardArt(ctx, symbols, 'elephant', x + 8, by - 4, 96);
-    cardText(ctx, d.elephants > 1 ? d.elephants + ' elephants came' : 'An elephant came', x + 116, by + 40, 'italic 30px ' + CARD_SERIF, CARD_INK);
-    cardText(ctx, 'to my meadow', x + 116, by + 74, 'italic 30px ' + CARD_SERIF, CARD_INK);
+    if (d.rarity) {
+      cardText(ctx, d.elephants > 1 ? d.elephants + ' elephants came!' : 'An elephant came!', x + 116, by + 40, 'italic 30px ' + CARD_SERIF, CARD_INK);
+      cardText(ctx, d.rarity, x + 116, by + 72, '19px ' + CARD_TYPE, CARD_MOSS);
+    } else {
+      cardText(ctx, d.elephants > 1 ? d.elephants + ' elephants came' : 'An elephant came', x + 116, by + 40, 'italic 30px ' + CARD_SERIF, CARD_INK);
+      cardText(ctx, 'to my meadow', x + 116, by + 74, 'italic 30px ' + CARD_SERIF, CARD_INK);
+    }
   }
   cardText(ctx, 'bioconnectpazzle.com', x, 634, '20px ' + CARD_TYPE, CARD_MUTE);
   cardBoard(ctx, symbols, d.cells, 580, 58, 560);
@@ -4051,7 +4090,8 @@ async function drawShareCard(layout) {
     level: levelAt(displayScore(state.score)),
     season: seasonLabel(),
     standing: runStanding(),
-    elephants: state.elephants
+    elephants: state.elephants,
+    rarity: state.elephants ? rarityLine() : ''
   };
   (which === 'a' ? drawCardA : drawCardB)(ctx, symbols, d);
   return canvas;
@@ -4063,7 +4103,13 @@ async function drawShareCard(layout) {
 function prepareShareCard() {
   cardBlob = null;
   const run = state.runId;
-  drawShareCard().then(function (canvas) {
+  // The count includes this run, so report first. The rate only matters
+  // on an elephant card, and it may not hold up the picture for long.
+  const counted = reportRunOutcome();
+  const rarity = state.elephants ? counted.then(loadElephantRarity) : Promise.resolve();
+  Promise.race([rarity, new Promise(function (done) { setTimeout(done, 1500); })]).then(function () {
+    return drawShareCard();
+  }).then(function (canvas) {
     canvas.toBlob(function (blob) { if (state.runId === run && state.over) cardBlob = blob; }, 'image/png');
   }).catch(function () {});
 }

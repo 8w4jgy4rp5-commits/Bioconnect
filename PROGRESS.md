@@ -1791,3 +1791,11 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 共有: スマホ（pointer: coarse）は共有シートで画像＋文、PCは画像をクリップボードにコピーしてXの投稿画面を開き「Ctrl+Vで貼って」と表示。画像はゲームオーバー演出中に先に作る（タップ後の待ちで共有/コピーが拒否されないため）。paintAnimal に任意の size 引数を追加。
 - 検証: rules.test.js 成功。Chromeで endRun→画像生成→Share でポップアップ・clipboard(image/png)・案内表示を確認、ページ例外0。スマホ実機の共有シートとXアプリでの画像添付は未確認。monetization.test.cjs の1件失敗（0 !== 9000）は変更前から。
 - 未決: 「ぞうを作れた人の割合」をカードに載せたい要望あり。実プレイヤーの集計データが無い（sim.js はボット）。
+
+## 2026-10-16 — ぞうの希少さ（実プレイヤーの割合）をカードに
+- 本人要望: ぞうを作れた人の割合をカードに載せたい。sim.jsはボットなので使わず、実プレイの匿名集計を新設。
+- supabase/migrations/202610160001_run_outcomes.sql: bioconnect_private.run_outcomes（run_id, rules, elephant, ticks）。anonが呼べるのは bioconnect_record_run（復活で2回終わっても elephant は OR）と bioconnect_elephant_rate（runs/elephants の合計だけ、ticks<10は除外、rulesごと）。表は直接読めない。
+- script.js: 終了時に記録→ぞうがいれば割合を取得（最大1.5秒待ってカード作成）。200プレイ未満・50%以上・取得失敗では何も出さない。カードB案のぞう枠に「Only N% of meadows raise one」、X本文にも「(only N% do)」。
+- legal/privacy.html に匿名ゲーム統計を追記（施行日10/16）。
+- 検証: test/run-outcomes.test.cjs（pglite、npm testに追加）4件成功、rules.test.js成功、数字入りカードの描画をChromeで確認。
+- 本番SQL未適用: 本人がSupabaseのSQL Editorで上記migrationを実行する必要あり。未適用の間はカードに数字が出ないだけ。注意: 匿名呼び出しなので大量の偽記録で数字を歪めることは技術的に可能（遊びの統計として許容）。
