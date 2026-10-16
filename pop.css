@@ -325,6 +325,63 @@ body {
 .menu-card .level, .menu-card .chain { margin: 0 0 12px; border: 0; border-radius: 20px; background: var(--pop-white); box-shadow: 0 3px 0 rgba(30, 70, 110, .14); }
 .menu-card .app-footer { margin: 4px 0 0; color: var(--pop-mute); font-size: 12px; text-align: center; }
 
+/* ---------- pause ---------- */
+
+.pause-btn { flex: none; width: 50px; display: grid; place-items: center; padding: 0; cursor: pointer; }
+.pause-btn span, .pause-badge span { position: relative; display: block; width: 6px; height: 18px; margin-right: 10px; border-radius: 2px; background: var(--pop-ink); }
+.pause-btn span::after, .pause-badge span::after { content: ""; position: absolute; top: 0; left: 10px; width: 6px; height: 100%; border-radius: inherit; background: inherit; }
+.pause-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(30, 70, 110, .22); }
+.pause-btn:focus-visible { outline: 3px solid var(--pop-sun); outline-offset: 2px; }
+
+.pause-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(20, 45, 70, .5);
+}
+.pause-sheet[hidden], .pause-view[hidden] { display: none; }
+.pause-card {
+  width: min(100%, 320px);
+  padding: 22px 20px 20px;
+  border-radius: 28px;
+  background: linear-gradient(#e9f7ff, #f4fbe9);
+  box-shadow: 0 6px 0 rgba(30, 70, 110, .25), 0 18px 40px rgba(0, 0, 0, .22);
+  text-align: center;
+  font-family: var(--font);
+  animation: pause-pop .2s ease-out;
+}
+.pause-view { display: grid; gap: 10px; }
+/* the title wears a "?" block: sun yellow, riveted corners, the pause bars inside */
+.pause-badge {
+  justify-self: center;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-bottom: 2px;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 8px 8px, var(--pop-sun-d) 2.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 8px) 8px, var(--pop-sun-d) 2.5px, transparent 3px),
+    radial-gradient(circle at 8px calc(100% - 8px), var(--pop-sun-d) 2.5px, transparent 3px),
+    radial-gradient(circle at calc(100% - 8px) calc(100% - 8px), var(--pop-sun-d) 2.5px, transparent 3px),
+    var(--pop-sun);
+  box-shadow: 0 5px 0 var(--pop-sun-d);
+  animation: pause-bump .32s ease-out;
+}
+.pause-badge span { margin-right: 10px; background: #5a3b00; }
+.pause-title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: .02em; color: var(--pop-ink); }
+.pause-sub { margin: 0 0 6px; font-size: 14px; color: var(--pop-mute); }
+.pause-action { min-height: 52px; font-size: 17px; }
+.btn--danger { background: #ff7a6b; color: #fff; box-shadow: 0 5px 0 #c94a3d; }
+.btn--danger:active { box-shadow: 0 1px 0 #c94a3d; }
+@keyframes pause-pop { from { transform: scale(.88); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pause-bump { 0% { transform: translateY(0); } 40% { transform: translateY(-10px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .pause-card, .pause-badge { animation: none; } }
+
 /* ---------- the opening ---------- */
 
 .start-screen {

@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
-  <link rel="stylesheet" href="pop.css?v=caf4fa1f" />
-  <link rel="stylesheet" href="eldritch.css?v=40379e6f" />
+  <link rel="stylesheet" href="pop.css?v=f1e016c9" />
+  <link rel="stylesheet" href="eldritch.css?v=516895b4" />
   <!-- Cozy Eldritch is the standard look. ?skin=pop switches to the old
        pop look and remembers it in this browser; ?skin=eldritch switches
        back. Runs before first paint so the page never flashes the other look. -->
@@ -263,6 +263,7 @@
       <span class="season-next" id="seasonNext">Next challenge in 45s · Points &times;2</span>
       <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
     </div>
+    <button class="pop-chip pause-btn" id="pauseBtn" type="button" aria-label="Pause" aria-haspopup="dialog" aria-controls="pauseSheet"><span aria-hidden="true"></span></button>
     <button class="pop-chip menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-haspopup="dialog" aria-controls="menuSheet"><span aria-hidden="true"></span></button>
   </div>
 
@@ -393,6 +394,26 @@
   <footer class="app-footer">
     <p>Your best score is saved in this browser (and synced when you are logged in).</p>
   </footer>
+  </div>
+</div>
+
+<!-- Pause: stop the meadow on purpose, then carry on or start over.
+     Starting over asks once more, because it throws the run away. -->
+<div class="pause-sheet" id="pauseSheet" role="dialog" aria-modal="true" aria-labelledby="pauseTitle" hidden>
+  <div class="pause-card">
+    <div class="pause-view" id="pauseMain">
+      <span class="pause-badge" aria-hidden="true"><span></span></span>
+      <h2 class="pause-title" id="pauseTitle">Paused</h2>
+      <p class="pause-sub">The meadow will wait for you.</p>
+      <button class="btn btn--primary pause-action" id="pauseResume" type="button">Resume</button>
+      <button class="btn pause-action" id="pauseNew" type="button">New game</button>
+    </div>
+    <div class="pause-view" id="pauseConfirm" hidden>
+      <h2 class="pause-title" id="pauseConfirmTitle">Start over?</h2>
+      <p class="pause-sub">This meadow will be cleared and a new run begins.</p>
+      <button class="btn btn--danger pause-action" id="pauseYes" type="button">Yes, start over</button>
+      <button class="btn pause-action" id="pauseNo" type="button">No, go back</button>
+    </div>
   </div>
 </div>
 
@@ -566,11 +587,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="shared/supabase-config.js?v=da53bf22"></script>
 <script src="shared/app-sync.js?v=d012ffb0"></script>
-<script src="audio-synth.js?v=7e19ed62"></script>
-<script src="audio.js?v=d7bd3abc"></script>
+<script src="audio-synth.js?v=94db638f"></script>
+<script src="audio.js?v=b4c55994"></script>
 <script src="shared/monetization-config.js?v=14ea265e"></script>
 <script src="monetization.js?v=a668c156"></script>
-<script src="script.js?v=eed2afb0"></script>
+<script src="script.js?v=55505570"></script>
 <script src="watch.js?v=5a051aed"></script>
 <script src="skin.js?v=5406c35f"></script>
 <!-- cobbleworks:footer:start -->

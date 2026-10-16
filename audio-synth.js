@@ -434,6 +434,26 @@ window.BioSound = (() => {
       }
     }
 
+    // A bright two-note "ding-ding!" for menu buttons, like knocking a
+    // coin out of a block: a short low blip, then a held higher note.
+    // It is wired straight to the effects bus, outside `voices`, so a new
+    // game's reset or a pause cannot cut off the very sound that the
+    // button that caused it just made.
+    function coin(time = ctx.currentTime + .005) {
+      [[hz(83), time, .07], [hz(88), time + .07, .42]].forEach(([freq, start, duration]) => {
+        const source = ctx.createOscillator(), gain = ctx.createGain();
+        source.type = 'square';
+        source.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(.05, start + .004);
+        gain.gain.setValueAtTime(.05, start + Math.min(duration, .06));
+        gain.gain.exponentialRampToValueAtTime(.00001, start + duration);
+        source.connect(gain); gain.connect(effects);
+        source.onended = () => { source.disconnect(); gain.disconnect(); };
+        source.start(start); source.stop(start + duration + .02);
+      });
+    }
+
     function cancel(busName) {
       const bus = busName === 'music' ? music : busName === 'effects' ? effects : null;
       const now = ctx.currentTime;
@@ -449,7 +469,7 @@ window.BioSound = (() => {
       }
     }
 
-    return { musicBeat, effect, cancel, setEnsemble, instrumentPreview, setApplause, setCheer };
+    return { musicBeat, effect, coin, cancel, setEnsemble, instrumentPreview, setApplause, setCheer };
   }
   const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
   return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Tiptoe Hollow — Meadow Band' };

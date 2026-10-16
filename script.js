@@ -3701,8 +3701,50 @@ function closeMenu() {
   if (!menuOpen()) return;
   el.menuSheet.hidden = true;
   if (el.startScreen.hidden && el.howModal.hidden) document.body.classList.remove('is-modal');
-  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || counting);
+  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || pauseOpen() || counting);
   el.menuBtn.focus();
+}
+
+// The pause button stops the meadow without leaving the page. It only
+// opens mid-run: not over the title, the countdown, a finished board,
+// a revival that is waiting for its own Resume, or the elephant party.
+function coinSound() { if (window.BioAudio && window.BioAudio.coin) window.BioAudio.coin(); }
+function pauseOpen() { return !!el.pauseSheet && !el.pauseSheet.hidden; }
+function canPause() {
+  return !state.over && !state.revivalWait && !state.celebrating && !counting
+    && el.startScreen.hidden && el.howModal.hidden && !menuOpen() && !window.BioEconomy?.isBlocking();
+}
+function showPauseView(confirming) {
+  el.pauseMain.hidden = confirming;
+  el.pauseConfirm.hidden = !confirming;
+  el.pauseSheet.setAttribute('aria-labelledby', confirming ? 'pauseConfirmTitle' : 'pauseTitle');
+  (confirming ? el.pauseNo : el.pauseResume).focus();
+}
+function openPause() {
+  if (pauseOpen() || !canPause()) return;
+  el.pauseSheet.hidden = false;
+  document.body.classList.add('is-modal');
+  setPaused(true);
+  coinSound();
+  showPauseView(false);
+}
+function closePause() {
+  if (!pauseOpen()) return;
+  el.pauseSheet.hidden = true;
+  document.body.classList.remove('is-modal');
+  coinSound();
+  resumeIfAllowed();
+  el.pauseBtn.focus();
+}
+function startOverFromPause() {
+  el.pauseSheet.hidden = true;
+  document.body.classList.remove('is-modal');
+  disarmNew();
+  const started = window.BioEconomy ? window.BioEconomy.newGame() : replay();
+  coinSound();
+  // If the shop is busy the new game is refused; do not leave the meadow
+  // frozen behind a closed sheet.
+  Promise.resolve(started).then(function () { if (!counting) resumeIfAllowed(); });
 }
 
 function openHow(opener) {
@@ -3823,7 +3865,7 @@ function resumeRevival() {
   state.revivalWait = false; el.reviveResume.hidden = true; startRun();
 }
 function resumeIfAllowed() {
-  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || counting || state.revivalWait);
+  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || pauseOpen() || counting || state.revivalWait);
 }
 function replay() {
   setPaused(true);
@@ -3882,6 +3924,7 @@ async function init() {
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
     'growthFinalTile', 'growthProgress', 'growthTrack', 'ladderStrip', 'moveHint', 'previewLayer',
     'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose',
+    'pauseBtn', 'pauseSheet', 'pauseMain', 'pauseConfirm', 'pauseResume', 'pauseNew', 'pauseYes', 'pauseNo',
     'startLedgerBtn', 'ledgerDot', 'ledgerModal', 'ledgerClose', 'ledgerCount', 'ledgerBody', 'sealToasts'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
@@ -3958,7 +4001,7 @@ async function init() {
   // the meadow also stays still while the title screen is up
   const resume = function () {
     closeHow();
-    setPaused(document.hidden || !el.startScreen.hidden || counting);
+    setPaused(document.hidden || !el.startScreen.hidden || pauseOpen() || counting);
   };
   el.howClose.addEventListener('click', resume);
   el.howDone.addEventListener('click', resume);
@@ -3969,7 +4012,7 @@ async function init() {
     if (e.key === 'Escape' && !el.howModal.hidden) resume();
   });
   document.addEventListener('visibilitychange', function () {
-    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || counting);
+    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || pauseOpen() || counting);
   });
 
   // The menu holds the guide, the pace, a new game, the ladder and the
@@ -3984,6 +4027,16 @@ async function init() {
     // the guide opens over the game, not over the menu
     el.howBtn.addEventListener('click', function () { el.menuSheet.hidden = true; }, true);
   }
+
+  el.pauseBtn.addEventListener('click', openPause);
+  el.pauseResume.addEventListener('click', closePause);
+  el.pauseNew.addEventListener('click', function () { coinSound(); showPauseView(true); });
+  el.pauseNo.addEventListener('click', function () { coinSound(); showPauseView(false); });
+  el.pauseYes.addEventListener('click', startOverFromPause);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !pauseOpen()) return;
+    if (el.pauseConfirm.hidden) closePause(); else { coinSound(); showPauseView(false); }
+  });
 
   // The title screen carries the guide, so it is reachable before the
   // first tap. Sound has no switch: the device's silent mode decides.

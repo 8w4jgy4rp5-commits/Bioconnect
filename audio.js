@@ -108,6 +108,11 @@ window.BioAudio = (() => {
       clearInterval(timer); timer = 0; beat = 0; lastEffect = -1;
       sync();
     },
+    // Button feedback plays even while the meadow is paused.
+    coin() {
+      if (adMuted || document.hidden || !context()) return;
+      synth.coin();
+    },
     effect(kind, count = 1) {
       if (adMuted || document.hidden || !ctx || ctx.state !== 'running') return;
       if (paused && kind !== 'ready' && kind !== 'go' && kind !== 'gameover') return;

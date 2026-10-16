@@ -203,6 +203,12 @@
 .skin-eldritch .menu-sheet { background: rgba(0, 0, 0, .55); }
 .skin-eldritch .menu-card { background: linear-gradient(#1f2918, #141b11); color: var(--el-ink); }
 .skin-eldritch .menu-head h2 { font-family: var(--el-caps); font-weight: 400; }
+.skin-eldritch .pause-card { background: linear-gradient(#1f2918, #141b11); color: var(--el-ink); box-shadow: 0 0 0 1px rgba(236, 228, 200, .18), 0 18px 40px rgba(0, 0, 0, .5); }
+.skin-eldritch .pause-title { font-family: var(--el-caps); font-weight: 400; color: var(--el-ink); }
+.skin-eldritch .pause-sub { font-family: var(--el-serif); font-style: italic; color: var(--el-mute); }
+.skin-eldritch .pause-badge { box-shadow: 0 5px 0 var(--el-moss-d), 0 0 18px rgba(168, 198, 108, .3); }
+.skin-eldritch .pause-badge span { background: var(--el-deep); }
+.skin-eldritch .btn--danger { background: var(--el-blood); color: var(--el-deep); box-shadow: 0 0 18px rgba(224, 87, 60, .3); }
 .skin-eldritch .menu-card .level, .skin-eldritch .menu-card .chain { background: rgba(0, 0, 0, .25); box-shadow: inset 0 0 0 1px rgba(236, 228, 200, .1); color: var(--el-ink); }
 .skin-eldritch .gameover { z-index: 5; background: rgba(10, 13, 8, .72); }
 .skin-eldritch .gameover-card #goScore, .skin-eldritch .gameover-card .go-score strong { color: var(--el-ink); }
