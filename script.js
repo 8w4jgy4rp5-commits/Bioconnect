@@ -3752,6 +3752,7 @@ function openPause() {
   el.pauseSheet.hidden = false;
   document.body.classList.add('is-modal');
   setPaused(true);
+  if (window.BioAudio) window.BioAudio.hold(true);
   coinSound();
   showPauseView(false);
 }
@@ -3759,6 +3760,7 @@ function closePause() {
   if (!pauseOpen()) return;
   el.pauseSheet.hidden = true;
   document.body.classList.remove('is-modal');
+  if (window.BioAudio) window.BioAudio.hold(false);
   coinSound();
   resumeIfAllowed();
   el.pauseBtn.focus();
@@ -3766,6 +3768,7 @@ function closePause() {
 function startOverFromPause() {
   el.pauseSheet.hidden = true;
   document.body.classList.remove('is-modal');
+  if (window.BioAudio) window.BioAudio.hold(false);
   disarmNew();
   const started = window.BioEconomy ? window.BioEconomy.newGame() : replay();
   coinSound();

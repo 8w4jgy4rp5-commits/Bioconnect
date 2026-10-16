@@ -1,7 +1,7 @@
 // Music and effects are always on; the device's silent mode is the switch.
 // Browsers hold audio until the first touch or key, so that unlocks it.
 window.BioAudio = (() => {
-  let ctx, synth, paused = true, theme = 'title', adMuted = false;
+  let ctx, synth, paused = true, theme = 'title', adMuted = false, held = false;
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
   let playingKinds = [];
@@ -47,7 +47,7 @@ window.BioAudio = (() => {
   // countdown is quiet ('rest'), and the game plays the full band.
   // Otherwise only a hidden tab silences it.
   function sync() {
-    const active = !adMuted && !document.hidden && ctx && ctx.state === 'running' && theme !== 'rest';
+    const active = !adMuted && !held && !document.hidden && ctx && ctx.state === 'running' && theme !== 'rest';
     if (active && !timer) {
       nextTime = ctx.currentTime + .04;
       schedule(); timer = setInterval(schedule, 50);
@@ -95,6 +95,11 @@ window.BioAudio = (() => {
       theme = name;
       if (synth) synth.cancel('music');
       clearInterval(timer); timer = 0; beat = 0;
+      sync();
+    },
+    // The pause screen silences the music too; button coins still play.
+    hold(on) {
+      held = on;
       sync();
     },
     pause(on) {

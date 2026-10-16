@@ -378,12 +378,17 @@ window.BioSound = (() => {
     function applause(time, steps) {
       if (!applauseBuffer) return;
       const tier = steps >= 7 ? 2 : steps >= 5 ? 1 : 0;
-      const duration = [1.6, 2.1, 2.5][tier];
+      const duration = [2.2, 2.7, 3.1][tier];
       const source = ctx.createBufferSource();
       source.buffer = applauseBuffer;
+      // The asset is 2.6 s; loop its sustained middle so longer claps never cut off.
+      source.loop = true;
+      source.loopStart = Math.min(.8, applauseBuffer.duration / 3);
+      source.loopEnd = Math.max(source.loopStart + .1, applauseBuffer.duration - .1);
       voice(source, effects, time, duration, [.42, .48, .54][tier], .018,
         null, duration - .3);
-      cheer(time, tier);
+      // A short chain (3-4) gets the claps alone; the crowd joins from 5.
+      if (tier > 0) cheer(time, tier);
     }
 
     // Recording: DJ YA-MAN Cheer-Crowd01 High-Short (see audio/SOURCES.md).
