@@ -1799,3 +1799,9 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - legal/privacy.html に匿名ゲーム統計を追記（施行日10/16）。
 - 検証: test/run-outcomes.test.cjs（pglite、npm testに追加）4件成功、rules.test.js成功、数字入りカードの描画をChromeで確認。
 - 本番SQL未適用: 本人がSupabaseのSQL Editorで上記migrationを実行する必要あり。未適用の間はカードに数字が出ないだけ。注意: 匿名呼び出しなので大量の偽記録で数字を歪めることは技術的に可能（遊びの統計として許容）。
+
+## 2026-10-16 — Xの投稿文を挑戦状ふうに・5言語
+- 本人要望: 投稿文が淡白なので惹かれる文に。本人がA（ぞう: 「N回目でついに育てた／100回に1回／あなたは何回で？」）とC（ぞうなし: 「トラまでは来た…でもぞうには届かない／私より先に育てられる？」）を選択。
+- script.js の SHARE_WORDS に en/ja/es/zh/hi。言語はゲームの言語設定（cobbleworks:lang:v1）→ブラウザの言語→英語の順。ゲーム画面は英語のまま、投稿文だけ切替。
+- 「N回目」用に生涯の終了ゲーム数 runsPlayed を met に追加（復活は1回扱い、既存プレイヤーは履歴件数から開始）。2頭目以降は「Elephant #k for me!」。「1 in N」は実集計（run_outcomes）があるときだけ、無いときは「Most games never see one.」。
+- 検証: rules.test.js成功。Chromeで5言語×ぞうあり/なし＋集計なし＋3頭目の文面を出力して確認、例外0。es/zh/hiの自然さはネイティブ未確認。

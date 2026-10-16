@@ -771,7 +771,7 @@ async function accountChanged(owner) {
   const version = ++storeEpoch;
   recordOwner = owner;
   scoreStore?.dispose?.(); metStore?.dispose?.();
-  scoreStore = null; metStore = null; recordHistory = []; met.clear(); lifetimeElephants = 0;
+  scoreStore = null; metStore = null; recordHistory = []; met.clear(); lifetimeElephants = 0; runsPlayed = 0;
   state.best = 0; state.bestRevived = false; render();
   try {
     const score = await openStore(SLUG, 'score', { version: 2, default: { best: 0 }, merge: mergeScoreData });
@@ -835,6 +835,10 @@ function writeBest(n) {
 // rules version does not reset it. It only ever goes up: a stale copy
 // from another tab cannot lower it.
 let lifetimeElephants = 0;
+// Games finished, ever, for "after N tries" in the share post. Older
+// players start from the runs still in their history.
+let runsPlayed = 0;
+let runCounted = null;
 
 function readMet() {
   const v = metStore ? metStore.get() : null;
@@ -847,6 +851,8 @@ function readMet() {
     const c = Number(r[k]);
     if (Number.isFinite(c) && c > raised[k]) raised[k] = Math.floor(c);
   }
+  const played = v ? Number(v.runs) : 0;
+  if (Number.isFinite(played) && played > runsPlayed) runsPlayed = Math.floor(played);
   const g = v ? Number(v.grown) : 0;
   if (Number.isFinite(g) && g > grownTotal) grownTotal = Math.floor(g);
   if (v && Array.isArray(v.sealsSeen)) for (const id of v.sealsSeen) if (typeof id === 'string') sealsSeen.add(id);
@@ -859,7 +865,7 @@ function readMet() {
 function writeMet() {
   if (!metStore) return;
   metStore.set({ kinds: Array.from(met), elephants: lifetimeElephants, raised: Object.assign({}, raised),
-    grown: grownTotal, sealsSeen: Array.from(sealsSeen) })
+    grown: grownTotal, runs: runsPlayed, sealsSeen: Array.from(sealsSeen) })
     .catch(function (e) { console.error('Ecosystem Puzzle: save failed', e); });
 }
 
@@ -1826,6 +1832,12 @@ function setRelaxed(on) {
 function endRun() {
   state.over = true;
   recordRun();
+  // a revived run ends twice but is one try
+  if (runCounted !== state.runId) {
+    runCounted = state.runId;
+    runsPlayed = Math.max(runsPlayed + 1, recordHistory.length);
+    writeMet();
+  }
   window.BioEconomy?.draw();
   syncClock();
   el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
@@ -3814,19 +3826,88 @@ function hideWord() {
 // Ready?? / Go!! beat as the title screen, with the clock held still.
 // The X post behind "Share on X". The elephant line only shows up on the
 // rare runs that had one, since that is the result worth bragging about.
-function shareText() {
-  const shown = displayScore(state.score);
-  const lv = levelAt(shown);
-  const lines = [
-    '🌱 Bioconnect',
-    'The meadow filled in ' + seasonLabel(),
-    'Score ' + shown.toLocaleString('en-US') + ' · Level ' + lv.level + ' ' + lv.name
-  ];
-  if (state.elephants > 0) {
-    const rare = rarityLine();
-    lines.push('🐘 An elephant came to my meadow!' + (rare ? ' (' + rare.replace(/ of meadows raise one$/, '').toLowerCase() + ' do)' : ''));
+// The post is written in the player's language (the game's own language
+// choice, else the browser's), even though the game itself is English:
+// it is read by their followers, not by them.
+const SHARE_WORDS = {
+  en: {
+    first: '🐘 After {n} tries, I finally raised an elephant!', one: '🐘 I raised an elephant on my very first try!',
+    again: '🐘 Elephant #{k} for me!', rare: 'Only 1 in {r} games ever ends with one.', rareNone: 'Most games never see one.',
+    askE: 'How many tries will it take you?', top: '{e} Got all the way to {kind}…',
+    escape: 'but the elephant still escapes me.', askN: 'Can you raise one before I do?', score: 'Score',
+    seasons: ['Spring', 'Summer', 'Autumn', 'Winter'],
+    kinds: { sprout: 'a sprout', grass: 'grass', rabbit: 'a rabbit', fox: 'a fox', deer: 'a deer', zebra: 'a zebra', buffalo: 'a buffalo', wolf: 'a wolf', bear: 'a bear', lion: 'a lion', tiger: 'a tiger' }
+  },
+  ja: {
+    first: '🐘 {n}回目で、ついにぞうを育てた！', one: '🐘 はじめての1回で、ぞうを育てた！',
+    again: '🐘 これで{k}頭目のぞう！', rare: 'ぞうにたどり着くのは{r}回に1回だけ。', rareNone: 'ほとんどのプレイは、ぞうまで届かない。',
+    askE: 'あなたは何回でできる？', top: '{e} {kind}までは来た…',
+    escape: 'でも、ぞうにはまだ届かない。', askN: '私より先に育てられる？', score: 'スコア',
+    seasons: ['春', '夏', '秋', '冬'], tight: true,
+    kinds: { sprout: '芽', grass: '草', rabbit: 'ウサギ', fox: 'キツネ', deer: 'シカ', zebra: 'シマウマ', buffalo: 'バッファロー', wolf: 'オオカミ', bear: 'クマ', lion: 'ライオン', tiger: 'トラ' }
+  },
+  es: {
+    first: '🐘 ¡Tras {n} intentos, por fin crié un elefante!', one: '🐘 ¡Crié un elefante en mi primer intento!',
+    again: '🐘 ¡Mi elefante n.º {k}!', rare: 'Solo 1 de cada {r} partidas termina con uno.', rareNone: 'La mayoría de las partidas nunca lo ven.',
+    askE: '¿Cuántos intentos te costará a ti?', top: '{e} Llegué hasta {kind}…',
+    escape: 'pero el elefante se me sigue escapando.', askN: '¿Podrás criar uno antes que yo?', score: 'Puntuación',
+    seasons: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
+    kinds: { sprout: 'un brote', grass: 'la hierba', rabbit: 'un conejo', fox: 'un zorro', deer: 'un ciervo', zebra: 'una cebra', buffalo: 'un búfalo', wolf: 'un lobo', bear: 'un oso', lion: 'un león', tiger: 'un tigre' }
+  },
+  zh: {
+    first: '🐘 试了{n}次，终于养出了大象！', one: '🐘 第一次就养出了大象！',
+    again: '🐘 这是我的第{k}头大象！', rare: '每{r}局只有1局能等到大象。', rareNone: '大多数对局都等不到大象。',
+    askE: '你要试几次？', top: '{e} 一路养到了{kind}……',
+    escape: '可大象还是没来。', askN: '你能比我先养出大象吗？', score: '得分',
+    seasons: ['春', '夏', '秋', '冬'], tight: true,
+    kinds: { sprout: '嫩芽', grass: '草', rabbit: '兔子', fox: '狐狸', deer: '鹿', zebra: '斑马', buffalo: '水牛', wolf: '狼', bear: '熊', lion: '狮子', tiger: '老虎' }
+  },
+  hi: {
+    first: '🐘 {n} कोशिशों के बाद आखिरकार मैंने हाथी पाल लिया!', one: '🐘 पहली ही कोशिश में मैंने हाथी पाल लिया!',
+    again: '🐘 यह मेरा {k}वाँ हाथी है!', rare: 'हर {r} गेम में से सिर्फ 1 में हाथी आता है।', rareNone: 'ज़्यादातर गेम में हाथी कभी नहीं आता।',
+    askE: 'तुम्हें कितनी कोशिशें लगेंगी?', top: '{e} {kind} तक तो पहुँच गया…',
+    escape: 'पर हाथी अब भी हाथ नहीं आया।', askN: 'क्या तुम मुझसे पहले हाथी पाल सकते हो?', score: 'स्कोर',
+    seasons: ['वसंत', 'गर्मी', 'पतझड़', 'सर्दी'],
+    kinds: { sprout: 'अंकुर', grass: 'घास', rabbit: 'खरगोश', fox: 'लोमड़ी', deer: 'हिरण', zebra: 'ज़ेबरा', buffalo: 'भैंसा', wolf: 'भेड़िया', bear: 'भालू', lion: 'शेर', tiger: 'बाघ' }
   }
-  return lines.join('\n') + '\n\nhttps://bioconnectpazzle.com/';
+};
+const SHARE_EMOJI = { sprout: '🌱', grass: '🌿', rabbit: '🐰', fox: '🦊', deer: '🦌', zebra: '🦓', buffalo: '🐃', wolf: '🐺', bear: '🐻', lion: '🦁', tiger: '🐯' };
+
+function shareLang() {
+  let pick = null;
+  try { pick = localStorage.getItem('cobbleworks:lang:v1'); } catch (e) {}
+  const list = [pick].concat(navigator.languages || [navigator.language]);
+  for (const l of list) {
+    const code = String(l || '').toLowerCase().split('-')[0];
+    if (SHARE_WORDS[code]) return code;
+  }
+  return 'en';
+}
+
+function fillWords(text, values) {
+  return text.replace(/\{(\w+)\}/g, function (_, k) { return values[k] != null ? values[k] : ''; });
+}
+
+function shareText(lang) {
+  const w = SHARE_WORDS[lang] || SHARE_WORDS[shareLang()];
+  const score = displayScore(state.score).toLocaleString('en-US');
+  const lines = [];
+  if (state.elephants > 0) {
+    // the first elephant ever is the one with a story of tries behind it
+    const first = lifetimeElephants <= state.elephants;
+    lines.push(first ? (runsPlayed <= 1 ? w.one : fillWords(w.first, { n: runsPlayed })) : fillWords(w.again, { k: lifetimeElephants }));
+    const r = elephantOdds();
+    lines.push(r ? fillWords(w.rare, { r: r }) : w.rareNone);
+    lines.push(w.askE);
+    lines.push('', '🌱 Bioconnect · ' + w.score + ' ' + score);
+  } else {
+    const kind = w.kinds[state.topKind] || state.topKind;
+    lines.push(fillWords(w.top, { e: SHARE_EMOJI[state.topKind] || '🌱', kind: kind }), w.escape, w.askN);
+    const s = season();
+    const when = w.seasons[s] + (s === SEASONS - 1 ? (w.tight ? '' : ' ') + (difficultyStage() - s + 1) : '');
+    lines.push('', '🌱 Bioconnect · ' + w.score + ' ' + score + ' · ' + when);
+  }
+  return lines.join('\n') + '\nhttps://bioconnectpazzle.com/';
 }
 
 // ---------- How rare is an elephant ----------
@@ -3858,6 +3939,10 @@ function rarityLine() {
   const pct = r.elephants * 100 / r.runs;
   if (pct >= 50) return '';
   return pct < 1 ? 'Fewer than 1% of meadows raise one' : 'Only ' + Math.round(pct) + '% of meadows raise one';
+}
+// The same count as "1 in N" for the post, or 0 when there is none to give.
+function elephantOdds() {
+  return rarityLine() ? Math.max(2, Math.round(elephantRarity.runs / elephantRarity.elephants)) : 0;
 }
 
 // ---------- Share card ----------
