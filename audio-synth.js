@@ -378,7 +378,7 @@ window.BioSound = (() => {
     function applause(time, steps) {
       if (!applauseBuffer) return;
       const tier = steps >= 7 ? 2 : steps >= 5 ? 1 : 0;
-      const duration = [1.05, 1.5, 2.0][tier];
+      const duration = [1.6, 2.1, 2.5][tier];
       const source = ctx.createBufferSource();
       source.buffer = applauseBuffer;
       voice(source, effects, time, duration, [.42, .48, .54][tier], .018,
@@ -392,7 +392,7 @@ window.BioSound = (() => {
     function setCheer(buffer) { cheerBuffer = buffer; }
     function cheer(time, tier) {
       if (!cheerBuffer) return;
-      const duration = [.8, 1.0, 1.2][tier];
+      const duration = [1.3, 1.7, 2.1][tier];
       const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter();
       source.buffer = cheerBuffer;
       filter.type = 'lowpass'; filter.frequency.value = 3200;
