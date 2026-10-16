@@ -5,6 +5,11 @@ window.BioAudio = (() => {
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
   let playingKinds = [];
+  // Fetch our local asset early, then decode once the browser has an audio context.
+  // Failure leaves the usual merge sounds intact; never substitute synthetic claps.
+  const load = url => fetch(url)
+    .then(response => response.ok ? response.arrayBuffer() : null).catch(() => null);
+  const applauseData = load('audio/applause-02.mp3'), cheerData = load('audio/cheer-crowd01-6.mp3');
 
   // Safari: "ambient" obeys the ring/silent switch and mixes with other audio.
   try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (_) {}
@@ -13,7 +18,13 @@ window.BioAudio = (() => {
     try {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || !window.BioSound) return null;
-      if (!ctx) { ctx = new AC(); synth = window.BioSound.create(ctx); ctx.onstatechange = sync; }
+      if (!ctx) {
+        ctx = new AC(); synth = window.BioSound.create(ctx); ctx.onstatechange = sync;
+        applauseData.then(data => data && ctx.decodeAudioData(data))
+          .then(buffer => { if (buffer) synth.setApplause(buffer); }).catch(() => {});
+        cheerData.then(data => data && ctx.decodeAudioData(data))
+          .then(buffer => { if (buffer) synth.setCheer(buffer); }).catch(() => {});
+      }
       if (ctx.state !== 'running' && !document.hidden) ctx.resume().then(sync).catch(() => {});
       return ctx;
     } catch (_) { return null; }

@@ -1,5 +1,5 @@
 // Bioconnect: "Tiptoe Hollow — Meadow Band", adapted from our promo score.
-// No recordings, samples, or melodies from another game are used.
+// Original score; applause/cheer recordings and licenses are documented in audio/SOURCES.md.
 // Kept separate from playback so previews render the very same instruments.
 window.BioSound = (() => {
   const BPM = 120, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
@@ -371,6 +371,35 @@ window.BioSound = (() => {
       voice(source, effects, time, duration, volume, .03, filter);
     }
 
+    // Recording: DJ YA-MAN, second applause pattern (see audio/SOURCES.md).
+    // Use the effects bus so the existing pause/new-move cancellation applies.
+    let applauseBuffer = null;
+    function setApplause(buffer) { applauseBuffer = buffer; }
+    function applause(time, steps) {
+      if (!applauseBuffer) return;
+      const tier = steps >= 7 ? 2 : steps >= 5 ? 1 : 0;
+      const duration = [1.05, 1.5, 2.0][tier];
+      const source = ctx.createBufferSource();
+      source.buffer = applauseBuffer;
+      voice(source, effects, time, duration, [.42, .48, .54][tier], .018,
+        null, duration - .3);
+      cheer(time, tier);
+    }
+
+    // Recording: DJ YA-MAN Cheer-Crowd01 High-Short (see audio/SOURCES.md).
+    // Kept under the applause: quieter, shorter, and with the top cut so the claps stay crisp.
+    let cheerBuffer = null;
+    function setCheer(buffer) { cheerBuffer = buffer; }
+    function cheer(time, tier) {
+      if (!cheerBuffer) return;
+      const duration = [.8, 1.0, 1.2][tier];
+      const source = ctx.createBufferSource(), filter = ctx.createBiquadFilter();
+      source.buffer = cheerBuffer;
+      filter.type = 'lowpass'; filter.frequency.value = 3200;
+      voice(source, effects, time, duration, [.16, .2, .24][tier], .05,
+        filter, duration - .35);
+    }
+
     function effect(kind, count = 1, time = ctx.currentTime + .012) {
       if (kind === 'place') plant(time);
       else if (kind === 'merge' || kind === 'finish') {
@@ -381,6 +410,7 @@ window.BioSound = (() => {
           const notes = steps >= 7 ? [74,78,81,86] : steps >= 5 ? [74,78,81] : [74,78];
           const end = time + .105 + (steps - 1) * .145;
           notes.forEach((note, i) => wood(note, end + .055 + i * .075, .045, effects));
+          applause(end + .055 + notes.length * .075 + .06, steps);
         }
       } else if (kind === 'ready') {
         wood(69, time, .075, effects); wood(69, time + .22, .055, effects);
@@ -419,7 +449,7 @@ window.BioSound = (() => {
       }
     }
 
-    return { musicBeat, effect, cancel, setEnsemble, instrumentPreview };
+    return { musicBeat, effect, cancel, setEnsemble, instrumentPreview, setApplause, setCheer };
   }
   const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
   return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Tiptoe Hollow — Meadow Band' };
