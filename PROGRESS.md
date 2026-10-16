@@ -1,5 +1,12 @@
 # Bioconnect 進捗
 
+## 2026-10-16 — ?watch の再生データを今のルールで作り直し（watch/elephant-run.json）
+
+- 観測: index.html?watch を縦長Chromiumで録画すると、ぞうが出ずにスコア2,450で終わる（console「replay drifted, got 2450, recorded 8840」）。再生データは10-05作成で、その後のルール変更（a3fb57a 冬の草、3fd6b40 合体着地点）で手順がずれていた。
+- 変更: node watch-record.js 5000 で作り直し（seed 97 careful、174ティックでぞう、179で終了、スコア8,771）。
+- 検証: 540×960・DPR2のChromiumで ?watch を最後まで再生し、ぞうのお祝い画面が出てスコア8,771で終了、drift警告なし。
+- 注意: 今後 script.js のルールを変えたら、watch-record.js の再実行が必要。
+
 ## 2026-10-16 — 立体（3D）版のアイデアを保存（docs/ideas.md）
 
 - 依頼: 「立体にもできなくもないってことで、アイデアだけ保存しておいて」。
