@@ -1,5 +1,10 @@
 # 動物・画面素材の案内
 
+## 2026-10-17 アイコン
+
+タブ用 `favicon.ico`・`img/icon/favicon-32.png`・`favicon-16.png`、ホーム画面用 `apple-touch-icon.png`・`img/icon/icon-192.png`・`icon-512.png`。
+ゲームのウサギの部品を盤面と同じリグで組み立てた絵に、月夜の背景。作り方と不採用案は `concepts/app-icon-v1/`。
+
 ## 2026-10-17 焦り顔（ぷよぷよ風）
 
 合体に巻き込まれる直前などに出す顔。`img/rabbit-head-panic.png`（既存）と `img/lion-panic.png`。

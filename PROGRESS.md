@@ -1883,3 +1883,10 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
   32pxで顔・目・耳が読めることを確認。月を顔から離したので黄色でも顔とは被らない（右耳の先だけ重なる）。採用は未決定。
 - 追記（同日）: ユーザーがB1（白っぽい月）を選択。concepts/app-icon-v1/final/ に書き出し: favicon.ico（16/32/48）、favicon-16/32.png（角丸）、apple-touch-icon.png 180・icon-192/512.png（角なし。スマホ側が角を丸めるため）。
   未着手: index.html への組み込み（今はSVGのファビコン）と公開。
+
+## 2026-10-17 新アイコンをゲームに組み込み（index.html / favicon.ico / apple-touch-icon.png / img/icon/ / site.webmanifest）
+- ユーザー「ゲームに組み込んで、コミット・pushしておいて」。採用はB1（月夜、左下から肩まで出したウサギ、白っぽい月）。
+- 変更: index.html の SVG埋め込みファビコン（芽とキツネ）を差し替え。favicon.ico（16/32/48）と 32/16px PNG はタブ用、apple-touch-icon.png（180）と site.webmanifest の 192/512 はホーム画面用。原本は concepts/app-icon-v1/final/。
+- 検証: ローカルサーバー＋Chromiumで、全アイコンとmanifestが200で返ることを確認。ページエラーは外部SDK（supabase）が読めないことによる2件のみで、アイコンとは無関係。
+- 注意: rules.test.js の「stamps match」1件は変更前から失敗。stamp は Windows（CRLF）のファイルで計算されていて、このLFのチェックアウトでは別の値になるため。stamp は書き換えていない。
+- 未確認: 実機のタブ・ホーム画面での見え方。公開（main へのマージ）はまだ。
