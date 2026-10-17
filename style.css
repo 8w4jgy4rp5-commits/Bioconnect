@@ -2333,7 +2333,7 @@ body.is-celebrating { overflow: hidden; }
 }
 
 /* ---------- Panicked faces (Puyo-style) ----------
-   The face itself is drawn in paintAnimal (PANIC_FACE). CSS only adds
+   The face is a painted head (RIG[kind].head.panic). CSS only adds
    the flinch: while a merge path is held over it, and while it is being
    swallowed, the animal shivers in place of its idle. */
 .cell.cell--preview-panic .tile-art,

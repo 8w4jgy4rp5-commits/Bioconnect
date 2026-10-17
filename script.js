@@ -2470,7 +2470,8 @@ function partsOf(kind) {
   for (const part of rig.parts) {
     if (part[0] !== '@head') keys.push(part[0]);
   }
-  for (const face in rig.head) keys.push(rig.head[face]);
+  // the panic face is optional: without it the animal keeps its usual face
+  for (const face in rig.head) if (face !== 'panic') keys.push(rig.head[face]);
   return keys;
 }
 
@@ -2502,73 +2503,11 @@ function loadSprites() {
 
 // THE PANICKED FACE (Puyo's "oh no" the moment before it is merged).
 //
-// Only the rabbit has a painted panic head. Everyone else keeps the calm
-// painting and has a face drawn over its own eye, in the painting's own
-// pixels: a wide white eye with a pinprick pupil, a brow pushed up at the
-// inner end, and a small open "ah" mouth. Eyes face right, like the art.
-// [x, y, r] are measured on the calm file (pupil centroids, then eyeballed
-// at game size). `mouth` is left off where the painting's mouth already
-// says it -- the yawning lion.
-const PANIC_FACE = {
-  foxHeadCalm:  { eyes: [[63, 60, 11]], mouth: [80, 82, 6] },
-  wolfCalm:     { eyes: [[185, 42, 8]], mouth: [199, 62, 5] },
-  deerCalm:     { eyes: [[157, 106, 8]], mouth: [170, 131, 5] },
-  zebraCalm:    { eyes: [[161, 66, 9]], mouth: [195, 106, 6] },
-  buffaloCalm:  { eyes: [[177, 35, 7]], mouth: [193, 60, 5] },
-  bearCalm:     { eyes: [[189, 31, 7], [107, 93, 6]], mouth: [202, 50, 5] },
-  lionCalm:     { eyes: [[131, 37, 8]] },
-  tigerCalm:    { eyes: [[190, 55, 9]], mouth: [201, 76, 5] },
-  elephantCalm: { eyes: [[353, 96, 17]], mouth: [343, 137, 10] }
-};
-
-function drawPanicFace(ctx, face, unit) {
-  const ink = '#2b1a12';
-  ctx.lineCap = 'round';
-  // `unit` is one screen pixel in the painting's pixels. A tall animal
-  // (the deer) has a head a few pixels across on a phone tile, so the
-  // panic eye never drops below a size that still reads as an eye.
-  for (const [x, y, painted] of face.eyes) {
-    const r = Math.max(painted, unit * 3);
-    // a blue chill washing down the brow, like a Puyo going pale
-    ctx.strokeStyle = 'rgba(70, 105, 210, .75)';
-    ctx.lineWidth = Math.max(r * .14, unit * .5);
-    for (let n = 0; n < 3; n++) {
-      const lx = x - r * .9 + n * r * .55;
-      ctx.beginPath();
-      ctx.moveTo(lx, y - r * 2.5);
-      ctx.lineTo(lx, y - r * (1.75 - (n % 2) * .25));
-      ctx.stroke();
-    }
-    ctx.fillStyle = '#fff';
-    ctx.strokeStyle = ink;
-    ctx.lineWidth = Math.max(r * .2, unit * .6);
-    ctx.beginPath();
-    ctx.ellipse(x, y, r, r * 1.15, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = ink;
-    ctx.beginPath();
-    ctx.arc(x + r * .12, y + r * .05, r * .3, 0, Math.PI * 2);
-    ctx.fill();
-    // worried brow: low over the back of the eye, high toward the nose
-    ctx.lineWidth = Math.max(r * .26, unit * .7);
-    ctx.beginPath();
-    ctx.moveTo(x - r * .95, y - r * 1.2);
-    ctx.quadraticCurveTo(x, y - r * 1.4, x + r * .85, y - r * 1.95);
-    ctx.stroke();
-  }
-  if (face.mouth) {
-    const x = face.mouth[0], y = face.mouth[1], r = Math.max(face.mouth[2], unit * 1.8);
-    ctx.fillStyle = '#6b1f24';
-    ctx.strokeStyle = ink;
-    ctx.lineWidth = Math.max(r * .28, unit * .6);
-    ctx.beginPath();
-    ctx.ellipse(x, y, r * .75, r, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-  }
-}
-
+// A painted head, like the rabbit's rabbit-head-panic.png: the calm
+// painting edited so only the face changes, cut on the calm file's own
+// frame so the swap moves nothing else. `rig.head.panic` is optional --
+// an animal without its panic painting simply keeps its usual face,
+// because a face drawn over the art in code looked pasted on (2026-10-17).
 // Paints one animal, still, into a canvas sized `px` on a side.
 // `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
 // wears its other face, so the tile reads before the meter does.
@@ -2617,8 +2556,8 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     ctx.translate(0, -pivotY);
   }
   // Panic outranks hunger: the face is about the next second, not the meter.
-  const headKey = panic ? (rig.head.panic || rig.head.calm) : rig.head[fed < 0.34 ? 'hungry' : 'calm'];
-  const face = panic && !rig.head.panic ? PANIC_FACE[headKey] : null;
+  const headKey = panic && sprites[rig.head.panic] ? rig.head.panic : rig.head[fed < 0.34 ? 'hungry' : 'calm'];
+
   for (const [name, p, alpha] of rig.parts) {
     const sprite = sprites[name === '@head' ? headKey : name];
     if (!sprite) continue;
@@ -2647,13 +2586,6 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       ctx.drawImage(other.img, -w * p.px, h * (1 - p.py) - oh, w, oh);
     } else {
       ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
-    }
-    if (face && name === '@head') {
-      // into the painting's own pixel grid, so PANIC_FACE reads as measured
-      const k = w / sprite.w;
-      ctx.translate(-w * p.px, -h * p.py);
-      ctx.scale(k, k);
-      drawPanicFace(ctx, face, 1 / (k * s));
     }
     ctx.restore();
   }
@@ -3138,7 +3070,9 @@ function render(grew, meals, deaths) {
       node.classList.add('cell--inreach');
       label += ', about to be eaten';
     }
-    if (panic.has(i) && isAnimal(cell.kind)) node.classList.add('cell--panic');
+    // only an animal that owns a panic painting shows it (and drops the
+    // Cozy Eldritch stickers that would cover that face)
+    if (panic.has(i) && isAnimal(cell.kind) && sprites[RIG[cell.kind].head.panic]) node.classList.add('cell--panic');
     node.setAttribute('aria-label', label);
 
     if (popped.has(i)) {
