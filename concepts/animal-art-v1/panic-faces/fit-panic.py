@@ -1,11 +1,15 @@
-# usage: fit_panic.py <src.png> <calm.png> <out.png>
+# usage: fit-panic.py <src.png> <calm.png> <out.png> [low=.55]
+# Fits a ChatGPT panic edit onto the calm file's frame by matching the
+# part below `low` (the legs), which the edit must not have moved. A head
+# part (the fox) passes 0 to match the whole silhouette.
 import sys
 from PIL import Image
 import numpy as np
 src=Image.open(sys.argv[1]).convert('RGBA'); calm=Image.open(sys.argv[2]).convert('RGBA')
 print('src',src.size,'alpha range',np.array(src)[...,3].min(),np.array(src)[...,3].max(),'calm',calm.size)
 ca=np.array(calm)[...,3]>128; H,W=ca.shape
-mask=np.zeros_like(ca); mask[int(H*.55):,:]=True
+LOW=float(sys.argv[4]) if len(sys.argv)>4 else .55  # fraction of the height above the part that must not move
+mask=np.zeros_like(ca); mask[int(H*LOW):,:]=True
 def place(sc,dx,dy):
     w=round(W*sc); h=round(src.height*w/src.width)
     im=src.resize((w,h),Image.LANCZOS)

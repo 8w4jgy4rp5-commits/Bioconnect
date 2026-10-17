@@ -2024,6 +2024,14 @@ const SPRITE_FILES = {
   // the legs: concepts/animal-art-v1/panic-faces/). The yawn shuts into a
   // wobbly frown and the eyes go wide -- the king caught off guard.
   lionPanic: 'lion-panic.png',
+  // The rest of the painted panic faces, made and fitted the same way.
+  foxHeadPanic: 'fox-head-panic.png',
+  deerPanic: 'deer-panic.png',
+  zebraPanic: 'zebra-panic.png',
+  buffaloPanic: 'buffalo-panic.png',
+  wolfPanic: 'wolf-panic.png',
+  bearPanic: 'bear-panic.png',
+  tigerPanic: 'tiger-panic.png',
   // The only hungry pair on the board made with no image model: the
   // aura was already painted, so flare-tiger-aura.py lifts the gold out
   // by hue and scales it outward under the animal. The tiger itself is
@@ -2079,7 +2087,7 @@ const RIG = {
       ['foxLegFront', { w: 3.6, x: 6.4, y: 5.4, px: 0.5, py: 0.10 }, 1],
       ['@head', { w: 19.5, x: 6.8, y: -2.2, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'foxHeadCalm', hungry: 'foxHeadHunt' }
+    head: { calm: 'foxHeadCalm', hungry: 'foxHeadHunt', panic: 'foxHeadPanic' }
   },
   // THE WOLF IS ONE PIECE ON PURPOSE.
   //
@@ -2134,7 +2142,7 @@ const RIG = {
     parts: [
       ['@head', { w: 37, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'wolfCalm', hungry: 'wolfHungry' }
+    head: { calm: 'wolfCalm', hungry: 'wolfHungry', panic: 'wolfPanic' }
   },
   // THE BEAR IS A MOTHER AND HER CUB, AND THE CUB IS THE WHOLE PROBLEM.
   //
@@ -2171,7 +2179,7 @@ const RIG = {
     parts: [
       ['@head', { w: 44.48, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'bearCalm', hungry: 'bearHungry' }
+    head: { calm: 'bearCalm', hungry: 'bearHungry', panic: 'bearPanic' }
   },
   // THE BUFFALO IS LONG WHERE EVERYTHING ELSE IS TALL.
   //
@@ -2210,7 +2218,7 @@ const RIG = {
     parts: [
       ['@head', { w: 46.95, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'buffaloCalm', hungry: 'buffaloHungry' }
+    head: { calm: 'buffaloCalm', hungry: 'buffaloHungry', panic: 'buffaloPanic' }
   },
   // THE DEER IS THE NARROW ONE, AND NARROW IS NOT SMALL.
   //
@@ -2263,7 +2271,7 @@ const RIG = {
     parts: [
       ['@head', { w: 22.96, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'deerCalm', hungry: 'deerHungry' }
+    head: { calm: 'deerCalm', hungry: 'deerHungry', panic: 'deerPanic' }
   },
   // THE ZEBRA IS THE DEER'S PROBLEM AGAIN, AND THE SCARF IS THE ANSWER.
   //
@@ -2326,7 +2334,7 @@ const RIG = {
     parts: [
       ['@head', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'zebraCalm', hungry: 'zebraHungry' }
+    head: { calm: 'zebraCalm', hungry: 'zebraHungry', panic: 'zebraPanic' }
   },
   // THE LION IS LYING DOWN, AND IT IS STILL THE SECOND BIGGEST THING HERE.
   //
@@ -2422,7 +2430,7 @@ const RIG = {
     parts: [
       ['@head', { w: 51, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'tigerCalm', hungry: 'tigerHungry' }
+    head: { calm: 'tigerCalm', hungry: 'tigerHungry', panic: 'tigerPanic' }
   },
   // The muscled elephant is the first whole-body painting with a real
   // second face: a smirk when fed, a snorting glare when hungry. Both

@@ -5,6 +5,7 @@
 合体に巻き込まれる直前などに出す顔。`img/rabbit-head-panic.png`（既存）と `img/lion-panic.png`。
 ライオンは本人がChatGPTで穏やか版を編集した `concepts/animal-art-v1/panic-faces/lion-panic-src.png` を、
 `fit-panic.py` で lion-calm.png と同じ枠に合わせたもの。依頼文と残りの元絵は同じフォルダの PROMPTS.md。
+同日、キツネ（頭）・シカ・シマウマ・バッファロー・オオカミ・クマ（親子とも）・トラも同じ方法で追加（`img/<動物>-panic.png`、キツネは `img/fox-head-panic.png`）。残りはゾウのみ。
 
 ## 2026-10-03 遠吠えのオオカミ
 

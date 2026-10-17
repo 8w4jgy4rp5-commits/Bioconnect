@@ -1,5 +1,13 @@
 # Bioconnect 進捗
 
+## 2026-10-17 — 焦り顔を7種追加（キツネ・シカ・シマウマ・バッファロー・オオカミ・クマ・トラ）
+
+- 本人がChatGPTで作った8枚（zip「astonished images」）を panic-faces/<動物>-panic-src.png として保存。ライオンの口を開けた別案は lion-panic-open-mouth-src.png（未採用、口を閉じた方を継続）。
+- fit-panic.py に引数 low を追加（キツネは頭だけの部品なので全体で照合）。下半身の一致: バッファロー95.4% / シカ93.2% / クマ97.4% / トラ96.4% / オオカミ96.2% / シマウマ95.0% / キツネ頭97.3%。
+- script.js: SPRITE_FILES と RIG.head.panic に7種を追加。
+- 検証: rules.test.js 全件成功。ローカルChromeで10種の通常/焦り顔を130pxと60pxで並べ、入れ替えで体がずれないこと、全種が絵で描画される（SVGに落ちない）ことを確認。
+- 残り: ゾウだけ焦り顔の絵が無い（普段の顔のまま）。
+
 ## 2026-10-17 — ライオンの焦り顔（1匹目、img/lion-panic.png）
 
 - 本人がChatGPTで作った焦り顔（目を見開き、あくびが閉じてへの字口）を `panic-faces/lion-panic-src.png` に保存。
