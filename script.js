@@ -2020,6 +2020,10 @@ const SPRITE_FILES = {
   // old single file -- the shared frame landed on the existing crop.
   lionCalm: 'lion-calm.png',
   lionHungry: 'lion-hungry.png',
+  // Painted panic face (ChatGPT edit of lion-calm, fitted on its frame by
+  // the legs: concepts/animal-art-v1/panic-faces/). The yawn shuts into a
+  // wobbly frown and the eyes go wide -- the king caught off guard.
+  lionPanic: 'lion-panic.png',
   // The only hungry pair on the board made with no image model: the
   // aura was already painted, so flare-tiger-aura.py lifts the gold out
   // by hue and scales it outward under the animal. The tiger itself is
@@ -2368,7 +2372,7 @@ const RIG = {
     parts: [
       ['@head', { w: 39, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'lionCalm', hungry: 'lionHungry' }
+    head: { calm: 'lionCalm', hungry: 'lionHungry', panic: 'lionPanic' }
   },
   // THE TIGER IS THE FACE, AND THE FACE IS NOT SHOUTING.
   //

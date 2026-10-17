@@ -1,5 +1,11 @@
 # 動物・画面素材の案内
 
+## 2026-10-17 焦り顔（ぷよぷよ風）
+
+合体に巻き込まれる直前などに出す顔。`img/rabbit-head-panic.png`（既存）と `img/lion-panic.png`。
+ライオンは本人がChatGPTで穏やか版を編集した `concepts/animal-art-v1/panic-faces/lion-panic-src.png` を、
+`fit-panic.py` で lion-calm.png と同じ枠に合わせたもの。依頼文と残りの元絵は同じフォルダの PROMPTS.md。
+
 ## 2026-10-03 遠吠えのオオカミ
 
 img/wolf-howl.png（220×173、透過）を個性モーション用に追加。通常・空腹の2枚はそのまま。
