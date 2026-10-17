@@ -1,0 +1,40 @@
+<!doctype html><meta charset="utf-8">
+<body style="margin:0;background:transparent">
+<canvas id="c"></canvas>
+<script>
+// Same rig and drawing math as script.js (SPRITE_RIGS.rabbit + drawAnimal), fed, no motion.
+const FILES = { rabbitHeadHappy:'rabbit-head-happy.png', rabbitEar:'rabbit-ear.png', rabbitBody:'rabbit-body.png',
+  rabbitLegHind:'rabbit-leg-hind.png', rabbitLegFront:'rabbit-leg-front.png', rabbitTail:'rabbit-tail.png' };
+const rig = {
+  fit: { span: 38, ox: 0, oy: 1.2, tilt: -7 },
+  parts: [
+    ['rabbitLegHind', { w: 10.8, x: -5.2, y: 5.1, px: 0.5, py: 0.12, r: 8 }, 0.72],
+    ['rabbitLegFront', { w: 5.9, x: 5.6, y: 4.3, px: 0.5, py: 0.10, r: -12 }, 0.72],
+    ['rabbitTail', { w: 10.0, x: -11.0, y: 1.0, px: 0.5, py: 0.5 }, 1],
+    ['rabbitBody', { w: 21.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 }, 1],
+    ['rabbitLegHind', { w: 10.8, x: -3.8, y: 5.4, px: 0.5, py: 0.12, r: 8 }, 1],
+    ['rabbitLegFront', { w: 5.9, x: 6.8, y: 4.6, px: 0.5, py: 0.10, r: -12 }, 1],
+    ['rabbitEar', { w: 7.5, x: 4.6, y: -7.2, px: 0.5, py: 0.95, r: -40 }, 0.85],
+    ['rabbitEar', { w: 7.5, x: 6.8, y: -7.4, px: 0.5, py: 0.95, r: 10 }, 1],
+    ['rabbitHeadHappy', { w: 18.7, x: 6.4, y: -2.0, px: 0.5, py: 0.5 }, 1]
+  ]
+};
+const px = 900;
+const imgs = {};
+Promise.all(Object.entries(FILES).map(([k, f]) => new Promise(r => { const i = new Image(); i.onload = () => { imgs[k] = i; r(); }; i.src = '../../img/' + f; })))
+.then(() => {
+  const c = document.getElementById('c'); c.width = c.height = px + 300;
+  const ctx = c.getContext('2d'); ctx.imageSmoothingQuality = 'high';
+  const s = px / rig.fit.span;
+  ctx.translate(150 + px / 2 - rig.fit.ox * s, 150 + px / 2 + rig.fit.oy * s);
+  ctx.scale(s, s);
+  ctx.rotate(rig.fit.tilt * Math.PI / 180);
+  for (const [name, p, alpha] of rig.parts) {
+    const im = imgs[name], w = p.w, h = p.w * im.height / im.width;
+    ctx.globalAlpha = alpha; ctx.save(); ctx.translate(p.x, p.y);
+    if (p.r) ctx.rotate(p.r * Math.PI / 180);
+    ctx.drawImage(im, -w * p.px, -h * p.py, w, h); ctx.restore();
+  }
+  document.title = 'done';
+});
+</script>

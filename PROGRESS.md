@@ -1873,6 +1873,7 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 
 ## 2026-10-17 アイコン候補3案（concepts/app-icon-v1/）
 - ユーザー「ウサギを大きく、背景は草とハロウィンが混ざった雰囲気で3案」「ウサギはいまあるものをそのまま使う」。
-- ウサギは `img/ref/rabbit-reference.jpg`（1024px元絵）の背景を抜いた切り抜き。A 月夜の草原 / B 夕暮れのかぼちゃ畑 / C Cozy Eldritch。
+- ウサギは盤面の部品（img/rabbit-*.png）を script.js のリグどおりに大きく組み立てた rabbit-game.png。A 月夜の草原 / B 夕暮れのかぼちゃ畑 / C Cozy Eldritch。
+- 最初は img/ref/rabbit-reference.jpg を切り抜いたが、ゲームの絵ではなかったため差し替え（ユーザー指摘）。
 - 検証: Chromiumで512px書き出し、48px縮小でウサギとかぼちゃが読めることを確認。
 - 未確認・次: 採用案未決定。index.html のファビコン・ホーム画面アイコンへの組み込みは未着手。
