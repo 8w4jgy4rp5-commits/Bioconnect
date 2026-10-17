@@ -2060,7 +2060,7 @@ const RIG = {
       ['rabbitEar', { w: 7.5, x: 6.8, y: -7.4, px: 0.5, py: 0.95, r: 10 }, 1],
       ['@head', { w: 18.7, x: 6.4, y: -2.0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'rabbitHeadHappy', hungry: 'rabbitHeadPanic' }
+    head: { calm: 'rabbitHeadHappy', hungry: 'rabbitHeadPanic', panic: 'rabbitHeadPanic' }
   },
   fox: {
     fit: { span: 36, ox: 3, oy: 2 },
@@ -2500,10 +2500,79 @@ function loadSprites() {
   }
 }
 
+// THE PANICKED FACE (Puyo's "oh no" the moment before it is merged).
+//
+// Only the rabbit has a painted panic head. Everyone else keeps the calm
+// painting and has a face drawn over its own eye, in the painting's own
+// pixels: a wide white eye with a pinprick pupil, a brow pushed up at the
+// inner end, and a small open "ah" mouth. Eyes face right, like the art.
+// [x, y, r] are measured on the calm file (pupil centroids, then eyeballed
+// at game size). `mouth` is left off where the painting's mouth already
+// says it -- the yawning lion.
+const PANIC_FACE = {
+  foxHeadCalm:  { eyes: [[63, 60, 11]], mouth: [80, 82, 6] },
+  wolfCalm:     { eyes: [[185, 42, 8]], mouth: [199, 62, 5] },
+  deerCalm:     { eyes: [[157, 106, 8]], mouth: [170, 131, 5] },
+  zebraCalm:    { eyes: [[161, 66, 9]], mouth: [195, 106, 6] },
+  buffaloCalm:  { eyes: [[177, 35, 7]], mouth: [193, 60, 5] },
+  bearCalm:     { eyes: [[189, 31, 7], [107, 93, 6]], mouth: [202, 50, 5] },
+  lionCalm:     { eyes: [[131, 37, 8]] },
+  tigerCalm:    { eyes: [[190, 55, 9]], mouth: [201, 76, 5] },
+  elephantCalm: { eyes: [[353, 96, 17]], mouth: [343, 137, 10] }
+};
+
+function drawPanicFace(ctx, face, unit) {
+  const ink = '#2b1a12';
+  ctx.lineCap = 'round';
+  // `unit` is one screen pixel in the painting's pixels. A tall animal
+  // (the deer) has a head a few pixels across on a phone tile, so the
+  // panic eye never drops below a size that still reads as an eye.
+  for (const [x, y, painted] of face.eyes) {
+    const r = Math.max(painted, unit * 3);
+    // a blue chill washing down the brow, like a Puyo going pale
+    ctx.strokeStyle = 'rgba(70, 105, 210, .75)';
+    ctx.lineWidth = Math.max(r * .14, unit * .5);
+    for (let n = 0; n < 3; n++) {
+      const lx = x - r * .9 + n * r * .55;
+      ctx.beginPath();
+      ctx.moveTo(lx, y - r * 2.5);
+      ctx.lineTo(lx, y - r * (1.75 - (n % 2) * .25));
+      ctx.stroke();
+    }
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = Math.max(r * .2, unit * .6);
+    ctx.beginPath();
+    ctx.ellipse(x, y, r, r * 1.15, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = ink;
+    ctx.beginPath();
+    ctx.arc(x + r * .12, y + r * .05, r * .3, 0, Math.PI * 2);
+    ctx.fill();
+    // worried brow: low over the back of the eye, high toward the nose
+    ctx.lineWidth = Math.max(r * .26, unit * .7);
+    ctx.beginPath();
+    ctx.moveTo(x - r * .95, y - r * 1.2);
+    ctx.quadraticCurveTo(x, y - r * 1.4, x + r * .85, y - r * 1.95);
+    ctx.stroke();
+  }
+  if (face.mouth) {
+    const x = face.mouth[0], y = face.mouth[1], r = Math.max(face.mouth[2], unit * 1.8);
+    ctx.fillStyle = '#6b1f24';
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = Math.max(r * .28, unit * .6);
+    ctx.beginPath();
+    ctx.ellipse(x, y, r * .75, r, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
 // Paints one animal, still, into a canvas sized `px` on a side.
 // `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
 // wears its other face, so the tile reads before the meter does.
-function paintAnimal(canvas, type, fed, motion, size) {
+function paintAnimal(canvas, type, fed, motion, size, panic) {
   const rig = RIG[type];
   // `size` paints off-screen at an exact pixel size (the share card)
   const dpr = size ? 1 : Math.min(3, window.devicePixelRatio || 1);
@@ -2547,7 +2616,9 @@ function paintAnimal(canvas, type, fed, motion, size) {
     ctx.scale(pose[1], pose[2]);
     ctx.translate(0, -pivotY);
   }
-  const headKey = rig.head[fed < 0.34 ? 'hungry' : 'calm'];
+  // Panic outranks hunger: the face is about the next second, not the meter.
+  const headKey = panic ? (rig.head.panic || rig.head.calm) : rig.head[fed < 0.34 ? 'hungry' : 'calm'];
+  const face = panic && !rig.head.panic ? PANIC_FACE[headKey] : null;
   for (const [name, p, alpha] of rig.parts) {
     const sprite = sprites[name === '@head' ? headKey : name];
     if (!sprite) continue;
@@ -2564,7 +2635,7 @@ function paintAnimal(canvas, type, fed, motion, size) {
     if (type === 'fox' && name === '@head') turn += action * 3;
     if (turn) ctx.rotate(turn * Math.PI / 180);
     if (p.flip) ctx.scale(-1, 1);
-    const howl = type === 'wolf' && fed >= .34 && sprites.wolfHowl && motion ? motion.amount : 0;
+    const howl = type === 'wolf' && fed >= .34 && !panic && sprites.wolfHowl && motion ? motion.amount : 0;
     if (howl) {
       // Blend only while raising/lowering the head. Both poses share the
       // original width and paw baseline, including on small phone tiles.
@@ -2576,6 +2647,13 @@ function paintAnimal(canvas, type, fed, motion, size) {
       ctx.drawImage(other.img, -w * p.px, h * (1 - p.py) - oh, w, oh);
     } else {
       ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+    }
+    if (face && name === '@head') {
+      // into the painting's own pixel grid, so PANIC_FACE reads as measured
+      const k = w / sprite.w;
+      ctx.translate(-w * p.px, -h * p.py);
+      ctx.scale(k, k);
+      drawPanicFace(ctx, face, 1 / (k * s));
     }
     ctx.restore();
   }
@@ -2600,7 +2678,7 @@ const ANIMAL_GESTURES = {
 };
 const animalLife = { cells: new WeakMap(), entries: [], serial: 0, time: 0, last: 0, frame: 0, painted: 0, media: null };
 
-function livingArt(art, cell, fed, index) {
+function livingArt(art, cell, fed, index, panic) {
   if (art.tagName !== 'CANVAS') return;
   let life = animalLife.cells.get(cell);
   if (!life || life.kind !== cell.kind) {
@@ -2611,7 +2689,7 @@ function livingArt(art, cell, fed, index) {
       first: 3 + seed * 7, period: cfg.gap * (.85 + seed * .3) };
     animalLife.cells.set(cell, life);
   }
-  const entry = { art, cell, fed, life, index, moving: false };
+  const entry = { art, cell, fed, life, index, panic: !!panic, moving: false };
   animalLife.entries.push(entry);
   art.dataset.gesture = ANIMAL_GESTURES[cell.kind].name;
   // CSS breath and subtle idles continue from the same point after a render.
@@ -2637,7 +2715,7 @@ function animalMotion(life) {
 function paintLivingArt(entry, still) {
   const motion = still ? null : animalMotion(entry.life);
   entry.art.dataset.acting = motion && motion.amount > .02 ? 'true' : 'false';
-  paintAnimal(entry.art, entry.cell.kind, entry.fed, motion);
+  paintAnimal(entry.art, entry.cell.kind, entry.fed, motion, 0, entry.panic);
   entry.moving = !!(motion && motion.amount);
 }
 
@@ -2837,7 +2915,7 @@ function tileArt(kind) {
 }
 
 // Fills a `.tile` span with the art for `kind` (or empties it).
-function paintTile(node, kind, fed) {
+function paintTile(node, kind, fed, panic) {
   node.textContent = '';
   node.className = node.className.replace(/ ?tile--\w+-art/g, '');
   if (!kind) return;
@@ -2846,7 +2924,7 @@ function paintTile(node, kind, fed) {
   node.appendChild(art);
   if (art.tagName === 'CANVAS') {
     // the canvas needs its laid-out size, which only exists after paint
-    requestAnimationFrame(function () { paintAnimal(art, kind, fed == null ? 1 : fed); });
+    requestAnimationFrame(function () { paintAnimal(art, kind, fed == null ? 1 : fed, null, 0, panic); });
   }
 }
 
@@ -2904,28 +2982,18 @@ function inReach() {
   return risk;
 }
 
-// Animals that have reason to sweat, Puyo-style. Nothing here is read by
-// the rules; it only decides which tiles wear the nervous face.
-//   'panic'   a starving mouth beside it will bite next turn (inReach)
-//   'nervous' something that eats it is standing beside it, or the next
-//             tile in the hand would sweep it into a merge somewhere
-function nervousAnimals(risk) {
-  const mood = new Map();
-  for (let i = 0; i < CELLS; i++) {
-    const c = state.cells[i];
-    if (!c || !isAnimal(c.kind) || isShadow(state.cells, i)) continue;
-    const cfg = ANIMALS[c.kind];
-    for (const n of tileNeighbours(state.cells, i)) {
-      const p = state.cells[n];
-      if (p && isAnimal(p.kind) && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) mood.set(n, 'nervous');
-    }
-  }
+// Animals that wear the panicked face, Puyo-style: "oh no, here it
+// comes". Nothing here is read by the rules.
+//   - the next tile in the hand would sweep it into a merge somewhere
+//     (the same forecast that draws the merge badges on empty squares)
+//   - a starving mouth beside it bites next turn (inReach)
+function panickedAnimals(risk) {
+  const panic = new Set(risk);
   for (let i = 0; i < CELLS; i++) {
     if (state.cells[i]) continue;
-    for (const at of mergeVictims(previewGrowth(i))) mood.set(at, 'nervous');
+    for (const at of mergeVictims(previewGrowth(i))) panic.add(at);
   }
-  for (const at of risk) mood.set(at, 'panic');
-  return mood;
+  return panic;
 }
 
 // The live animals a forecast would swallow. Later chain steps also list
@@ -2940,15 +3008,6 @@ function mergeVictims(forecast) {
     }
   }
   return out;
-}
-
-function addSweat(node) {
-  const sweat = document.createElement('span');
-  sweat.className = 'sweat';
-  sweat.setAttribute('aria-hidden', 'true');
-  sweat.appendChild(document.createElement('i'));
-  sweat.appendChild(document.createElement('i'));
-  node.appendChild(sweat);
 }
 
 // render() rebuilds every tile, and a new element starts its CSS
@@ -2971,7 +3030,7 @@ function keepIdlePhase() {
 function render(grew, meals, deaths) {
   animalLife.entries = [];
   const risk = inReach();
-  const mood = nervousAnimals(risk);
+  const panic = panickedAnimals(risk);
   // at -> which rung landed there, so the square's flash can wait for the
   // ghosts that caused it instead of going off before they arrive.
   const popped = new Map((grew || []).map(function (g, n) { return [g.at, n]; }));
@@ -3071,7 +3130,7 @@ function render(grew, meals, deaths) {
       label += ', ' + (left <= 0.34 ? words[0] : left <= 0.67 ? words[1] : words[2]);
 
       if (art.tagName === 'CANVAS') {
-        livingArt(art, cell, left, i);
+        livingArt(art, cell, left, i, panic.has(i));
       }
       if (left <= 0.34) node.classList.add('cell--fading');
     }
@@ -3079,10 +3138,7 @@ function render(grew, meals, deaths) {
       node.classList.add('cell--inreach');
       label += ', about to be eaten';
     }
-    if (isAnimal(cell.kind)) {
-      addSweat(node);
-      if (mood.has(i)) node.classList.add('cell--' + mood.get(i));
-    }
+    if (panic.has(i) && isAnimal(cell.kind)) node.classList.add('cell--panic');
     node.setAttribute('aria-label', label);
 
     if (popped.has(i)) {
@@ -3313,9 +3369,9 @@ function ghostInto(from, to, kind) {
   ghost.style.setProperty('--dy', (b.y - a.y) + 'px');
   ghost.style.animationDuration = GHOST_MS + 'ms';
   fxAdd(ghost, GHOST_MS + 60);
-  paintTile(ghost, kind, 1);
   // swallowed into its partner: the moment a Puyo looks alarmed
-  if (isAnimal(kind)) { ghost.classList.add('ghost--panic'); addSweat(ghost); }
+  paintTile(ghost, kind, 1, true);
+  if (isAnimal(kind)) ghost.classList.add('ghost--panic');
 }
 
 // Where it landed. Sized to the square that kept the result, so an

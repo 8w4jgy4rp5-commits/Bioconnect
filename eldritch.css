@@ -162,6 +162,8 @@
 .skin-eldritch .cell--rabbit::after { --g1x: 36%; --g1y: 22%; --g2x: 58%; --g2y: 18%; --g3x: 47%; --g3y: 40%; }
 .skin-eldritch .cell--deer::after { --g1x: 40%; --g1y: 16%; --g2x: 64%; --g2y: 20%; --p1x: -2px; --p1y: -1px; }
 .skin-eldritch .cell--buffalo::after { --g1x: 62%; --g1y: 30%; --g2x: -50%; --g2y: -50%; --p1x: 2px; --p1y: -2px; }
+/* a panicked animal's own face is the joke then; the stickers step aside */
+.skin-eldritch .cell--panic::after { background: none; }
 
 /* tentacles on the rim, and the one that brought a flower */
 .el-deco { display: none; }
