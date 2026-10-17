@@ -2699,7 +2699,7 @@ function clearMovePreview() {
   previewMode = '';
   if (el.previewLayer) el.previewLayer.textContent = '';
   for (const node of cellNodes) {
-    node.classList.remove('cell--preview-origin', 'cell--preview-step', 'cell--preview-destination');
+    node.classList.remove('cell--preview-origin', 'cell--preview-step', 'cell--preview-destination', 'cell--preview-panic');
   }
   if (el.moveHint) {
     el.moveHint.classList.remove('is-previewing');
@@ -2737,6 +2737,7 @@ function renderMovePreview() {
   const lastSide = bigSide(last.kind);
   cellNodes[origin].classList.add('cell--preview-origin');
   for (const step of forecast) cellNodes[step.at].classList.add('cell--preview-step');
+  for (const at of mergeVictims(forecast)) cellNodes[at].classList.add('cell--preview-panic');
   for (const at of blockAt(last.at, lastSide)) cellNodes[at].classList.add('cell--preview-destination');
   if (el.moveHint) {
     el.moveHint.classList.add('is-previewing');
@@ -2903,6 +2904,53 @@ function inReach() {
   return risk;
 }
 
+// Animals that have reason to sweat, Puyo-style. Nothing here is read by
+// the rules; it only decides which tiles wear the nervous face.
+//   'panic'   a starving mouth beside it will bite next turn (inReach)
+//   'nervous' something that eats it is standing beside it, or the next
+//             tile in the hand would sweep it into a merge somewhere
+function nervousAnimals(risk) {
+  const mood = new Map();
+  for (let i = 0; i < CELLS; i++) {
+    const c = state.cells[i];
+    if (!c || !isAnimal(c.kind) || isShadow(state.cells, i)) continue;
+    const cfg = ANIMALS[c.kind];
+    for (const n of tileNeighbours(state.cells, i)) {
+      const p = state.cells[n];
+      if (p && isAnimal(p.kind) && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) mood.set(n, 'nervous');
+    }
+  }
+  for (let i = 0; i < CELLS; i++) {
+    if (state.cells[i]) continue;
+    for (const at of mergeVictims(previewGrowth(i))) mood.set(at, 'nervous');
+  }
+  for (const at of risk) mood.set(at, 'panic');
+  return mood;
+}
+
+// The live animals a forecast would swallow. Later chain steps also list
+// squares that only hold the previous rung after the merge, so a square
+// counts only if what stands there now is what that step consumes.
+function mergeVictims(forecast) {
+  const out = [];
+  for (const step of forecast) {
+    for (const at of step.from) {
+      const c = state.cells[at];
+      if (c && c.kind === step.was && isAnimal(c.kind)) out.push(at);
+    }
+  }
+  return out;
+}
+
+function addSweat(node) {
+  const sweat = document.createElement('span');
+  sweat.className = 'sweat';
+  sweat.setAttribute('aria-hidden', 'true');
+  sweat.appendChild(document.createElement('i'));
+  sweat.appendChild(document.createElement('i'));
+  node.appendChild(sweat);
+}
+
 // render() rebuilds every tile, and a new element starts its CSS
 // animation from the first frame -- so every tick (1.8s) cut each idle
 // loop (2.6-8s) off before it got anywhere, and the animals looked
@@ -2923,6 +2971,7 @@ function keepIdlePhase() {
 function render(grew, meals, deaths) {
   animalLife.entries = [];
   const risk = inReach();
+  const mood = nervousAnimals(risk);
   // at -> which rung landed there, so the square's flash can wait for the
   // ghosts that caused it instead of going off before they arrive.
   const popped = new Map((grew || []).map(function (g, n) { return [g.at, n]; }));
@@ -3029,6 +3078,10 @@ function render(grew, meals, deaths) {
     if (risk.has(i)) {
       node.classList.add('cell--inreach');
       label += ', about to be eaten';
+    }
+    if (isAnimal(cell.kind)) {
+      addSweat(node);
+      if (mood.has(i)) node.classList.add('cell--' + mood.get(i));
     }
     node.setAttribute('aria-label', label);
 
@@ -3261,6 +3314,8 @@ function ghostInto(from, to, kind) {
   ghost.style.animationDuration = GHOST_MS + 'ms';
   fxAdd(ghost, GHOST_MS + 60);
   paintTile(ghost, kind, 1);
+  // swallowed into its partner: the moment a Puyo looks alarmed
+  if (isAnimal(kind)) { ghost.classList.add('ghost--panic'); addSweat(ghost); }
 }
 
 // Where it landed. Sized to the square that kept the result, so an
