@@ -21,7 +21,7 @@
   };
   document.addEventListener('DOMContentLoaded', () => {
     const banner=document.createElement('div'); banner.id='localTestBanner';
-    banner.style.cssText='position:relative;z-index:1100;background:#4a235a;color:white;padding:6px;text-align:center;font:12px sans-serif';
+    banner.style.cssText='position:relative;z-index:1100;pointer-events:none;background:#4a235a;color:white;padding:6px;text-align:center;font:12px sans-serif';
     banner.textContent='LOCAL SIMULATION · Fake login / email code 123456 / fake payment / fake ads';
     document.body.prepend(banner);
   });
