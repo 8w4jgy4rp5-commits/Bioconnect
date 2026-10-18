@@ -1,5 +1,14 @@
 # Bioconnect 進捗
 
+## 2026-10-18 — オープニングのクリスタル残高とNo Ads入口を分離
+
+- 本人依頼: 月夜の画面右上にクリスタルの絵・所持数を真鍮色の枠で表示し、右端の＋からクリスタル専用ショップを開く。下部の小ボタン列にADSの禁止アイコンを追加し、No Ads専用ショップを開く。
+- 残高は既存のサーバーwalletと連動。未ログインは0、ログイン後の残高不明は—。No Ads所有時はOwned表示。復活のFind Crystals / locked Dawnも対応する専用画面へ。ゲーム内メニューの総合ショップは維持。
+- 確認: 320×568 / 375×812 / 812×375 / 1280×800で画面内配置、商品分離、Escape・閉じた後のフォーカス復帰、初回claim後の3表示とログアウト後の0表示、No Ads購入確認をChromeで検証。既存ブラウザ検証35項目成功（外部サービスは模擬）。証跡: output/playwright/opening-wallet/。
+- rules.test.jsは267件成功、run-outcomesも成功。npm testは既存monetization.test.cjs:172の固定rules=20と現行RULES_VERSION=22の不一致により保存同期テストで失敗（今回script.js・当該テストは変更なし）。
+- 本人の「公開して」を受け、最新mainのウサギアイコンを維持して今回の6ファイルを公開。別作業のLP・商品画像・認証案内は対象外。
+
+
 ## 2026-10-17 — 焦り顔を7種追加（キツネ・シカ・シマウマ・バッファロー・オオカミ・クマ・トラ）
 
 - 本人がChatGPTで作った8枚（zip「astonished images」）を panic-faces/<動物>-panic-src.png として保存。ライオンの口を開けた別案は lion-panic-open-mouth-src.png（未採用、口を閉じた方を継続）。

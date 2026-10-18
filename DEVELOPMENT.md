@@ -1,5 +1,9 @@
 # Bioconnect 開発方針
 
+## 2026-10-18 — オープニングの購入入口
+
+クリスタルは絵と所持数を枠内に置き、右の＋でクリスタル専用ショップを開く。No AdsはADSの禁止マークを下部の小ボタン列に配置し、No Adsだけの購入画面を開く。月夜の配色に合わせ、数字は読みやすい通常書体。未ログイン残高は0、認証済みで残高取得できない場合は—。所有済みのNo AdsはOwnedとして特典確認へ。既存の認証・購入確認・価格・付与処理を共用する。
+
 ## 2026-10-15 — 本番で販売開始・Stripeの鍵は制限付きキーも可
 
 本番で購入を有効化（CHECKOUT_ENABLED=true、paymentsEnabled=true）し、本人が実購入と全額返金の取り消しを確認した。Stripeの新しい管理画面では制限付きキー（rk_live_）しか作れない場合があるため、Edge Functions は sk_ と rk_ の両方を受け付ける。制限付きキーには Checkout Sessions（書き込み）、Prices・Products・Charges・Disputes（読み取り）が必要。止めるときは Secrets から CHECKOUT_ENABLED を消す（支払い済みの付与・取り消しのwebhookは動き続ける）。

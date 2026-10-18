@@ -353,3 +353,10 @@
 /* the old-book face has old-style figures (1 reads as I, 0 as o): prices and counts use a plain face */
 .skin-eldritch .shop-card .pack-amt, .skin-eldritch .shop-card .pack-price, .skin-eldritch .shop-card .no-ads-buy, .skin-eldritch .shop-card #walletLabel { font-family: "Segoe UI", system-ui, -apple-system, sans-serif; font-weight: 700; }
 .skin-eldritch .shop-card #walletLabel { font-weight: 600; }
+
+/* Moonlit brass frame, moss-green crystal and a quiet No Ads seal. */
+.skin-eldritch .start-wallet { background: #161d20; border-color: #665b43; color: #f1ead0; box-shadow: inset 0 1px 0 #f1ead012, 0 4px 14px #0004; }
+.skin-eldritch .start-crystal-add { background: #293728; border-color: #665b43; color: #c9e88a; }
+.skin-eldritch .start-crystal-add:hover { background: #3b4c32; }
+.skin-eldritch .start-noads { color: #c6bd9e; }
+.skin-eldritch .start-noads:hover, .skin-eldritch .start-noads.is-owned { color: #c9e88a; }

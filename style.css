@@ -2349,3 +2349,32 @@ body.is-celebrating { overflow: hidden; }
   .cell.cell--preview-panic .tile-art,
   .ghost--panic .tile-art { animation: none; }
 }
+
+/* Opening wallet and dedicated store entrances. */
+.start-topline { gap: 10px; }
+.start-resources { display: flex; align-items: flex-end; flex-direction: column; gap: 8px; }
+.start-wallet { display: flex; align-items: stretch; border: 1px solid #71934f; border-radius: 13px; background: #f1f5e7; color: #293e28; box-shadow: 0 3px 10px #0002; overflow: hidden; }
+.start-balance { display: flex; align-items: center; gap: 8px; padding: 4px 12px; min-width: 76px; font: 700 18px/1.2 "Segoe UI", system-ui, sans-serif; font-variant-numeric: tabular-nums; }
+.start-balance svg { width: 25px; height: 29px; flex: none; }
+.start-crystal-add { border: 0; border-left: 1px solid #71934f; border-radius: 0; min-width: 44px; min-height: 44px; padding: 0 10px; background: #d6e8b8; color: inherit; cursor: pointer; font: 500 28px/1 system-ui, sans-serif; }
+.start-crystal-add:hover { background: #c4dfa0; }
+.start-crystal-add:focus-visible { outline: 2px solid currentColor; outline-offset: -5px; }
+.start-noads { width: auto; min-width: 56px; height: auto; min-height: 52px; padding: 5px 9px; display: flex; flex-direction: column; gap: 2px; }
+.start-noads svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 2; }
+.start-noads svg text { fill: currentColor; stroke: none; font: 800 12px "Segoe UI", sans-serif; }
+.start-noads span { font: 600 10px/1.2 "Segoe UI", system-ui, sans-serif; letter-spacing: .04em; }
+.start-minor { align-items: center; }
+#startWallet[hidden], #startNoAdsBtn[hidden] { display: none !important; }
+#shopModal[data-shop-view="crystals"] .no-ads-product,
+#shopModal[data-shop-view="no_ads"] #crystalShopHeading,
+#shopModal[data-shop-view="no_ads"] #crystalRefundPolicy,
+#shopModal[data-shop-view="no_ads"] .crystal-products,
+#shopModal[data-shop-view="no_ads"] #claimBtn { display: none !important; }
+@media (max-height: 480px) {
+  .start-stage { padding-top: calc(env(safe-area-inset-top, 0px) + 8px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px); }
+  .start-resources { flex-direction: row; align-items: center; }
+  .start-logo { font-size: 2.7rem; }
+  .start-tagline { margin-top: 8px; padding: 4px 12px; }
+  .start-controls { gap: 8px; }
+  .start-play { min-height: 46px; }
+}

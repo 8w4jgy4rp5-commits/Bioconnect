@@ -76,9 +76,17 @@ window.BioEconomy = (() => {
     const paid = !!wallet?.no_ads;
     // Until the live backend sells, the store and revivals stay out of sight there.
     const storeOn = cfg.storeEnabled === true || loopback;
-    for (const id of ['shopBtn', 'startShopBtn']) if ($(id)) $(id).hidden = !storeOn;
+    for (const id of ['shopBtn', 'startShopBtn', 'startWallet', 'startNoAdsBtn']) if ($(id)) $(id).hidden = !storeOn;
+    const crystalCount = session ? (wallet ? String(wallet.crystals) : '—') : '0';
+    if ($('startCrystalCount')) $('startCrystalCount').textContent = crystalCount;
+    if ($('startCrystalBalance')) $('startCrystalBalance').setAttribute('aria-label', wallet || !session ? 'Crystals: ' + crystalCount : 'Crystal balance unavailable');
+    if ($('startNoAdsLabel')) $('startNoAdsLabel').textContent = paid ? 'Owned' : 'No Ads';
+    if ($('startNoAdsBtn')) {
+      $('startNoAdsBtn').classList.toggle('is-owned', paid);
+      $('startNoAdsBtn').setAttribute('aria-label', paid ? 'No Ads owned. View benefits' : 'Open No Ads shop');
+    }
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
-    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : 'Sign in to claim 3 free Crystals or purchase';
+    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : ($('shopModal')?.dataset.shopView === 'no_ads' ? 'Sign in to purchase No Ads or view your benefits' : 'Sign in to claim 3 free Crystals or purchase');
     if ($('authControls')) $('authControls').hidden = !!session;
     if ($('googleLink')) {
       $('googleLink').hidden = !session || !!test || googleLinked(session.user);
@@ -366,9 +374,14 @@ window.BioEconomy = (() => {
       try { window.adBreak(config); } catch { finish(); }
     });
   }
-  function openShop() {
+  function openShop(view = 'all') {
     if (busy || adPanel || adActive) return;
-    opener = document.activeElement; panel = $('shopModal'); panel.hidden = false;
+    view = ['crystals', 'no_ads'].includes(view) ? view : 'all';
+    opener = document.activeElement; panel = $('shopModal');
+    panel.dataset.shopView = view;
+    $('shopTitle').textContent = view === 'no_ads' ? 'No Ads' : view === 'crystals' ? 'Crystals' : 'Crystals & No Ads';
+    panel.hidden = false;
+    panel.querySelector('.shop-card').scrollTop = 0;
     pause(); draw(); $('shopClose').focus();
     refresh();
   }
@@ -471,7 +484,8 @@ window.BioEconomy = (() => {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first?.focus(); }
   }
   async function init() {
-    $('shopBtn').onclick = openShop; $('startShopBtn').onclick = openShop;
+    $('shopBtn').onclick = () => openShop(); $('startShopBtn').onclick = () => openShop('crystals');
+    $('startNoAdsBtn').onclick = () => openShop('no_ads');
     $('shopClose').onclick = closeShop; $('shopModal').onclick = e => { if (e.target === $('shopModal')) closeShop(); };
     $('claimBtn').onclick = claim; $('signOutBtn').onclick = signOut;
     $('googleLink').onclick = linkGoogle;
@@ -491,8 +505,8 @@ window.BioEconomy = (() => {
     window.addEventListener('pageshow', e => { if (e.persisted && leaving) { leaving = false; cancelConfirm(); draw(); } });
     $('confirmBack').onclick = () => { const sku = confirming; cancelConfirm(); document.querySelector(`[data-product="${sku}"]`)?.focus(); };
     $('reviveCrystal').onclick = () => revive('crystal'); $('reviveDaily').onclick = () => revive('daily'); $('reviveAd').onclick = () => revive('ad');
-    $('reviveFind').onclick = openShop;
-    $('reviveDawnLocked').onclick = () => { openShop(); document.querySelector('.no-ads-product')?.scrollIntoView({ block: 'nearest' }); };
+    $('reviveFind').onclick = () => openShop('crystals');
+    $('reviveDawnLocked').onclick = () => openShop('no_ads');
     $('reviveResume').onclick = () => { if (!isBlocking()) game().resumeRevival(); };
     document.addEventListener('keydown', trapFocus);
     const authError = oauthError();
