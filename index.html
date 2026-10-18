@@ -9,7 +9,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="img/icon/favicon-16.png" />
   <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="manifest" href="site.webmanifest" />
-  <link rel="stylesheet" href="style.css?v=28202005" />
+  <link rel="stylesheet" href="style.css?v=2a22dc0e" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
@@ -271,7 +271,6 @@
       <span class="season-track"><span class="season-fill" id="seasonFill"></span></span>
     </div>
     <button class="pop-chip pause-btn" id="pauseBtn" type="button" aria-label="Pause" aria-haspopup="dialog" aria-controls="pauseSheet"><span aria-hidden="true"></span></button>
-    <button class="pop-chip menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-haspopup="dialog" aria-controls="menuSheet"><span aria-hidden="true"></span></button>
   </div>
 
   <!-- What to make next, said as a speech bubble from the next animal. -->
@@ -377,10 +376,6 @@
     <div class="menu-head"><h2 id="menuTitle">Menu</h2><button class="pop-chip menu-close" id="menuClose" type="button" aria-label="Close menu">&times;</button></div>
   <!-- ---------- Controls ---------- -->
   <div class="controls">
-    <button class="btn" id="howBtn" type="button">How to play</button><button class="btn" id="shopBtn" type="button" hidden>Crystals &amp; No Ads</button>
-    <!-- Real time punishes anyone who reads the board slowly. The setting
-         is not a difficulty level and is not hidden away as one. -->
-    <button class="btn btn--speed" id="speedBtn" type="button" aria-pressed="false">Normal</button>
     <button class="btn" id="newBtn" type="button">New game</button>
   </div>
   <!-- The rung. Score alone does not say whether a run was any good,
@@ -415,6 +410,13 @@
       <p class="pause-sub">The meadow will wait for you.</p>
       <button class="btn btn--primary pause-action" id="pauseResume" type="button">Resume</button>
       <button class="btn pause-action" id="pauseNew" type="button">New game</button>
+      <!-- What used to sit behind the menu button: the guide, the pace and the store.
+           The pace is not a difficulty level and is not hidden away as one. -->
+      <div class="pause-extras">
+        <button class="btn" id="howBtn" type="button">How to play</button>
+        <button class="btn btn--speed" id="speedBtn" type="button" aria-pressed="false">Speed: Normal</button>
+        <button class="btn" id="shopBtn" type="button" hidden>Crystals &amp; No Ads</button>
+      </div>
     </div>
     <div class="pause-view" id="pauseConfirm" hidden>
       <h2 class="pause-title" id="pauseConfirmTitle">Start over?</h2>
@@ -511,8 +513,9 @@
           <span id="startNoAdsLabel">No Ads</span>
         </button>
         <button class="start-icon" id="startHowBtn" type="button" aria-label="How to play">?</button>
-        <button class="start-icon start-ledger" id="startLedgerBtn" type="button" aria-label="The Ledger: your seals">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5c3-1 6-1 8 1 2-2 5-2 8-1v14c-3-1-6-1-8 1-2-2-5-2-8-1z"/><path d="M12 6v14"/></svg>
+        <button class="start-icon start-ledger" id="startLedgerBtn" type="button" aria-label="Achievements">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4v1a3 3 0 0 0 3 3M17 5h3v1a3 3 0 0 1-3 3M12 13v4M8 21h8l-1-4H9z"/></svg>
+          <span>Achievements</span>
           <span class="ledger-dot" id="ledgerDot" hidden></span>
         </button>
       </div>
@@ -612,7 +615,7 @@
 <script src="audio.js?v=880090c9"></script>
 <script src="shared/monetization-config.js?v=c2e6d691"></script>
 <script src="monetization.js?v=3ba9606f"></script>
-<script src="script.js?v=ec73b475"></script>
+<script src="script.js?v=2b485f47"></script>
 <script src="watch.js?v=cb2e678f"></script>
 <script src="skin.js?v=126147c3"></script>
 <!-- cobbleworks:footer:start -->

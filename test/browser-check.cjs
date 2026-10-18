@@ -17,7 +17,7 @@ async function main(){
     });await page.locator('#gameover').waitFor({state:'visible'});
   };
   const start=async()=>{await page.goto(server.url);await page.locator('#startBtn').focus();await page.locator('#startBtn').press('Enter');await page.locator('#countdown').waitFor({state:'hidden'});};
-  const shop=async()=>{await page.locator('#menuBtn').click();await page.locator('#shopBtn').click();};
+  const shop=async()=>{await page.locator('#pauseBtn').click();await page.locator('#shopBtn').click();};
   const login=async(email='a@example.test')=>{await page.locator('#signInEmail').fill(email);await page.locator('#sendCodeBtn').click();await page.locator('#signInCode').fill('123456');await page.locator('#verifyCodeBtn').click();await page.waitForFunction(()=>BioEconomy.summary().wallet!==null);};
   try{
     // A separate browser profile covers hosted-checkout return before PLAY.
@@ -63,7 +63,7 @@ async function main(){
     await shop();await login();await page.locator('#claimBtn').click();await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===3);ok('email code login and one-time three-Crystal claim');
     await page.screenshot({path:path.join(out,'store-mobile.png')});
     assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);ok('375px store has no horizontal overflow');
-    await page.locator('#shopClose').click();await page.locator('#menuClose').click();await stage();
+    await page.locator('#shopClose').click();await page.locator('#pauseResume').click();await stage();
     await page.locator('#reviveCrystal').click();await page.locator('#reviveResume').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),2);assert.equal(await page.locator('[data-ad="complete"]').count(),0);ok('Crystal revival spends one without an ad');
     await page.locator('#reviveResume').click();await shop();
     await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();await page.locator('#unpaid').click();await page.locator('#shopModal').waitFor({state:'visible'});await page.waitForFunction(()=>BioEconomy.summary().wallet?.crystals===2);ok('checkout return alone grants nothing');
@@ -76,7 +76,7 @@ async function main(){
     await stage();assert.equal(await page.locator('#reviveDaily').isVisible(),false);assert.equal(await page.locator('#reviveAd').isVisible(),false);
     await page.locator('#reviveCrystal').click();await page.locator('#reviveResume').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),11);ok('daily exhausted purchaser uses one Crystal');
     await page.locator('#reviveResume').click();await shop();await page.locator('#signOutBtn').click();await page.waitForFunction(()=>BioEconomy.summary().owner===null);await login('b@example.test');assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),0);assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.no_ads),false);ok('logout and account switching clear balances and rights');
-    await page.locator('#claimBtn').click();await page.waitForFunction(()=>BioEconomy.summary().wallet.crystals===3);await page.locator('#shopClose').click();await page.locator('#menuClose').click();
+    await page.locator('#claimBtn').click();await page.waitForFunction(()=>BioEconomy.summary().wallet.crystals===3);await page.locator('#shopClose').click();await page.locator('#pauseResume').click();
     await page.evaluate(()=>newGame());await stage();
     await fetch(server.url+'/__test/drop-next',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
     await page.locator('#reviveCrystal').click();await page.waitForFunction(()=>BioEconomy.summary().pending&&!BioEconomy.summary().busy);assert.equal(await page.locator('#goAgain').isDisabled(),true);ok('lost consume response locks alternative actions and keeps durable snapshot');
@@ -91,7 +91,7 @@ async function main(){
     await page.setViewportSize({width:320,height:568});await page.screenshot({path:path.join(out,'revived-320.png')});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
     const resumeBox=await page.locator('#reviveResume').boundingBox();assert.ok(resumeBox.y>=0&&resumeBox.y+resumeBox.height<=568);ok('320px mobile viewport with visible Resume and unwrapped score marker');
     await page.locator('#reviveResume').click();await shop();await page.locator('#signOutBtn').click();await page.locator('#googleSignIn').click();await page.waitForFunction(()=>BioEconomy.summary().owner?.endsWith('1'));ok('Google login control with explicitly simulated provider');
-    await page.locator('#shopClose').click();await page.locator('#menuClose').click();await page.evaluate(()=>newGame());await stage();
+    await page.locator('#shopClose').click();await page.locator('#pauseResume').click();await page.evaluate(()=>newGame());await stage();
     async function holdWalletWhileSwitching(action) {
       let held=false, release, started;
       const waitForStart=new Promise(r=>started=r), gate=new Promise(r=>release=r);
@@ -108,7 +108,7 @@ async function main(){
     }
     await holdWalletWhileSwitching(()=>page.locator('#reviveCrystal').click());
     assert.equal(await page.evaluate(()=>BioEconomy.summary().wallet.crystals),2);assert.equal(await page.evaluate(()=>state.over&&!state.revived),true);assert.equal(await page.evaluate(()=>BioEconomy.summary().pending),false);ok('account switch while initial wallet awaits cannot consume the new account');
-    await page.evaluate(()=>window.__BIOCONNECT_TEST_ADAPTER__.signIn());await page.waitForFunction(()=>BioEconomy.summary().wallet?.no_ads);await shop();
+    await page.evaluate(()=>window.__BIOCONNECT_TEST_ADAPTER__.signIn());await page.waitForFunction(()=>BioEconomy.summary().wallet?.no_ads);await page.evaluate(()=>BioEconomy.openShop());
     const ordersBefore=(await server.db.query('select count(*)::int as n from bioconnect_private.orders where owner_id=$1',['00000000-0000-4000-8000-000000000002'])).rows[0].n;
     await holdWalletWhileSwitching(async()=>{await page.locator('[data-product="crystals5"]').click();await page.locator('#confirmBuy').click();});
     const ordersAfter=(await server.db.query('select count(*)::int as n from bioconnect_private.orders where owner_id=$1',['00000000-0000-4000-8000-000000000002'])).rows[0].n;

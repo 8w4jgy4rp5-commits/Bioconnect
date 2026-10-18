@@ -3794,6 +3794,7 @@ function closeMenu() {
 // a revival that is waiting for its own Resume, or the elephant party.
 function coinSound() { if (window.BioAudio && window.BioAudio.coin) window.BioAudio.coin(); }
 function pauseOpen() { return !!el.pauseSheet && !el.pauseSheet.hidden; }
+function shopOpen() { const m = document.getElementById('shopModal'); return !!m && !m.hidden; }
 function canPause() {
   return !state.over && !state.revivalWait && !state.celebrating && !counting
     && el.startScreen.hidden && el.howModal.hidden && !menuOpen() && !window.BioEconomy?.isBlocking();
@@ -3843,7 +3844,7 @@ function openHow(opener) {
 
 function closeHow() {
   el.howModal.hidden = true;
-  if (el.startScreen.hidden) document.body.classList.remove('is-modal');
+  if (el.startScreen.hidden && !pauseOpen()) document.body.classList.remove('is-modal');
   (howOpener || el.howBtn).focus();
 }
 
@@ -4464,7 +4465,7 @@ async function init() {
 
   el.speedBtn.addEventListener('click', function () {
     setRelaxed(!state.relaxed);
-    el.speedBtn.textContent = state.relaxed ? 'Relaxed' : 'Normal';
+    el.speedBtn.textContent = state.relaxed ? 'Speed: Relaxed' : 'Speed: Normal';
     el.speedBtn.setAttribute('aria-pressed', String(state.relaxed));
   });
 
@@ -4482,7 +4483,8 @@ async function init() {
     if (e.target === el.howModal) resume();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !el.howModal.hidden) resume();
+    // the guide can sit over the pause card; Escape closes only the guide
+    if (e.key === 'Escape' && !el.howModal.hidden) { resume(); e.stopImmediatePropagation(); }
   });
   document.addEventListener('visibilitychange', function () {
     setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || pauseOpen() || counting);
@@ -4507,7 +4509,7 @@ async function init() {
   el.pauseNo.addEventListener('click', function () { coinSound(); showPauseView(false); });
   el.pauseYes.addEventListener('click', startOverFromPause);
   document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape' || !pauseOpen()) return;
+    if (e.key !== 'Escape' || !pauseOpen() || !el.howModal.hidden || shopOpen()) return;
     if (el.pauseConfirm.hidden) closePause(); else { coinSound(); showPauseView(false); }
   });
 

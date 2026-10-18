@@ -116,7 +116,7 @@ const {engine,launchTestBrowser,evidenceDir}=require('./browser-runtime.cjs');co
   assert.equal(await sdk.evaluate(()=>fixtureSdkUrl),sdk.url());assert.match(sdk.url(),/code=fixture-code/);assert.equal(await sdk.locator('#shopModal').isVisible(),false);ok('successful callback parameters remain available to Auth SDK');
   // A real game snapshot, including paused active play, survives a denied OAuth return.
   await linked.goto(server.url+'/plain.html');await linked.locator('#shopModal').waitFor({state:'visible'});await linked.locator('#shopClose').click();await linked.locator('#startBtn').press('Enter');await linked.locator('#countdown').waitFor({state:'hidden'});
-  await linked.locator('#menuBtn').click();await linked.locator('#shopBtn').click();await linked.locator('#googleLink').click();await linked.waitForURL('https://accounts.google.com/**');
+  await linked.locator('#pauseBtn').click();await linked.locator('#shopBtn').click();await linked.locator('#googleLink').click();await linked.waitForURL('https://accounts.google.com/**');
   const active=linked.authProof.snapshot;
   await linked.goto(server.url+'/plain.html?error=access_denied&error_description=cancelled');await linked.locator('#shopModal').waitFor({state:'visible'});
   assert.deepEqual(await linked.evaluate(()=>BioGame.snapshot()),active);assert.equal(await linked.evaluate(()=>BioGame.snapshot().startScreenVisible),false);assert.equal(await linked.evaluate(()=>state.paused),true);ok('denied OAuth restores the complete active game and holds it paused');
