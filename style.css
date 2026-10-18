@@ -2222,7 +2222,7 @@ body.is-celebrating { overflow: hidden; }
 #crystalRefundPolicy { margin:2px 0 0; font-size:12px; opacity:.8; }
 .crystal-products { gap:6px; }
 .economy-card .crystal-pack { display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 6px 12px; border-radius:6px; }
-.pack-gems { width:60px; height:44px; }
+.pack-gems { width:80px; height:59px; }
 .pack-amt { font-size:24px; font-weight:700; line-height:1; }
 .pack-price { margin-top:6px; padding:2px 14px; border-radius:4px; background:#243c2e; color:#fff8e8; font-size:15px; font-weight:700; }
 .crystal-pack:disabled { opacity:.55; }
@@ -2378,3 +2378,8 @@ body.is-celebrating { overflow: hidden; }
   .start-controls { gap: 8px; }
   .start-play { min-height: 46px; }
 }
+
+/* Signed-out tap on a paid action: the reason shows in red above the sign-in buttons. */
+.auth-prompt { margin: 4px 0 8px; color: #c0281c; font-weight: 700; font-size: 14px; line-height: 1.35; }
+.auth-prompt[hidden] { display: none; }
+.skin-eldritch .shop-card .auth-prompt { color: #ff7a6b; }

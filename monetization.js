@@ -88,6 +88,7 @@ window.BioEconomy = (() => {
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
     if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : ($('shopModal')?.dataset.shopView === 'no_ads' ? 'Sign in to purchase No Ads or view your benefits' : 'Sign in to claim 3 free Crystals or purchase');
     if ($('authControls')) $('authControls').hidden = !!session;
+    if (session && $('authPrompt')) $('authPrompt').hidden = true;
     if ($('googleLink')) {
       $('googleLink').hidden = !session || !!test || googleLinked(session.user);
       $('googleLink').disabled = busy || !!pending || !known;
@@ -175,9 +176,16 @@ window.BioEconomy = (() => {
     try { await action(); } catch (err) { notice(err.message || 'Service unavailable. Please retry.'); }
     finally { busy = false; draw(); }
   }
-  function requireLogin() {
+  // Signed out: bring the sign-in buttons into view and say why, in red, right above them.
+  function requireLogin(sku) {
     if (uid()) return true;
-    openShop(); message('Sign in to purchase or claim your free Crystals.'); return false;
+    if (panel) panel.querySelector('.shop-card').scrollTop = 0; else openShop();
+    if (!panel) return false;
+    const why = sku === 'no_ads' ? 'Sign in first to buy No Ads.' : sku ? 'Sign in first to buy Crystals.'
+      : 'Sign in first to use Crystals or claim your 3 free ones.';
+    $('authPrompt').textContent = why; $('authPrompt').hidden = false;
+    message('Sign in to purchase or claim your free Crystals.');
+    $('googleSignIn').focus(); return false;
   }
   async function claim() {
     if (!requireLogin()) return;
@@ -185,7 +193,7 @@ window.BioEconomy = (() => {
   }
   // Final review before leaving for Stripe: item, price, payment, delivery, refunds.
   function confirmPurchase(sku) {
-    if (!requireLogin()) return;
+    if (!requireLogin(sku)) return;
     if (!test && !cfg.paymentsEnabled) { notice('Purchases are not enabled yet.'); return; }
     if (!Object.hasOwn(products, sku)) return;
     confirming = sku;
@@ -200,7 +208,7 @@ window.BioEconomy = (() => {
     if ($('checkoutConfirm')) $('checkoutConfirm').hidden = true;
   }
   async function buy(sku) {
-    if (!requireLogin()) return;
+    if (!requireLogin(sku)) return;
     if (!test && !cfg.paymentsEnabled) { message('Purchases are not enabled yet.'); return; }
     const owner = uid(), version = epoch;
     await exclusive(async () => {
@@ -387,7 +395,7 @@ window.BioEconomy = (() => {
   }
   function closeShop() {
     if (!panel || busy) return;
-    cancelConfirm(); panel.hidden = true; panel = null; game()?.resumeIfAllowed(); opener?.focus();
+    cancelConfirm(); $('authPrompt').hidden = true; panel.hidden = true; panel = null; game()?.resumeIfAllowed(); opener?.focus();
   }
   async function googleLogin() {
     if (test) { await test.signIn('google'); return; }
