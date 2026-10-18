@@ -2383,3 +2383,12 @@ body.is-celebrating { overflow: hidden; }
 .auth-prompt { margin: 4px 0 8px; color: #c0281c; font-weight: 700; font-size: 14px; line-height: 1.35; }
 .auth-prompt[hidden] { display: none; }
 .skin-eldritch .shop-card .auth-prompt { color: #ff7a6b; }
+
+/* The best score sits right beside the kicker, not with the wallet. */
+.start-intro { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.start-intro .start-best { white-space: nowrap; }
+@media (max-width: 360px) {
+  .start-intro { gap: 6px; }
+  .start-intro .start-kicker { letter-spacing: .06em; }
+  .start-intro .start-best { padding: 6px 9px; }
+}
