@@ -5,6 +5,8 @@ window.BioSound = (() => {
   const BPM = 120, BEAT = 60 / BPM, BARS = 16, BEATS = BARS * 4;
   // The title screen plays the same tune, slower, as a music box.
   const TITLE_BEAT = 60 / 84;
+  // A nearly full meadow plays the same tune faster, over a ticking clock.
+  const PINCH_BEAT = 60 / 144, NORMAL_BEAT = BEAT;
   // Each newly encountered species joins the band once during this run.
   const INSTRUMENTS = Object.freeze([
     { kind: 'rabbit', name: 'Piano' },
@@ -272,7 +274,7 @@ window.BioSound = (() => {
       }
     }
 
-    function ensembleBeat(beat, time, kinds) {
+    function ensembleBeat(beat, time, kinds, BEAT) {
       const bar = Math.floor(beat / 4), within = beat % 4, notes = harmony(bar, within);
       const active = new Set(kinds);
       const play = (kind, midi, offset, duration, volume) => {
@@ -309,10 +311,25 @@ window.BioSound = (() => {
       [62,65,69,65].forEach((midi,i) => instrument(kind,midi + (low ? -12 : high ? 12 : 0),time + i * .65,.6,.11));
     }
 
-    function musicBeat(index, time, theme = 'game', kinds = []) {
+    // Urgency on top of the band: a clock ticking every half beat and a
+    // low staccato pulse, plus a rising alarm call at the end of each bar.
+    function pinchBeat(beat, time, notes) {
+      const within = beat % 4;
+      [0, .5].forEach((offset, i) => {
+        const t = time + offset * PINCH_BEAT;
+        tone(i ? 2350 : 1760, t, .045, i ? .012 : .018, music, 'square', .001);
+        tuba(notes[0] - 12, t, PINCH_BEAT * .3, .045);
+      });
+      if (within === 3) {
+        whistle(notes[3] + 12, time + PINCH_BEAT * .5, PINCH_BEAT * .45, .03, notes[3] + 13);
+      }
+    }
+
+    function musicBeat(index, time, theme = 'game', kinds = [], pinch = false) {
       const beat = ((index % BEATS) + BEATS) % BEATS;
       if (theme === 'rest') return;
       if (theme === 'title') return titleBeat(beat, time);
+      const BEAT = pinch ? PINCH_BEAT : NORMAL_BEAT;
       setEnsemble(kinds, time);
       const bar = Math.floor(beat / 4), within = beat % 4;
       const score = HOLLOW_BARS[bar % 8], notes = harmony(bar, within);
@@ -332,7 +349,8 @@ window.BioSound = (() => {
         whistle(bar % 8 === 3 ? 69 : 74, time, BEAT * 1.8, .022, bar % 8 === 3 ? 86 : 62);
       }
       if (bar % 8 >= 4) tone(hz(notes[1 + (within + 1) % 3] + 12), time + BEAT * .5, .17, .014, music, 'triangle', .003);
-      ensembleBeat(beat, time, kinds);
+      ensembleBeat(beat, time, kinds, BEAT);
+      if (pinch) pinchBeat(beat, time, notes);
     }
 
     function plant(time) {
@@ -476,6 +494,7 @@ window.BioSound = (() => {
 
     return { musicBeat, effect, coin, cancel, setEnsemble, instrumentPreview, setApplause, setCheer };
   }
-  const beatLength = theme => theme === 'title' ? TITLE_BEAT : BEAT;
+  const beatLength = (theme, pinch = false) =>
+    theme === 'title' ? TITLE_BEAT : pinch && theme === 'game' ? PINCH_BEAT : BEAT;
   return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Tiptoe Hollow — Meadow Band' };
 })();

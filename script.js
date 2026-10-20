@@ -56,6 +56,7 @@
 
 const SIZE = 5;                 // board is SIZE x SIZE
 const CELLS = SIZE * SIZE;
+const PINCH_CELLS = 20;          // this many filled squares switches to the pinch music
 
 // How many touching alike tiles it takes to grow up. Two, all the way
 // up the ladder now.
@@ -2973,6 +2974,9 @@ function keepIdlePhase() {
 
 function render(grew, meals, deaths) {
   animalLife.entries = [];
+  if (window.BioAudio && window.BioAudio.pinch) {
+    window.BioAudio.pinch(!state.over && state.cells.filter(Boolean).length >= PINCH_CELLS);
+  }
   const risk = inReach();
   const panic = panickedAnimals(risk);
   // at -> which rung landed there, so the square's flash can wait for the

@@ -4,7 +4,7 @@ window.BioAudio = (() => {
   let ctx, synth, paused = true, theme = 'title', adMuted = false, held = false;
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
-  let playingKinds = [];
+  let playingKinds = [], pinch = false, playingPinch = false;
   // Fetch our local asset early, then decode once the browser has an audio context.
   // Failure leaves the usual merge sounds intact; never substitute synthetic claps.
   const load = url => fetch(url)
@@ -36,10 +36,11 @@ window.BioAudio = (() => {
     if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + .035;
     while (nextTime < ctx.currentTime + .16) {
       // Join on the next bar without restarting the tune or its tempo.
-      if (theme === 'game' && beat % 4 === 0) playingKinds = [...discovered];
-      synth.musicBeat(beat, nextTime, theme, playingKinds);
+      // The pinch tempo also switches on a bar, in either direction.
+      if (theme === 'game' && beat % 4 === 0) { playingKinds = [...discovered]; playingPinch = pinch; }
+      synth.musicBeat(beat, nextTime, theme, playingKinds, playingPinch);
       beat = (beat + 1) % window.BioSound.BEATS;
-      nextTime += window.BioSound.beatLength(theme);
+      nextTime += window.BioSound.beatLength(theme, playingPinch);
     }
   }
 
@@ -89,7 +90,9 @@ window.BioAudio = (() => {
         if (known.has(kind)) discovered.add(kind);
       }
     },
-    band() { return { discovered: [...discovered], playing: playingKinds.slice(), theme, adMuted }; },
+    band() { return { discovered: [...discovered], playing: playingKinds.slice(), theme, adMuted, pinch: playingPinch }; },
+    // A crowded board asks for the urgent arrangement; it lands on the next bar.
+    pinch(on) { pinch = !!on; },
     theme(name) {
       if (theme === name) return;
       theme = name;
@@ -108,7 +111,7 @@ window.BioAudio = (() => {
       if (on && synth) synth.cancel('effects');
     },
     reset() {
-      discovered.clear(); playingKinds = [];
+      discovered.clear(); playingKinds = []; pinch = playingPinch = false;
       if (synth) { synth.cancel(); synth.setEnsemble([], ctx.currentTime); }
       clearInterval(timer); timer = 0; beat = 0; lastEffect = -1;
       sync();
