@@ -1,0 +1,40 @@
+/* Practice uses the same board, with one unmistakable next action. */
+.lesson-bar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; color:#f5f0dc; background:#273b29; border:1px solid #a8c66c; border-radius:12px; padding:9px 12px; font:13px/1.4 system-ui,sans-serif; }
+.lesson-bar[hidden], .lesson-bar button[hidden] { display:none; }
+.lesson-bar span { flex:1; }
+.lesson-bar button { min-height:40px; padding:7px 12px; border:1px solid #a8c66c; border-radius:8px; font:600 13px/1.3 system-ui,sans-serif; cursor:pointer; }
+.lesson-skip { background:transparent; color:#f5f0dc; }
+.lesson-next { background:#d5e9a0; color:#19291f; }
+.lesson-bar button:focus-visible, .start-basics:focus-visible { outline:3px solid #f6bd76; outline-offset:3px; }
+.start-basics { border:0; background:transparent; color:inherit; font:13px/1.4 system-ui,sans-serif; text-decoration:underline; text-underline-offset:4px; padding:8px 12px; min-height:36px; cursor:pointer; }
+.is-lesson .cell.cell--lesson-target { outline:3px solid #f5cf78; outline-offset:-4px; background:#53693b; box-shadow:inset 0 0 22px #f5cf7855; animation:lesson-glow 1.5s ease-in-out infinite; }
+.is-lesson .cell.cell--lesson-source { outline:2px solid #d5e9a0; outline-offset:-3px; }
+.is-lesson .lesson-hand .is-now { outline:3px solid #f5cf78; outline-offset:3px; border-radius:16px; }
+.is-lesson .goal-words strong, .is-lesson .goal-words small { font-family:system-ui,sans-serif; font-style:normal; }
+.is-lesson .goal-words strong { font-size:15px; }
+.is-lesson .goal-words small { font-size:12px; line-height:1.4; }
+.is-lesson #pauseBtn, .is-lesson #seasonFill, .is-lesson .season-next, .is-lesson .season-note { visibility:hidden; }
+.is-lesson .ladder-strip { opacity:.55; }
+@keyframes lesson-glow { 50% { box-shadow:inset 0 0 32px #f5cf7890; } }
+@media(prefers-reduced-motion:reduce) { .is-lesson .cell.cell--lesson-target { animation:none; } }
+@media(max-width:360px) { .lesson-bar { font-size:12px; gap:6px; padding:7px 9px; } .lesson-bar button { padding:7px 9px; } }
+
+/* Keep the board and the current hand visible while the practice bar is up. */
+.is-lesson .board-frame { width:min(100%, max(240px, calc(100svh - 445px))); align-self:center; justify-self:center; }
+.lesson-bar { flex-wrap:nowrap; min-height:60px; box-sizing:border-box; }
+.lesson-bar button { min-width:124px; }
+.is-lesson .handbar .hand-piece:not(.is-now), .is-lesson .handbar .hand-arrow { display:none; }
+.is-lesson .goal-words { min-height:62px; }
+.is-lesson .cell:not(.cell--lesson-target) .merge-preview { visibility:hidden; }
+
+/* Scores and the full ladder wait until the actual run. */
+.is-lesson .pop-top, .is-lesson .ladder-strip { display:none; }
+@media(max-height:650px) { .is-lesson .meadow-notes { display:none; } }
+
+/* Let the pair, placement glow and result do the teaching. The short
+   verbal feedback remains available to screen readers. */
+.is-lesson .goal-words, .is-lesson .move-hint { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.is-lesson .growth-summary { justify-content:center; gap:20px; min-height:62px; }
+.is-lesson .goal-pair::after { content:'→'; padding-left:12px; font:24px/1 system-ui,sans-serif; }
+.is-lesson .meadow-notes { display:block; position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.start-basics { font-size:20px; line-height:1; }

@@ -123,10 +123,10 @@ window.BioEconomy = (() => {
       $('reviveAd').disabled = $('reviveFind').disabled = $('reviveDawnLocked').disabled = busy || !!pending;
       $('goAgain').disabled = busy || !!pending;
       const words = (id, title, note) => { const b = $(id); b.querySelector('strong').textContent = title; b.querySelector('em').textContent = note; };
-      words('reviveCrystal', pending?.source === 'crystal' ? 'Retry Crystal revival' : 'Offer 1 Crystal',
-        pending?.source === 'crystal' ? 'confirming with your account' : wallet ? `you have ${wallet.crystals}` : session ? '' : 'sign in for 3 free Crystals');
-      words('reviveDaily', pending?.source === 'daily' ? 'Retry daily revival' : 'Wait for Dawn',
-        pending?.source === 'daily' ? 'confirming with your account' : 'free · once a day');
+      words('reviveCrystal', pending?.source === 'crystal' ? 'Retry revival' : 'Revive',
+        pending?.source === 'crystal' ? '1 Crystal · confirming your previous request' : wallet ? `1 Crystal · balance: ${wallet.crystals}` : session ? 'Requires 1 Crystal · balance unavailable' : 'Requires 1 Crystal · sign in');
+      words('reviveDaily', pending?.source === 'daily' ? 'Retry revival' : 'Revive',
+        pending?.source === 'daily' ? 'Free daily revival · confirming your previous request' : 'Free · once a day');
       if (s?.revived) $('reviveStatus').textContent = 'Revival already used in this game.';
     }
   }

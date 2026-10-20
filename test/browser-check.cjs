@@ -16,7 +16,7 @@ async function main(){
       state.score=55555;state.ticks=103;state.stock=['grass','fox','rabbit'];state.topKind='tiger';state.over=false;state.paused=true;render();endRun();
     });await page.locator('#gameover').waitFor({state:'visible'});
   };
-  const start=async()=>{await page.goto(server.url);await page.locator('#startBtn').focus();await page.locator('#startBtn').press('Enter');await page.locator('#countdown').waitFor({state:'hidden'});};
+  const start=async()=>{await page.goto(server.url);await page.locator('#startBtn').focus();await page.locator('#startBtn').press('Enter');if(await page.locator('#lessonBar').isVisible()) await page.locator('#lessonSkip').click();await page.locator('#countdown').waitFor({state:'hidden'});};
   const shop=async()=>{await page.locator('#pauseBtn').click();await page.locator('#shopBtn').click();};
   const login=async(email='a@example.test')=>{await page.locator('#signInEmail').fill(email);await page.locator('#sendCodeBtn').click();await page.locator('#signInCode').fill('123456');await page.locator('#verifyCodeBtn').click();await page.waitForFunction(()=>BioEconomy.summary().wallet!==null);};
   try{
@@ -39,7 +39,7 @@ async function main(){
       assert.equal(await titlePage.locator('#reviveResume').isVisible(),false);
       assert.equal(await titlePage.evaluate(()=>state.paused),true);
       ok('title purchase return waits for PLAY with no revival Resume');
-      await titlePage.locator('#startBtn').focus();await titlePage.locator('#startBtn').press('Enter');await titlePage.locator('#countdown').waitFor({state:'hidden'});
+      await titlePage.locator('#startBtn').focus();await titlePage.locator('#startBtn').press('Enter');if(await titlePage.locator('#lessonBar').isVisible()) await titlePage.locator('#lessonSkip').click();await titlePage.locator('#countdown').waitFor({state:'hidden'});
       assert.equal(await titlePage.evaluate(()=>state.paused||state.revived||state.revivalWait),false);
       ok('PLAY starts normally after title purchase return');
     } finally { await titleContext.close(); }

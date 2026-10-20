@@ -1056,7 +1056,7 @@ function openLedger(opener) {
 function closeLedger() {
   if (el.ledgerModal.hidden) return;
   el.ledgerModal.hidden = true;
-  if (el.startScreen.hidden && el.howModal.hidden) document.body.classList.remove('is-modal');
+  if (el.startScreen.hidden) document.body.classList.remove('is-modal');
   if (ledgerOpener && document.contains(ledgerOpener)) ledgerOpener.focus();
 }
 
@@ -1101,6 +1101,7 @@ const state = {
   next: 'sprout',     // what the next tick will hand you
   refill: 0,          // ticks banked toward the next tile
   score: 0,
+  runStats: null,
   best: 0,
   bestRevived: false,
   revived: false,
@@ -1284,9 +1285,153 @@ function pickBlock(cells, at, side) {
   return best;
 }
 
+// Three unscored practice moves. The clock stays still, but merges and
+// feeding use the actual rules. No score, discovery, outcome or wallet writes.
+const lesson = { active: false, step: 0, done: false, handled: false };
+const LESSON_KEY = 'ecosystem-puzzle:basics:v1';
+const LESSONS = [
+  { tiles: [[12, 'sprout']], hand: 'sprout', target: 13,
+    title: 'Put the sprouts together', hint: 'Tap the glowing square.',
+    success: 'Two sprouts became grass!', next: 'Try a chain' },
+  { tiles: [[11, 'grass'], [12, 'rabbit']], hand: 'grass', target: 10,
+    title: 'One move, two merges', hint: 'Grass → rabbit → fox. Try the glowing square.',
+    success: 'Grass → rabbit → fox. That is a chain!', next: 'Try feeding' },
+  { tiles: [[12, 'rabbit']], hand: 'grass', target: 13,
+    title: 'This rabbit is hungry', hint: 'Put grass beside it to feed it.',
+    success: 'It ate the grass. Fed rabbit, free square!', next: 'Play for real' }
+];
+
+function offerLesson() {
+  if (!el.lessonBar || lesson.handled || state.best > 0 || runsPlayed > 0 || met.size > 0
+    || /[?&](?:watch|celebrate)\b/.test(location.search)) return false;
+  try { return localStorage.getItem(LESSON_KEY) !== 'done'; } catch { return true; }
+}
+
+function beginLesson() {
+  if (counting || window.BioEconomy?.isBlocking()) return;
+  // Only the title offers practice, so an existing run can never be discarded.
+  if (el.startScreen.hidden) return;
+  el.startScreen.hidden = true;
+  document.body.classList.remove('is-modal');
+  lesson.active = true;
+  lesson.step = 0;
+  document.body.classList.add('is-lesson');
+  if (window.BioAudio) window.BioAudio.theme('game');
+  setupLesson();
+}
+
+function setupLesson() {
+  cancelChain();
+  clearFx();
+  clearMovePreview();
+  lesson.done = false;
+  const step = LESSONS[lesson.step];
+  state.cells = new Array(CELLS).fill(null);
+  for (const [at, kind] of step.tiles) state.cells[at] = makeTile(kind);
+  if (lesson.step === 2) state.cells[12].clock = ANIMALS.rabbit.starveAt - 1;
+  state.stock = [step.hand, step.hand, step.hand];
+  state.next = step.hand;
+  state.topKind = lesson.step === 0 ? 'sprout' : 'rabbit';
+  state.score = 0;
+  state.ticks = 0;
+  state.paused = false;
+  render();
+  syncClock();
+  setTicker('Practice only · no timer, no score.');
+  cellNodes[step.target].focus({ preventScroll: true });
+}
+
+function placeLessonTile(i) {
+  if (lesson.done || state.paused) return;
+  const step = LESSONS[lesson.step];
+  if (i !== step.target) {
+    setTicker('Try the glowing square beside the ' + step.tiles[0][1] + '.');
+    return;
+  }
+  clearMovePreview();
+  state.cells[i] = makeTile(step.hand);
+  const grew = growFrom(i, state.cells, true);
+  for (const g of grew) g.points = 0;
+  if (grew.length) state.topKind = grew[grew.length - 1].kind;
+  // The rabbit is already hungry. Resolve one real meal, without advancing
+  // seasons, paying points, or recording a run.
+  const meals = lesson.step === 2 ? feedEveryone() : [];
+  lesson.done = true;
+  render(grew, meals, []);
+  if (grew.length) replayChain(grew, 0);
+  if (window.BioAudio) {
+    window.BioAudio.effect('place');
+    if (grew.length) window.BioAudio.effect('merge', grew.length);
+    if (meals.length) window.BioAudio.effect('eat', meals.length);
+  }
+  setTicker(step.success);
+  el.lessonNext.focus({ preventScroll: true });
+}
+
+function finishLesson() {
+  lesson.handled = true;
+  try { localStorage.setItem(LESSON_KEY, 'done'); } catch {}
+  resetLesson();
+  setPaused(true);
+  newGame();
+  playIntro();
+}
+
+function resetLesson() {
+  lesson.active = false;
+  lesson.done = false;
+  if (!el.lessonBar) return;
+  el.lessonBar.hidden = true;
+  document.body.classList.remove('is-lesson');
+  el.pauseBtn.disabled = false;
+  el.hand.classList.remove('lesson-hand');
+}
+
+function renderLesson() {
+  if (!el.lessonBar) return;
+  el.lessonBar.hidden = !lesson.active;
+  if (!lesson.active) return;
+  const step = LESSONS[lesson.step];
+  el.lessonStep.textContent = (lesson.step + 1) + ' / 3';
+  el.lessonSkip.hidden = lesson.done;
+  el.lessonNext.hidden = !lesson.done;
+  el.lessonNext.textContent = lesson.step === LESSONS.length - 1 ? 'Play' : 'Next';
+  el.goalHead.textContent = lesson.done ? 'Nicely done!' : step.title;
+  el.goalSub.textContent = lesson.done ? step.success : step.hint;
+  el.seasonName.textContent = 'Practice';
+  el.seasonMult.textContent = 'No score';
+  el.pauseBtn.disabled = true;
+  el.hand.classList.toggle('lesson-hand', !lesson.done);
+  for (let i = 0; i < cellNodes.length; i++) {
+    const node = cellNodes[i];
+    node.classList.toggle('cell--lesson-target', !lesson.done && i === step.target);
+    node.classList.toggle('cell--lesson-source', !lesson.done && step.tiles.some(t => t[0] === i));
+    if (lesson.done) node.disabled = true;
+    if (!lesson.done && i === step.target) {
+      node.setAttribute('aria-label', node.getAttribute('aria-label') + '. Practice: ' + step.hint);
+    }
+  }
+}
+
+function initLesson() {
+  for (const id of ['lessonBar', 'lessonStep', 'lessonSkip', 'lessonNext', 'startBasicsBtn']) {
+    el[id] = document.getElementById(id);
+  }
+  el.lessonSkip.addEventListener('click', finishLesson);
+  el.lessonNext.addEventListener('click', function () {
+    if (!lesson.active || !lesson.done) return;
+    if (lesson.step === LESSONS.length - 1) finishLesson();
+    else { lesson.step += 1; setupLesson(); }
+  });
+  el.startBasicsBtn.addEventListener('click', beginLesson);
+}
+
+
 let overTimer = 0;
 
 function newGame() {
+  resetLesson();
+  state.runStats = newRunStats();
   state.runId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'simulation';
   state.revived = false;
   state.revivalWait = false;
@@ -1338,6 +1483,7 @@ function newGame() {
 // on now, because the two are no longer the same instant.
 
 function placeTile(i) {
+  if (lesson.active) { placeLessonTile(i); return; }
   if (state.over || state.celebrating || state.cells[i]) return;
 
   // An empty hand was the one refusal that looked like a broken button:
@@ -1357,7 +1503,16 @@ function placeTile(i) {
   // Keep planting fluid; only the world clock ages the meadow.
   state.stock.push(state.next);
   state.next = rollHand();
+  const beforeGrowth = state.cells.slice();
   const grew = growFrom(i);
+  if (state.runStats) {
+    state.runStats.placed += 1;
+    if (grew.length > state.runStats.maxChain) {
+      state.runStats.chainKinds = [grew[0].was].concat(grew.map(g => g.kind));
+    }
+    state.runStats.maxChain = Math.max(state.runStats.maxChain, grew.length);
+    state.runStats.cleared += growthClearings(grew, beforeGrowth).length;
+  }
   // the share card shows the meadow at the moment it reached its highest
   // animal, not the stone-choked one that ended the run
   if (state.topKind !== topBefore) state.peakCells = state.cells.map(function (c) { return c && Object.assign({}, c); });
@@ -1421,6 +1576,7 @@ function nudgeHand() {
 // turn, and deaths run after feeding so a meal always saves a life.
 
 function worldTick() {
+  if (lesson.active) return;
   if (state.over || state.paused || state.celebrating) return;
 
   state.ticks += 1;
@@ -1428,6 +1584,11 @@ function worldTick() {
   bumpClocks();
   const meals = feedEveryone();
   const deaths = collectDeaths();
+  if (state.runStats) {
+    state.runStats.meals += meals.length;
+    state.runStats.starved += deaths.length;
+    if (deaths.length) state.runStats.lostKind = deaths[0].kind;
+  }
   const withered = witherPlants();
   const stone = surfaceStone();
   const dealt = refillHand();
@@ -1815,7 +1976,7 @@ function tickMs() { return TICK_MS * (state.relaxed ? RELAXED_SCALE : 1); }
 function syncClock() {
   syncAnimalLife();
   if (window.BioAudio) window.BioAudio.pause(state.over || state.paused);
-  const shouldRun = !state.over && !state.paused && !state.celebrating && !state.revivalWait && !window.BioEconomy?.isBlocking();
+  const shouldRun = !lesson.active && !state.over && !state.paused && !state.celebrating && !state.revivalWait && !window.BioEconomy?.isBlocking();
   if (shouldRun && !tickTimer) tickTimer = setInterval(worldTick, tickMs());
   else if (!shouldRun && tickTimer) { clearInterval(tickTimer); tickTimer = 0; }
 }
@@ -1837,6 +1998,72 @@ function setRelaxed(on) {
   render();
 }
 
+// Facts from this run, rather than a guessed cause of defeat. Old checkout
+// snapshots have no counters; keep their recap hidden instead of inventing zeros.
+function newRunStats() { return { placed: 0, maxChain: 0, starved: 0, cleared: 0, meals: 0 }; }
+function readRunStats(value) {
+  if (!value || typeof value !== 'object') return null;
+  const clean = {};
+  for (const key of Object.keys(newRunStats())) {
+    if (!Number.isSafeInteger(value[key]) || value[key] < 0) return null;
+    clean[key] = value[key];
+  }
+  const chain = value.chainKinds;
+  if (Array.isArray(chain) && chain.length === clean.maxChain + 1 && chain.length > 1 && chain.length <= LADDER.length
+    && chain.every((kind, n) => LADDER.includes(kind) && (!n || GROWS_INTO[chain[n - 1]] === kind))) {
+    clean.chainKinds = chain.slice();
+  }
+  if (typeof value.lostKind === 'string' && LADDER.includes(value.lostKind) && isAnimal(value.lostKind)) clean.lostKind = value.lostKind;
+  return clean;
+}
+function runRecap(stats) {
+  const s = readRunStats(stats);
+  if (!s) return null;
+  const fact = s.starved ? 'So close! Leave a little room for food.'
+    : s.cleared ? 'Nice clearing! Line up the next pair.'
+    : s.maxChain > 1 ? 'Great chain! Keep the next match nearby.'
+    : s.maxChain === 1 ? 'Almost! Try setting up a two-step chain.'
+    : 'Try placing two matching tiles together.';
+  return { fact };
+}
+function renderRunRecap() {
+  if (!el.goRecap) return;
+  const recap = runRecap(state.runStats);
+  el.goRecap.hidden = !recap;
+  el.goRecapFact.textContent = recap ? recap.fact : '';
+}
+
+// The real growth events also describe obstacle removal. Include elephant
+// footprints, but never label a flattened plant or animal as a blocker.
+function growthClearings(events, cells = state.cells) {
+  const cleared = new Set();
+  for (const step of events) {
+    for (const at of (step.bones || []).concat(step.trampled || [])) {
+      if (cells[at] && isBlocker(cells[at].kind)) cleared.add(at);
+    }
+  }
+  return Array.from(cleared);
+}
+function markClearing(at) {
+  const node = cellNodes[at];
+  node.classList.add('cell--preview-clear');
+  node.dataset.clearBaseLabel = node.getAttribute('aria-label');
+  node.setAttribute('aria-label', node.dataset.clearBaseLabel + ', clears with this move');
+  const cue = document.createElement('span');
+  cue.className = 'blocker-clear-cue';
+  cue.setAttribute('aria-hidden', 'true');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 40 40');
+  const crack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  crack.setAttribute('d', 'M22 2L16 14L23 22L16 38M16 14L6 19M23 22L33 26');
+  svg.appendChild(crack);
+  const label = document.createElement('span');
+  label.textContent = 'CLEAR';
+  cue.append(svg, label);
+  node.appendChild(cue);
+}
+
+
 function endRun() {
   state.over = true;
   recordRun();
@@ -1853,6 +2080,7 @@ function endRun() {
   el.goScore.textContent = scoreLabel(state.score, state.revived);
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
   el.goNote.textContent = endNote();
+  renderRunRecap();
   shareHint('');
   prepareShareCard();
   if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
@@ -2722,7 +2950,13 @@ function clearMovePreview() {
   previewMode = '';
   if (el.previewLayer) el.previewLayer.textContent = '';
   for (const node of cellNodes) {
-    node.classList.remove('cell--preview-origin', 'cell--preview-step', 'cell--preview-destination', 'cell--preview-panic');
+    node.classList.remove('cell--preview-origin', 'cell--preview-step', 'cell--preview-destination', 'cell--preview-panic', 'cell--preview-clear');
+    const cue = node.querySelector('.blocker-clear-cue');
+    if (cue) cue.remove();
+    if (node.dataset.clearBaseLabel) {
+      node.setAttribute('aria-label', node.dataset.clearBaseLabel);
+      delete node.dataset.clearBaseLabel;
+    }
   }
   if (el.moveHint) {
     el.moveHint.classList.remove('is-previewing');
@@ -2759,6 +2993,8 @@ function renderMovePreview() {
   const last = forecast.length ? forecast[forecast.length - 1] : { at: origin, kind: state.stock[0] };
   const lastSide = bigSide(last.kind);
   cellNodes[origin].classList.add('cell--preview-origin');
+  const clearings = growthClearings(forecast);
+  for (const at of clearings) markClearing(at);
   for (const step of forecast) cellNodes[step.at].classList.add('cell--preview-step');
   for (const at of mergeVictims(forecast)) cellNodes[at].classList.add('cell--preview-panic');
   for (const at of blockAt(last.at, lastSide)) cellNodes[at].classList.add('cell--preview-destination');
@@ -2767,7 +3003,8 @@ function renderMovePreview() {
     el.moveHint.textContent = kindName(last.kind)
       + (lastSide > 1 ? ' · ' + lastSide + '×' + lastSide : '')
       + (forecast.length ? ' · ' + forecast.length + (forecast.length === 1 ? ' merge' : ' merges') : ' · plant')
-      + ' → row ' + (Math.floor(last.at / SIZE) + 1) + ', col ' + (last.at % SIZE + 1);
+      + ' → row ' + (Math.floor(last.at / SIZE) + 1) + ', col ' + (last.at % SIZE + 1)
+      + (clearings.length ? ' · clears ' + clearings.length + (clearings.length === 1 ? ' blocker' : ' blockers') : '');
   }
   if (!el.previewLayer || !forecast.length) return;
   const frame = el.previewLayer.getBoundingClientRect();
@@ -2996,6 +3233,7 @@ function render(grew, meals, deaths) {
     delete node.dataset.previewMerges;
     delete node.dataset.previewDestination;
     delete node.dataset.previewSide;
+    delete node.dataset.clearBaseLabel;
     node.disabled = state.over || state.paused || !!cell;
 
     // The three squares a big tile leans on draw nothing: its home
@@ -3115,6 +3353,8 @@ function render(grew, meals, deaths) {
   el.board.classList.toggle('board--spent', !state.stock.length && !state.over);
   el.pauseNote.hidden = !state.paused || state.over;
   renderMovePreview();
+  renderLesson();
+  if (state.over) renderRunRecap();
   syncAnimalLife();
 }
 
@@ -3773,11 +4013,6 @@ function nextGoal() {
 
 // ---------- Wiring ----------
 
-// The guide opens from the title screen as well as from the board, so
-// closing it must not lift the title screen's own scroll lock, and
-// focus goes back to whichever button opened it.
-let howOpener = null;
-
 function menuOpen() { return !!el.menuSheet && !el.menuSheet.hidden; }
 function openMenu() {
   el.menuSheet.hidden = false;
@@ -3788,8 +4023,8 @@ function openMenu() {
 function closeMenu() {
   if (!menuOpen()) return;
   el.menuSheet.hidden = true;
-  if (el.startScreen.hidden && el.howModal.hidden) document.body.classList.remove('is-modal');
-  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || pauseOpen() || counting);
+  if (el.startScreen.hidden) document.body.classList.remove('is-modal');
+  setPaused(document.hidden || !el.startScreen.hidden || pauseOpen() || counting);
   el.menuBtn.focus();
 }
 
@@ -3800,8 +4035,8 @@ function coinSound() { if (window.BioAudio && window.BioAudio.coin) window.BioAu
 function pauseOpen() { return !!el.pauseSheet && !el.pauseSheet.hidden; }
 function shopOpen() { const m = document.getElementById('shopModal'); return !!m && !m.hidden; }
 function canPause() {
-  return !state.over && !state.revivalWait && !state.celebrating && !counting
-    && el.startScreen.hidden && el.howModal.hidden && !menuOpen() && !window.BioEconomy?.isBlocking();
+  return !lesson.active && !state.over && !state.revivalWait && !state.celebrating && !counting
+    && el.startScreen.hidden && !menuOpen() && !window.BioEconomy?.isBlocking();
 }
 function showPauseView(confirming) {
   el.pauseMain.hidden = confirming;
@@ -3839,19 +4074,6 @@ function startOverFromPause() {
   Promise.resolve(started).then(function () { if (!counting) resumeIfAllowed(); });
 }
 
-function openHow(opener) {
-  el.howModal.hidden = false;
-  document.body.classList.add('is-modal');
-  howOpener = opener || el.howBtn;
-  el.howClose.focus();
-}
-
-function closeHow() {
-  el.howModal.hidden = true;
-  if (el.startScreen.hidden && !pauseOpen()) document.body.classList.remove('is-modal');
-  (howOpener || el.howBtn).focus();
-}
-
 // A short "Ready?? / Go!!" beat stands between the button and the first
 // move, so the meadow does not begin ticking under the player's thumb.
 // The title screen lifts at once — the board is already dealt — but the
@@ -3860,6 +4082,7 @@ let counting = false;
 const countTimers = [];
 
 function playIntro() {
+  if (offerLesson()) { beginLesson(); return; }
   el.startScreen.hidden = true;
   document.body.classList.remove('is-modal');
   counting = true;
@@ -4320,13 +4543,14 @@ function reviveRun() {
   return true;
 }
 function snapshotRun() {
-  const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','runId'];
+  const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','runId','runStats'];
   return { ...Object.fromEntries(keys.map(k => [k, JSON.parse(JSON.stringify(state[k]))])), startScreenVisible: !el.startScreen.hidden };
 }
 function restoreRun(data) {
   if (!data || !Array.isArray(data.cells) || data.cells.length !== CELLS || !Array.isArray(data.stock)
     || !Number.isFinite(data.score) || !Number.isFinite(data.ticks) || typeof data.runId !== 'string') return;
   for (const k of Object.keys(snapshotRun())) if (k !== 'startScreenVisible' && k in data) state[k] = JSON.parse(JSON.stringify(data[k]));
+  state.runStats = readRunStats(data.runStats);
   const atTitle = data.startScreenVisible === true && !state.over;
   state.paused = true; state.revivalWait = !state.over && !atTitle;
   el.startScreen.hidden = !atTitle; document.body.classList.toggle('is-modal', atTitle);
@@ -4334,6 +4558,7 @@ function restoreRun(data) {
   el.goScore.textContent = scoreLabel(state.score, state.revived);
   el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
   el.goNote.textContent = endNote();
+  renderRunRecap();
   if (el.reviveResume) el.reviveResume.hidden = state.over || atTitle;
   if (window.BioAudio?.discover) window.BioAudio.discover(Object.keys(state.seen));
   render(); syncClock();
@@ -4343,7 +4568,7 @@ function resumeRevival() {
   state.revivalWait = false; el.reviveResume.hidden = true; startRun();
 }
 function resumeIfAllowed() {
-  setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || pauseOpen() || counting || state.revivalWait);
+  setPaused(document.hidden || !el.startScreen.hidden || menuOpen() || pauseOpen() || counting || state.revivalWait);
 }
 function replay() {
   setPaused(true);
@@ -4396,9 +4621,9 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goShare', 'goShareHint', 'goAgain', 'howBtn', 'newBtn', 'reviveResume',
-    'speedBtn', 'howModal', 'howClose', 'howDone', 'startScreen', 'startBtn', 'startBest',
-    'startHowBtn', 'countdown', 'countdownWord',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goRecap', 'goRecapFact', 'goShare', 'goShareHint', 'goAgain', 'newBtn', 'reviveResume',
+    'speedBtn', 'startScreen', 'startBtn', 'startBest',
+    'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
     'growthFinalTile', 'growthProgress', 'growthTrack', 'ladderStrip', 'moveHint', 'previewLayer',
     'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose',
@@ -4408,6 +4633,7 @@ async function init() {
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
 
   buildBoard();
+  initLesson();
   animalLife.media = window.matchMedia('(prefers-reduced-motion: reduce)');
   const motionPreferenceChanged = function () { syncAnimalLife(); };
   if (animalLife.media.addEventListener) animalLife.media.addEventListener('change', motionPreferenceChanged);
@@ -4473,38 +4699,19 @@ async function init() {
     el.speedBtn.setAttribute('aria-pressed', String(state.relaxed));
   });
 
-  // The guide is several screens long and the meadow must not starve
-  // behind it. Same for a backgrounded tab.
-  el.howBtn.addEventListener('click', function () { openHow(el.howBtn); setPaused(true); });
-  // the meadow also stays still while the title screen is up
-  const resume = function () {
-    closeHow();
-    setPaused(document.hidden || !el.startScreen.hidden || pauseOpen() || counting);
-  };
-  el.howClose.addEventListener('click', resume);
-  el.howDone.addEventListener('click', resume);
-  el.howModal.addEventListener('click', function (e) {
-    if (e.target === el.howModal) resume();
-  });
-  document.addEventListener('keydown', function (e) {
-    // the guide can sit over the pause card; Escape closes only the guide
-    if (e.key === 'Escape' && !el.howModal.hidden) { resume(); e.stopImmediatePropagation(); }
-  });
+  // Background tabs pause the meadow without advancing it.
   document.addEventListener('visibilitychange', function () {
-    setPaused(document.hidden || !el.startScreen.hidden || !el.howModal.hidden || menuOpen() || pauseOpen() || counting);
+    setPaused(document.hidden || !el.startScreen.hidden || menuOpen() || pauseOpen() || counting);
   });
 
-  // The menu holds the guide, the pace, a new game, the ladder and the
-  // level. Like the guide, it stops the meadow while it is open.
+  // The menu pauses the meadow while its controls are open.
   if (el.menuBtn) {
     el.menuBtn.addEventListener('click', openMenu);
     el.menuClose.addEventListener('click', closeMenu);
     el.menuSheet.addEventListener('click', function (e) { if (e.target === el.menuSheet) closeMenu(); });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && menuOpen() && el.howModal.hidden) closeMenu();
+      if (e.key === 'Escape' && menuOpen()) closeMenu();
     });
-    // the guide opens over the game, not over the menu
-    el.howBtn.addEventListener('click', function () { el.menuSheet.hidden = true; }, true);
   }
 
   el.pauseBtn.addEventListener('click', openPause);
@@ -4513,13 +4720,11 @@ async function init() {
   el.pauseNo.addEventListener('click', function () { coinSound(); showPauseView(false); });
   el.pauseYes.addEventListener('click', startOverFromPause);
   document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape' || !pauseOpen() || !el.howModal.hidden || shopOpen()) return;
+    if (e.key !== 'Escape' || !pauseOpen() || shopOpen()) return;
     if (el.pauseConfirm.hidden) closePause(); else { coinSound(); showPauseView(false); }
   });
 
-  // The title screen carries the guide, so it is reachable before the
-  // first tap. Sound has no switch: the device's silent mode decides.
-  el.startHowBtn.addEventListener('click', function () { openHow(el.startHowBtn); setPaused(true); });
+  // Title actions. Sound follows the device silent mode.
   el.startLedgerBtn.addEventListener('click', function () { openLedger(el.startLedgerBtn); });
   el.ledgerClose.addEventListener('click', closeLedger);
   el.ledgerModal.addEventListener('click', function (e) { if (e.target === el.ledgerModal) closeLedger(); });

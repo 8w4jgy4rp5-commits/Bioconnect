@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#19291f">
+  <meta name="description" content="つなげて、育てて、ちょっとふしぎな食物連鎖。Bioconnectはブラウザで遊べる合体パズルです。">
+  <title>Bioconnect — A curious little food chain</title>
+  <link rel="icon" href="assets/rabbit-pose.png"><link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skip">本文へスキップ</a>
+  <header class="header wrap">
+    <a class="wordmark" href="#" aria-label="Bioconnect home"><span class="brand-icon" aria-hidden="true">✳</span> bioconnect<span class="brand-dot">.</span></a>
+    <nav aria-label="Main"><a href="#story" data-i18n="navStory">どんなゲーム？</a><a href="#moments" data-i18n="navMoments">プレイ画面</a><a href="#connect" data-i18n="navConnect">つながる</a></nav>
+    <div class="languages" role="group" aria-label="Language"><button type="button" data-lang="ja" aria-pressed="true">JP</button><span>/</span><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+  </header>
+  <main id="main">
+    <section class="hero wrap">
+      <div class="hero-copy"><p class="eyebrow"><span class="live-dot"></span><span data-i18n="eyebrow">A CURIOUS LITTLE FOOD CHAIN</span></p>
+        <h1 data-i18n="heroTitle">つながる。<br>育つ。<br><em>あれ、きみは？</em></h1>
+        <p class="intro" data-i18n="heroBody">小さな芽から、まさかのゾウまで。<br>かわいくて、ちょっとふしぎな食物連鎖パズル。</p>
+        <div class="hero-actions"><a class="button primary play-link" href="https://bioconnectpazzle.com/" target="_blank" rel="noopener noreferrer"><span data-i18n="play">ブラウザで遊ぶ</span><span aria-hidden="true">↗</span></a><button class="watch" type="button" id="watch"><span class="play-circle" aria-hidden="true">▶</span><span data-i18n="watch">プレイ映像を見る</span></button></div>
+        <p class="small-note" data-i18n="free">インストール不要 · 基本プレイ無料 · PC / スマートフォン</p>
+      </div>
+      <div class="hero-art">
+        <div class="scene" id="scene" role="img" aria-label="紹介アニメ：2匹のウサギが合体してキツネになり、きょとんとする">
+          <div class="moon" aria-hidden="true"></div><span class="star s1" aria-hidden="true">✧</span><span class="star s2" aria-hidden="true">✦</span><span class="star s3" aria-hidden="true">·</span>
+          <div class="scene-caption"><span class="live-dot"></span><span data-i18n="sceneLabel">小さな森の、とある出会い。</span></div>
+          <div class="hill back" aria-hidden="true"></div><div class="hill front" aria-hidden="true"></div><div class="orbit" aria-hidden="true"></div>
+          <img class="rabbit rabbit-left" src="assets/rabbit-pose.png" alt=""><img class="rabbit rabbit-right" src="assets/rabbit-pose.png" alt="">
+          <div class="merge-flash" aria-hidden="true">✳</div><div class="fox-character"><span class="speech" aria-hidden="true">…?</span><img src="assets/fox-pose.png" alt=""></div>
+          <div class="sprout plant-one" aria-hidden="true">♧</div><div class="sprout plant-two" aria-hidden="true">♧</div><div class="grass" aria-hidden="true"></div>
+          <span class="scene-number" aria-hidden="true">01 — THE UNEXPECTED</span>
+        </div>
+        <div class="scene-footer"><span data-i18n="animationNote">紹介アニメーション / コンセプト試作</span><button id="motion" type="button" aria-pressed="false" data-i18n="pause">一時停止 Ⅱ</button></div>
+      </div>
+    </section>
+    <div class="ribbon"><div class="wrap"><span data-i18n="ribbon">ひとつ置けば、森が変わる。</span><span aria-hidden="true">✳</span><span>MERGE. GROW. SURPRISE.</span><span aria-hidden="true">✳</span><a href="#story" data-i18n="explore">小さな生態系をのぞく ↓</a></div></div>
+    <section class="story light" id="story"><div class="wrap">
+      <div class="section-heading"><p class="eyebrow">01 / THE LITTLE ECOSYSTEM</p><h2 data-i18n="storyTitle">かわいいだけでは、<br><em>生きていけない。</em></h2><p data-i18n="storyIntro">同じものをつなげて育てる。<br>でもここには、食べる・食べられる関係も。<br>次の一手が、小さな森の運命を変えます。</p></div>
+      <div class="story-steps">
+        <article><span class="step-no">01</span><div class="step-art pair"><img src="assets/rabbit-pose.png" alt=""><span>+</span><img src="assets/rabbit-pose.png" alt=""><span>→</span><img src="assets/fox-pose.png" alt=""></div><h3 data-i18n="step1Title">出会ったら、次のいのち。</h3><p data-i18n="step1Body">同じ植物や動物を隣り合わせて合体。ウサギがキツネに、キツネがシカに。連鎖がつながれば、森は一気ににぎやかに。</p></article>
+        <article><span class="step-no">02</span><div class="step-art predator"><img src="assets/rabbit-pose.png" alt=""><span class="ellipsis">… !</span><img src="assets/wolf-calm.png" alt=""></div><h3 data-i18n="step2Title">おなかがすくのは、お互いさま。</h3><p data-i18n="step2Body">動物たちは食べて生きています。育てたい仲間と、近づく天敵。合体だけでは決まらない、食物連鎖のかけひき。</p></article>
+        <article><span class="step-no">03</span><div class="step-art elephant"><span>✧</span><img src="assets/elephant-calm.png" alt=""><span>?</span></div><h3 data-i18n="step3Title">その先に、ゾウがいる。</h3><p data-i18n="step3Body">小さな芽から始まる長い旅。季節が移る森で、どこまで育てられる？ めったに出会えないゾウを、あなたの手で。</p></article>
+      </div>
+      <div class="animal-parade" aria-label="成長して出会う動物たち"><img src="assets/rabbit-pose.png" alt="Rabbit"><span>·</span><img src="assets/fox-pose.png" alt="Fox"><span>·</span><img src="assets/deer-calm.png" alt="Deer"><span>·</span><img src="assets/zebra-calm.png" alt="Zebra"><span>·</span><img src="assets/buffalo-calm.png" alt="Buffalo"><span>·</span><img src="assets/wolf-calm.png" alt="Wolf"><span>·</span><img src="assets/bear-calm.png" alt="Bear"><span>·</span><img src="assets/lion-calm.png" alt="Lion"><span>·</span><img src="assets/tiger-calm.png" alt="Tiger"><span>·</span><img src="assets/elephant-calm.png" alt="Elephant"></div>
+    </div></section>
+    <section class="moments wrap" id="moments"><div class="gallery-heading"><div><p class="eyebrow">02 / STRAIGHT FROM THE GAME</p><h2 data-i18n="momentsTitle">小さな盤面。<br><em>思いがけないドラマ。</em></h2></div><p data-i18n="momentsIntro">ほんとのプレイは、こんな感じ。<br>画像を押すと、大きく見られます。</p></div>
+      <div class="gallery">
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-1.png" aria-label="プレイ画面1を拡大"><img src="assets/highlight-1.png" alt="5連鎖でバッファローが登場する実際のプレイ画面" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>01</span><div><h3 data-i18n="shot1Title">連鎖は、突然に。</h3><p data-i18n="shot1Body">ひとつの配置から、次々と合体。</p></div></figcaption></figure>
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-2.png" aria-label="プレイ画面2を拡大"><img src="assets/highlight-2.png" alt="6連鎖でオオカミが登場する実際のプレイ画面" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>02</span><div><h3 data-i18n="shot2Title">ようこそ、オオカミ。</h3><p data-i18n="shot2Body">新しい仲間で、生態系も変わる。</p></div></figcaption></figure>
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-3.png" aria-label="プレイ画面3を拡大"><img src="assets/highlight-3.png" alt="7連鎖でクマが登場する実際のプレイ画面" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>03</span><div><h3 data-i18n="shot3Title">もう一手、もう一回。</h3><p data-i18n="shot3Body">大きく育った、その先が見たい。</p></div></figcaption></figure>
+      </div><p class="capture-note" data-i18n="captureNote">実際のゲーム画面より。撮影時のバージョンのため、現在の表示と異なる場合があります。</p>
+    </section>
+    <section class="connect light" id="connect"><div class="wrap connect-grid"><div><p class="eyebrow">03 / FOLLOW THE LITTLE THINGS</p><h2 data-i18n="connectTitle">森の外でも、<br><em>つながろう。</em></h2><p class="connect-copy" data-i18n="connectBody">短い動画、開発のひとこま、<br>そして、あなたの「できた！」。<br>Bioconnectのつづきは、ここから。</p><img class="connect-animal" src="assets/deer-calm.png" alt=""></div><div><div class="platform-list" id="platforms"></div><p class="platform-note" data-i18n="platformNote">各媒体のアカウント・投稿先は、公開後に順次追加します。</p></div></div></section>
+    <section class="final-cta wrap"><span class="eyebrow">YOUR LITTLE ECOSYSTEM AWAITS</span><h2 data-i18n="ctaTitle">さて、何に育つかな。</h2><a class="button primary play-link" href="https://bioconnectpazzle.com/" target="_blank" rel="noopener noreferrer"><span data-i18n="play">ブラウザで遊ぶ</span><span aria-hidden="true">↗</span></a><p data-i18n="ctaNote">小さな芽から、はじめよう。</p></section>
+  </main>
+  <footer class="wrap footer"><a class="wordmark" href="#">✳ bioconnect.</a><span>© 2026 Bioconnect</span><a href="https://bioconnectpazzle.com/legal/privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="privacy">プライバシーポリシー</a><span class="preview-label" data-i18n="preview">LP DESIGN PREVIEW</span></footer>
+  <dialog id="media-dialog"><div class="dialog-top"><span id="dialog-title" data-i18n="mediaTitle">Bioconnect / 実際のプレイ画面</span><button type="button" id="close-dialog" data-i18n="close">閉じる ×</button></div><div id="dialog-content"></div></dialog>
+</body></html>

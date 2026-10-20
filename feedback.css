@@ -1,0 +1,44 @@
+/* Results are a replay screen, with a short factual recap immediately above it. */
+.gameover, .skin-eldritch .gameover { position:fixed; inset:0; z-index:45; padding:16px; border-radius:0; touch-action:pan-y; }
+.gameover .gameover-card { width:min(100%, 360px); max-width:360px; max-height:calc(100svh - 32px); overflow-y:auto; box-sizing:border-box; padding:16px 20px; overscroll-behavior:contain; touch-action:pan-y; }
+.gameover-card .run-recap { margin:12px 0; padding:11px 12px; text-align:left; background:#eaf1dd; color:#263b25; border:1px solid #819b53; border-radius:12px; font:13px/1.5 system-ui,sans-serif; }
+.run-recap[hidden] { display:none; }
+.gameover-card .run-recap h3 { margin:0 0 5px; font:700 12px/1.4 system-ui,sans-serif; letter-spacing:.04em; }
+.gameover-card .run-recap p { margin:0; }
+.gameover-card .run-recap .recap-tip { margin-top:6px; font-size:12px; }
+.skin-eldritch .gameover-card .run-recap { background:#26301c; border-color:#788c4a; color:#eee7ce; }
+.gameover-card #goAgain { display:block; width:100%; min-height:48px; margin:10px 0 12px; padding:12px 18px; border-radius:12px; background:#d5e9a0; color:#19291f; box-shadow:0 4px 0 #819b53; font:700 16px/1.4 system-ui,sans-serif; }
+.gameover-card #goAgain:focus-visible { outline:3px solid #e8b86c; outline-offset:3px; }
+.gameover-card .revive-heading { margin:14px 0 4px; font:500 12px/1.4 system-ui,sans-serif; opacity:.8; }
+.gameover-card .go-share { margin:8px auto; }
+/* Only predicted removals get a crack and a label. The actual rule is unchanged. */
+.cell.cell--preview-clear { outline:3px dashed #f1c66a; outline-offset:-4px; box-shadow:inset 0 0 20px #f1c66a55; }
+.blocker-clear-cue { position:absolute; inset:2px; z-index:4; display:grid; justify-items:center; align-content:space-between; pointer-events:none; color:#ffdf8e; }
+.blocker-clear-cue svg { width:72%; height:72%; filter:drop-shadow(0 1px 2px #000); }
+.blocker-clear-cue path { fill:none; stroke:currentColor; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.blocker-clear-cue > span { position:absolute; bottom:1px; padding:1px 4px; background:#253320; color:#fff0be; border:1px solid #e2bd70; border-radius:4px; font:700 9px/1.4 system-ui,sans-serif; letter-spacing:.03em; }
+@media(max-width:360px) { .gameover, .skin-eldritch .gameover { padding:10px; } .gameover .gameover-card { max-height:calc(100svh - 20px); padding:12px 15px; } }
+
+/* Say what each action does, with its condition on a quieter second line. */
+.gameover-card #goAgain span { display:block; }
+.gameover-card #goAgain small { display:block; margin-top:3px; font:400 12px/1.4 system-ui,sans-serif; }
+.gameover-card .revive-heading { font:700 15px/1.4 system-ui,sans-serif; opacity:1; }
+.gameover-card .revive-summary { margin:0 0 8px; font:400 12px/1.4 system-ui,sans-serif; }
+.gameover-card .revive-words em { font:400 12px/1.4 system-ui,sans-serif; }
+
+/* Keep the purchase requirement readable; the lock sits beside the words. */
+.gameover-card .revive-chains { position:relative; inset:auto; width:22px; height:24px; margin-left:auto; flex:none; }
+.gameover-card .revive-chains::before, .gameover-card .revive-chains::after { display:none; }
+.gameover-card .revive-lock { position:static; width:18px; height:20px; transform:none; }
+.gameover-card .revive-btn--locked > .revive-words { opacity:1; filter:none; flex:1; }
+
+.result-score-row { display:flex; align-items:center; justify-content:center; gap:13px; }
+.result-score-row .go-score { margin:0; }
+.gameover-card .result-score-row #goShare { display:inline-flex; gap:4px; align-items:center; padding:5px 7px; margin:0; min-height:30px; background:transparent; color:inherit; box-shadow:none; border:0; border-radius:6px; font:400 11px/1.4 system-ui,sans-serif; }
+.result-score-row #goShare svg { width:11px; height:11px; }
+
+/* One complete mascot and one short, recorded-outcome-based encouragement. */
+.gameover-card .run-recap.recap-compact { display:flex; align-items:center; gap:12px; padding:8px 12px; min-height:104px; }
+.gameover-card .run-recap.recap-compact[hidden] { display:none; }
+.recap-compact .recap-rabbit { display:block; flex:none; width:76px; height:104px; object-fit:contain; object-position:center; }
+.gameover-card .recap-compact p { flex:1; min-width:0; font:500 14px/1.6 system-ui,sans-serif; }

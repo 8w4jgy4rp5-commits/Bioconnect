@@ -220,3 +220,12 @@ img/ref が移行元に存在すればコピー済み。元に存在しない原
 - `concepts/animal-art-v1/wolf-starving-prompt.txt`（通った指示の記録）
 - `concepts/animal-art-v1/hungry-faces/wolf-overlay.png`（脚が動いていないことの確認図）
 - `img/zebra-whole.png`
+
+## 2026-10-19 振り返り専用の笑顔ウサギ
+
+- img/rabbit-recap-smile-v1.png: 振り返りカード専用。既存のconcepts/app-icon-v1/rabbit-game.pngをimagegenで編集し、やさしい目と小さい笑顔へ。透過、両耳・足先・尻尾が収まり、カードでは76×104pxのcontain表示。盤面のウサギ素材は変更しない。
+- 生成原本: Codex generated_images/01a14e5b-6ab5-70f2-885f-8cbc6e74478d/exec-c33d08a9-78c9-46b7-b276-2953badf8ad1.png。原本を保持し、プロジェクトへ複製済み。
+
+### 振り返りウサギ v2（2026-10-19）
+- 現行: img/rabbit-recap-muni-v2.png。本人指定により、元のウサギのむにっとした頬・鼻下から分かれる口元を引き継ぎ、目元だけやさしい印象にした。imagegenで元のrabbit-game.pngとv1を参照して編集。耳・足先が収まる透過画像。v1と原画は保持。盤面用素材は変更なし。
+- 生成原本: Codex generated_images/01a14e5b-6ab5-70f2-885f-8cbc6e74478d/exec-24b94a9e-9818-4f2b-ba44-848637f12bdf.png。

@@ -169,7 +169,7 @@ async function main() {
     const ctx={console,window:{addEventListener(){}},navigator:{onLine:true},document:{body:null,addEventListener(){},querySelectorAll:()=>[]},setTimeout:()=>0,clearTimeout(){}};
     vm.createContext(ctx);vm.runInContext(fs.readFileSync(require('path').join(__dirname,'../script.js'),'utf8')+'\nglobalThis.mergeForTest=mergeScoreData;',ctx);
     const wrap=(d,t,o=ids.a)=>({v:1,av:2,t,o,d});
-    const rules=20,l={best:9000,rules,revived:true,history:[{runId:randomUUID(),score:9000,rules,revived:true,at:1,season:'Winter'}]},r={best:100,rules,revived:false,history:[{runId:randomUUID(),score:100,rules,revived:false,at:2,season:'Spring'}]};
+    const rules=vm.runInContext('RULES_VERSION',ctx),l={best:9000,rules,revived:true,history:[{runId:randomUUID(),score:9000,rules,revived:true,at:1,season:'Winter'}]},r={best:100,rules,revived:false,history:[{runId:randomUUID(),score:100,rules,revived:false,at:2,season:'Spring'}]};
     localMap.set(key,JSON.stringify(wrap(l,1)));let remote=wrap(r,2),owner=ids.a;
     ctx.localStorage={getItem:k=>localMap.get(k)||null,setItem:(k,v)=>localMap.set(k,v),removeItem:k=>localMap.delete(k)};
     ctx.supabaseClient={auth:{getSession:async()=>({data:{session:{user:{id:owner}}}})},from:()=>({select(){return this;},eq(){return this;},maybeSingle:async()=>({data:{value:remote}}),upsert:async row=>{assert.equal(row.owner_id,owner);remote=row.value;return {error:null};}})};
