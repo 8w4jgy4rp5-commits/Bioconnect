@@ -15,3 +15,6 @@ test/mobile-gateway.test.cjs
 
 # Claude Code team agents/skills (private)
 .claude/
+
+# itch.io build output (node tools/build-itch.cjs)
+dist/

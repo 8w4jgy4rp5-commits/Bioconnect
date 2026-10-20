@@ -1983,3 +1983,11 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 本人希望: 遊び方はなるべく文字で説明せず、想像・発見してほしい。長文のHow to playページ、タイトルの？、一時停止のHow to play、参照案内と専用のJSを除去。旧説明はローカルoutput/playwright/no-guide-v1/previous-how-to.htmlへ控えを保存。
 - 本人が「光るマスの誘導を残して、説明文を減らす」を選択。初回3手を維持し、絵のペアと成長先・光るマス・配置結果を主役にした。説明文は視覚表示から外すが読み上げ用に保持。画面の文字は段数とSkip/Next/Playへ短縮、任意入口は✦（aria-label=Practice）。
 - ページ除去後のnpm test成功（ルール267件、練習・振り返り・匿名集計、課金/保存25件）。実ブラウザでタイトルに説明入口がないこと、光るマスへの配置とNext、Skipで通常プレイへ移ること、一時停止/再開を確認。ブラウザエラーなし。証跡は旧OneDrive作業フォルダのoutput/feedback-v1/quiet-practice.png。スマホ実機は未確認。ゲームルール・保存・課金処理は変更なし。公開・コミット・pushなし。
+
+## 2026-10-20 — itch.io掲載用のビルドと素材
+
+- 本人方針: Steamは見送り、itch.ioに無料のブラウザ版を置いて本家サイトへの入口にする。iframe内ではStripe決済とGoogleログインが動かないため「itch版はショップなし」を本人が選択。
+- 追加: tools/build-itch.cjs（`node tools/build-itch.cjs` → dist/bioconnect-itch.zip）。本番ファイルは変更せず、コピー側だけ store/payments/ads をoff、Cloudflare計測を除去、legalリンクを本番の絶対URLへ、CobbleWorksフッターを公式サイトへのリンクへ置換。置換が外れたらビルド失敗。zipはWindowsのtar.exeで作成（パス区切りが/になる）。dist/はGit対象外。
+- 素材: dist/itch-kit/ に表紙cover.png（630×500、og-imageの盤面を流用）、スクショ5枚（og-image、landingのhighlight 1〜3、タイトル画面）、page-text.md（英語説明文・タグ・アップロード設定）。
+- 検証: 別オリジンのiframe（127.0.0.1ではないホスト名。ループバックではショップが強制表示されるため）で、ショップ・復活・ウォレットが非表示、フッターのリンクが公式サイト、PLAYから練習開始、コンソールエラー0を確認。960×720で表示が収まる。スマホ実機・itch.io上の実表示は未確認。
+- 次: 本人がitch.ioアカウントを作り、下書きでアップロード→表示確認→公開。
