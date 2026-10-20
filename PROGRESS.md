@@ -1990,4 +1990,4 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 追加: tools/build-itch.cjs（`node tools/build-itch.cjs` → dist/bioconnect-itch.zip）。本番ファイルは変更せず、コピー側だけ store/payments/ads をoff、Cloudflare計測を除去、legalリンクを本番の絶対URLへ、CobbleWorksフッターを公式サイトへのリンクへ置換。置換が外れたらビルド失敗。zipはWindowsのtar.exeで作成（パス区切りが/になる）。dist/はGit対象外。
 - 素材: dist/itch-kit/ に表紙cover.png（630×500、og-imageの盤面を流用）、スクショ5枚（og-image、landingのhighlight 1〜3、タイトル画面）、page-text.md（英語説明文・タグ・アップロード設定）。
 - 検証: 別オリジンのiframe（127.0.0.1ではないホスト名。ループバックではショップが強制表示されるため）で、ショップ・復活・ウォレットが非表示、フッターのリンクが公式サイト、PLAYから練習開始、コンソールエラー0を確認。960×720で表示が収まる。スマホ実機・itch.io上の実表示は未確認。
-- 次: 本人がitch.ioアカウントを作り、下書きでアップロード→表示確認→公開。
+- 結論: 本人判断で掲載は見送り（手間の割に見てもらえない見込み）。ビルドスクリプトは残す。
