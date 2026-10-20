@@ -1991,3 +1991,10 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 素材: dist/itch-kit/ に表紙cover.png（630×500、og-imageの盤面を流用）、スクショ5枚（og-image、landingのhighlight 1〜3、タイトル画面）、page-text.md（英語説明文・タグ・アップロード設定）。
 - 検証: 別オリジンのiframe（127.0.0.1ではないホスト名。ループバックではショップが強制表示されるため）で、ショップ・復活・ウォレットが非表示、フッターのリンクが公式サイト、PLAYから練習開始、コンソールエラー0を確認。960×720で表示が収まる。スマホ実機・itch.io上の実表示は未確認。
 - 結論: 本人判断で掲載は見送り（手間の割に見てもらえない見込み）。ビルドスクリプトは残す。
+
+## 2026-10-20 — LPを /about/ に移して公開用に整備
+- 方針: Xのプロフィールリンクはゲーム（トップ）へ直行。LPは検索・他SNS・共有リンクから来る初見の人の入口と、流入分析の受け皿にする。
+- 変更: landing/ → about/ に移設（landing/index.html は /about/ への転送＋noindex）。HTMLの初期状態を英語（lang="en"）にし、日本語はブラウザ設定・切替ボタンで表示。canonical / og / twitter:card を追加。Playボタンは同じタブで開く。URL未設定のSNSは表示せず、1つもなければ「Follow along」欄とナビごと非表示。「LP DESIGN PREVIEW」「concept preview」表記を削除。スマホの英語見出しを56px→40pxにしてPlayボタンを画面上半分へ。
+- ゲーム側: フッターに「About Bioconnect」リンク、sitemap.xml に /about/ を追加。
+- 検証: npm test 通過。Edge(Playwright)で幅390pxを撮影、Playボタン下端 英語460px / 日本語478px、コンソールエラーなし、/landing/ → /about/ 転送を確認。
+- 残り: config.js に各SNSのURLを入れると欄が出る。Search Consoleで /about/ の登録申請。

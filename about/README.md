@@ -1,10 +1,10 @@
-# Bioconnect LP — 2026-10-17 local concept
+# Bioconnect LP — 公開先 https://bioconnectpazzle.com/about/（2026-10-20に landing/ から移設）
 
 日英切り替え、2匹のウサギ→キツネの8秒ループ紹介アニメ、実プレイスクショ3枚の拡大、音声つき実プレイ録画、SNS案内を備えた独立LPです。配色は深緑・クリーム色・黄緑。ゲーム本体のコードやルールは変更していません。
 
 ## 開く
 
-正本では `node landing/server.cjs` を実行し、`http://127.0.0.1:8789/` を開く。既に同じポートで起動中ならそのURLを利用する。HTMLは直接開くことも可能。
+正本では `node about/server.cjs` を実行し、`http://127.0.0.1:8789/` を開く。既に同じポートで起動中ならそのURLを利用する。HTMLは直接開くことも可能。
 
 作業プレビュー側では `node server.cjs` で dist/ を配信します。外部への公開・コミット・pushは行っていません。
 

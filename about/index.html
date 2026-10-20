@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#19291f">
+  <meta name="description" content="Merge, grow, and discover a curious little food chain. Play Bioconnect, a free browser merge puzzle.">
+  <title>Bioconnect – A Food Chain Merge Puzzle You Play in Your Browser</title>
+  <link rel="canonical" href="https://bioconnectpazzle.com/about/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Bioconnect">
+  <meta property="og:title" content="Bioconnect – A Food Chain Merge Puzzle">
+  <meta property="og:description" content="From a tiny sprout to a rather unexpected elephant. Free to play in your browser.">
+  <meta property="og:url" content="https://bioconnectpazzle.com/about/">
+  <meta property="og:image" content="https://bioconnectpazzle.com/og-image.jpg">
+  <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/rabbit-pose.png"><link rel="stylesheet" href="style.css">
+  <script src="config.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+  <header class="header wrap">
+    <a class="wordmark" href="#" aria-label="Bioconnect home"><span class="brand-icon" aria-hidden="true">✳</span> bioconnect<span class="brand-dot">.</span></a>
+    <nav aria-label="Main"><a href="#story" data-i18n="navStory">The game</a><a href="#moments" data-i18n="navMoments">In the meadow</a><a href="#connect" data-i18n="navConnect" hidden>Follow along</a></nav>
+    <div class="languages" role="group" aria-label="Language"><button type="button" data-lang="ja" aria-pressed="true">JP</button><span>/</span><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+  </header>
+  <main id="main">
+    <section class="hero wrap">
+      <div class="hero-copy"><p class="eyebrow"><span class="live-dot"></span><span data-i18n="eyebrow">A CURIOUS LITTLE FOOD CHAIN</span></p>
+        <h1 data-i18n="heroTitle">A little merge.<br>A little magic.<br><em>Wait… who are you?</em></h1>
+        <p class="intro" data-i18n="heroBody">From a tiny sprout to a rather unexpected elephant.<br>A cute, curious puzzle with a food chain of its own.</p>
+        <div class="hero-actions"><a class="button primary play-link" href="https://bioconnectpazzle.com/"><span data-i18n="play">Play in your browser</span><span aria-hidden="true">→</span></a><button class="watch" type="button" id="watch"><span class="play-circle" aria-hidden="true">▶</span><span data-i18n="watch">Watch gameplay</span></button></div>
+        <p class="small-note" data-i18n="free">No download · Free to play · Desktop &amp; mobile</p>
+      </div>
+      <div class="hero-art">
+        <div class="scene" id="scene" role="img" aria-label="Promotional animation: two rabbits merge into a fox, which pauses in surprise.">
+          <div class="moon" aria-hidden="true"></div><span class="star s1" aria-hidden="true">✧</span><span class="star s2" aria-hidden="true">✦</span><span class="star s3" aria-hidden="true">·</span>
+          <div class="scene-caption"><span class="live-dot"></span><span data-i18n="sceneLabel">A chance encounter in the meadow.</span></div>
+          <div class="hill back" aria-hidden="true"></div><div class="hill front" aria-hidden="true"></div><div class="orbit" aria-hidden="true"></div>
+          <img class="rabbit rabbit-left" src="assets/rabbit-pose.png" alt=""><img class="rabbit rabbit-right" src="assets/rabbit-pose.png" alt="">
+          <div class="merge-flash" aria-hidden="true">✳</div><div class="fox-character"><span class="speech" aria-hidden="true">…?</span><img src="assets/fox-pose.png" alt=""></div>
+          <div class="sprout plant-one" aria-hidden="true">♧</div><div class="sprout plant-two" aria-hidden="true">♧</div><div class="grass" aria-hidden="true"></div>
+          <span class="scene-number" aria-hidden="true">01 — THE UNEXPECTED</span>
+        </div>
+        <div class="scene-footer"><span data-i18n="animationNote">Promotional animation / concept preview</span><button id="motion" type="button" aria-pressed="false" data-i18n="pause">Pause Ⅱ</button></div>
+      </div>
+    </section>
+    <div class="ribbon"><div class="wrap"><span data-i18n="ribbon">One little move. A whole new meadow.</span><span aria-hidden="true">✳</span><span>MERGE. GROW. SURPRISE.</span><span aria-hidden="true">✳</span><a href="#story" data-i18n="explore">Meet the ecosystem ↓</a></div></div>
+    <section class="story light" id="story"><div class="wrap">
+      <div class="section-heading"><p class="eyebrow">01 / THE LITTLE ECOSYSTEM</p><h2 data-i18n="storyTitle">Cute doesn’t mean<br><em>a quiet life.</em></h2><p data-i18n="storyIntro">Connect matching plants and animals to help them grow.<br>But everyone needs to eat.<br>Your next move could change everything.</p></div>
+      <div class="story-steps">
+        <article><span class="step-no">01</span><div class="step-art pair"><img src="assets/rabbit-pose.png" alt=""><span>+</span><img src="assets/rabbit-pose.png" alt=""><span>→</span><img src="assets/fox-pose.png" alt=""></div><h3 data-i18n="step1Title">A meeting. A whole new creature.</h3><p data-i18n="step1Body">Place matching plants or animals next to each other to merge. Rabbits become a fox; foxes become a deer. Set off a chain and watch the meadow grow.</p></article>
+        <article><span class="step-no">02</span><div class="step-art predator"><img src="assets/rabbit-pose.png" alt=""><span class="ellipsis">… !</span><img src="assets/wolf-calm.png" alt=""></div><h3 data-i18n="step2Title">Everyone gets a little hungry.</h3><p data-i18n="step2Body">Your animals need food to survive. A growing friend, a hungry predator. Find your way through a food chain that keeps you thinking.</p></article>
+        <article><span class="step-no">03</span><div class="step-art elephant"><span>✧</span><img src="assets/elephant-calm.png" alt=""><span>?</span></div><h3 data-i18n="step3Title">Somewhere, there’s an elephant.</h3><p data-i18n="step3Body">A long journey from a tiny sprout. As the seasons turn, how far can you grow? Raise the rarest animal in the meadow yourself.</p></article>
+      </div>
+      <div class="animal-parade" aria-label="Animals you can discover"><img src="assets/rabbit-pose.png" alt="Rabbit"><span>·</span><img src="assets/fox-pose.png" alt="Fox"><span>·</span><img src="assets/deer-calm.png" alt="Deer"><span>·</span><img src="assets/zebra-calm.png" alt="Zebra"><span>·</span><img src="assets/buffalo-calm.png" alt="Buffalo"><span>·</span><img src="assets/wolf-calm.png" alt="Wolf"><span>·</span><img src="assets/bear-calm.png" alt="Bear"><span>·</span><img src="assets/lion-calm.png" alt="Lion"><span>·</span><img src="assets/tiger-calm.png" alt="Tiger"><span>·</span><img src="assets/elephant-calm.png" alt="Elephant"></div>
+    </div></section>
+    <section class="moments wrap" id="moments"><div class="gallery-heading"><div><p class="eyebrow">02 / STRAIGHT FROM THE GAME</p><h2 data-i18n="momentsTitle">A little board.<br><em>Unexpected stories.</em></h2></div><p data-i18n="momentsIntro">A peek at the real game.<br>Tap any screenshot for a closer look.</p></div>
+      <div class="gallery">
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-1.png" aria-label="Enlarge gameplay screenshot 1"><img src="assets/highlight-1.png" alt="Actual gameplay: a five-step chain introduces a buffalo" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>01</span><div><h3 data-i18n="shot1Title">And then it all connects.</h3><p data-i18n="shot1Body">One placement. A whole chain of surprises.</p></div></figcaption></figure>
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-2.png" aria-label="Enlarge gameplay screenshot 2"><img src="assets/highlight-2.png" alt="Actual gameplay: a six-step chain introduces a wolf" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>02</span><div><h3 data-i18n="shot2Title">Welcome to the meadow, wolf.</h3><p data-i18n="shot2Body">A new arrival changes the food chain.</p></div></figcaption></figure>
+        <figure><button class="screenshot" type="button" data-image="assets/highlight-3.png" aria-label="Enlarge gameplay screenshot 3"><img src="assets/highlight-3.png" alt="Actual gameplay: a seven-step chain introduces a bear" loading="lazy"><span aria-hidden="true">↗</span></button><figcaption><span>03</span><div><h3 data-i18n="shot3Title">One more move. One more try.</h3><p data-i18n="shot3Body">There’s always something bigger to discover.</p></div></figcaption></figure>
+      </div><p class="capture-note" data-i18n="captureNote">Actual gameplay captures. Recorded on an earlier version; the current interface may differ.</p>
+    </section>
+    <section class="connect light" id="connect" hidden><div class="wrap connect-grid"><div><p class="eyebrow">03 / FOLLOW THE LITTLE THINGS</p><h2 data-i18n="connectTitle">Beyond the meadow.<br><em>Stay connected.</em></h2><p class="connect-copy" data-i18n="connectBody">Little videos, notes from development,<br>and your “I finally did it!” moments.<br>Find more Bioconnect here.</p><img class="connect-animal" src="assets/deer-calm.png" alt=""></div><div><div class="platform-list" id="platforms"></div><p class="platform-note" data-i18n="platformNote">Account and post links will be added as each channel becomes available.</p></div></div></section>
+    <section class="final-cta wrap"><span class="eyebrow">YOUR LITTLE ECOSYSTEM AWAITS</span><h2 data-i18n="ctaTitle">What will you grow?</h2><a class="button primary play-link" href="https://bioconnectpazzle.com/"><span data-i18n="play">Play in your browser</span><span aria-hidden="true">→</span></a><p data-i18n="ctaNote">It all starts with a little sprout.</p></section>
+  </main>
+  <footer class="wrap footer"><a class="wordmark" href="#">✳ bioconnect.</a><span>© 2026 Bioconnect</span><a href="/legal/privacy.html" data-i18n="privacy">Privacy policy</a></footer>
+  <dialog id="media-dialog"><div class="dialog-top"><span id="dialog-title" data-i18n="mediaTitle">Bioconnect / Actual gameplay</span><button type="button" id="close-dialog" data-i18n="close">Close ×</button></div><div id="dialog-content"></div></dialog>
+</body></html>
