@@ -1997,4 +1997,4 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 変更: landing/ → about/ に移設（landing/index.html は /about/ への転送＋noindex）。HTMLの初期状態を英語（lang="en"）にし、日本語はブラウザ設定・切替ボタンで表示。canonical / og / twitter:card を追加。Playボタンは同じタブで開く。URL未設定のSNSは表示せず、1つもなければ「Follow along」欄とナビごと非表示。「LP DESIGN PREVIEW」「concept preview」表記を削除。スマホの英語見出しを56px→40pxにしてPlayボタンを画面上半分へ。
 - ゲーム側: フッターに「About Bioconnect」リンク、sitemap.xml に /about/ を追加。
 - 検証: npm test 通過。Edge(Playwright)で幅390pxを撮影、Playボタン下端 英語460px / 日本語478px、コンソールエラーなし、/landing/ → /about/ 転送を確認。
-- 追記: X（https://x.com/cobble_dev_ten）を設定し「Follow along」欄が表示されるように。TikTok（@bioconnectpazzle.com、共有用の追跡パラメータは除去）とYouTube（@bioconnectgame）も設定。残るのはRedditのみ。Search Consoleで /about/ の登録申請。
+- 追記: X（https://x.com/cobble_dev_ten）を設定し「Follow along」欄が表示されるように。TikTok（@bioconnectpazzle.com、共有用の追跡パラメータは除去）とYouTube（@bioconnectgame）も設定。Reddit（u/Bioconnectpuzzle）も設定し4媒体すべて表示、欄下の「順次追加します」文をフォロー案内に変更。Search Consoleで /about/ の登録申請。
