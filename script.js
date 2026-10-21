@@ -2084,6 +2084,7 @@ function endRun() {
   shareHint('');
   prepareShareCard();
   if (el.gameover.classList) el.gameover.classList.toggle('gameover--elephant', state.elephants > 0);
+  el.goPop.hidden = true;
   // The music stops, a sad horn sags, and "Game Over" wilts over the
   // board before the score card comes up.
   if (window.BioAudio) { window.BioAudio.theme('rest'); window.BioAudio.effect('gameover'); }
@@ -2093,6 +2094,13 @@ function endRun() {
     hideWord();
     el.gameover.hidden = false;
     el.goAgain.focus();
+    // an elephant is the run worth bragging about, so ask for the post
+    // up front, once per run (a revived run can end twice)
+    if (state.elephants > 0 && elephantPopRun !== state.runId) {
+      elephantPopRun = state.runId;
+      el.goPop.hidden = false;
+      el.goPopShare.focus();
+    }
     showSealToasts();
   }, 2400);
 }
@@ -4243,7 +4251,7 @@ function elephantOdds() {
 // ---------- Share card ----------
 // An X post link can only carry text, and the link's own preview is one
 // fixed picture for everybody. So the run's picture travels as a file:
-// the share sheet on a phone, the clipboard on a desktop. It shows the
+// on the clipboard, pasted into the post by hand. It shows the
 // meadow at its best moment (peakCells), not the stone-choked one that
 // ended the run.
 const CARD_LAYOUTS = { a: { w: 1080, h: 1080 }, b: { w: 1200, h: 675 } };
@@ -4478,7 +4486,7 @@ async function drawShareCard(layout) {
 }
 
 // Made while "Game Over" is still on screen, so the share tap can hand
-// the file over at once: share sheets and the clipboard both refuse
+// the file over at once: the clipboard refuses
 // anything that waits too long after the tap.
 function prepareShareCard() {
   cardBlob = null;
@@ -4494,26 +4502,31 @@ function prepareShareCard() {
   }).catch(function () {});
 }
 
+let elephantPopRun = null;
+function closeElephantPop() {
+  if (el.goPop.hidden) return;
+  el.goPop.hidden = true;
+  el.goAgain.focus();
+}
+
 function shareHint(text) {
   if (!el.goShareHint) return;
   el.goShareHint.textContent = text;
   el.goShareHint.hidden = !text;
 }
 
+// Always the X post box, phone or not. The phone share sheet listed X's
+// "send as a message" right beside "post", so the result kept landing in
+// someone's DMs instead of on the timeline. The picture can't ride on a
+// post link, so it goes on the clipboard to paste into the post.
 function shareRun() {
   const text = shareText();
   const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
-  const file = cardBlob && typeof File === 'function' ? new File([cardBlob], 'bioconnect.png', { type: 'image/png' }) : null;
   const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
-  if (file && touch && navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({ files: [file], text: text }).catch(function (e) {
-      if (e && e.name !== 'AbortError') window.open(intent, '_blank', 'noopener');
-    });
-    return;
-  }
   if (cardBlob && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
     navigator.clipboard.write([new ClipboardItem({ 'image/png': cardBlob })]).then(function () {
-      shareHint('Picture copied. Paste it into your post (' + (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl') + '+V).');
+      shareHint(touch ? 'Picture copied. Long-press in your post and tap Paste to add it.'
+        : 'Picture copied. Paste it into your post (' + (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl') + '+V).');
     }).catch(function () { shareHint(''); });
   }
   window.open(intent, '_blank', 'noopener');
@@ -4621,7 +4634,7 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goRecap', 'goRecapFact', 'goShare', 'goShareHint', 'goAgain', 'newBtn', 'reviveResume',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goRecap', 'goRecapFact', 'goShare', 'goShareHint', 'goPop', 'goPopShare', 'goPopLater', 'goAgain', 'newBtn', 'reviveResume',
     'speedBtn', 'startScreen', 'startBtn', 'startBest',
     'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
@@ -4735,6 +4748,10 @@ async function init() {
   if (el.menuBtn) el.newBtn.addEventListener('click', function () { if (!armedNew) closeMenu(); });
   el.goAgain.addEventListener('click', function () { disarmNew(); if (window.BioEconomy) window.BioEconomy.newGame(); else replay(); });
   el.goShare.addEventListener('click', shareRun);
+  el.goPopShare.addEventListener('click', function () { shareRun(); closeElephantPop(); });
+  el.goPopLater.addEventListener('click', closeElephantPop);
+  el.goPop.addEventListener('click', function (e) { if (e.target === el.goPop) closeElephantPop(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeElephantPop(); });
 
   // the little reference row under the board
   for (const node of document.querySelectorAll('.tile--mini')) {

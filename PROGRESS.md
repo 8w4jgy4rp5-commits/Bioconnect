@@ -2004,3 +2004,11 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 本人判断: B案（ポップ路線：1枚ごとに背景色、丸文字、少し傾けたスマホ、動物が枠から飛び出す）を採用。A案（ゲームと同じ深緑＋古書風書体のシリアス路線）は控えとして残す。
 - 置き場所: output/appstore-screenshots/（B1〜B5.jpg が採用版、A1〜A5.jpg は不採用案、compose.html がレイアウト、capture2.cjs が撮影、render.cjs が書き出し）。比較ページ: https://claude.ai/artifact/QMUoghxAWvkyTssDCFwGF2
 - 未確認・次: 実際のストア申請はまだ。飛び出す動物の原画が小さく（220px前後）、原寸ではわずかにぼやける。画像フォルダとこの記録をコミット・push済み。
+
+## 2026-10-21 結果画面のX共有（スマホでDMになる問題）
+- 原因: スマホではOSの共有シート（navigator.share）を開いていたため、Xの「メッセージで送る」に入りやすかった。
+- 変更: shareRun は端末を問わず x.com/intent/post（投稿画面）を開く。画像はクリップボードにコピーし、スマホでは「長押しで貼り付け」の案内を出す。共有シート経由は廃止。
+- 見た目: スコア横の小さな透明ボタンをやめ、メモの下に黒い「Share on X」ボタン（全幅）を独立して置いた。ぞうが出た回は金枠で「🐘 You raised an elephant! Share your result!」を必ず表示（goShareCall）。
+- 検証: node rules.test.js 272件成功（stamp.js 実行後）、test/feedback.test.cjs 成功。Playwright iPhone 13 サイズで通常／ぞうの両方を撮影し、タップで投稿URLが開くことを確認。
+- 未確認: 実機のiPhone/AndroidでXアプリが開くか、画像の貼り付けができるか。コミット・pushなし。
+- 追記（同日）: ぞうの回の呼びかけは結果カード内の文から「結果画面の手前の小ウインドウ」（#goPop）に変更。結果が出た直後に1ランにつき1回だけ表示（復活後にもう一度終わっても再表示しない）。「Share on X」で投稿画面を開いて閉じる、「Maybe later」・外側タップ・Escで閉じる。結果カード内の黒いShareボタンと金枠はそのまま。検証: rules.test.js 成功、feedback.test.cjs 成功、iPhone 13サイズで表示・タップ動作・コンソールエラー0を確認。

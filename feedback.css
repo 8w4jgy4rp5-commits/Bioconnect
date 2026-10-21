@@ -34,11 +34,32 @@
 
 .result-score-row { display:flex; align-items:center; justify-content:center; gap:13px; }
 .result-score-row .go-score { margin:0; }
-.gameover-card .result-score-row #goShare { display:inline-flex; gap:4px; align-items:center; padding:5px 7px; margin:0; min-height:30px; background:transparent; color:inherit; box-shadow:none; border:0; border-radius:6px; font:400 11px/1.4 system-ui,sans-serif; }
-.result-score-row #goShare svg { width:11px; height:11px; }
+/* Share sits on its own line as a real button; an elephant run frames it in gold. */
+.gameover-card .go-share-box { margin:10px 0 2px; }
+.gameover-card .go-share-box #goShare { display:flex; gap:8px; align-items:center; justify-content:center; width:100%; min-height:44px; margin:0; padding:10px 16px; border:0; border-radius:12px; background:#0f1419; color:#fff; box-shadow:0 3px 0 #000; font:700 15px/1.4 system-ui,sans-serif; }
+.gameover-card .go-share-box #goShare svg { width:16px; height:16px; }
+.gameover--elephant .go-share-box { padding:10px; border:2px solid #c6983b; border-radius:14px; background:rgba(198,152,59,.14); }
 
 /* One complete mascot and one short, recorded-outcome-based encouragement. */
 .gameover-card .run-recap.recap-compact { display:flex; align-items:center; gap:12px; padding:8px 12px; min-height:104px; }
 .gameover-card .run-recap.recap-compact[hidden] { display:none; }
 .recap-compact .recap-rabbit { display:block; flex:none; width:76px; height:104px; object-fit:contain; object-position:center; }
 .gameover-card .recap-compact p { flex:1; min-width:0; font:500 14px/1.6 system-ui,sans-serif; }
+
+/* Elephant runs: a small window over the results asking for the post. */
+.go-pop { position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:24px; background:rgba(8,10,6,.55); animation:go-pop-fade .2s ease-out; }
+.go-pop[hidden] { display:none; }
+.go-pop-card { width:min(100%, 300px); box-sizing:border-box; padding:22px 20px 14px; text-align:center; background:#fffbea; color:#2b2412; border:3px solid #c6983b; border-radius:18px; box-shadow:0 18px 40px rgba(0,0,0,.45); animation:go-pop-in .32s cubic-bezier(.2,1.4,.4,1); }
+.go-pop-badge { width:64px; height:64px; margin:-54px auto 6px; display:grid; place-items:center; font-size:38px; background:#fffbea; border:3px solid #c6983b; border-radius:50%; }
+.go-pop-card h3 { margin:0 0 2px; color:#a87414; font:800 19px/1.35 system-ui,sans-serif; }
+.go-pop-card p { margin:0 0 14px; font:600 15px/1.4 system-ui,sans-serif; }
+.go-pop-card .go-pop-share { display:flex; gap:8px; align-items:center; justify-content:center; width:100%; min-height:46px; margin:0; padding:10px 16px; border:0; border-radius:12px; background:#0f1419; color:#fff; box-shadow:0 3px 0 #000; font:700 15px/1.4 system-ui,sans-serif; }
+.go-pop-card .go-pop-share svg { width:16px; height:16px; }
+.go-pop-later { margin-top:8px; padding:8px 12px; min-height:36px; border:0; background:none; color:#6b6047; font:500 13px/1.4 system-ui,sans-serif; cursor:pointer; }
+.skin-eldritch .go-pop-card, .skin-eldritch .go-pop-badge { background:#2a2616; border-color:#c6983b; }
+.skin-eldritch .go-pop-card { color:#ece4c8; }
+.skin-eldritch .go-pop-card h3 { color:#e8c06a; }
+.skin-eldritch .go-pop-later { color:#a39c7c; }
+@keyframes go-pop-fade { from { opacity:0; } }
+@keyframes go-pop-in { from { opacity:0; transform:scale(.85) translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .go-pop, .go-pop-card { animation:none; } }
