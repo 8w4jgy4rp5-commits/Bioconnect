@@ -1998,3 +1998,9 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - ゲーム側: フッターに「About Bioconnect」リンク、sitemap.xml に /about/ を追加。
 - 検証: npm test 通過。Edge(Playwright)で幅390pxを撮影、Playボタン下端 英語460px / 日本語478px、コンソールエラーなし、/landing/ → /about/ 転送を確認。
 - 追記: X（https://x.com/cobble_dev_ten）を設定し「Follow along」欄が表示されるように。TikTok（@bioconnectpazzle.com、共有用の追跡パラメータは除去）とYouTube（@bioconnectgame）も設定。Reddit（u/Bioconnectpuzzle）はアカウント削除のためURL空に戻し非表示（3媒体表示）。欄下の「順次追加します」文をフォロー案内に変更。Search Consoleで /about/ の登録申請。
+
+## 2026-10-21 — App Store風の紹介画像（B案を採用）
+- 作成: 実際のゲーム画面（盤面を組んでPlaywrightで393px・3倍撮影）をiPhone枠に入れ、上に英語の一言を載せた5枚組×2案。並びは 遊び方 → 7連鎖 → エサやり → 冬 → ゾウ。1290×2796（6.7インチ用）。
+- 本人判断: B案（ポップ路線：1枚ごとに背景色、丸文字、少し傾けたスマホ、動物が枠から飛び出す）を採用。A案（ゲームと同じ深緑＋古書風書体のシリアス路線）は控えとして残す。
+- 置き場所: output/appstore-screenshots/（B1〜B5.jpg が採用版、A1〜A5.jpg は不採用案、compose.html がレイアウト、capture2.cjs が撮影、render.cjs が書き出し）。比較ページ: https://claude.ai/artifact/QMUoghxAWvkyTssDCFwGF2
+- 未確認・次: 実際のストア申請はまだ。飛び出す動物の原画が小さく（220px前後）、原寸ではわずかにぼやける。画像フォルダとこの記録をコミット・push済み。
