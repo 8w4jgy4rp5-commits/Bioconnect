@@ -10,6 +10,8 @@ window.BioAudio = (() => {
   const load = url => fetch(url)
     .then(response => response.ok ? response.arrayBuffer() : null).catch(() => null);
   const applauseData = load('audio/applause-02.mp3'), cheerData = load('audio/cheer-crowd01-6.mp3');
+  // Missing until the owner's recording is added; a 404 just means no voice.
+  const announcerData = load('audio/announcer-bioconnect.mp3');
 
   // Safari: "ambient" obeys the ring/silent switch and mixes with other audio.
   try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (_) {}
@@ -24,6 +26,8 @@ window.BioAudio = (() => {
           .then(buffer => { if (buffer) synth.setApplause(buffer); }).catch(() => {});
         cheerData.then(data => data && ctx.decodeAudioData(data))
           .then(buffer => { if (buffer) synth.setCheer(buffer); }).catch(() => {});
+        announcerData.then(data => data && ctx.decodeAudioData(data))
+          .then(buffer => { if (buffer) synth.setAnnouncer(buffer); }).catch(() => {});
       }
       if (ctx.state !== 'running' && !document.hidden) ctx.resume().then(sync).catch(() => {});
       return ctx;

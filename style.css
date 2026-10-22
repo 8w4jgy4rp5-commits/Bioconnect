@@ -2327,8 +2327,54 @@ body.is-celebrating { overflow: hidden; }
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(.2); }
 }
 @keyframes chain-edge-out { 0% { opacity: 0; } 18% { opacity: .9; } 100% { opacity: 0; } }
+/* ---------- The stadium call (5+ chain) ---------- */
+.fx-shout {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 4;
+  display: flex;
+  white-space: nowrap;
+  font-family: 'Fredoka', var(--font);
+  font-weight: 700;
+  font-size: clamp(30px, 10.5vw, 54px);
+  line-height: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.fx-shout > span { display: inline-block; opacity: 0; }
+/* Scoreboard slam: white on a dark outline, leaning forward, one shake. */
+.fx-shout { animation: shout-hold 1.85s ease-out forwards; }
+.fx-shout > span {
+  color: #fff;
+  -webkit-text-stroke: 7px #1f3a24;
+  paint-order: stroke fill;
+  text-shadow: 0 5px 0 #1f3a24, 0 0 26px #ffd66ecc;
+  transform: skewX(-9deg);
+  animation: shout-slam .32s cubic-bezier(.2, 1.6, .4, 1) forwards;
+  animation-delay: calc(var(--n) * 28ms);
+}
+.fx-shout > span:last-child { color: #ffd66e; }
+.ghost--crumble { animation: crumble-out .6s ease-in forwards; }
+@keyframes shout-slam {
+  0% { opacity: 0; transform: skewX(-9deg) scale(2.4); }
+  100% { opacity: 1; transform: skewX(-9deg) scale(1); }
+}
+@keyframes shout-hold {
+  0%, 26% { transform: translate(-50%, -50%); }
+  29% { transform: translate(calc(-50% - 5px), calc(-50% + 2px)); }
+  32% { transform: translate(calc(-50% + 4px), calc(-50% - 2px)); }
+  35%, 82% { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0; }
+}
+@keyframes crumble-out {
+  0% { opacity: .9; transform: translate(-50%, -50%) scale(1); }
+  35% { opacity: .9; transform: translate(-50%, -50%) scale(1.08) rotate(-4deg); }
+  100% { opacity: 0; transform: translate(-50%, -30%) scale(.5) rotate(10deg); }
+}
 @media (prefers-reduced-motion: reduce) {
   .fx-chain--praise { animation: none; opacity: 1; }
+  .fx-shout, .fx-shout > span { animation: none; opacity: 1; }
   .chain-spark, .chain-edge { display: none; }
 }
 

@@ -15,3 +15,10 @@
 - File: audio/cheer-crowd01-6.mp3 = 「Cheer-Crowd01-6(High-Short).mp3」 from Cheer-Crowd01-mp3.zip, downloaded by the owner (2026-10-16). Unedited copy, 3.5 seconds.
 - Provider: 音の素材屋さん【DJやーまん】 (YouTube channel UC6psamc4AnOEEEq5fWsYBQw), per the owner (2026-10-16). Same terms as the applause above: free to use, no credit required; do not re-upload the sound on its own.
 - Use: layered under the applause for 5+ chains only (3-4 chains are applause alone), lowpassed at 3.2 kHz, fades after 1.7 / 2.1 seconds for 5 / 7+ chain.
+
+# Announcer voice
+
+- File: audio/announcer-bioconnect.mp3 — the owner's own recording shouting "BIOCONNECT!" (take 1 of 2, 1.6 s, recorded 2026-10-21). Owned by the project; no third-party terms.
+- Treatment: option A "Stadium" chosen by the owner (2026-10-22) over B fight-game and C arcade. Baked offline: pitch ×0.94, highpass 380 Hz, soft clip, lowpass 3.6 kHz, +6 dB at 1.8 kHz, 0.23 s slap-back echo, 2.4 s hall reverb; tail trimmed below −60 dB, 3.1 s total.
+- Comparison page (source take and treatment code fx.js): https://claude.ai/artifact/8CcvCmtJfLnV2Wo4hCnDMR
+- Use: 5+ chains only, on the last pop (audio-synth.js announce).

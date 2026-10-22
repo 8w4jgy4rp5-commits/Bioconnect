@@ -293,6 +293,20 @@ ok('a two-step chain creates a rabbit', cell(1, 1).kind === 'rabbit');
 ok('the chain clears all three neighboring blockers', !cell(0, 2) && !cell(1, 0) && !cell(0, 1));
 ok('the hand advances in order and appends the preview', S.stock.join(',') === 'grass,sprout,grass');
 
+// A five-step chain shakes loose every blocker within two squares of
+// where it ended, diagonals included; a four-step chain does not.
+const longChain = [[0, 2, 'deer'], [1, 2, 'fox'], [2, 2, 'rabbit'], [3, 2, 'grass'], [4, 2, 'sprout'],
+                   [2, 0, 'stone'], [0, 4, 'bones'], [4, 0, 'stone']];
+board(longChain); S.cells[at(4, 3)] = { kind: 'sprout', clock: 0, born: 'wild' };
+let longGrew = X.ctx.growFrom(at(4, 3));
+ok('a five-step chain reaches a zebra', longGrew.length === 5 && longGrew[4].kind === 'zebra', JSON.stringify(longGrew.map(g => g.kind)));
+ok('...and clears the blockers two squares from it', !cell(2, 0) && !cell(0, 4));
+ok('...but not the one three squares away', cell(4, 0) && cell(4, 0).kind === 'stone');
+ok('...and reports them as cleared by its last step', longGrew[4].bones.includes(at(2, 0)) && longGrew[4].bones.includes(at(0, 4)));
+board(longChain.slice(1)); S.cells[at(4, 3)] = { kind: 'sprout', clock: 0, born: 'wild' };
+longGrew = X.ctx.growFrom(at(4, 3));
+ok('a four-step chain leaves the far blockers alone', longGrew.length === 4 && cell(2, 0) && cell(0, 4));
+
 // Regression: rabbit | grass | sprout | new sprout chains back to fox.
 board([[0, 2, 'rabbit'], [1, 2, 'grass'], [2, 2, 'sprout']]);
 S.stock = ['sprout', 'grass', 'sprout']; S.over = false;

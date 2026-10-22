@@ -467,6 +467,12 @@ const BLOCKERS = ['scrub', 'bones', 'stone'];
 // How fast the ground pushes back is the year's business — see the
 // season block below.
 const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
+// A long chain is rare (about one scoring move in two hundred) and it is
+// the loudest thing a player can do on purpose, so it shakes the meadow
+// loose: every blocker within this many squares of the animal it ended
+// on is gone too, diagonals included.
+const BIG_CHAIN_AT = 5;
+const BIG_CHAIN_REACH = 2;
 
 // ---------- The year ----------
 // Supply stays small throughout a run. Pressure and rewards, rather than
@@ -954,7 +960,7 @@ function updateLedgerDot() {
 
 function animalImg(kind, cls) {
   const img = document.createElement('img');
-  img.src = 'img/' + (kind === 'rabbit' || kind === 'fox' ? kind + '-pose.png' : kind + '-calm.png');
+  img.src = 'img/' + (kind === 'rabbit' || kind === 'fox' ? kind + '-pose-v2.png' : kind + '-calm.png');
   img.alt = '';
   if (cls) img.className = cls;
   return img;
@@ -1539,7 +1545,12 @@ function placeTile(i) {
   // layer is measured against where those cells ended up.
   // One rung at a time, over a board that is already finished. See
   // replayChain for why nothing here waits for it.
-  if (grew.length) replayChain(grew, before);
+  if (grew.length) {
+    // What each cleared square held, for the crumble a long chain plays.
+    const blockerWas = {};
+    for (const at of growthClearings(grew, beforeGrowth)) blockerWas[at] = beforeGrowth[at].kind;
+    replayChain(grew, before, blockerWas);
+  }
   announceFirsts(dealtFirst ? [{ kind: dealtKind }].concat(grew) : grew);
   const giants = grew.filter(function (g) { return g.kind === 'elephant'; }).length;
   if (countRaised(grew) && !giants) writeMet();
@@ -1724,6 +1735,20 @@ function growFrom(i, cells = state.cells, preview = false) {
     // has settled — by render() time those squares are empty.
     events.push({ at: i, kind: up, size: group.length, bones: cleared, trampled: trampled,
                   from: group, was: cell.kind });
+  }
+  if (events.length >= BIG_CHAIN_AT) {
+    const last = events[events.length - 1];
+    const feet = footprint(cells, last.at);
+    const near = function (n) {
+      return feet.some(function (f) {
+        return Math.max(Math.abs(f % SIZE - n % SIZE), Math.abs(((f / SIZE) | 0) - ((n / SIZE) | 0))) <= BIG_CHAIN_REACH;
+      });
+    };
+    for (let n = 0; n < CELLS; n++) {
+      if (!cells[n] || !isBlocker(cells[n].kind) || !near(n)) continue;
+      cells[n] = null;
+      last.bones.push(n);
+    }
   }
   return events;
 }
@@ -2019,9 +2044,11 @@ function readRunStats(value) {
 function runRecap(stats) {
   const s = readRunStats(stats);
   if (!s) return null;
-  const fact = s.starved ? 'So close! Leave a little room for food.'
+  // Praise the best moment first; one hungry animal happens in nearly every run,
+  // so food advice only wins when starving outpaced eating.
+  const fact = s.maxChain > 1 ? 'Great chain! Keep the next match nearby.'
     : s.cleared ? 'Nice clearing! Line up the next pair.'
-    : s.maxChain > 1 ? 'Great chain! Keep the next match nearby.'
+    : s.starved > s.meals ? 'So close! Leave a little room for food.'
     : s.maxChain === 1 ? 'Almost! Try setting up a two-step chain.'
     : 'Try placing two matching tiles together.';
   return { fact };
@@ -3492,6 +3519,38 @@ function showChain(steps, final = false) {
   fxAdd(tag, praise ? 1050 : 1200);
 }
 
+// The stadium call for a long chain: the game's own name, shouted. The
+// voice is in audio-synth.js and lands on the same rung as this does.
+// A first-time welcome card outranks it: the voice still plays, the
+// lettering just stays off so the two never sit on top of each other.
+function shoutBioconnect() {
+  if (!el.fx || el.fx.querySelector('.first')) return;
+  for (const old of el.fx.querySelectorAll('.fx-shout')) old.remove();
+  const shout = document.createElement('span');
+  shout.className = 'fx-shout';
+  'BIOCONNECT!'.split('').forEach(function (ch, n) {
+    const letter = document.createElement('span');
+    letter.textContent = ch;
+    letter.style.setProperty('--n', n);
+    shout.appendChild(letter);
+  });
+  fxAdd(shout, 1900);
+}
+
+// A blocker the long chain shook loose, crumbling on its own square.
+function crumble(i, kind) {
+  const at = fxAt(i);
+  if (!at) return;
+  const ghost = document.createElement('span');
+  ghost.className = 'ghost ghost--crumble';
+  ghost.style.left = at.x + 'px';
+  ghost.style.top = at.y + 'px';
+  ghost.style.width = (at.w * 0.92) + 'px';
+  ghost.style.height = (at.h * 0.82) + 'px';
+  fxAdd(ghost, 620);
+  paintTile(ghost, kind, 1, true);
+}
+
 // Decoration uses a fixed radial pattern, never the game's random source.
 function chainSparkles(i, steps, final) {
   const at = fxAt(i);
@@ -3546,7 +3605,7 @@ function cancelChain() {
   for (const t of chainTimers) clearTimeout(t);
   chainTimers = [];
   if (!el.fx) return;
-  for (const n of el.fx.querySelectorAll('.ghost, .ring, .fx-chain, .chain-spark, .chain-edge')) n.remove();
+  for (const n of el.fx.querySelectorAll('.ghost, .ring, .fx-chain, .fx-shout, .chain-spark, .chain-edge')) n.remove();
 }
 
 // The tiles that are gone, shown going. A ghost leaves the square it
@@ -3595,7 +3654,7 @@ function ringAt(i, steps = 1) {
 // because the shares add up to the total, the pops add up to the number
 // in the ticker. Late in a run the same rung pays less, and this is where
 // that becomes visible.
-function replayChain(grew, before) {
+function replayChain(grew, before, blockerWas = {}) {
   if (!el.fx) return;
   cancelChain();
   // Motion is the whole point of a ghost, so when motion is unwelcome the
@@ -3617,6 +3676,10 @@ function replayChain(grew, before) {
       }
       if (gain >= 1) popScore(step.at, gain, step.kind);
       if (n > 0) showChain(n + 1, n === grew.length - 1);
+      if (n === grew.length - 1 && grew.length >= BIG_CHAIN_AT) {
+        shoutBioconnect();
+        if (!still) for (const b of step.bones) if (blockerWas[b]) crumble(b, blockerWas[b]);
+      }
     }, chainStepAt(n)));
   }
 }

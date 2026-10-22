@@ -22,7 +22,7 @@ built-in image_genで既存wolf-calm.pngを編集し、首を上げて口を開�
 
 移行時点で存在した画像は、Gitに未登録・除外されているものも含めて保存。
 ゲームで使用中の画像は script.js の SPRITE_FILES と RIG が正本。
-オープニング画面だけ `img/rabbit-pose.png` / `img/fox-pose.png` を使う（2026-10-03、ゲームの描画を透過で切り出した1枚絵。盤面は部品リグのまま）。
+オープニング画面・実績画面・/about/ は `img/rabbit-pose-v2.png` / `img/fox-pose-v2.png` を使う（2026-10-20、`node tools/make-pose.cjs . img` で部品リグから等倍で組み直し、四辺に余白）。旧 `rabbit-pose.png` / `fox-pose.png` は2026-10-03にマスの枠で切り抜いたため耳先・尾が欠けている。戻す場合は参照を旧ファイル名に戻すだけ（旧ファイルは削除しない）。
 実コードではラダー10種すべての画像を使用（ウサギ・キツネ・シカ・シマウマ・バッファロー・オオカミ・クマ・ライオン・トラ・ゾウ）。クマは親子の絵。残る候補は不採用の記録として保管する。
 シカは満腹 `img/deer-calm.png` と空腹 `img/deer-hungry.png` の2枚組（2026-10-01）。元絵は
 `concepts/imported-from-chatgpt/animal-illustrations/deer-timid-20260923.png`（おびえた描き直し）で、

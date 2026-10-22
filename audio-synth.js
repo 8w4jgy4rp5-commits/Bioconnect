@@ -423,16 +423,36 @@ window.BioSound = (() => {
         filter, duration - .35);
     }
 
+    // Recording: the owner shouting the game's name (see audio/SOURCES.md).
+    // 5+ chains only, on the last pop. The stadium PA treatment (horn,
+    // grit, hall and slap-back) is baked into the file, so play it as-is.
+    let announcerBuffer = null;
+    function setAnnouncer(buffer) { announcerBuffer = buffer; }
+    function announce(time) {
+      if (!announcerBuffer) return;
+      const source = ctx.createBufferSource(), gain = ctx.createGain();
+      source.buffer = announcerBuffer;
+      gain.gain.setValueAtTime(.9, time);
+      source.connect(gain); gain.connect(effects);
+      const entry = { source, gain, bus: effects, time };
+      voices.add(entry);
+      source.onended = () => { voices.delete(entry); source.disconnect(); gain.disconnect(); };
+      source.start(time);
+    }
+
     function effect(kind, count = 1, time = ctx.currentTime + .012) {
       if (kind === 'place') plant(time);
       else if (kind === 'merge' || kind === 'finish') {
         const steps = Math.min(11, Math.max(1, Math.floor(Number(count) || 1)));
         for (let i = 0; i < steps; i++) pop(time + .105 + i * .145, i, .18 / (1 + i * .055));
-        if (kind === 'finish') [74,78,81].forEach((n, i) => wood(n, time + .16 + steps * .145 + i * .10, .07, effects));
-        else if (steps >= 3) {
+        if (kind === 'finish') {
+          [74,78,81].forEach((n, i) => wood(n, time + .16 + steps * .145 + i * .10, .07, effects));
+          if (steps >= 5) announce(time + .105 + (steps - 1) * .145 + .04);
+        } else if (steps >= 3) {
           const notes = steps >= 7 ? [74,78,81,86] : steps >= 5 ? [74,78,81] : [74,78];
           const end = time + .105 + (steps - 1) * .145;
           notes.forEach((note, i) => wood(note, end + .055 + i * .075, .045, effects));
+          if (steps >= 5) announce(end + .04);
           applause(end + .055 + notes.length * .075 + .06, steps);
         }
       } else if (kind === 'ready') {
@@ -492,7 +512,7 @@ window.BioSound = (() => {
       }
     }
 
-    return { musicBeat, effect, coin, cancel, setEnsemble, instrumentPreview, setApplause, setCheer };
+    return { musicBeat, effect, coin, cancel, setEnsemble, instrumentPreview, setApplause, setCheer, setAnnouncer };
   }
   const beatLength = (theme, pinch = false) =>
     theme === 'title' ? TITLE_BEAT : pinch && theme === 'game' ? PINCH_BEAT : BEAT;

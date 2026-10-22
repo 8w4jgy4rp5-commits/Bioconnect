@@ -32,8 +32,12 @@ state.cells.fill(null);state.cells[12]=ctx.makeTile('rabbit');state.cells[12].cl
 ctx.worldTick();
 assert.equal(state.runStats.meals,1);assert.equal(state.runStats.starved,1,'eating is separate from starvation');
 const recap=ctx.runRecap(state.runStats);
-assert.equal(recap.fact,'So close! Leave a little room for food.');
+assert.equal(recap.fact,'Great chain! Keep the next match nearby.','a big chain outranks one hungry animal');
 assert.ok(recap.fact.length < 60,'recap stays a single short comment');
+const fact=o=>ctx.runRecap({placed:9,maxChain:0,starved:0,cleared:0,meals:0,...o}).fact;
+assert.equal(fact({cleared:1,starved:5}),'Nice clearing! Line up the next pair.');
+assert.equal(fact({maxChain:1,starved:1,meals:1}),'Almost! Try setting up a two-step chain.','starving no more than eating is not the headline');
+assert.equal(fact({maxChain:1,starved:3,meals:2}),'So close! Leave a little room for food.');
 const beforeRevival=JSON.stringify(state.runStats);
 state.over=true;
 assert.equal(ctx.reviveRun(),true);

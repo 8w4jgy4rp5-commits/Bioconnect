@@ -1999,11 +1999,36 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証: npm test 通過。Edge(Playwright)で幅390pxを撮影、Playボタン下端 英語460px / 日本語478px、コンソールエラーなし、/landing/ → /about/ 転送を確認。
 - 追記: X（https://x.com/cobble_dev_ten）を設定し「Follow along」欄が表示されるように。TikTok（@bioconnectpazzle.com、共有用の追跡パラメータは除去）とYouTube（@bioconnectgame）も設定。Reddit（u/Bioconnectpuzzle）はアカウント削除のためURL空に戻し非表示（3媒体表示）。欄下の「順次追加します」文をフォロー案内に変更。Search Consoleで /about/ の登録申請。
 
+## 2026-10-20 — ゲームオーバーのひとことに優先順位
+- 本人指摘: 「動物が1回でも飢えたら So close」だとほぼ毎回同じ文になる。
+- 変更: runRecap の判定順を「大きい連鎖(maxChain>1) → クリア → 飢え(飢えた回数 > 食べた回数のときだけ) → 2段連鎖 → それ以外」に。文言は変更なし。
+- 変更ファイル: script.js / test/feedback.test.cjs（優先順位のテスト3件追加）/ index.html（stamp更新）。
+- 検証: node rules.test.js 267件成功、feedback.test.cjs 成功。実ブラウザでの表示は未確認（文言・見た目は変わっていない）。コミット・pushなし。
+
+## 2026-10-20 — うさぎの耳・キツネのしっぽが切れる件
+- 原因: 1枚絵 rabbit-pose.png / fox-pose.png が、盤面の描画をマスの枠で切り抜いて作られていたため、枠からはみ出す耳先・尾が欠けていた。盤面の部品リグ自体は欠けていない。
+- 変更: tools/make-pose.cjs を追加（部品リグを等倍・大きいキャンバスで組み直し、四辺に4%の余白）。img/ と about/assets/ に *-pose-v2.png を追加し、index.html・script.js(animalImg)・about/index.html の参照を v2 へ。旧ファイルは残し、戻す時は参照を戻すだけ。dist/（itch版、掲載見送り）は触っていない。
+- 検証: npm test 成功。Edge 390px でオープニングの影ウサギと /about/ の手順図を新旧比較し、耳・尾が全部見えることを確認。コンソールエラー0。キツネは尾の分だけ横長になり、同じ幅の枠では少し小さく見える。コミット・pushなし。
+
 ## 2026-10-21 — App Store風の紹介画像（B案を採用）
 - 作成: 実際のゲーム画面（盤面を組んでPlaywrightで393px・3倍撮影）をiPhone枠に入れ、上に英語の一言を載せた5枚組×2案。並びは 遊び方 → 7連鎖 → エサやり → 冬 → ゾウ。1290×2796（6.7インチ用）。
 - 本人判断: B案（ポップ路線：1枚ごとに背景色、丸文字、少し傾けたスマホ、動物が枠から飛び出す）を採用。A案（ゲームと同じ深緑＋古書風書体のシリアス路線）は控えとして残す。
 - 置き場所: output/appstore-screenshots/（B1〜B5.jpg が採用版、A1〜A5.jpg は不採用案、compose.html がレイアウト、capture2.cjs が撮影、render.cjs が書き出し）。比較ページ: https://claude.ai/artifact/QMUoghxAWvkyTssDCFwGF2
 - 未確認・次: 実際のストア申請はまだ。飛び出す動物の原画が小さく（220px前後）、原寸ではわずかにぼやける。画像フォルダとこの記録をコミット・push済み。
+
+## 2026-10-21 — 5連鎖以上で「BIOCONNECT!」＋周りの障害物を消すおまけ
+- ルール: 5連鎖以上（BIG_CHAIN_AT=5）で、最後に生まれた動物から2マス以内（斜め含む、BIG_CHAIN_REACH=2）の石・骨・やぶを全部消す。消えたマスは最後の段の bones に入るので、予告の CLEAR 表示・ティッカーの「dead squares came back」・runStats にもそのまま反映。得点計算は変わらないため RULES_VERSION は据え置き。
+- 演出: 最後の段で盤面中央に「BIOCONNECT!」（shoutBioconnect）、消えた障害物は崩れるアニメ（crumble）。デザインは本人判断でA案（スタジアム：白太字＋濃緑ふち、順に落ちて一度揺れる）を採用、B案（一文字ずつ色違いのポップ）は削除。比較ページ: https://claude.ai/artifact/8Evs1PHVyTns1AY9pymYgC
+- 声: audio/announcer-bioconnect.mp3 を読み込み、最後のポップと同時にスタジアム風エコー付きで再生（audio-synth.js announce）。ファイルは本人録音待ちで、無い間は無音で動く。届いたら audio/SOURCES.md に記録。
+- 検証: node rules.test.js 272件成功（5連鎖で2マス以内が消え3マス先は残る／4連鎖では消えない、を追加）。sim.js 300回で BIG_CHAIN_AT=5 と 99 を比較し差は誤差の範囲（5連鎖以上は得点手の約0.5%）。Playwright 390pxで両案を撮影、コンソールエラー0。
+- 未確認: 実際の声との音量バランス。初めての動物の「Welcome」カードと文字が重なる場面がある（すぐ消えるので許容中）。コミット・pushなし。
+
+## 2026-10-22 — 「BIOCONNECT!」の声を入れた（A スタジアム）
+- 本人判断: 声の加工3案（A スタジアム / B 格闘ゲーム実況 / C アーケード）から A を採用。素材は1本目（1.6秒）。比較ページ: https://claude.ai/artifact/8CcvCmtJfLnV2Wo4hCnDMR
+- 変更: 加工をあらかじめ焼き込んだ audio/announcer-bioconnect.mp3（3.1秒）を追加。audio-synth.js announce は二重にならないよう、ゲーム側の反響を外してそのまま鳴らすだけに。audio/SOURCES.md に記録。index.html stamp更新。
+- 検証: npm test 272件成功。実機での音量バランス（拍手・歓声との重なり）は未確認。
+- 追記: 初めての動物の「Welcome」カードが出ている間は、「BIOCONNECT!」の文字を出さない（声と障害物が崩れる演出はそのまま）。本人指示でカード優先。
+- 10-20〜22の分をまとめてコミット・push。other-ai.patch（Stripe更新の別件）は含めていない。
 
 ## 2026-10-21 結果画面のX共有（スマホでDMになる問題）
 - 原因: スマホではOSの共有シート（navigator.share）を開いていたため、Xの「メッセージで送る」に入りやすかった。
