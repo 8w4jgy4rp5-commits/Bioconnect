@@ -17,7 +17,7 @@
 // So the two are split:
 //
 //   worldTick()  the meadow's own clock, on a real timer. Hunger,
-//                feeding, deaths, withering, stones, the season — and
+//                feeding, deaths, withering, stones, the stage — and
 //                the tile that arrives in your hand.
 //   placeTile()  yours. Instant, free, and it advances nothing. Put a
 //                sprout beside a starving rabbit the moment its bar
@@ -253,10 +253,6 @@ function growValue(kind) {
 const SPROUT_WITHER_AT = 14;
 const GRASS_WITHER_AT = 18;
 
-// Spring deals half sprouts, half grass. See HAND_BY_STAGE for how the
-// hand widens as the year hardens.
-const GRASS_IN_HAND = 50;
-
 const LADDER = ["sprout", "grass", "rabbit", "fox", "deer", "zebra", "buffalo", "wolf", "bear", "lion", "tiger", "elephant"];
 const MERGE_AT = Object.fromEntries(LADDER.slice(0, -1).map(k => [k, 2]));
 
@@ -465,7 +461,7 @@ const BLOCKERS = ['scrub', 'bones', 'stone'];
 // reclaims one square beside it.
 //
 // How fast the ground pushes back is the year's business — see the
-// season block below.
+// stage block below.
 const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
 // A long chain is rare (about one scoring move in two hundred) and it is
 // the loudest thing a player can do on purpose, so it shakes the meadow
@@ -474,146 +470,92 @@ const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
 const BIG_CHAIN_AT = 5;
 const BIG_CHAIN_REACH = 2;
 
-// ---------- The year ----------
-// Supply stays small throughout a run. Pressure and rewards, rather than
-// larger dealt animals, rise with the independent world clock.
-const SEASON_LENGTH = 25;       // world ticks per difficulty stage
-const SEASONS = 4;
-const DIFFICULTY_STAGES = 8;    // spring, summer, autumn, then five winters
+// ---------- The clock's pressure ----------
+// No seasons (2026-10-22, rules 23). Every STAGE_LENGTH ticks the stage
+// goes up: stones come faster and points multiply. The hand does not jump
+// with it — its animal share climbs smoothly with the clock (handOdds).
+const STAGE_LENGTH = 25;        // world ticks per stage
+const DIFFICULTY_STAGES = 8;    // stages 1-8; the last one lasts forever
 const STONE_EVERY_FIRST = 12;
-const STONE_EVERY_LAST = 6;     // first winter; later winters approach the floor
+const STONE_EVERY_MID = 6;      // from stage 4; later stages approach the floor
+const STONE_EVERY_MID_STAGE = 3;
 const STONE_EVERY_MIN = 2;
 const WITHER_BONUS_FIRST = 30;
 const WITHER_BONUS_LAST = 0;
-const SCORE_PER_SEASON = 1;     // growth AND meals: x1 through x8
+const SCORE_PER_STAGE = 1;      // growth AND meals: x1 through x8
 
-const SEASON_NAMES = ['Spring', 'Summer', 'Autumn', 'Winter'];
-const SEASON_NOTES = [
+const STAGE_NOTES = [
   'Room to grow. Start small.',
   'More stones. Rabbits join your hand.',
-  'Plants fade sooner. Foxes join your hand.',
-  'Winter deepens. Keep your meadow fed.'
+  'Plants fade sooner. Foxes and deer join.',
+  'More stones, more animals. Keep it fed.'
 ];
 
 function difficultyStage() {
-  return Math.min(DIFFICULTY_STAGES - 1, Math.floor(state.ticks / SEASON_LENGTH));
+  return Math.min(DIFFICULTY_STAGES - 1, Math.floor(state.ticks / STAGE_LENGTH));
 }
-function season() { return Math.min(SEASONS - 1, difficultyStage()); }
-function seasonLabel() {
-  const s = season();
-  return SEASON_NAMES[s] + (s === SEASONS - 1 ? ' ' + (difficultyStage() - s + 1) : '');
-}
+function stageLabel() { return 'Stage ' + (difficultyStage() + 1); }
+// 0-3, for the colour of the stage strip only.
+function pressureTier() { return Math.min(3, difficultyStage()); }
 function stoneEvery() {
-  const s = season();
-  const firstYear = SEASONS < 2 ? STONE_EVERY_LAST : Math.round(
-    STONE_EVERY_FIRST + (STONE_EVERY_LAST - STONE_EVERY_FIRST) * s / (SEASONS - 1));
-  return Math.max(STONE_EVERY_MIN, firstYear - Math.max(0, difficultyStage() - (SEASONS - 1)));
+  const stage = difficultyStage(), mid = STONE_EVERY_MID_STAGE;
+  const early = Math.round(STONE_EVERY_FIRST + (STONE_EVERY_MID - STONE_EVERY_FIRST) * Math.min(stage, mid) / mid);
+  return Math.max(STONE_EVERY_MIN, early - Math.max(0, stage - mid));
 }
 function witherBonus() {
   // Gradual shortening avoids the old ten-tick lifespan loss at a season
   // boundary. The plant meter and wither check share this same limit.
-  const progress = Math.min(1, state.ticks / (SEASON_LENGTH * (DIFFICULTY_STAGES - 1)));
+  const progress = Math.min(1, state.ticks / (STAGE_LENGTH * (DIFFICULTY_STAGES - 1)));
   return Math.round(WITHER_BONUS_FIRST + (WITHER_BONUS_LAST - WITHER_BONUS_FIRST) * progress);
 }
-function scoreMultiplier() { return 1 + difficultyStage() * SCORE_PER_SEASON; }
+function scoreMultiplier() { return 1 + difficultyStage() * SCORE_PER_STAGE; }
 function plantLimit(kind) { return PLANTS[kind].witherAt + witherBonus(); }
 function nextDifficultySeconds() {
-  const left = SEASON_LENGTH - state.ticks % SEASON_LENGTH;
+  const left = STAGE_LENGTH - state.ticks % STAGE_LENGTH;
   return Math.ceil(left * TICK_MS * (state.relaxed ? RELAXED_SCALE : 1) / 1000);
 }
 
-// THE HAND WIDENS WITH THE YEAR. (rules 18)
+// THE HAND FOLLOWS THE CLOCK. (2026-10-22, rules 23)
 //
-// Stones come faster every season while the hand stayed plants-only, so
-// the gap between how fast the meadow fills and how fast you can grow
-// only ever widened. From summer on, a few small animals are dealt too —
-// rabbits first, foxes from autumn, never anything above the fox. Like
-// the fruit game the elephant is modelled on, the hand only ever holds
-// the bottom of the ladder; everything from the deer up is still earned.
+// The hand used to change by season: plants only in spring, rabbits in
+// summer, foxes in autumn, the deer only in winter. The owner still could
+// not reach the tiger, and trimming plants from the winter row alone left
+// the bots' tiger at 0% even at a third plants — the animals arrived too
+// late to be merged that far. Now every share climbs in a straight line
+// with the clock: rabbits from the first tick, foxes from tick 25, deer
+// from tick 50, all at their late share by HAND_RAMP_TICKS. Plants are
+// what is left, and grass never drops below HAND_GRASS_MIN (players read
+// a grassless hand as "grass stopped coming", rules 20).
 //
-// Driven by the clock, plus one discovery: raising a zebra jumps the
-// hand straight to the winter row (rules 19). Waiting for winter left a
-// player who climbed fast building a wolf out of sprouts. The old
-// discovery-driven hand (rules 12) let a tiger summon lions and complete
-// the elephant by itself; this one still never deals above the fox, so a
-// discovery can speed the bottom of the ladder but never skip the top. Measured against rules 17 (`node sim.js 300`): casual median
-// 2,386 -> 3,268, three-tick thinker 3,271 -> 3,762; the careful bot's
-// runs got shorter (212 -> 116 ticks) because dealt animals with no
-// partner take squares. The planner reached the bear 88% (was 45%); lion
-// and above did not move. Weights are percent of each deal, stage 0-7.
-const HAND_BY_STAGE = [
-  { sprout: 100 - GRASS_IN_HAND, grass: GRASS_IN_HAND },  // Spring
-  { sprout: 45, grass: 45, rabbit: 10 },                  // Summer
-  { sprout: 40, grass: 40, rabbit: 15, fox: 5 }           // Autumn
-];
-// THE WINTERS KEEP WIDENING. (rules 20)
+// Nothing above the deer is ever dealt (rules 22: dealing zebras and
+// buffalo made the late game suddenly easy). Raising a zebra moves the
+// hand to at least tick WIDE_HAND_AT (rules 19), so a fast climber is not
+// left building a wolf out of sprouts.
 //
-// One fixed winter row meant the deal stopped helping at tick 75 while
-// stones kept speeding up, so a player who averaged around 5,000 shown
-// stalled at the bear and never saw a lion. Past the first winter the
-// rabbit and fox shares now climb in a straight line from the first
-// pair of numbers to the second, and deer, zebras and buffalo join, over
-// HAND_RAMP_STAGES winters; sprouts and grass split what is left. Nothing
-// above the buffalo is ever dealt, so the wolf up is still earned.
-//
-// Rabbits and foxes alone could not do it: 60% rabbits and 50% foxes at
-// the end still left the lion near 1%, because an elephant is 256 foxes
-// of merging and a run is about 200 ticks. Most runs also ended in
-// Winter 2, before a four-winter ramp had done anything, hence one winter.
-// Target: the tiger about one run in ten. Measured, `node sim.js 400`
-// against rules 19 — casual bot lion 0% -> 48%, tiger ~1% -> 15%;
-// thinks-every-3 lion 0% -> 73%, tiger 0% -> 5%; elephant 0-1%,
-// and that last figure is on purpose: the elephant stays a
-// feat few runs ever reach, and stones are not slowed to get there.
-// Changing the shown scale is why RULES_VERSION moved.
-// THE HAND STOPS AT THE DEER. (2026-10-16, rules 22)
-//
-// Dealing zebras and buffalo made the late game suddenly easy: the hand
-// handed out what the player used to have to grow. Their shares are now 0
-// and their 40% falls to sprouts and grass. `node sim.js 300`: casual lion
-// 67% -> 8%, tiger 42% -> 0%; thinks-every-3 lion 91% -> 0%. If that proves
-// too hard, HAND_ZEBRA_LATE = 20 alone measured casual lion 42%, tiger 2%.
-const HAND_RABBIT_WINTER = 20;
-const HAND_FOX_WINTER = 10;
-const HAND_RABBIT_LATE = 10;
-const HAND_FOX_LATE = 12;
-// FEWER PLANTS LATE, ONE STEP AT A TIME. (2026-10-22, rules 22 kept)
-// The owner found the tiger too hard. Plants in the late hand 60% -> 57%,
-// the 3 going to deer. Next steps if still too hard: 24, then 27 — never
-// all at once. `node sim.js 300`: casual lion 7% -> 9% (24: 9%, 27: 14%),
-// bots' tiger 0% at every step, so the person playing is the real test.
-const HAND_DEER_LATE = 21;
-const HAND_ZEBRA_LATE = 0;
-const HAND_BUFFALO_LATE = 0;
-// GRASS NEVER RUNS OUT. (2026-10-06, rules 20 kept: the score scale barely moved)
-//
-// At 95% animals the late hand dealt grass about one tile in thirty, and
-// players read that as "grass stopped coming". Every grazer from the
-// rabbit to the bear still needs it, so it is now a floor, not leftovers:
-// the late animals went from 95% to 80%, and leaned toward the top of
-// the dealt range (rabbit/fox 20/20 -> 10/12, buffalo 15 -> 20) so the
-// tiger did not pay for it. `node sim.js 400` against rules 20: casual
-// lion 55% -> 52%, tiger 17% -> 18%; thinks-every-3 lion 69% -> 78%,
-// tiger 5% -> 6%. Scaling every share evenly instead cost half the tigers.
-const HAND_GRASS_MIN = 20;    // percent of every winter deal that is grass
-const HAND_RAMP_STAGES = 1;    // winters it takes to reach the late shares
+// Target from the owner: the tiger about 3%. `node sim.js 600` on this
+// code: casual lion 24%, tiger 1% (season hand: lion 7%, tiger 0%);
+// thinks-every-3 lion 1-3%, tiger 0%. More animals did not buy tigers:
+// fox 27 / deer 48 (plants ~10%) still measured casual tiger 1-2%, since
+// the bots' runs end before two lions meet. The owner's play is the test.
+const HAND_RAMP_TICKS = 125;
+const HAND_RABBIT_LATE = 18;
+const HAND_FOX_FROM = 25;
+const HAND_FOX_LATE = 21;
+const HAND_DEER_FROM = 50;
+const HAND_DEER_LATE = 36;
+const HAND_GRASS_MIN = 15;     // percent of every deal that is grass, at least
 const WIDE_HAND_FROM = 'zebra';
+const WIDE_HAND_AT = 75;
 function handOdds() {
-  // A zebra jumps the hand to at least the first winter (rules 19).
-  const firstWinter = SEASONS - 1;
-  let stage = difficultyStage();
-  if (rank(state.topKind) >= rank(WIDE_HAND_FROM)) stage = Math.max(stage, firstWinter);
-  if (stage < firstWinter) return HAND_BY_STAGE[stage];
-  const t = Math.min(1, (stage - firstWinter) / Math.max(1, HAND_RAMP_STAGES));
-  const rabbit = Math.round(HAND_RABBIT_WINTER + (HAND_RABBIT_LATE - HAND_RABBIT_WINTER) * t);
-  const fox = Math.round(HAND_FOX_WINTER + (HAND_FOX_LATE - HAND_FOX_WINTER) * t);
-  const deer = Math.round(HAND_DEER_LATE * t);
-  const zebra = Math.round(HAND_ZEBRA_LATE * t);
-  const buffalo = Math.round(HAND_BUFFALO_LATE * t);
-  const rest = Math.max(0, 100 - rabbit - fox - deer - zebra - buffalo);
+  let t = state.ticks;
+  if (rank(state.topKind) >= rank(WIDE_HAND_FROM)) t = Math.max(t, WIDE_HAND_AT);
+  const share = (from, late) => Math.round(late * Math.max(0, Math.min(1, (t - from) / (HAND_RAMP_TICKS - from))));
+  const rabbit = share(0, HAND_RABBIT_LATE);
+  const fox = share(HAND_FOX_FROM, HAND_FOX_LATE);
+  const deer = share(HAND_DEER_FROM, HAND_DEER_LATE);
+  const rest = 100 - rabbit - fox - deer;
   const grass = Math.min(rest, Math.max(HAND_GRASS_MIN, rest - Math.floor(rest / 2)));
-  const sprout = rest - grass;
-  return { sprout: sprout, grass: grass, rabbit: rabbit, fox: fox, deer: deer, zebra: zebra, buffalo: buffalo };
+  return { sprout: rest - grass, grass: grass, rabbit: rabbit, fox: fox, deer: deer };
 }
 
 // ---------- The clock ----------
@@ -652,13 +594,13 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 22;
+const RULES_VERSION = 23;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
 // Everything above this line is the game's own arithmetic and it counts
 // in RAW points: a meal is worth what was eaten, a chain multiplies it,
-// winter multiplies it again. Those numbers are tuned against each other
+// the stage multiplies it again. Those numbers are tuned against each other
 // and not one of them changes here. What changes is what the player sees.
 //
 // Raw points have no ceiling and no shape. The harness plays this same
@@ -759,7 +701,7 @@ function mergeScoreData(left, right) {
 }
 function recordRun() {
   const entry = { runId: state.runId, score: state.score, rules: RULES_VERSION,
-    revived: state.revived, season: seasonLabel(), ticks: state.ticks, at: Date.now() };
+    revived: state.revived, season: stageLabel(), ticks: state.ticks, at: Date.now() };
   recordHistory = [entry].concat(recordHistory.filter(r => r.runId !== entry.runId)).slice(0,30);
   writeBest(state.best);
 }
@@ -1118,7 +1060,7 @@ const state = {
   revived: false,
   revivalWait: false,
   runId: null,
-  ticks: 0,           // the world's own clock. Seasons and stones read it
+  ticks: 0,           // the world's own clock. Stages, stones and the hand read it
   over: false,
   paused: false,      // title screen, tab hidden, guide open, or the run is done
   celebrating: false, // the elephant overlay is up; the meadow waits for it
@@ -1455,7 +1397,7 @@ function newGame() {
   state.cells = new Array(CELLS).fill(null);
   state.topKind = 'sprout';
   // Before the deal: rollHand reads the clock, and Play again used to
-  // deal its opening hand at the last run's late-winter odds.
+  // deal its opening hand at the last run's late odds.
   state.ticks = 0;
   // Start with a full hand. The first thing a new player does is look at
   // the board, and arriving with one tile and a running clock teaches
@@ -1928,8 +1870,8 @@ function witherPlants() {
 
 // Several mouths fed on one turn multiply each other: the point of the
 // game is a chain that runs, not a single animal kept alive in a corner.
-// The season multiplies it again, so a chain still running in winter is
-// worth several times the same chain in spring.
+// The stage multiplies it again, so a chain still running at stage 6 is
+// worth several times the same chain at stage 1.
 function scoreMeals(meals) {
   if (!meals.length) return 0;
   let base = 0;
@@ -2107,7 +2049,7 @@ function endRun() {
   }
   window.BioEconomy?.draw();
   syncClock();
-  el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
+  el.goTitle.textContent = 'The meadow filled at ' + stageLabel();
   const lv = levelAt(displayScore(state.score));
   el.goScore.textContent = scoreLabel(state.score, state.revived);
   el.goLevel.textContent = 'Level ' + lv.level + ' · ' + lv.name;
@@ -3985,15 +3927,15 @@ function renderHand() {
 function renderSeason() {
   const stage = difficultyStage();
   const finalStage = stage >= DIFFICULTY_STAGES - 1;
-  el.seasonBar.dataset.season = String(season());
-  el.seasonName.textContent = seasonLabel();
-  el.seasonNote.textContent = SEASON_NOTES[season()];
+  el.seasonBar.dataset.season = String(pressureTier());
+  el.seasonName.textContent = stageLabel();
+  el.seasonNote.textContent = STAGE_NOTES[pressureTier()];
   el.seasonMult.textContent = 'Points ×' + scoreMultiplier();
   el.seasonMult.title = 'Multiplier for growth and meals, before the score scale';
   el.seasonNext.textContent = finalStage ? 'Maximum pressure · keep growing'
-    : 'Next challenge in ' + nextDifficultySeconds() + 's · Points ×' + (scoreMultiplier() + SCORE_PER_SEASON);
+    : 'Next challenge in ' + nextDifficultySeconds() + 's · Points ×' + (scoreMultiplier() + SCORE_PER_STAGE);
   el.seasonNext.title = 'Time advances only while the meadow is running';
-  const within = finalStage ? 1 : (state.ticks % SEASON_LENGTH) / SEASON_LENGTH;
+  const within = finalStage ? 1 : (state.ticks % STAGE_LENGTH) / STAGE_LENGTH;
   el.seasonFill.style.width = Math.round(within * 100) + '%';
 }
 
@@ -4206,7 +4148,6 @@ const SHARE_WORDS = {
     again: '🐘 Elephant #{k} for me!', rare: 'Only 1 in {r} games ever ends with one.', rareNone: 'Most games never see one.',
     askE: 'How many tries will it take you?', top: '{e} Got all the way to {kind}…',
     escape: 'but the elephant still escapes me.', askN: 'Can you raise one before I do?', score: 'Score',
-    seasons: ['Spring', 'Summer', 'Autumn', 'Winter'],
     kinds: { sprout: 'a sprout', grass: 'grass', rabbit: 'a rabbit', fox: 'a fox', deer: 'a deer', zebra: 'a zebra', buffalo: 'a buffalo', wolf: 'a wolf', bear: 'a bear', lion: 'a lion', tiger: 'a tiger' }
   },
   ja: {
@@ -4214,7 +4155,6 @@ const SHARE_WORDS = {
     again: '🐘 これで{k}頭目のぞう！', rare: 'ぞうにたどり着くのは{r}回に1回だけ。', rareNone: 'ほとんどのプレイは、ぞうまで届かない。',
     askE: 'あなたは何回でできる？', top: '{e} {kind}までは来た…',
     escape: 'でも、ぞうにはまだ届かない。', askN: '私より先に育てられる？', score: 'スコア',
-    seasons: ['春', '夏', '秋', '冬'], tight: true,
     kinds: { sprout: '芽', grass: '草', rabbit: 'ウサギ', fox: 'キツネ', deer: 'シカ', zebra: 'シマウマ', buffalo: 'バッファロー', wolf: 'オオカミ', bear: 'クマ', lion: 'ライオン', tiger: 'トラ' }
   },
   es: {
@@ -4222,7 +4162,6 @@ const SHARE_WORDS = {
     again: '🐘 ¡Mi elefante n.º {k}!', rare: 'Solo 1 de cada {r} partidas termina con uno.', rareNone: 'La mayoría de las partidas nunca lo ven.',
     askE: '¿Cuántos intentos te costará a ti?', top: '{e} Llegué hasta {kind}…',
     escape: 'pero el elefante se me sigue escapando.', askN: '¿Podrás criar uno antes que yo?', score: 'Puntuación',
-    seasons: ['Primavera', 'Verano', 'Otoño', 'Invierno'],
     kinds: { sprout: 'un brote', grass: 'la hierba', rabbit: 'un conejo', fox: 'un zorro', deer: 'un ciervo', zebra: 'una cebra', buffalo: 'un búfalo', wolf: 'un lobo', bear: 'un oso', lion: 'un león', tiger: 'un tigre' }
   },
   zh: {
@@ -4230,7 +4169,6 @@ const SHARE_WORDS = {
     again: '🐘 这是我的第{k}头大象！', rare: '每{r}局只有1局能等到大象。', rareNone: '大多数对局都等不到大象。',
     askE: '你要试几次？', top: '{e} 一路养到了{kind}……',
     escape: '可大象还是没来。', askN: '你能比我先养出大象吗？', score: '得分',
-    seasons: ['春', '夏', '秋', '冬'], tight: true,
     kinds: { sprout: '嫩芽', grass: '草', rabbit: '兔子', fox: '狐狸', deer: '鹿', zebra: '斑马', buffalo: '水牛', wolf: '狼', bear: '熊', lion: '狮子', tiger: '老虎' }
   },
   hi: {
@@ -4238,7 +4176,6 @@ const SHARE_WORDS = {
     again: '🐘 यह मेरा {k}वाँ हाथी है!', rare: 'हर {r} गेम में से सिर्फ 1 में हाथी आता है।', rareNone: 'ज़्यादातर गेम में हाथी कभी नहीं आता।',
     askE: 'तुम्हें कितनी कोशिशें लगेंगी?', top: '{e} {kind} तक तो पहुँच गया…',
     escape: 'पर हाथी अब भी हाथ नहीं आया।', askN: 'क्या तुम मुझसे पहले हाथी पाल सकते हो?', score: 'स्कोर',
-    seasons: ['वसंत', 'गर्मी', 'पतझड़', 'सर्दी'],
     kinds: { sprout: 'अंकुर', grass: 'घास', rabbit: 'खरगोश', fox: 'लोमड़ी', deer: 'हिरण', zebra: 'ज़ेबरा', buffalo: 'भैंसा', wolf: 'भेड़िया', bear: 'भालू', lion: 'शेर', tiger: 'बाघ' }
   }
 };
@@ -4274,9 +4211,7 @@ function shareText(lang) {
   } else {
     const kind = w.kinds[state.topKind] || state.topKind;
     lines.push(fillWords(w.top, { e: SHARE_EMOJI[state.topKind] || '🌱', kind: kind }), w.escape, w.askN);
-    const s = season();
-    const when = w.seasons[s] + (s === SEASONS - 1 ? (w.tight ? '' : ' ') + (difficultyStage() - s + 1) : '');
-    lines.push('', '🌱 Bioconnect · ' + w.score + ' ' + score + ' · ' + when);
+    lines.push('', '🌱 Bioconnect · ' + w.score + ' ' + score);
   }
   return lines.join('\n') + '\nhttps://bioconnectpazzle.com/';
 }
@@ -4544,7 +4479,7 @@ async function drawShareCard(layout) {
     cells: state.peakCells || state.cells,
     score: scoreLabel(state.score, state.revived).replace(' 💎', ''),
     level: levelAt(displayScore(state.score)),
-    season: seasonLabel(),
+    season: stageLabel(),
     standing: runStanding(),
     elephants: state.elephants,
     rarity: state.elephants ? rarityLine() : ''
@@ -4637,7 +4572,7 @@ function restoreRun(data) {
   el.startScreen.hidden = !atTitle; document.body.classList.toggle('is-modal', atTitle);
   el.gameover.hidden = !state.over;
   el.goScore.textContent = scoreLabel(state.score, state.revived);
-  el.goTitle.textContent = 'The meadow filled in ' + seasonLabel();
+  el.goTitle.textContent = 'The meadow filled at ' + stageLabel();
   el.goNote.textContent = endNote();
   renderRunRecap();
   if (el.reviveResume) el.reviveResume.hidden = state.over || atTitle;

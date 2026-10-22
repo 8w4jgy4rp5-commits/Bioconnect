@@ -488,7 +488,7 @@ function playMany(bot, runs, ownPolicy) {
     tickTotal += state.ticks;
     starved += runStarved;
     runStarved = 0;
-    endedIn[Math.min(endedIn.length - 1, ctx.season())] += 1;
+    endedIn[Math.min(endedIn.length - 1, ctx.pressureTier())] += 1;
     if (rabbitAt) { sawRabbit += 1; firstRabbit.push(rabbitAt); }
     if (foxAt) { sawFox += 1; firstFox.push(foxAt); }
     if (peakRabbits >= 2) twoRabbits += 1;
@@ -601,7 +601,7 @@ const runs = Number(process.argv[2]) || 300;
 // right amount of ready-made grass is.
 const sweep = process.argv.slice(3);
 
-console.log('configuration          ticks   shown p25/50/75   mean     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear        lion       tiger   elephant     ended sp/su/au/wi');
+console.log('configuration          ticks   shown p25/50/75   mean     max   0pt   lv6  starved  grown   alive   idle    rabbit       fox      wolf        bear        lion       tiger   elephant     ended L1/L2/L3/L4+');
 console.log('-'.repeat(146));
 
 if (sweep.indexOf('--meals') >= 0) {
