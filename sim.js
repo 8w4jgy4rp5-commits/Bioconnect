@@ -77,6 +77,8 @@ function load(overrides) {
   x.el.goLevel = {};
   x.el.goNote = {};
   x.el.goAgain = { focus() {} };
+  x.el.goPop = {};
+  x.el.goPopShare = { focus() {} };
   x.el.countdown = {};
   x.el.countdownWord = {};
   x.ctx = ctx;

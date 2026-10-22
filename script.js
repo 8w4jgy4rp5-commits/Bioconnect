@@ -577,7 +577,12 @@ const HAND_RABBIT_WINTER = 20;
 const HAND_FOX_WINTER = 10;
 const HAND_RABBIT_LATE = 10;
 const HAND_FOX_LATE = 12;
-const HAND_DEER_LATE = 18;
+// FEWER PLANTS LATE, ONE STEP AT A TIME. (2026-10-22, rules 22 kept)
+// The owner found the tiger too hard. Plants in the late hand 60% -> 57%,
+// the 3 going to deer. Next steps if still too hard: 24, then 27 — never
+// all at once. `node sim.js 300`: casual lion 7% -> 9% (24: 9%, 27: 14%),
+// bots' tiger 0% at every step, so the person playing is the real test.
+const HAND_DEER_LATE = 21;
 const HAND_ZEBRA_LATE = 0;
 const HAND_BUFFALO_LATE = 0;
 // GRASS NEVER RUNS OUT. (2026-10-06, rules 20 kept: the score scale barely moved)
