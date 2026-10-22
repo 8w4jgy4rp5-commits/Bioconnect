@@ -2012,3 +2012,8 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証: node rules.test.js 272件成功（stamp.js 実行後）、test/feedback.test.cjs 成功。Playwright iPhone 13 サイズで通常／ぞうの両方を撮影し、タップで投稿URLが開くことを確認。
 - 未確認: 実機のiPhone/AndroidでXアプリが開くか、画像の貼り付けができるか。コミット・pushなし。
 - 追記（同日）: ぞうの回の呼びかけは結果カード内の文から「結果画面の手前の小ウインドウ」（#goPop）に変更。結果が出た直後に1ランにつき1回だけ表示（復活後にもう一度終わっても再表示しない）。「Share on X」で投稿画面を開いて閉じる、「Maybe later」・外側タップ・Escで閉じる。結果カード内の黒いShareボタンと金枠はそのまま。検証: rules.test.js 成功、feedback.test.cjs 成功、iPhone 13サイズで表示・タップ動作・コンソールエラー0を確認。
+
+## 2026-10-22 — AdSense審査中は No Ads を隠す
+- 理由: 広告が出ていない間に「No Ads」を売ると、買っても何も変わらない。AdSenseは「準備中」（2026-10-22 本人アカウントで確認）。
+- 変更: monetization.js に noAdsSold()（adsEnabled=true かテストアダプタ時だけ true）。売っていない間は、スタートの No Ads ボタン・ショップの No Ads 商品・ゲームオーバーの「Unlock daily revival」と案内文を隠し、ショップ見出しは「Crystals」、残高表示から「No Ads not owned」を外す。購入済みの人には今まで通り表示。adsEnabled を true にすれば自動で全部戻る。
+- 検証: npm test 成功。Edge 390px（localhost・テストアダプタなし）でスタートにNo Adsボタンなし、ショップは Crystals のみ、コンソールエラー0。

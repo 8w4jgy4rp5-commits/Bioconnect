@@ -76,7 +76,13 @@ window.BioEconomy = (() => {
     const paid = !!wallet?.no_ads;
     // Until the live backend sells, the store and revivals stay out of sight there.
     const storeOn = cfg.storeEnabled === true || loopback;
-    for (const id of ['shopBtn', 'startShopBtn', 'startWallet', 'startNoAdsBtn']) if ($(id)) $(id).hidden = !storeOn;
+    // No Ads is not sold while no ads run; owners still see what they bought.
+    const noAdsOn = storeOn && (paid || noAdsSold());
+    for (const id of ['shopBtn', 'startShopBtn', 'startWallet']) if ($(id)) $(id).hidden = !storeOn;
+    if ($('startNoAdsBtn')) $('startNoAdsBtn').hidden = !noAdsOn;
+    const noAdsProduct = document.querySelector('#shopModal .no-ads-product');
+    if (noAdsProduct) noAdsProduct.hidden = !noAdsOn;
+    if ($('shopTitle') && $('shopModal')?.dataset.shopView === 'all') $('shopTitle').textContent = noAdsOn ? 'Crystals & No Ads' : 'Crystals';
     const crystalCount = session ? (wallet ? String(wallet.crystals) : '—') : '0';
     if ($('startCrystalCount')) $('startCrystalCount').textContent = crystalCount;
     if ($('startCrystalBalance')) $('startCrystalBalance').setAttribute('aria-label', wallet || !session ? 'Crystals: ' + crystalCount : 'Crystal balance unavailable');
@@ -86,7 +92,7 @@ window.BioEconomy = (() => {
       $('startNoAdsBtn').setAttribute('aria-label', paid ? 'No Ads owned. View benefits' : 'Open No Ads shop');
     }
     if ($('accountLabel')) $('accountLabel').textContent = session ? (session.user.email || 'Signed in') : 'Play without signing in';
-    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : 'Account balance unavailable') : ($('shopModal')?.dataset.shopView === 'no_ads' ? 'Sign in to purchase No Ads or view your benefits' : 'Sign in to claim 3 free Crystals or purchase');
+    if ($('walletLabel')) $('walletLabel').textContent = session ? (wallet ? `${wallet.crystals} Crystals` + (noAdsOn ? ` · ${paid ? 'No Ads owned' : 'No Ads not owned'}` : '') : 'Account balance unavailable') : ($('shopModal')?.dataset.shopView === 'no_ads' ? 'Sign in to purchase No Ads or view your benefits' : 'Sign in to claim 3 free Crystals or purchase');
     if ($('authControls')) $('authControls').hidden = !!session;
     if (session && $('authPrompt')) $('authPrompt').hidden = true;
     if ($('googleLink')) {
@@ -117,7 +123,7 @@ window.BioEconomy = (() => {
         : session && wallet ? 'find' : 'crystal';
       const show = { reviveDaily: 'daily', reviveCrystal: 'crystal', reviveAd: 'ad', reviveFind: 'find' };
       for (const id in show) $(id).hidden = used || main !== show[id];
-      $('reviveDawnLocked').hidden = $('reviveHush').hidden = used || paid || !!pending;
+      $('reviveDawnLocked').hidden = $('reviveHush').hidden = used || paid || !!pending || !noAdsOn;
       $('reviveCrystal').disabled = busy || (!!pending && pending.source !== 'crystal');
       $('reviveDaily').disabled = busy || (!!pending && pending.source !== 'daily');
       $('reviveAd').disabled = $('reviveFind').disabled = $('reviveDawnLocked').disabled = busy || !!pending;
@@ -382,9 +388,12 @@ window.BioEconomy = (() => {
       try { window.adBreak(config); } catch { finish(); }
     });
   }
+  // Selling No Ads only makes sense once ads can actually appear.
+  function noAdsSold() { return cfg.adsEnabled === true || !!test; }
   function openShop(view = 'all') {
     if (busy || adPanel || adActive) return;
     view = ['crystals', 'no_ads'].includes(view) ? view : 'all';
+    if (view === 'no_ads' && !wallet?.no_ads && !noAdsSold()) view = 'crystals';
     opener = document.activeElement; panel = $('shopModal');
     panel.dataset.shopView = view;
     $('shopTitle').textContent = view === 'no_ads' ? 'No Ads' : view === 'crystals' ? 'Crystals' : 'Crystals & No Ads';
