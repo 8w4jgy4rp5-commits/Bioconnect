@@ -469,6 +469,9 @@ const CLEAR_PER_MERGE = 1;  // one growth buys back one dead square
 // on is gone too, diagonals included.
 const BIG_CHAIN_AT = 5;
 const BIG_CHAIN_REACH = 2;
+// The shout waits for a longer chain than the shake: at five it came often
+// enough to turn into wallpaper. audio-synth.js holds the same number.
+const SHOUT_AT = 7;
 
 // ---------- The clock's pressure ----------
 // No seasons (2026-10-22, rules 23). Every STAGE_LENGTH ticks the stage
@@ -3624,7 +3627,7 @@ function replayChain(grew, before, blockerWas = {}) {
       if (gain >= 1) popScore(step.at, gain, step.kind);
       if (n > 0) showChain(n + 1, n === grew.length - 1);
       if (n === grew.length - 1 && grew.length >= BIG_CHAIN_AT) {
-        shoutBioconnect();
+        if (grew.length >= SHOUT_AT) shoutBioconnect();
         if (!still) for (const b of step.bones) if (blockerWas[b]) crumble(b, blockerWas[b]);
       }
     }, chainStepAt(n)));

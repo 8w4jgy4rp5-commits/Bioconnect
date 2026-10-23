@@ -1353,6 +1353,8 @@ body.is-modal { overflow: hidden; }
   overflow: hidden;
   border-radius: 18px;
   z-index: 3;
+  /* Lets the shout size itself by the board, not the screen. */
+  container-type: inline-size;
 }
 
 .pop {
@@ -2338,6 +2340,10 @@ body.is-celebrating { overflow: hidden; }
   font-family: 'Fredoka', var(--font);
   font-weight: 700;
   font-size: clamp(30px, 10.5vw, 54px);
+  /* The board shrinks with a short screen too, so a width-only size could
+     outgrow it and lose the first letters to the clip. 10cqw keeps the
+     word near three quarters of the board, slam included. */
+  font-size: clamp(20px, 10cqw, 54px);
   line-height: 1;
   pointer-events: none;
   transform: translate(-50%, -50%);
