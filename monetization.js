@@ -76,12 +76,14 @@ window.BioEconomy = (() => {
     const paid = !!wallet?.no_ads;
     // Until the live backend sells, the store and revivals stay out of sight there.
     const storeOn = cfg.storeEnabled === true || loopback;
-    // No Ads is not sold while no ads run; owners still see what they bought.
-    const noAdsOn = storeOn && (paid || noAdsSold());
+    // While no ads run, No Ads is out of sight for everyone, owners included
+    // (their daily revival still works). It returns once adsEnabled is true.
+    const noAdsOn = storeOn && noAdsSold();
     for (const id of ['shopBtn', 'startShopBtn', 'startWallet']) if ($(id)) $(id).hidden = !storeOn;
     if ($('startNoAdsBtn')) $('startNoAdsBtn').hidden = !noAdsOn;
     const noAdsProduct = document.querySelector('#shopModal .no-ads-product');
     if (noAdsProduct) noAdsProduct.hidden = !noAdsOn;
+    if ($('shopBtn')) $('shopBtn').textContent = noAdsOn ? 'Crystals & No Ads' : 'Crystals';
     if ($('shopTitle') && $('shopModal')?.dataset.shopView === 'all') $('shopTitle').textContent = noAdsOn ? 'Crystals & No Ads' : 'Crystals';
     const crystalCount = session ? (wallet ? String(wallet.crystals) : '—') : '0';
     if ($('startCrystalCount')) $('startCrystalCount').textContent = crystalCount;
@@ -393,7 +395,7 @@ window.BioEconomy = (() => {
   function openShop(view = 'all') {
     if (busy || adPanel || adActive) return;
     view = ['crystals', 'no_ads'].includes(view) ? view : 'all';
-    if (view === 'no_ads' && !wallet?.no_ads && !noAdsSold()) view = 'crystals';
+    if (view === 'no_ads' && !noAdsSold()) view = 'crystals';
     opener = document.activeElement; panel = $('shopModal');
     panel.dataset.shopView = view;
     $('shopTitle').textContent = view === 'no_ads' ? 'No Ads' : view === 'crystals' ? 'Crystals' : 'Crystals & No Ads';

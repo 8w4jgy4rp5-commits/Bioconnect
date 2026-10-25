@@ -2074,3 +2074,19 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 変更: style.css の .fx に container-type: inline-size、.fx-shout の文字サイズを clamp(20px, 10cqw, 54px)（盤面幅基準）に。旧指定は非対応ブラウザ用に残した。PCでは54px→46pxと少し小さくなる。stamp.js 実行済み。
 - 検証: node rules.test.js 272件成功。Playwrightで10種の画面（320×568〜1440×900、横向き844×390含む）、演出全体（0〜1850ms）を10ms刻みで測り、見えている文字は常に盤面の内側（最小余白17px）。390×664 のスクショで確認、コンソールエラー0。
 - 未確認: 実機iPhone Safariでの見た目。コミット・pushなし。
+
+## 2026-10-23 — X用「BIOCONNECT!」演出の紹介動画
+- 依頼: 叫びの演出が出る様子をXに投稿するための紹介動画。ゲームコード・ルールは変更なし。
+- 作り方: concepts/bioconnect-call-video-v1/ の3本。find-scenes.cjs（現ルールの careful bot で7連鎖以上の盤面を探す。300 seed で21場面）→ capture.cjs（実ページに盤面を再現して実際に置き、画面と音を録画。seed 113 の8連鎖クマ、seed 138 の7連鎖クマ）→ make-video.cjs（ffmpegで編集）。
+- 成果物: output/playwright/bioconnect-call-video/bioconnect-call-x.mp4（15.9秒、1080×1920縦、30fps、H.264/AAC、3.8MB）。構成: 8連鎖（等速）→ 叫びをズーム＋0.5倍スロー → 7連鎖（等速）→ 終わりの画面（BIOCONNECT! / Raise the food chain. / Free puzzle in your browser / ぞう / bioconnectpazzle.com）。字幕は英語。
+- 撮影の注意: Playwright の viewport+deviceScaleFactor では録画フレームがCSSピクセル（432×768）になる。--force-device-scale-factor=2.5 と CDP の Emulation.setDeviceMetricsOverride で 1080×1920 になった。音は ScriptProcessor だと欠けて短くなったので MediaRecorder（実時間）に変更し、映像と同じ13.6秒に揃った。レッスン表示は localStorage で済みにし、初対面の Welcome は met/seen を埋めて出さない（出ると叫びが抑えられる）。
+- 検証: 2場面とも叫びの文字を検出（8連鎖 3.35秒、7連鎖 10.02秒）。録音中の声は元の announcer-bioconnect.mp3 と相関0.82で3.37秒に一致。書き出し動画の全フレーム復号OK、ページ例外0（cloudflare計測のCORSのみ）。スロー場面と終わりの画面を目視確認。
+- 未確認: 本人の視聴・聴感。Xへの投稿はしていない（公開は本人判断）。コミット・pushなし。
+- 次: 本人の感想で字幕・長さ・スロー場面を調整。投稿文が必要なら用意する。
+
+## 2026-10-24 — 広告が止まっている間は No Ads を全員に非表示（所有者も）
+- 依頼: 広告（AdSense）停止中なので、ショップなどの No Ads 表示を出さない版にする。広告が来たら戻す。
+- 変更（monetization.js）: No Ads の表示条件を「adsEnabled が true（またはテスト用アダプタ）」だけにし、所有者への例外を外した。一時停止メニューのショップボタン名も No Ads が出ない時は「Crystals」に。No Ads を開こうとすると Crystals 画面になる（所有者も）。所有者の毎日1回の無料復活そのものは従来どおり使える。stamp.js 実行済み。
+- 戻し方: shared/monetization-config.js の adsEnabled を true にすれば自動で全表示が戻る（コードの戻しは不要）。
+- 検証: npm test 成功（rules 272件ほか）。ローカルChromeで、スタート画面・Crystals画面・一時停止メニューのショップ・鎖付き復活ボタンから開いたショップのいずれにも「No Ads」の文字が見えないことを確認。
+- 未確認: 実際の No Ads 所有アカウントでの見た目（コード上は所有かどうかで分岐しなくなった）。法務ページ（terms/privacy/commerce）の No Ads 説明は商品説明のため残している。コミット・push はまだ（自動の権限チェックで止められたため、本人の確認待ち）。
