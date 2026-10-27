@@ -1,0 +1,28 @@
+/* How-to-play page. Same palette as the legal pages; no scripts. */
+:root { --bg:#fff8e8; --ink:#243c2e; --mute:#5b6b5f; --line:#c9d6bd; --link:#2f6b3f; --card:#f3ecd6; --accent:#3f7d4b; --on-accent:#fff; }
+@media (prefers-color-scheme: dark) { :root { --bg:#141a14; --ink:#e7eadf; --mute:#a9b2a3; --line:#34402f; --link:#9fd38a; --card:#1d251c; --accent:#9fd38a; --on-accent:#10150e; } }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:28px; line-height:1.2; margin:8px 0 10px; }
+h2 { font-size:20px; margin:36px 0 8px; scroll-margin-top:12px; }
+p, li { overflow-wrap:anywhere; }
+li { margin:4px 0; }
+a { color:var(--link); }
+.back { color:var(--mute); font-size:14px; }
+.lead { font-size:17px; }
+.tryit { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.toc { display:flex; flex-wrap:wrap; gap:6px 14px; margin:18px 0 0; padding:12px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-size:14px; }
+.ladder { list-style:none; padding:0; margin:12px 0; display:grid; grid-template-columns:repeat(auto-fill, minmax(96px, 1fr)); gap:8px; counter-reset:step; }
+.ladder li { counter-increment:step; margin:0; display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; background:var(--card); border:1px solid var(--line); border-radius:10px; font-size:14px; font-weight:600; }
+.ladder li::before { content:counter(step); align-self:flex-start; margin:-4px 0 -18px 2px; font-size:11px; font-weight:400; color:var(--mute); }
+.ladder img, .ladder .plant { width:56px; height:56px; object-fit:contain; }
+.ladder .plant { display:grid; place-items:center; font-size:34px; }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:15px; }
+th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { font-size:13px; color:var(--mute); font-weight:600; }
+td:first-child { font-weight:600; white-space:nowrap; padding-right:14px; }
+.cta { margin:36px 0 12px; text-align:center; }
+.play { display:inline-block; padding:12px 22px; border-radius:999px; background:var(--accent); color:var(--on-accent); font-weight:700; text-decoration:none; }
+.play:hover, .play:focus-visible { filter:brightness(1.08); }

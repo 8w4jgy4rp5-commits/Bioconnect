@@ -540,12 +540,17 @@ function nextDifficultySeconds() {
 // thinks-every-3 lion 1-3%, tiger 0%. More animals did not buy tigers:
 // fox 27 / deer 48 (plants ~10%) still measured casual tiger 1-2%, since
 // the bots' runs end before two lions meet. The owner's play is the test.
+//
+// 2026-10-27: the owner saw deer take over the late board and asked for
+// more rabbits and foxes. Same 75% animals, reshuffled 18/21/36 ->
+// 25/26/24. `node sim.js 600`: casual lion 23% -> 22%, tiger 0 -> 1%;
+// thinks/3 bear 67% -> 52%, lion 3% -> 1%; median shown score 5874 -> 6220.
 const HAND_RAMP_TICKS = 125;
-const HAND_RABBIT_LATE = 18;
+const HAND_RABBIT_LATE = 25;
 const HAND_FOX_FROM = 25;
-const HAND_FOX_LATE = 21;
+const HAND_FOX_LATE = 26;
 const HAND_DEER_FROM = 50;
-const HAND_DEER_LATE = 36;
+const HAND_DEER_LATE = 24;
 const HAND_GRASS_MIN = 15;     // percent of every deal that is grass, at least
 const WIDE_HAND_FROM = 'zebra';
 const WIDE_HAND_AT = 75;
@@ -1549,6 +1554,7 @@ function worldTick() {
     state.runStats.meals += meals.length;
     state.runStats.starved += deaths.length;
     if (deaths.length) state.runStats.lostKind = deaths[0].kind;
+    for (const d of deaths) state.runStats.starvedBy[d.kind] = (state.runStats.starvedBy[d.kind] || 0) + 1;
   }
   const withered = witherPlants();
   const stone = surfaceStone();
@@ -1975,11 +1981,12 @@ function setRelaxed(on) {
 
 // Facts from this run, rather than a guessed cause of defeat. Old checkout
 // snapshots have no counters; keep their recap hidden instead of inventing zeros.
-function newRunStats() { return { placed: 0, maxChain: 0, starved: 0, cleared: 0, meals: 0 }; }
+function newRunStats() { return { placed: 0, maxChain: 0, starved: 0, cleared: 0, meals: 0, starvedBy: {} }; }
+const RUN_COUNTERS = ['placed', 'maxChain', 'starved', 'cleared', 'meals'];
 function readRunStats(value) {
   if (!value || typeof value !== 'object') return null;
   const clean = {};
-  for (const key of Object.keys(newRunStats())) {
+  for (const key of RUN_COUNTERS) {
     if (!Number.isSafeInteger(value[key]) || value[key] < 0) return null;
     clean[key] = value[key];
   }
@@ -1989,25 +1996,129 @@ function readRunStats(value) {
     clean.chainKinds = chain.slice();
   }
   if (typeof value.lostKind === 'string' && LADDER.includes(value.lostKind) && isAnimal(value.lostKind)) clean.lostKind = value.lostKind;
+  // Older snapshots predate the per-kind tally; they simply say less.
+  clean.starvedBy = {};
+  if (value.starvedBy && typeof value.starvedBy === 'object') {
+    for (const kind of Object.keys(value.starvedBy)) {
+      const n = value.starvedBy[kind];
+      if (isAnimal(kind) && Number.isSafeInteger(n) && n > 0) clean.starvedBy[kind] = n;
+    }
+  }
   return clean;
 }
-function runRecap(stats) {
+
+const PLURAL = { fox: 'foxes', deer: 'deer', buffalo: 'buffalo', wolf: 'wolves', grass: 'grass' };
+function plural(kind) { return PLURAL[kind] || kind + 's'; }
+function foodWords(kind) {
+  const diet = ANIMALS[kind].diet.filter(k => k !== 'sprout').slice(0, 3).map(plural);
+  return diet.length > 1 ? diet.slice(0, -1).join(', ') + ' and ' + diet[diet.length - 1] : diet[0];
+}
+function capital(text) { return text[0].toUpperCase() + text.slice(1); }
+
+// Every fact this run can back up, each with the move it suggests. The
+// strongest one is shown. Weights were set against the boards the sim
+// bots leave behind (2026-10-27: about 16 of 25 squares are animals, 6
+// are blockers), so each fact fires when it stands out, not every game.
+function recapCandidates(s, end) {
+  const out = [];
+  const add = (id, weight, fact, tip) => out.push({ id, weight, fact, tip });
+  const cells = Array.isArray(end.cells) ? end.cells : [];
+  const count = test => cells.filter(c => c && test(c.kind)).length;
+  const top = end.topKind;
+
+  // The highest animal is still standing: the next discovery was one merge
+  // away. It is a real near miss when the rung below is waiting as well.
+  if (top && isAnimal(top) && GROWS_INTO[top] && rank(top) >= rank('deer') && count(k => k === top)) {
+    const below = LADDER[rank(top) - 1];
+    add('one-more', count(k => k === below) ? 56 + rank(top) : 44, 'So close! One more ' + top + ' makes ' + an(GROWS_INTO[top]).toLowerCase() + '.',
+      'Build the next ' + top + ' right beside this one.');
+  }
+
+  const lost = Object.keys(s.starvedBy).sort((a, b) => rank(b) - rank(a))[0] || s.lostKind;
+  if (lost && rank(lost) >= rank('deer')) {
+    const n = s.starvedBy[lost] || 1;
+    add('big-starved', 50 + rank(lost), (n > 1 ? n + ' ' + plural(lost) : 'Your ' + lost) + ' starved.',
+      capital(plural(lost)) + ' eat ' + foodWords(lost) + '. Keep food beside them.');
+  }
+
+  const blockers = count(isBlocker);
+  if (cells.length && blockers * 3 >= cells.length) {
+    add('blocked', 52, 'Stones and bones took ' + blockers + ' of ' + cells.length + ' squares.',
+      'Merge beside them: chains crack every one they touch.');
+  }
+
+  if (s.starved >= 4 && s.starved * 3 >= s.meals) {
+    add('hungry', 48, s.starved + ' animals starved, only ' + s.meals + (s.meals === 1 ? ' meal.' : ' meals.'),
+      'Leave a free square next to hungry animals for food.');
+  }
+
+  const animals = count(isAnimal);
+  if (cells.length && animals * 5 >= cells.length * 3) {
+    add('crowded', 42, 'Animals packed ' + animals + ' of ' + cells.length + ' squares.',
+      'Merge pairs before adding more: each merge frees a square.');
+  }
+
+  const plants = count(isPlant);
+  if (cells.length && plants * 10 >= cells.length * 4) {
+    add('plants', 44, 'Plants filled ' + plants + ' squares at the end.',
+      'Pair plants up early so they grow into rabbits.');
+  }
+
+  if (s.maxChain >= 3) {
+    const path = s.chainKinds ? ', ' + s.chainKinds[0] + ' → ' + s.chainKinds[s.chainKinds.length - 1] : '';
+    add('chain', 40 + s.maxChain * 3, 'Great chain! ' + s.maxChain + ' steps' + path + '.',
+      'Park the next rung beside it to go even longer.');
+  }
+
+  if (s.cleared >= 3) {
+    add('cleared', 36 + Math.min(s.cleared, 20) / 2, 'Nice clearing! You cracked ' + s.cleared + ' blockers.',
+      'Aim chains at stone clusters to clear several at once.');
+  }
+
+  const runs = (Array.isArray(end.history) ? end.history : []).filter(r => Number(r.rules) === RULES_VERSION).slice(0, 10);
+  if (runs.length >= 3 && runs[0].runId === end.runId && runs.slice(1).every(r => r.score < runs[0].score)) {
+    add('best-recent', 54, 'Best of your last ' + runs.length + ' games!', '');
+  } else if (runs.length >= 2 && runs[0].runId === end.runId && runs[1].score > 0 && runs[0].score >= runs[1].score * 1.2) {
+    add('improved', 50, 'Score up ' + Math.round((runs[0].score / runs[1].score - 1) * 100) + '% on your last game!', '');
+  }
+
+  if (!out.length) {
+    add('basics', 0, s.maxChain >= 1 ? 'Almost! Try setting up a two-step chain.' : 'Try placing two matching tiles together.',
+      s.maxChain >= 1 ? 'Drop a tile so its merge lands by the next rung.' : 'Two of the same, side by side, grow into the next.');
+  }
+  return out.sort((a, b) => b.weight - a.weight);
+}
+
+function runRecap(stats, end = {}) {
   const s = readRunStats(stats);
   if (!s) return null;
-  // Praise the best moment first; one hungry animal happens in nearly every run,
-  // so food advice only wins when starving outpaced eating.
-  const fact = s.maxChain > 1 ? 'Great chain! Keep the next match nearby.'
-    : s.cleared ? 'Nice clearing! Line up the next pair.'
-    : s.starved > s.meals ? 'So close! Leave a little room for food.'
-    : s.maxChain === 1 ? 'Almost! Try setting up a two-step chain.'
-    : 'Try placing two matching tiles together.';
-  return { fact };
+  const list = recapCandidates(s, end);
+  // What the last two cards led with steps back, so a close second gets a turn.
+  const recent = Array.isArray(end.recent) ? end.recent : [];
+  const score = c => c.weight - (recent.includes(c.id) ? 20 : 0);
+  const pick = list.reduce((best, c) => score(c) > score(best) ? c : best);
+  // A score headline carries no move of its own; borrow the next fact's advice.
+  const tip = pick.tip || (list.find(c => c !== pick && c.tip) || {}).tip || 'Same plan, one more try.';
+  return { id: pick.id, fact: pick.fact, tip };
 }
+
+// Rendered on every redraw while the card is up, so the pick is made once
+// per ending; a revived run that ends again gets a fresh look.
+let recapMemo = { key: '', recap: null, recent: [] };
 function renderRunRecap() {
   if (!el.goRecap) return;
-  const recap = runRecap(state.runStats);
+  const key = state.runId + ':' + state.ticks + ':' + (state.runStats ? state.runStats.placed : '-');
+  if (key !== recapMemo.key) {
+    const recent = recapMemo.recap ? [recapMemo.recap.id].concat(recapMemo.recent).slice(0, 2) : recapMemo.recent;
+    recapMemo = { key, recent, recap: runRecap(state.runStats, { cells: state.cells, topKind: state.topKind, history: recordHistory, runId: state.runId, recent }) };
+  }
+  const recap = recapMemo.recap;
   el.goRecap.hidden = !recap;
   el.goRecapFact.textContent = recap ? recap.fact : '';
+  if (el.goRecapTip) {
+    el.goRecapTip.textContent = recap ? recap.tip : '';
+    el.goRecapTip.hidden = !recap || !recap.tip;
+  }
 }
 
 // The real growth events also describe obstacle removal. Include elephant
@@ -4640,7 +4751,7 @@ async function init() {
     'scoreValue', 'bestValue', 'ticker',
     'level', 'levelNum', 'levelName', 'levelNext', 'levelFill',
     'goal', 'seasonBar', 'seasonName', 'seasonNote', 'seasonMult', 'seasonFill', 'seasonNext',
-    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goRecap', 'goRecapFact', 'goShare', 'goShareHint', 'goPop', 'goPopShare', 'goPopLater', 'goAgain', 'newBtn', 'reviveResume',
+    'fx', 'gameover', 'goTitle', 'goScore', 'goLevel', 'goNote', 'goRecap', 'goRecapFact', 'goRecapTip', 'goShare', 'goShareHint', 'goPop', 'goPopShare', 'goPopLater', 'goAgain', 'newBtn', 'reviveResume',
     'speedBtn', 'startScreen', 'startBtn', 'startBest',
     'countdown', 'countdownWord',
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',

@@ -45,6 +45,9 @@
 .gameover-card .run-recap.recap-compact[hidden] { display:none; }
 .recap-compact .recap-rabbit { display:block; flex:none; width:76px; height:104px; object-fit:contain; object-position:center; }
 .gameover-card .recap-compact p { flex:1; min-width:0; font:500 14px/1.6 system-ui,sans-serif; }
+.recap-compact .recap-words { flex:1; min-width:0; }
+.gameover-card .recap-compact .recap-tip { margin-top:4px; font:400 12.5px/1.5 system-ui,sans-serif; opacity:.85; }
+.recap-tip[hidden] { display:none; }
 
 /* Elephant runs: a small window over the results asking for the post. */
 .go-pop { position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:24px; background:rgba(8,10,6,.55); animation:go-pop-fade .2s ease-out; }
