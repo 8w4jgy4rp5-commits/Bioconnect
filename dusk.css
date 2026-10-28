@@ -1,0 +1,214 @@
+/* Trial opening (branch try/dusk-opening): the herd sits at the water's
+   edge at dusk and looks across at one huge tree on the far shore. The
+   title sits top-left inside a thin orbit, the screen first says only
+   "Tap to begin", and the buttons become a plain text menu. Built on top
+   of the Cozy Eldritch look; the pop look never sees any of it. */
+
+.start-dusk, .dusk-press, .dusk-orbit { display: none; }
+
+.skin-eldritch .start-screen {
+  --hz: 52%;            /* the horizon, from the top of the screen */
+  --bank: 26%;          /* where the near bank meets the water, from the bottom */
+  background: #121a2e;
+}
+.skin-eldritch .start-moonscene { display: none; }
+
+/* ---------- the scene ---------- */
+
+.skin-eldritch .start-dusk { display: block; position: absolute; inset: 0; overflow: hidden; }
+
+.skin-eldritch .dusk-sky {
+  position: absolute; inset: 0 0 calc(100% - var(--hz));
+  background: linear-gradient(#141d36 0%, #26375c 34%, #5b5277 62%, #b9727a 82%, #eb9c6e 94%, #f6c28a 100%);
+}
+/* a few stars still out high up */
+.skin-eldritch .dusk-sky::before {
+  content: ""; position: absolute; inset: 0 0 50%;
+  background:
+    radial-gradient(1.5px 1.5px at 12% 18%, #f1ead0, transparent),
+    radial-gradient(1px 1px at 27% 8%, #f1ead0, transparent),
+    radial-gradient(1.5px 1.5px at 58% 14%, #f1ead0, transparent),
+    radial-gradient(1px 1px at 71% 30%, #f1ead0, transparent),
+    radial-gradient(1.5px 1.5px at 88% 10%, #f1ead0, transparent),
+    radial-gradient(1px 1px at 40% 36%, #f1ead0, transparent);
+  animation: dusk-twinkle 5s ease-in-out infinite;
+}
+.skin-eldritch .dusk-sun {
+  position: absolute; left: 30%; bottom: 0; width: clamp(70px, 15vh, 150px); aspect-ratio: 1;
+  translate: -50% 52%; border-radius: 50%;
+  background: radial-gradient(circle, #fff1cf 0 45%, #f8c98c 70%);
+  box-shadow: 0 0 60px 30px rgba(246, 176, 120, .35), 0 0 160px 90px rgba(235, 140, 110, .18);
+}
+/* thin clouds drifting across the glow */
+.skin-eldritch .dusk-streak {
+  position: absolute; left: var(--x); top: var(--y); width: var(--w); height: 3px; border-radius: 3px;
+  background: linear-gradient(90deg, transparent, rgba(255, 196, 160, .55) 30%, rgba(255, 170, 150, .4) 70%, transparent);
+  animation: dusk-drift 40s linear infinite var(--d, 0s);
+}
+
+.skin-eldritch .dusk-shore {
+  position: absolute; left: 0; width: 100%; height: 4vh; top: calc(var(--hz) - 4vh + 1px); fill: #2a2f4c;
+}
+
+/* the tree stands on the far shore, roots on the horizon */
+.skin-eldritch .dusk-tree {
+  position: absolute; left: 68%; bottom: calc(100% - var(--hz) - 2px);
+  height: clamp(120px, min(30vh, 62vw), 340px); aspect-ratio: 200 / 260; translate: -50% 0;
+}
+.skin-eldritch .dusk-tree svg {
+  width: 100%; height: 100%; display: block; fill: #262b46;
+  filter: drop-shadow(0 0 14px rgba(246, 170, 120, .28));
+}
+.skin-eldritch .dusk-tree .start-glint i { width: 4px; height: 3px; }
+
+.skin-eldritch .dusk-water {
+  position: absolute; left: 0; right: 0; top: var(--hz); bottom: 0; overflow: hidden;
+  background: linear-gradient(#d88a6e 0%, #8a6380 10%, #3e4268 34%, #1b2340 70%);
+}
+/* gentle swell lines rolling toward us */
+.skin-eldritch .dusk-water::before {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(transparent 0 9px, rgba(255, 220, 190, .07) 9px 10px);
+  animation: dusk-swell 6s linear infinite;
+}
+/* the sun's path on the water, under the sun */
+.skin-eldritch .dusk-path {
+  position: absolute; left: 30%; top: 0; width: clamp(40px, 9vh, 90px); height: 60%; translate: -50% 0;
+  background: repeating-linear-gradient(rgba(255, 214, 160, .65) 0 2px, transparent 2px 7px);
+  mask-image: linear-gradient(#000, transparent); -webkit-mask-image: linear-gradient(#000, transparent);
+  animation: dusk-shimmer 2.4s ease-in-out infinite alternate;
+}
+
+.skin-eldritch .dusk-bank {
+  position: absolute; left: 0; bottom: 0; width: 100%; height: calc(var(--bank) / .7); fill: #0e120f;
+}
+
+.skin-eldritch .dusk-pair {
+  position: absolute; left: min(66%, calc(100% - 140px)); bottom: calc(var(--bank) - 1.5vh); translate: -50% 0;
+  display: flex; align-items: flex-end; gap: clamp(2px, .8vh, 8px);
+}
+/* backlit: almost black, with a warm rim on the side facing the sun */
+.skin-eldritch .dusk-animal {
+  display: block; width: auto; transform-origin: 50% 100%;
+  filter: brightness(0) drop-shadow(-1.5px -1px 0 rgba(255, 178, 120, .6)) drop-shadow(0 0 12px rgba(246, 170, 120, .18));
+  animation: start-breathe 3.6s ease-in-out infinite; animation-delay: var(--start-delay, 0s);
+}
+.skin-eldritch .dusk-animal--elephant { height: clamp(72px, min(19vh, 26vw), 210px); }
+.skin-eldritch .dusk-animal--rabbit { height: clamp(26px, min(6.2vh, 10vw), 68px); }
+
+/* eyes in the near grass */
+.skin-eldritch .start-dusk > .start-glint { z-index: 1; }
+
+.skin-eldritch .dusk-fly {
+  position: absolute; left: var(--x); bottom: var(--y); width: 4px; height: 4px; border-radius: 50%;
+  background: var(--el-moss); box-shadow: 0 0 8px 2px rgba(168, 198, 108, .7);
+  animation: dusk-fly 7s ease-in-out infinite var(--d, 0s);
+}
+
+/* ---------- the words over the scene ---------- */
+
+.skin-eldritch .start-stage { width: min(100%, 1180px); padding-left: clamp(20px, 6vw, 72px); padding-right: clamp(20px, 6vw, 72px); }
+.skin-eldritch .start-topline { position: static; justify-content: flex-end; }
+.skin-eldritch .start-kicker,
+.skin-eldritch .start-foot { display: none; }
+/* the best score sits small at the bottom left */
+.skin-eldritch .start-intro { position: absolute; left: clamp(20px, 6vw, 72px); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); }
+.skin-eldritch .start-best { background: none; border: 0; box-shadow: none; padding: 0; font-family: var(--el-type); font-weight: 400; letter-spacing: .2em; text-transform: uppercase; font-size: .68rem; color: rgba(236, 228, 200, .55); }
+.skin-eldritch .start-best span { font-size: .8rem; color: rgba(236, 228, 200, .8); }
+
+.skin-eldritch .start-hero { justify-self: start; width: max-content; max-width: 100%; place-content: start; justify-items: start; text-align: left; padding-top: clamp(28px, 8vh, 90px); margin-left: clamp(4px, 2vw, 24px); }
+.skin-eldritch .start-logo { font-size: clamp(2.7rem, 13vw, 5.6rem); line-height: 1; transform: rotate(-3deg); letter-spacing: 0;
+  text-shadow: 0 0 2px #10150e, 0 0 24px rgba(246, 176, 120, .35), 0 5px 0 #10150e; animation-name: dusk-rise; }
+.skin-eldritch .start-logo span { display: inline; }
+.skin-eldritch .start-logo-2 { font-size: 1em; margin: 0; }
+.skin-eldritch .start-tagline { margin: 6px 0 0 .3em; padding: 0; background: none; border: 0; box-shadow: none;
+  font-size: clamp(.85rem, 3.6vw, 1.1rem); letter-spacing: .08em; color: #f1ead0; text-shadow: 0 1px 8px rgba(0, 0, 0, .6); }
+
+/* the orbit: a thin ring around the title, one small light riding it */
+.skin-eldritch .dusk-orbit {
+  display: block; position: absolute; left: -9%; top: calc(clamp(28px, 8vh, 90px) - 18%); width: 118%; height: auto;
+  overflow: visible; pointer-events: none; transform: rotate(-7deg);
+}
+.skin-eldritch .dusk-orbit path { fill: none; stroke: rgba(241, 234, 208, .7); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+.skin-eldritch .dusk-orbit circle { fill: var(--el-moss); filter: drop-shadow(0 0 4px var(--el-moss)); }
+
+/* first screen: only the title and "Tap to begin" */
+.skin-eldritch .dusk-press {
+  display: block; position: absolute; left: 0; right: 0; top: calc(var(--hz) + 7%); margin: 0; text-align: center;
+  font-family: var(--el-type); font-size: clamp(.8rem, 3.4vw, 1rem); letter-spacing: .4em; text-transform: uppercase;
+  color: #f1ead0; text-shadow: 0 1px 8px rgba(0, 0, 0, .7); pointer-events: none;
+  animation: dusk-blink 2.2s ease-in-out infinite;
+}
+.skin-eldritch .start-screen:not(.is-press) .dusk-press { display: none; }
+.skin-eldritch .start-screen.is-press .start-controls,
+.skin-eldritch .start-screen.is-press .start-intro { opacity: 0; pointer-events: none; }
+.skin-eldritch .start-screen.is-press { cursor: pointer; }
+
+/* the menu: plain words over the water, a small light beside the chosen one */
+.skin-eldritch .start-controls {
+  position: absolute; left: clamp(20px, 6vw, 72px); top: calc(var(--hz) + 3%);
+  display: grid; justify-items: start; gap: 2px; animation: none;
+}
+.skin-eldritch .start-minor { display: contents; }
+.skin-eldritch .start-controls .start-play,
+.skin-eldritch .start-controls .start-basics,
+.skin-eldritch .start-controls .start-icon {
+  position: relative; width: auto; min-width: 0; min-height: 40px; height: auto; margin: 0;
+  display: flex; flex-direction: row; align-items: center; padding: 4px 8px 4px 24px;
+  border: 0; border-radius: 0; background: none; box-shadow: none; transform: none;
+  font-family: var(--el-type); font-weight: 400; font-size: clamp(.92rem, 3.9vw, 1.08rem);
+  letter-spacing: .22em; text-transform: uppercase; color: #f1ead0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .75); cursor: pointer; outline: none;
+}
+.skin-eldritch .start-controls .start-play { font-size: clamp(1.05rem, 4.6vw, 1.3rem); }
+.skin-eldritch .start-controls .start-icon svg { display: none; }
+.skin-eldritch .start-controls button { text-decoration: none; }
+.skin-eldritch .start-controls button span:not(.ledger-dot) { font: inherit; letter-spacing: inherit; }
+.skin-eldritch .start-controls .start-basics { font-size: 0; }
+.skin-eldritch .start-controls .start-basics::after { content: "Practice"; font-size: clamp(.92rem, 3.9vw, 1.08rem); }
+.skin-eldritch .start-controls .start-icon[hidden] { display: none; }
+.skin-eldritch .start-controls .ledger-dot { position: static; width: 8px; height: 8px; margin-left: 8px; box-shadow: none; }
+.skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon)::before {
+  content: ""; position: absolute; left: 6px; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%;
+  background: var(--el-moss); box-shadow: 0 0 8px 2px rgba(168, 198, 108, .7);
+  opacity: 0; transition: opacity .15s;
+}
+.skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon):is(:hover, :focus)::before { opacity: 1; }
+.skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon):is(:hover, :focus) { color: #fff6dc; }
+.skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon):active { transform: translateX(2px); }
+.skin-eldritch .start-screen:not(.is-press) .start-controls > *,
+.skin-eldritch .start-screen:not(.is-press) .start-minor > * { animation: dusk-in .5s both; }
+.skin-eldritch .start-screen:not(.is-press) .start-basics { animation-delay: .07s; }
+.skin-eldritch .start-screen:not(.is-press) .start-minor > * { animation-delay: .14s; }
+
+/* a wide screen: the pair sits out front, between the sun and the tree */
+@media (min-width: 700px) { .skin-eldritch .dusk-pair { left: 46%; } }
+/* a tall phone: lower horizon, less empty bank, tighter menu */
+@media (max-aspect-ratio: 3/4) {
+  .skin-eldritch .start-screen { --hz: 56%; --bank: 21%; }
+  .skin-eldritch .start-controls { gap: 0; }
+  .skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon) { letter-spacing: .14em; min-height: 38px; }
+}
+/* a phone on its side: smaller tree and herd, the menu still over the water */
+@media (max-height: 480px) {
+  .skin-eldritch .start-screen { --hz: 46%; }
+  .skin-eldritch .start-hero { padding-top: 16px; }
+  .skin-eldritch .start-logo { font-size: clamp(2rem, 9vh, 3rem); }
+  .skin-eldritch .start-controls { top: calc(var(--hz) + 2%); gap: 0; }
+  .skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon) { min-height: 32px; }
+}
+
+@keyframes dusk-twinkle { 50% { opacity: .5; } }
+@keyframes dusk-drift { from { translate: -6vw 0; } to { translate: 6vw 0; } }
+@keyframes dusk-swell { to { background-position: 0 10px; } }
+@keyframes dusk-shimmer { from { opacity: .6; transform: scaleX(.85); } to { opacity: 1; transform: scaleX(1.1); } }
+@keyframes dusk-fly { 0%, 100% { translate: 0 0; opacity: .2; } 50% { translate: 10px -14px; opacity: 1; } }
+@keyframes dusk-blink { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes dusk-in { from { opacity: 0; translate: -8px 0; } }
+@keyframes dusk-rise { from { opacity: 0; transform: translateY(10px) rotate(-3deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-eldritch :is(.dusk-streak, .dusk-path, .dusk-fly, .dusk-animal, .dusk-press),
+  .skin-eldritch .dusk-sky::before, .skin-eldritch .dusk-water::before { animation: none; }
+  .skin-eldritch .dusk-orbit circle { display: none; }
+}

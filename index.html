@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" />
   <link rel="stylesheet" href="pop.css?v=f1e016c9" />
   <link rel="stylesheet" href="eldritch.css?v=8547adbe" />
+  <link rel="stylesheet" href="dusk.css?v=e43a8b27" />
   <!-- Cozy Eldritch is the standard look. ?skin=pop switches to the old
        pop look and remembers it in this browser; ?skin=eldritch switches
        back. Runs before first paint so the page never flashes the other look. -->
@@ -458,6 +459,44 @@
      game board behind the screen lets the title feel like a real opening
      without adding a second page or changing the existing game loop. -->
 <div class="start-screen" id="startScreen" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+  <!-- Trial (try/dusk-opening): the herd at the water's edge at dusk,
+       looking across at one huge tree on the far shore. Only dusk.css
+       shows it, on top of the Cozy Eldritch look. -->
+  <div class="start-dusk" aria-hidden="true">
+    <div class="dusk-sky"><div class="dusk-sun"></div>
+      <i class="dusk-streak" style="--x: 6%; --y: 62%; --w: 38%"></i>
+      <i class="dusk-streak" style="--x: 48%; --y: 70%; --w: 30%; --d: -9s"></i>
+      <i class="dusk-streak" style="--x: 18%; --y: 78%; --w: 46%; --d: -18s"></i>
+    </div>
+    <svg class="dusk-shore" viewBox="0 0 400 20" preserveAspectRatio="none">
+      <path d="M0 20V13C14 11 22 8 34 9S52 12 66 10 88 6 104 8 128 12 146 11 170 7 190 9 220 12 240 11 262 8 280 9 310 12 330 10 356 7 372 9 392 12 400 12V20Z"/>
+    </svg>
+    <div class="dusk-tree">
+      <svg viewBox="0 0 200 260">
+        <circle cx="100" cy="86" r="60"/><circle cx="52" cy="108" r="40"/><circle cx="150" cy="104" r="44"/>
+        <circle cx="70" cy="62" r="38"/><circle cx="134" cy="58" r="40"/><circle cx="100" cy="34" r="34"/>
+        <circle cx="26" cy="132" r="24"/><circle cx="176" cy="130" r="22"/>
+        <path d="M86 140C90 190 88 225 70 260H130C112 225 110 190 114 140Z"/>
+      </svg>
+      <span class="start-glint start-glint--amber" style="--x: 34%; --y: 64%"><i></i><i></i></span>
+      <span class="start-glint" style="--x: 62%; --y: 74%; --glint-delay: -2s"><i></i><i></i></span>
+      <span class="start-glint start-glint--amber" style="--x: 78%; --y: 56%; --glint-delay: -3.4s"><i></i><i></i></span>
+    </div>
+    <div class="dusk-water"><i class="dusk-path"></i></div>
+    <svg class="dusk-bank" viewBox="0 0 400 100" preserveAspectRatio="none">
+      <path d="M0 100V30C60 18 120 23 200 21S340 25 400 33V100Z"/>
+    </svg>
+    <div class="dusk-pair">
+      <img class="dusk-animal dusk-animal--elephant" src="img/elephant-calm.png" alt="">
+      <img class="dusk-animal dusk-animal--rabbit" src="img/rabbit-pose-v2.png" alt="" style="--start-delay: .8s">
+    </div>
+    <span class="start-glint" style="--x: 12%; --y: 9%; --glint-delay: -1s"><i></i><i></i></span>
+    <span class="start-glint start-glint--amber" style="--x: 88%; --y: 6%; --glint-delay: -2.6s"><i></i><i></i></span>
+    <i class="dusk-fly" style="--x: 22%; --y: 26%"></i>
+    <i class="dusk-fly" style="--x: 46%; --y: 18%; --d: -2s"></i>
+    <i class="dusk-fly" style="--x: 80%; --y: 30%; --d: -4s"></i>
+    <i class="dusk-fly" style="--x: 64%; --y: 12%; --d: -5.5s"></i>
+  </div>
   <div class="start-stage">
 
     <!-- The sky behind everything. -->
@@ -480,6 +519,10 @@
     </div>
 
     <div class="start-hero">
+      <svg class="dusk-orbit" viewBox="0 0 300 100" aria-hidden="true">
+        <path id="duskOrbit" d="M6 60C6 30 80 8 160 8S294 22 294 42 220 92 140 92 6 84 6 60Z"/>
+        <circle r="3"><animateMotion dur="14s" repeatCount="indefinite"><mpath href="#duskOrbit"/></animateMotion></circle>
+      </svg>
       <h2 class="start-logo" id="startTitle">
         <span>Bio</span>
         <span class="start-logo-2"><svg class="start-sprout" viewBox="0 0 24 30" aria-hidden="true">
@@ -532,6 +575,7 @@
       </div>
     </div>
 
+    <p class="dusk-press" aria-hidden="true">Tap to begin</p>
     <div class="start-controls">
       <button class="start-play" id="startBtn" type="button">PLAY</button>
       <button class="start-basics" id="startBasicsBtn" type="button" aria-label="Practice" title="Practice">✦</button>
@@ -630,7 +674,7 @@
 <script src="monetization.js?v=cfba0045"></script>
 <script src="script.js?v=605cd15f"></script>
 <script src="watch.js?v=5a051aed"></script>
-<script src="skin.js?v=5406c35f"></script>
+<script src="skin.js?v=116cae18"></script>
   <footer class="cw-footer">
     <a href="guide/">How to play</a> · <a href="about/">About</a> · <a href="legal/privacy.html">Privacy</a> · <a href="legal/terms.html">Terms</a>
   </footer>

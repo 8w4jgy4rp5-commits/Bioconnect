@@ -44,7 +44,38 @@
     decorate();
   }
 
-  const start = function () { const t = document.getElementById('ticker'); if (t) attach(t); };
+  // Trial dusk opening (dusk.css): the title first says only "Tap to begin".
+  // The first tap or key shows the text menu instead of pressing anything
+  // (the Crystal wallet in the corner stays live).
+  // Enter or Space on a focused menu item goes straight through, so the
+  // keyboard path to PLAY is unchanged. Up/Down walk the menu.
+  function dusk(screen) {
+    if (!screen) return;
+    const items = () => [...screen.querySelectorAll('.start-controls button')].filter(b => !b.hidden && b.offsetParent);
+    const reveal = function () {
+      screen.classList.remove('is-press');
+      document.getElementById('startBtn')?.focus();
+    };
+    screen.classList.add('is-press');
+    screen.addEventListener('click', function (e) {
+      if (!screen.classList.contains('is-press') || e.target.closest('.start-resources')) return;
+      e.preventDefault(); e.stopPropagation(); reveal();
+    }, true);
+    document.addEventListener('keydown', function (e) {
+      if (screen.hidden) return;
+      if (screen.classList.contains('is-press')) {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target.closest?.('.start-controls')) { screen.classList.remove('is-press'); return; }
+        e.preventDefault(); reveal(); return;
+      }
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      const list = items(); if (!list.length) return;
+      const at = list.indexOf(document.activeElement);
+      const next = at < 0 ? 0 : (at + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length;
+      e.preventDefault(); list[next].focus();
+    }, true);
+  }
+
+  const start = function () { const t = document.getElementById('ticker'); if (t) attach(t); dusk(document.getElementById('startScreen')); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
 })();
