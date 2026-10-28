@@ -186,6 +186,7 @@
 /* a tall phone: lower horizon, less empty bank, tighter menu */
 @media (max-aspect-ratio: 3/4) {
   .skin-eldritch .start-screen { --hz: 56%; --bank: 21%; }
+  .skin-eldritch .dusk-pair { left: calc(100% - 112px); }
   .skin-eldritch .start-controls { gap: 0; }
   .skin-eldritch .start-controls :is(.start-play, .start-basics, .start-icon) { letter-spacing: .14em; min-height: 38px; }
 }
