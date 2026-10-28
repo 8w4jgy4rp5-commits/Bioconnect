@@ -2128,3 +2128,12 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - リポジトリ外の作業。`~/.claude/skills/video-prompt-writer/REQUIREMENTS.md` と見本 `examples/motor-40s.md`（自分用、非公開）。SKILL.md は未作成。
 - 決定: 合格基準は「1回のプロンプトで完成」。出力は Claude 用台本と動画AI用英語プロンプトの両方、汎用、本人確認はプロンプト完成時の1回。必須10項目（モーターの型8つ＋決定的＋見る人にインパクトを残す設計）。
 - 次: モーターのプロンプトと過去の台本を項目ごとに比べ、足りない情報を洗い出す。
+
+## 2026-10-28 — 本物のプレイヤーの流入元を数える（player_visits）
+- きっかけ: Cloudflare Web Analytics の30日分を調べたら、約7割が「直接」で、アメリカの訪問はXから0件。10/12（ドメインを設定した日）にアメリカ80・フランス40が集中していて、大半は自動の巡回プログラムとみられた。人数をきちんと知るために、ゲームの中で数える。
+- 新規: supabase/migrations/202610280001_player_visits.sql。bioconnect_private.player_visits（visit_id, source, repeat_player, lang, at）。anonが呼べるのは bioconnect_record_visit だけで、表は読めない。SQL Editor 用の集計ビュー bioconnect_private.player_visits_daily（日本時間の日付×流入元、人数・初めての人数・言語）。
+- 変更（script.js）: 1マス目を置いたとき（練習の1手目も含む）に、ページを開くごとに1行だけ送る。流入元は ?ref=（英小文字・数字・ハイフンで32字まで）→ 来た元のサイト（www.を外す）→ direct の順。?ref= と ?count= は読み込み時にアドレスバーから消す。送らない条件: ?count=off を開いた端末（?count=on で戻る）、本番の2ホスト以外、navigator.webdriver（自動ブラウザ）、?watch / ?celebrate。名前・端末ID・IPは送らない。
+- 検証: npm test 成功（test/player-visits.test.cjs を追加）。ローカルの実ブラウザで、?ref=x-bio&count=off を開くとアドレスバーから目印が消えて count-off が保存されること、localhost と count-off の端末では送らないこと、送るときは1回目 p_returning=false・2回目 true になることを確認。練習の1手目を置いてもコンソールエラー0。
+- 本番SQL未適用: 本人が Supabase の SQL Editor で上のmigrationを実行する必要あり。未適用の間は記録が静かに失敗するだけで、ゲームには影響しない。
+- 注意: 匿名の呼び出しなので、偽の記録を大量に送ることは技術的にできる（数字の目安として許容）。Cloudflare の数字と比べるときは、こちらは「遊んだ人」、Cloudflare は「開いた人」。
+- 次: 本人の端末（PC・スマホ）で一度ずつ https://bioconnectpazzle.com/?count=off を開く。Xのプロフィール欄は ?ref=x-bio、投稿は ?ref=x-post のリンクにする。1〜2週間たったら player_visits_daily を見る。

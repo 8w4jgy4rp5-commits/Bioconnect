@@ -1310,6 +1310,7 @@ function placeLessonTile(i) {
     return;
   }
   clearMovePreview();
+  reportVisit();
   state.cells[i] = makeTile(step.hand);
   const grew = growFrom(i, state.cells, true);
   for (const g of grew) g.points = 0;
@@ -1454,6 +1455,7 @@ function placeTile(i) {
   if (!state.stock.length) { nudgeHand(); return; }
 
   cancelChain();
+  reportVisit();
   const dealtKind = state.stock.shift();
   const topBefore = state.topKind;
   state.cells[i] = makeTile(dealtKind);
@@ -4342,6 +4344,54 @@ function reportRunOutcome() {
   if (!sb || !/^[0-9a-f-]{36}$/i.test(state.runId || '')) return Promise.resolve();
   return Promise.resolve(sb.rpc('bioconnect_record_run', {
     p_run: state.runId, p_rules: RULES_VERSION, p_elephant: state.elephants > 0, p_ticks: state.ticks
+  })).catch(function () {});
+}
+
+// ---------- Where players come from ----------
+// One anonymous row per page load (player_visits), sent only when the first
+// tile goes down, so crawlers and people who only opened the page are not
+// counted. Source: a ?ref= tag on the link we shared, else the site that
+// linked here, else 'direct'. ?count=off on a device stops counting it for
+// good (the owner's own play); ?count=on undoes that.
+const COUNT_OFF_KEY = 'ecosystem-puzzle:count-off:v1';
+const PLAYED_KEY = 'ecosystem-puzzle:played:v1';
+const COUNTED_HOSTS = ['bioconnectpazzle.com', '8w4jgy4rp5-commits.github.io'];
+const visitSource = (function () {
+  if (typeof URLSearchParams === 'undefined' || typeof location === 'undefined') return 'direct';
+  const params = new URLSearchParams(location.search);
+  const count = params.get('count');
+  try {
+    if (count === 'off') localStorage.setItem(COUNT_OFF_KEY, '1');
+    if (count === 'on') localStorage.removeItem(COUNT_OFF_KEY);
+  } catch {}
+  const ref = (params.get('ref') || '').toLowerCase();
+  // Drop the tags so a link copied from the address bar does not carry them on.
+  if (params.has('ref') || count) {
+    params.delete('ref'); params.delete('count');
+    const q = params.toString();
+    try { history.replaceState(history.state, '', location.pathname + (q ? '?' + q : '') + location.hash); } catch {}
+  }
+  if (/^[a-z0-9-]{1,32}$/.test(ref)) return ref;
+  try {
+    const host = new URL(document.referrer).hostname.replace(/^www\./, '');
+    if (host && host !== location.hostname) return host.slice(0, 40);
+  } catch {}
+  return 'direct';
+})();
+let visitReported = false;
+function reportVisit() {
+  if (visitReported) return;
+  visitReported = true;
+  const sb = outcomeClient();
+  if (!sb || navigator.webdriver || !COUNTED_HOSTS.includes(location.hostname)
+    || /[?&](?:watch|celebrate)\b/.test(location.search)) return;
+  let off = false, played = false;
+  try { off = localStorage.getItem(COUNT_OFF_KEY) === '1'; played = localStorage.getItem(PLAYED_KEY) === '1'; } catch {}
+  if (off || typeof crypto === 'undefined' || !crypto.randomUUID) return;
+  try { localStorage.setItem(PLAYED_KEY, '1'); } catch {}
+  Promise.resolve(sb.rpc('bioconnect_record_visit', {
+    p_visit: crypto.randomUUID(), p_source: visitSource, p_returning: played,
+    p_lang: (navigator.language || '').slice(0, 16)
   })).catch(function () {});
 }
 function loadElephantRarity() {
