@@ -2,7 +2,7 @@
   "name": "bioconnect-local-tests",
   "private": true,
   "scripts": {
-    "test": "node rules.test.js && node test/onboarding.test.cjs && node test/feedback.test.cjs && node test/run-outcomes.test.cjs && node test/monetization.test.cjs",
+    "test": "node rules.test.js && node test/onboarding.test.cjs && node test/feedback.test.cjs && node test/run-outcomes.test.cjs && node test/player-visits.test.cjs && node test/monetization.test.cjs",
     "test:postgres": "node test/monetization.test.cjs --postgres",
     "test:browser": "node test/browser-check.cjs",
     "test:server": "node test/local-server.cjs",
