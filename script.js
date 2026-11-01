@@ -2744,6 +2744,44 @@ function loadSprites() {
 // Paints one animal, still, into a canvas sized `px` on a side.
 // `fed` is 1 just after a meal and 0 at death: a hungry animal sags and
 // wears its other face, so the tile reads before the meter does.
+// THE DEER'S FRIGHT. Fastest legs on the meadow, and the moment anything
+// threatens him he freezes and buzzes: black cartoon shock lines round
+// the body, two drawings swapped every 90ms, and a small shake. Only
+// while he wears the panic face, so it means exactly what that face
+// means. The animal page (animals/animal-rig.js) uses the same marks.
+// Marks are [x, y, outward angle in degrees] in rig units.
+const FRIGHT = {
+  deer: { shake: .28, marks: [
+    [-3.5, -15.5, -110], [3.5, -17.5, -70], [9.5, -11, -25], [11, -3.5, 10],
+    [8.5, 3.5, 35], [5.5, 13.5, 60], [-6.5, 13, 125], [-11.5, 4.5, 160],
+    [-11.5, -3, 195], [-6, -7.5, 235]
+  ] }
+};
+
+function frightTick() { return Math.floor(performance.now() / 90); }
+
+// One shock mark: a short zigzag pointing away from the body, black with
+// a pale rim so it reads on both the meadow and the dark skins. `minPx`
+// keeps the strokes visible on a 44px tile.
+function paintShock(ctx, x, y, deg, flick, unitPx) {
+  const a = deg * Math.PI / 180, len = 2.9, n = 5;
+  const ux = Math.cos(a), uy = Math.sin(a), vx = -uy, vy = ux;
+  ctx.lineJoin = 'miter';
+  ctx.lineCap = 'round';
+  for (const [color, width, minPx] of [['rgba(236,228,200,.6)', .8, 2.2], ['#0d0a07', .38, 1.1]]) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(width, minPx / unitPx);
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) {
+      const along = i / n * len;
+      const side = (i % 2 ? 1 : -1) * (i === 0 || i === n ? .2 : .55) * flick;
+      const qx = x + ux * along + vx * side, qy = y + uy * along + vy * side;
+      if (i) ctx.lineTo(qx, qy); else ctx.moveTo(qx, qy);
+    }
+    ctx.stroke();
+  }
+}
+
 function paintAnimal(canvas, type, fed, motion, size, panic) {
   const rig = RIG[type];
   // `size` paints off-screen at an exact pixel size (the share card)
@@ -2768,6 +2806,14 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
   // A whole-body lean, in degrees, for animals whose pose is part of
   // their character. Negative lifts the nose (everything faces right).
   if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
+  // frozen with fright: a new small offset every buzz tick (not on the
+  // share card, which is a still picture)
+  const fright = panic && !size && FRIGHT[type];
+  const buzz = fright ? frightTick() : 0;
+  if (fright) {
+    const r1 = Math.sin(buzz * 12.9898) * 43758.5453, r2 = Math.sin(buzz * 78.233) * 43758.5453;
+    ctx.translate((r1 - Math.floor(r1) - .5) * 2 * fright.shake, (r2 - Math.floor(r2) - .5) * fright.shake);
+  }
 
   const action = motion ? motion.amount * (fed < .34 ? .35 : 1) : 0;
   const wave = motion ? Math.sin(motion.progress * Math.PI * 4) * action : 0;
@@ -2823,6 +2869,13 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
+  if (fright) {
+    const odd = buzz % 2;
+    fright.marks.forEach(function (k, i) {
+      if ((i + odd) % 3 === 0) return;
+      paintShock(ctx, k[0] + (odd ? .4 : -.2), k[1] + (odd ? -.3 : .3), k[2] + (odd ? 8 : -6), odd ? -1 : 1, s);
+    });
+  }
   ctx.restore();
 }
 
@@ -2900,7 +2953,8 @@ function animateAnimalLife(now) {
     for (const entry of animalLife.entries) {
       if (!entry.art.isConnected) continue;
       const motion = animalMotion(entry.life);
-      if (motion.amount || entry.moving) paintLivingArt(entry);
+      // a frightened deer buzzes every frame, gesture or not
+      if (motion.amount || entry.moving || (entry.panic && FRIGHT[entry.cell.kind])) paintLivingArt(entry);
     }
   }
   animalLife.frame = requestAnimationFrame(animateAnimalLife);
