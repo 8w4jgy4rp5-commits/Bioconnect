@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Animals of Bioconnect</title>
+  <meta name="description" content="Every animal on Bioconnect's food chain in one field book: the rabbit, fox, deer, zebra, buffalo, wolf, bear, lion, tiger and the elephant. What each one eats, who eats it, and how to raise the next." />
+  <link rel="canonical" href="https://bioconnectpazzle.com/animals/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="The Animals of Bioconnect" />
+  <meta property="og:description" content="From the rabbit to the elephant: every animal on Bioconnect's food chain." />
+  <meta property="og:url" content="https://bioconnectpazzle.com/animals/" />
+  <meta property="og:image" content="https://bioconnectpazzle.com/og-image.jpg" />
+  <link rel="icon" href="../favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" />
+  <link rel="stylesheet" href="../guide/guide.css?v=3" />
+  <style>
+    /* One field book: every animal page lives here, one shown at a time.
+       The arrows at mid-screen turn the page; the button bottom right goes
+       back to the game's opening screen. */
+    main { padding-left:56px; padding-right:56px; padding-bottom:96px; }
+    @media (min-width:840px) { main { padding-left:16px; padding-right:16px; } }
+    .page[hidden] { display:none; }
+    .page h1:focus { outline:none; }
+    .count { font:13px var(--type); color:var(--mute); margin:0; }
+    .specimen { margin:16px 0 6px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 8px 10px; box-shadow:inset 0 0 0 4px var(--bg), inset 0 0 0 5px var(--plum); }
+    .specimen img { width:180px; height:auto; }
+    .specimen canvas { display:block; width:240px; height:240px; max-width:100%; margin:0 auto; cursor:pointer; transform-origin:center bottom; }
+    .specimen figcaption { font:13px var(--type); color:var(--mute); }
+    .facts { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:4px 14px; }
+    .facts dt { font:15px var(--type); color:var(--accent); margin-top:10px; }
+    .facts dd { margin:0 0 10px; }
+
+    /* each animal keeps its own breathing from its old page */
+    #rabbit .specimen canvas { width:220px; height:220px; animation:rabbit-idle 2.6s ease-in-out infinite, rabbit-breathe 1.5s ease-in-out infinite; }
+    @keyframes rabbit-idle { 0%, 100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+    @keyframes rabbit-breathe { 0%, 100% { scale:1 1; } 40%, 50% { scale:1.014 1.028; } 86% { scale:1 1; } }
+    #fox .specimen canvas { width:220px; height:220px; animation:fox-sniff 3.4s ease-in-out infinite, fox-breathe 2.1s ease-in-out infinite; }
+    /* the game's sniff: a long still stretch, then a few small turns */
+    @keyframes fox-sniff { 0%, 52%, 100% { transform:rotate(0deg); } 60% { transform:rotate(1.4deg); } 67% { transform:rotate(-.4deg); } 74% { transform:rotate(1.2deg); } 84% { transform:rotate(0deg); } }
+    @keyframes fox-breathe { 0%, 100% { scale:1 1; } 40%, 50% { scale:1.015 1.03; } 86% { scale:1 1; } }
+    #deer .specimen canvas { width:220px; height:220px; animation:deer-breathe 2.1s ease-in-out infinite; }
+    /* quick, shallow breaths: a deer that never quite relaxes */
+    @keyframes deer-breathe { 0%, 100% { scale:1 1; } 40%, 50% { scale:1.012 1.022; } 86% { scale:1 1; } }
+    #zebra .specimen canvas { width:220px; height:220px; animation:zebra-breathe 2.6s ease-in-out infinite; }
+    /* slow, deep, confident breaths */
+    @keyframes zebra-breathe { 0%, 100% { scale:1 1; } 45%, 55% { scale:1.01 1.018; } }
+    #buffalo .specimen canvas { width:240px; height:240px; animation:buffalo-breathe 3s ease-in-out infinite; }
+    /* big, slow breaths */
+    @keyframes buffalo-breathe { 0%, 100% { scale:1 1; } 45%, 55% { scale:1.008 1.016; } }
+    #wolf .specimen canvas { width:240px; height:240px; animation:wolf-breathe 2.4s ease-in-out infinite; }
+    /* steady, ready breaths: always set for a fight */
+    @keyframes wolf-breathe { 0%, 100% { scale:1 1; } 45%, 55% { scale:1.01 1.016; } }
+    #bear .specimen canvas { width:240px; height:240px; animation:bear-breathe 3.6s ease-in-out infinite; }
+    /* slow, heavy breaths: a big animal in no hurry */
+    @keyframes bear-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.008 1.014; } }
+    #lion .specimen canvas { width:240px; height:240px; animation:lion-breathe 4.6s ease-in-out infinite; }
+    /* the deep, slow breaths of a king who is not getting up */
+    @keyframes lion-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.012 1.02; } }
+    #tiger .specimen canvas { width:240px; height:240px; animation:tiger-breathe 4s ease-in-out infinite; }
+    /* calm, even, unbothered */
+    @keyframes tiger-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.006 1.01; } }
+    #elephant .specimen canvas { width:240px; height:240px; animation:elephant-breathe 5s ease-in-out infinite; }
+    @keyframes elephant-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.008 1.012; } }
+    @media (prefers-reduced-motion: reduce) { .specimen canvas { animation:none !important; } }
+
+    .turn { position:fixed; top:50%; transform:translateY(-50%); z-index:5; width:44px; height:64px; display:grid; place-items:center; padding:0; border:1px solid var(--line); background:color-mix(in srgb, var(--card) 88%, transparent); color:var(--accent); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.4); }
+    .turn svg { width:22px; height:22px; }
+    .turn:hover, .turn:focus-visible { background:var(--card-up); color:#fff6dc; }
+    .turn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .turn--prev { left:0; border-left:0; border-radius:0 12px 12px 0; }
+    .turn--next { right:0; border-right:0; border-radius:12px 0 0 12px; }
+    .turn small { position:absolute; top:100%; margin-top:6px; font:11px var(--type); color:var(--mute); white-space:nowrap; }
+    .turn--prev small { left:6px; }
+    .turn--next small { right:6px; }
+    @media (min-width:840px) {
+      .turn { width:56px; height:80px; }
+      .turn--prev { left:calc(50% - 360px - 76px); border-left:1px solid var(--line); border-radius:12px; }
+      .turn--next { right:calc(50% - 360px - 76px); border-right:1px solid var(--line); border-radius:12px; }
+    }
+
+    .home { position:fixed; right:16px; bottom:max(16px, env(safe-area-inset-bottom)); z-index:5; display:flex; align-items:center; gap:8px; padding:10px 18px 10px 14px; border-radius:999px; background:var(--accent); color:var(--on-accent); font:17px/1.2 var(--caps); text-decoration:none; box-shadow:0 0 0 3px var(--bg), 0 0 0 4px var(--plum), 0 4px 14px rgba(0,0,0,.45); }
+    .home svg { width:20px; height:20px; }
+    .home:hover, .home:focus-visible { filter:brightness(1.1); }
+  </style>
+</head>
+<body>
+<main>
+  <p class="back"><a href="../guide/">How to play</a> · <span class="count" id="count" aria-live="polite"></span></p>
+
+  <article class="page" id="rabbit" hidden>
+    <h1 tabindex="-1">The Rabbit</h1>
+      <p class="lead">The rabbit is the first animal on Bioconnect's food chain. It lives anywhere there is grass, it loves to eat, and beyond that there is honestly not much to say about it. He hates being called an "ordinary rabbit", so please try not to say it to his face. But he is. He is a very ordinary rabbit.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="rabbit" role="img" aria-label="The rabbit from Bioconnect, a plain cream-coloured rabbit with pink ears, twitching its ears now and then"></canvas>
+        <noscript><img src="../img/rabbit-pose-v2.png" alt="The rabbit from Bioconnect" width="171" height="220" /></noscript>
+        <figcaption>Specimen No. 3 · Rabbit · thoroughly ordinary</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 3, right after the plants. Two grass tiles make a rabbit. Two rabbits make a fox.</dd>
+        <dt>Eats</dt>
+        <dd>Grass and sprouts.</dd>
+        <dt>Eaten by</dt>
+        <dd>Foxes, wolves and bears. The elephant will also eat a rabbit if you grew that rabbit by merging.</dd>
+        <dt>Appetite</dt>
+        <dd>The biggest on the meadow. No animal gets hungry faster.</dd>
+      </dl>
+
+      <h2>Why the rabbit is always hungry</h2>
+      <p>The rabbit eats grass, and it eats a lot of it. Of all the animals in Bioconnect, it is the one that gets hungry the fastest. When it is hungry it eats one grass or sprout tile touching it, and that square becomes empty again. If there is nothing green beside it for too long, the rabbit starves and leaves bones behind, and bones take up a square until a merge clears them.</p>
+      <p>So a rabbit sitting in a corner of the meadow will quietly mow down every plant around it, and then it will be in trouble.</p>
+
+      <h2>The plan: make a fox before the grass runs out</h2>
+      <p>A rabbit is not meant to stay a rabbit for long. Before it eats all the grass around it, put a second rabbit right next to it. The two merge into a fox, and you are one step further up the food chain.</p>
+      <ul>
+        <li><strong>Plant rabbits next to rabbits.</strong> Your hand deals rabbits directly, so you rarely have to wait. Place a new rabbit where it touches one that is already on the board.</li>
+        <li><strong>Grow grass next to a rabbit.</strong> Two grass tiles merging beside a rabbit make a new rabbit, and that one merges straight into a fox. One tap, two steps.</li>
+        <li><strong>Watch the warning.</strong> A hungry rabbit shows a warning on its tile. That is your cue to either give it grass or give it a partner.</li>
+        <li><strong>Mind the fox.</strong> Once you have a fox, a rabbit standing next to it is lunch. That can be useful when the fox needs food, and annoying when you were saving that rabbit for the next merge.</li>
+      </ul>
+
+      <h2>Real rabbits</h2>
+      <p>Real rabbits really are serious eaters. They graze on grass and leafy plants for hours every day, mostly around dawn and dusk. Their front teeth never stop growing, and all that chewing is what keeps them worn down. Their eyes sit high on the sides of the head, so they can see almost all the way around them, which helps when so many animals would like to eat them. In Bioconnect that list is foxes, wolves and bears.</p>
+  </article>
+
+  <article class="page" id="fox" hidden>
+    <h1 tabindex="-1">The Fox</h1>
+      <p class="lead">The fox is a sly one. In front of any animal bigger than itself, it keeps its head down and says nothing. In front of a rabbit, it is suddenly very brave. Its dream is to beat a wolf one day, and it is quite sure it could, if it really tried.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="fox" role="img" aria-label="The fox from Bioconnect, an orange fox with a big bushy tail, swishing its tail now and then"></canvas>
+        <noscript><img src="../img/fox-pose-v2.png" alt="The fox from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 4 · Fox · confident (around rabbits)</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 4. Two rabbits make a fox. Two foxes make a deer.</dd>
+        <dt>Eats</dt>
+        <dd>Rabbits, grass and sprouts.</dd>
+        <dt>Eaten by</dt>
+        <dd>Wolves, lions and tigers. The elephant will also eat a fox if you grew that fox by merging.</dd>
+        <dt>Appetite</dt>
+        <dd>Big. Only the rabbit gets hungry faster.</dd>
+      </dl>
+
+      <h2>Brave in front of rabbits</h2>
+      <p>The fox is the first animal on the meadow that eats other animals. When it gets hungry, it eats one food tile touching it, and if a rabbit is standing next to it, that rabbit is usually the meal. It will also make do with grass or a sprout, which is why a fox is easier to keep fed than the animals above it.</p>
+      <p>Its appetite is big, though. Only the rabbit gets hungry faster, so a fox with nothing beside it will not wait long. If it goes hungry for too long, it starves and leaves bones behind.</p>
+
+      <h2>Very quiet in front of everyone else</h2>
+      <p>Above the fox, the food chain stops being friendly. Wolves, lions and tigers all eat foxes, and so does the elephant. A fox placed next to a hungry wolf is not going to beat it, whatever the fox thinks. It is going to be lunch.</p>
+
+      <h2>The plan: two foxes make a deer</h2>
+      <ul>
+        <li><strong>Pair it up early.</strong> Your hand deals foxes directly. Drop the second fox right beside the first and they merge into a deer, one step closer to the top.</li>
+        <li><strong>Build it from rabbits.</strong> Two rabbits merging next to a fox make a new fox, which merges straight into a deer. Grass beside a rabbit beside a fox can climb three steps in one tap.</li>
+        <li><strong>Use rabbits as food, on purpose.</strong> A spare rabbit next to a hungry fox keeps it alive. Just don't park the rabbit you were saving for the next merge there.</li>
+        <li><strong>Keep it away from wolves.</strong> Until you want to feed a wolf, put a little space between the two. The fox will not thank you, because it thinks it would have won.</li>
+      </ul>
+
+      <h2>Real foxes</h2>
+      <p>Real red foxes really are clever, flexible eaters. They hunt mice, voles and rabbits, but they will also eat insects, fruit and berries, so they get by almost anywhere, including cities. A fox can hear a mouse moving under snow or grass and catches it with a high, arching pounce. As for that dream: wolves do kill foxes, and foxes tend to keep out of their way. Some foxes have found a smarter plan and follow wolves at a safe distance to pick at the leftovers of their meals.</p>
+  </article>
+
+  <article class="page" id="deer" hidden>
+    <h1 tabindex="-1">The Deer</h1>
+      <p class="lead">The deer has the fastest legs on the meadow. It doesn't help. The moment he meets anything that eats deer, he gets so frightened that he can't move at all, and fast legs that stay where they are are not much use. When he is relaxed, he is honestly great company: chatty, quick and very funny. The trouble is that he spends about eighty percent of his day being frightened, so not many animals have heard the jokes.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="deer" role="img" aria-label="The deer from Bioconnect, a very thin brown deer with antlers, trembling with fright, lifting its head now and then to listen"></canvas>
+        <noscript><img src="../img/deer-calm.png" alt="The deer from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 5 · Deer · frightened (80% of the day)</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 5. Two foxes make a deer. Two deer make a zebra.</dd>
+        <dt>Eats</dt>
+        <dd>Grass and sprouts. Nothing else.</dd>
+        <dt>Eaten by</dt>
+        <dd>Wolves, bears, lions and tigers. The elephant will also eat a deer if you grew that deer by merging.</dd>
+        <dt>Appetite</dt>
+        <dd>Steady. It can go longer without food than a rabbit or a fox.</dd>
+      </dl>
+
+      <h2>Back to eating plants</h2>
+      <p>After the fox, the food chain takes a breath. The deer doesn't hunt anything. When it gets hungry, it eats one patch of grass or a sprout touching it, and that is all it ever wants. Keep a little green beside it and it stays happy.</p>
+      <p>It can wait longer between meals than the rabbit or the fox, which makes it a good animal to leave alone for a while. But not forever: a deer with no plants beside it for too long starves and leaves bones behind.</p>
+
+      <h2>Fast legs, frozen feet</h2>
+      <p>The deer is on more menus than anything below it. Wolves, bears, lions and tigers all eat deer, and so does the elephant if the deer was one you raised. His nerves are not silly. They are a good reading of the situation. They just don't come with a plan: he could outrun any of them, and instead he stands perfectly still and waits. On the board, too, a deer never runs. Keeping it safe is your job.</p>
+      <p>The wolf is his worst problem, because in poor light he takes it for a fox and walks straight up to it. On the board, a deer beside a wolf that isn't hungry yet wears a little question mark. Once the wolf gets hungry, he works it out, and starts shaking.</p>
+      <p>There is one trick that helps. A wolf would rather eat an animal that came from your hand than one you built by merging. Put a dealt rabbit beside a hungry wolf and the wolf takes the rabbit, and the deer you grew next to it lives to see another turn.</p>
+
+      <h2>The plan: two deer make a zebra</h2>
+      <ul>
+        <li><strong>Grow it from foxes.</strong> Two foxes merging make a deer. A chain of rabbits beside foxes beside a deer can climb all the way to a zebra in one tap.</li>
+        <li><strong>Watch for it in your hand.</strong> Later in a run, your hand starts dealing deer directly. Drop one beside another deer and they merge into a zebra.</li>
+        <li><strong>Keep grass close.</strong> A deer in the middle of other animals has nothing to eat. Leave it a plant, or plan to merge it before it gets hungry.</li>
+        <li><strong>Keep it away from wolves and bears.</strong> Until you are ready to feed one, give the deer some space. Give him a quiet corner and you may even catch him in a good mood.</li>
+      </ul>
+
+      <h2>Real deer</h2>
+      <p>Real deer really do spend much of their day on alert. Their big ears turn separately toward a sound, and their eyes sit on the sides of the head, so they can see almost all the way around without moving. They eat grass, leaves, buds and twigs, and they are a main meal for wolves, big cats and bears. Those antlers are not permanent, either: in most species only the males grow them, and they fall off and grow back every year.</p>
+  </article>
+
+  <article class="page" id="zebra" hidden>
+    <h1 tabindex="-1">The Zebra</h1>
+      <p class="lead">The zebra is the meadow's undisputed fashion icon. It never goes anywhere without its golden scarf, and it never stops sparkling. Every so often it sparkles so hard that there is an audible <em>shing!</em> and it strikes its best pose for a camera that isn't there. The zebra knows exactly how good it looks. Its goal is to be the first animal ever to walk at Paris Fashion Week.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="zebra" role="img" aria-label="The zebra from Bioconnect, a striped zebra in a golden scarf, sparkling and now and then flashing a big star as it lifts its chin into a pose"></canvas>
+        <noscript><img src="../img/zebra-calm.png" alt="The zebra from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 6 · Zebra · fabulous (and aware of it)</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 6. Two deer make a zebra. Two zebras make a buffalo.</dd>
+        <dt>Eats</dt>
+        <dd>Grass and sprouts. Strictly plant-based, darling.</dd>
+        <dt>Eaten by</dt>
+        <dd>Wolves, lions and tigers. The elephant will also eat any zebra, since every zebra is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>Calm. It can go longer without food than the deer.</dd>
+      </dl>
+
+      <h2>Made, never dealt</h2>
+      <p>The zebra is the first animal your hand will never give you. Sprouts, grass, rabbits, foxes and deer can all arrive as a tile, but a zebra only exists if you build it: two deer, side by side. The zebra would like you to know it was not found lying around. It was <em>made</em>.</p>
+      <p>That also makes every zebra a raised animal, which matters later. An elephant eats only what you grew by merging, and to an elephant a zebra is a very good meal.</p>
+
+      <h2>The scarf is the signal</h2>
+      <p>On a crowded board, look for the gold. The scarf is the brightest colour anywhere on this part of the food chain, so a zebra is easy to spot. It also tells you how the zebra is doing. When it gets hungry, the knot comes undone, the ends hang down to its knees and the gold goes dull. A zebra would never be seen like that on purpose. Get it some grass.</p>
+      <p>It is a calm eater, at least. It can go longer between meals than the deer, and it wants nothing but grass and sprouts. Leave it with no plants beside it for too long, though, and it starves and leaves bones behind.</p>
+
+      <h2>The plan: two zebras make a buffalo</h2>
+      <ul>
+        <li><strong>Build it from deer.</strong> Line up two deer and they merge into a zebra. A chain of foxes beside deer beside a zebra can climb several steps in one tap.</li>
+        <li><strong>Make the second one nearby.</strong> Since a zebra can't come from your hand, the next zebra has to be built too. Grow your second pair of deer right next to the first zebra so the merge lands where you want it.</li>
+        <li><strong>Keep the wolves busy.</strong> A wolf would rather eat an animal from your hand than one you built. A dealt rabbit or fox beside a hungry wolf keeps your zebra off the menu.</li>
+        <li><strong>Watch the scarf.</strong> If it starts coming undone, the zebra is hungry. Put grass beside it before you do anything else.</li>
+      </ul>
+
+      <h2>Real zebras</h2>
+      <p>No two zebras have the same stripes. Each pattern is as individual as a fingerprint, so this zebra's sense of personal style is, in a way, accurate. Scientists still debate what the stripes are for, but one strong idea is that they confuse biting flies, which land on striped coats far less often than on plain ones. Zebras live in herds, spend most of the day grazing tough grass, and keep an eye out for lions and hyenas. As far as anyone knows, none of them has walked a runway yet.</p>
+  </article>
+
+  <article class="page" id="buffalo" hidden>
+    <h1 tabindex="-1">The Buffalo</h1>
+      <p class="lead">The buffalo never leaves the house without a full face: lashes, eyeshadow, blush and a careful lip. Nobody knows whether the buffalo is a he or a she, and the buffalo has never felt the need to say. What everyone does know is that the make-up must be checked, every few seconds, in a little hand mirror. The buffalo has strong feelings about two other animals. One is the zebra, one step down the food chain, who is far too stylish and gets no kindness at all. The other is the tiger, who is wonderful.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="buffalo" role="img" aria-label="The buffalo from Bioconnect, a big brown buffalo with curled horns, lashes, pink blush and lipstick, lifting its head every few seconds to check itself in a little pink hand mirror"></canvas>
+        <noscript><img src="../img/buffalo-calm.png" alt="The buffalo from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 7 · Buffalo · checking the make-up (again)</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 7. Two zebras make a buffalo. Two buffalo make a wolf.</dd>
+        <dt>Eats</dt>
+        <dd>Grass and sprouts.</dd>
+        <dt>Eaten by</dt>
+        <dd>Lions and tigers. The elephant will also eat any buffalo, since every buffalo is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>The calmest of the plant eaters. It can wait longer between meals than any animal below it.</dd>
+      </dl>
+
+      <h2>The mirror</h2>
+      <p>Every few seconds, out comes the mirror. The buffalo lifts its head, checks the lashes, checks the lip, checks the hair between the horns, and puts the mirror away. Then it worries that something moved, and does it all again. On the board you will see the little pink mirror pop up beside its face. Nothing is ever actually wrong. The buffalo checks anyway.</p>
+
+      <h2>The zebra problem</h2>
+      <p>The zebra sits one step below the buffalo on the food chain, and in the buffalo's opinion it should act like it. Instead it wears that scarf and sparkles at everyone. Put a buffalo next to a zebra and you will see an angry vein pop up over the buffalo's back. It does not hurt the zebra in any way. It is just how the buffalo feels.</p>
+      <p>There is a twist, of course: the buffalo is made from zebras. Two of them, side by side. The buffalo would rather not talk about it.</p>
+
+      <h2>The tiger</h2>
+      <p>Put a buffalo next to a tiger and little hearts float up over its back. The buffalo thinks the tiger is the most beautiful animal on the meadow, and it is not wrong. The tiger also eats buffalo. When a hungry tiger is about to, the hearts stop and the buffalo's face changes very quickly. The tiger does prefer zebra, though, and takes a zebra first if one is beside it. The buffalo takes this as a sign of real affection.</p>
+
+      <h2>The plan: two buffalo make a wolf</h2>
+      <ul>
+        <li><strong>Build it from zebras.</strong> Two zebras side by side make a buffalo. Your hand never deals one, so every buffalo is built.</li>
+        <li><strong>Keep it fed, but don't rush.</strong> It is the calmest eater below the wolf. A buffalo can hold on while you set up the next merge, as long as it has a plant beside it eventually.</li>
+        <li><strong>Watch the big cats.</strong> Lions and tigers both eat buffalo. Keep a little space between them until you are ready to feed one.</li>
+        <li><strong>Pair it up for a wolf.</strong> Two buffalo merge into a wolf, the first hunter on this half of the food chain. Grow the second buffalo right beside the first.</li>
+      </ul>
+
+      <h2>Real buffalo</h2>
+      <p>The African buffalo takes its looks seriously too, in its way. It rolls in mud, which dries into a coat that protects its skin from the sun and biting insects, and it lets small birds called oxpeckers ride on its back to pick off ticks: a full spa service. Both males and females have horns, so even a real buffalo can be hard to tell apart at a glance. And while the buffalo here adores the tiger, real buffalo are one of the few animals that big cats truly fear. A herd will gang up on a lion and chase it away.</p>
+  </article>
+
+  <article class="page" id="wolf" hidden>
+    <h1 tabindex="-1">The Wolf</h1>
+      <p class="lead">The wolf is the first big hunter on the food chain, and every plant eater on the meadow is afraid of it. It sits right in the middle of things: big enough to scare the deer, small enough to be lunch for a lion. It looks a lot like a fox, which causes problems after dark. Deer keep walking up to a wolf thinking it is a fox, and the number of deer who found out the hard way keeps going up. The wolf itself is brave to the point of trouble. It will pick a fight with animals far above it, and it has never once backed down.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="wolf" role="img" aria-label="The wolf from Bioconnect, a grey wolf with a cream chest, taking turns throwing its head back to howl and leaning forward to growl"></canvas>
+        <noscript><img src="../img/wolf-calm.png" alt="The wolf from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 8 · Wolf · not backing down</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 8. Two buffalo make a wolf. Two wolves make a bear.</dd>
+        <dt>Eats</dt>
+        <dd>Rabbits, foxes, deer and zebras, in that order of preference. Never plants.</dd>
+        <dt>Eaten by</dt>
+        <dd>Lions and tigers. The elephant will also eat any wolf, since every wolf is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>Patient. It can go longer between meals than any plant eater, but when it is hungry, it eats whatever it can reach.</dd>
+      </dl>
+
+      <h2>The first big hunter</h2>
+      <p>Below the wolf, the only meat eater is the fox, and all it hunts is rabbits. The wolf is where the food chain turns serious. When it gets hungry, it takes one animal touching it: a rabbit if there is one, then a fox, a deer or a zebra. The plant eaters know this. Put a deer next to a hungry wolf and you will see the deer freeze and shake.</p>
+      <p>It is not reckless about its meals, though. A wolf would rather eat an animal from your hand than one you built by merging. A dealt rabbit beside a hungry wolf saves the deer and zebras you are growing next to it.</p>
+
+      <h2>"Is that a fox?"</h2>
+      <p>Grey coat, pointed ears, bushy tail. In bad light a wolf passes for a fox, and a deer has nothing to fear from a fox. So the deer walks right up to say hello. On the board, a deer standing beside a wolf that isn't hungry yet wears a little question mark. The moment the wolf gets hungry, the question is answered, and the deer starts shaking. Move it before then.</p>
+
+      <h2>Brave, and then some</h2>
+      <p>The wolf knows exactly where it stands on the food chain, and it refuses to act like it. Put it beside a bear, a lion, a tiger or even an elephant and it leans in and growls. The lion and the tiger both eat wolves. The wolf growls at them anyway. It has not won one of these yet, and it has no plans to stop.</p>
+
+      <h2>The plan: two wolves make a bear</h2>
+      <ul>
+        <li><strong>Build it from buffalo.</strong> Two buffalo side by side make a wolf. Your hand never deals one, so every wolf is built.</li>
+        <li><strong>Feed it from your hand.</strong> Keep a dealt rabbit or fox within reach. The wolf eats that first and leaves your raised animals alone.</li>
+        <li><strong>Keep the deer out of the dark.</strong> A deer next to a wolf is a meal waiting for the wolf to get hungry. If you need that deer, give it a different neighbour.</li>
+        <li><strong>Don't let the growling fool you.</strong> A wolf beside a hungry lion or tiger is in real danger, however brave it looks. Keep the big cats a step away until you mean to feed one.</li>
+        <li><strong>Pair it up for a bear.</strong> Two wolves merge into a bear. Build the second one right beside the first.</li>
+      </ul>
+
+      <h2>Real wolves</h2>
+      <p>Wolves and foxes really are cousins: both belong to the dog family, which is why the two look so alike from a distance. A wolf is much bigger, though, often three or four times a fox's weight. Real wolves hunt in packs, which lets them take down animals far larger than themselves, such as deer, elk and even bison. And they really do stand their ground. Wolves have been seen chasing bears away from a kill. Their howl carries for kilometres and helps the pack find each other and warn other packs off their land.</p>
+  </article>
+
+  <article class="page" id="bear" hidden>
+    <h1 tabindex="-1">The Bear</h1>
+      <p class="lead">The bear is never alone. Every bear on the meadow is a mother with her cub walking at her left side, and everything she does is about that cub. She eats grass when she can and meat when she has to, but anything that comes too close to her cub goes to the top of the list. The cub, for its part, is scared of almost everything. It jumps at rabbits. It is still only about a third as jumpy as the deer, which tells you a lot about the deer.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="bear" role="img" aria-label="The bear from Bioconnect, a black mother bear with a cream chest mark and her cub at her left side. The mother now and then stands up tall, and the cub every so often jumps with fright"></canvas>
+        <noscript><img src="../img/bear-calm.png" alt="The bear from Bioconnect, a mother and her cub" /></noscript>
+        <figcaption>Specimen No. 9 · Bear · with cub</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 9. Two wolves make a bear. Two bears make a lion.</dd>
+        <dt>Eats</dt>
+        <dd>Grass, rabbits and deer, in that order of preference. The exception is an animal standing on her left, next to the cub. She eats that one first.</dd>
+        <dt>Eaten by</dt>
+        <dd>Lions and tigers. The elephant will also eat any bear, since every bear is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>Patient, like the wolf. Protecting the cub does not make her hungrier. It only changes what she picks when she does eat.</dd>
+      </dl>
+
+      <h2>A mother first</h2>
+      <p>Left to herself, the bear is a gentle eater. When she gets hungry she would rather have a patch of grass than chase anything. If there is no grass beside her, she takes a rabbit, then a deer.</p>
+      <p>The cub changes that. It always walks on her left, and she watches that side closely. When she gets hungry, a rabbit or deer standing on her left is the first thing she eats, before the grass and before anything on her other sides. It doesn't matter whether you built that animal or it came from your hand. Grass on her left is fine. Grass never scared anybody.</p>
+
+      <h2>The nervous cub</h2>
+      <p>The cub is timid. When any animal stands on its side of the board, it starts to jump with little shock marks around it, on and off. The mother isn't scared, so only the cub shakes. On the board, that is your warning: whatever is making the cub nervous is the next thing the mother eats once she gets hungry.</p>
+      <p>As nervous as it is, the cub is a calm animal next to the deer. A frightened deer shakes about three times as much and three times as long. The cub has its mother. The deer has nobody.</p>
+
+      <h2>The plan: two bears make a lion</h2>
+      <ul>
+        <li><strong>Build it from wolves.</strong> Two wolves side by side make a bear. Your hand never deals one, so every bear is built.</li>
+        <li><strong>Keep the left side clear.</strong> Don't park an animal you need on the bear's left. Put grass there, or nothing.</li>
+        <li><strong>Use the left side on purpose.</strong> A dealt rabbit on her left is a meal you choose for her. It keeps her away from the deer you are building on her other sides.</li>
+        <li><strong>Watch the cub.</strong> If the cub is jumping, something is standing on its side. Move your plans around it before the mother gets hungry.</li>
+        <li><strong>Mind the big cats.</strong> Lions and tigers eat bears. A bear next to a hungry lion is in trouble, cub or no cub.</li>
+        <li><strong>Pair it up for a lion.</strong> Two bears merge into a lion. Build the second one right beside the first.</li>
+      </ul>
+
+      <h2>Real bears</h2>
+      <p>A mother bear protecting her cubs is one of the most dangerous animals in the forest. Many bear attacks on people happen because someone came between a mother and her cubs without knowing it. Cubs stay with their mother for one to three years and learn everything from her: what to eat, where to find it, and when to climb a tree to get out of trouble. Even big adult male bears tend to keep away from a mother with cubs. And bears really do eat mostly plants. Grass, berries, roots and nuts make up most of a black bear's diet, with meat when the chance comes.</p>
+  </article>
+
+  <article class="page" id="lion" hidden>
+    <h1 tabindex="-1">The Lion</h1>
+      <p class="lead">The lion is the king of the beasts, and it would like you to know that it has the crown to prove it. That is about all the proof there is. On a normal day the lion lies flat on the grass, yawns until its eyes water, and does not get up for anybody. There is no dignity in it at all. And yet the lion really is one of the strongest animals on the meadow. It just only shows it once a day, when it gets hungry.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="lion" role="img" aria-label="The lion from Bioconnect, a golden lion with a red mane and a small gold crown, lying flat on the ground and yawning so wide that a tear runs down its face"></canvas>
+        <noscript><img src="../img/lion-calm.png" alt="The lion from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 10 · Lion · not getting up</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 10. Two bears make a lion. Two lions make a tiger.</dd>
+        <dt>Eats</dt>
+        <dd>Foxes, deer, zebras, buffalo, wolves and bears. Never plants. The animal right in front of its face goes first.</dd>
+        <dt>Eaten by</dt>
+        <dd>Tigers. The elephant will also eat any lion, since every lion is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>Very patient. It can lie there for a long time. When it does get hungry, it means it.</dd>
+      </dl>
+
+      <h2>The laziest king</h2>
+      <p>Most of the time, the lion does nothing. It yawns. It yawns again. The crown stays on, mostly out of habit. Animals walk right past it and it does not even look. If you put a lion on the board and wonder whether it is doing anything, the answer is no.</p>
+
+      <h2>Serious only when hungry</h2>
+      <p>Then it gets hungry, and for a moment the lion remembers who it is. The yawn closes, the face goes hard, and it eats one animal touching it. It doesn't touch the grass. A king eats meat.</p>
+      <p>It doesn't shop around, either. The lion faces right, and the animal on its right, straight in front of its face, is the one it eats first. That counts even if it is a wolf or a bear you spent ages building, and even if a cheap fox from your hand is waiting on its other side. Only when nothing is in front of it does the lion look around, and then it takes the cheapest animal beside it, a dealt one before one you raised.</p>
+
+      <h2>Mind what you put in front of it</h2>
+      <p>This is the one thing to remember about the lion. Its right side is its plate. Park your best animal there and, the next time the lion gets hungry, it is gone. Park something you can spare there instead, and you choose its dinner for it.</p>
+
+      <h2>The plan: two lions make a tiger</h2>
+      <ul>
+        <li><strong>Build it from bears.</strong> Two bears side by side make a lion. Your hand never deals one, so every lion is built.</li>
+        <li><strong>Keep your best animals off its right side.</strong> A wolf or a bear in front of a hungry lion is a wasted wolf or bear.</li>
+        <li><strong>Serve dinner on purpose.</strong> A dealt fox or deer on its right is a meal you picked. It keeps the lion away from everything else.</li>
+        <li><strong>Watch the hunger bar, not the yawn.</strong> The lion looks the same lazy king right up until it gets hungry. The red bar is the only warning you get.</li>
+        <li><strong>Pair it up for a tiger.</strong> Two lions merge into a tiger. Build the second one right beside the first, and not in front of it.</li>
+      </ul>
+
+      <h2>Real lions</h2>
+      <p>Real lions really are lazy, at least by the clock. They often sleep or rest for 16 to 20 hours a day, saving their energy in the heat. When they do hunt, it is short and serious: a burst of speed and a lot of strength over a very short distance. Lions are also the only big cats that live in groups, called prides. In a pride, it is mostly the lionesses who do the hunting, while the males with the big manes guard the territory. So the king is not just lazy. In real life, he also lets someone else catch dinner.</p>
+  </article>
+
+  <article class="page" id="tiger" hidden>
+    <h1 tabindex="-1">The Tiger</h1>
+      <p class="lead">The tiger has the hardest face on the meadow: a cold, half-closed stare that never changes, and a ring of gold that flares when it gets hungry. It almost never comes out onto the grassland, so the other animals don't know it well. They give it a lot of room. That is a shame, because the tiger is a gentle soul. It is serious, it is quiet, and, though it would never say so, it is very fond of grass.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="tiger" role="img" aria-label="The tiger from Bioconnect, an orange striped tiger with a stern half-closed stare and gold spikes around its head."></canvas>
+        <noscript><img src="../img/tiger-calm.png" alt="The tiger from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 11 · Tiger · secretly soft</figcaption>
+      </figure>
+
+      <dl class="facts">
+        <dt>Place on the food chain</dt>
+        <dd>Step 11. Two lions make a tiger. Two tigers make an elephant.</dd>
+        <dt>Eats</dt>
+        <dd>Grass first, always. If there is no grass beside it: foxes, deer, zebras, buffalo, wolves, bears and lions.</dd>
+        <dt>Eaten by</dt>
+        <dd>Only the elephant, since every tiger is one you raised.</dd>
+        <dt>Appetite</dt>
+        <dd>Thrifty. It runs on very little, and a patch of grass is honestly enough.</dd>
+      </dl>
+
+      <h2>The hardest face on the meadow</h2>
+      <p>It doesn't smile. It doesn't growl either. It just looks at you, half asleep and completely unimpressed, with gold spikes standing around its head. When it gets hungry, the spikes reach out even further. The tiger is rare, too. You have to build two lions to see one, so most of the meadow has only heard stories about it, and the stories are not kind.</p>
+
+      <h2>Soft on grass</h2>
+      <p>Here is what the stories leave out. When the tiger gets hungry, the first thing it looks for is grass. A patch of grass beside it is its favourite meal, and it eats that before any animal, even a cheap fox from your hand. It is not that it can't hunt. It is the top hunter below the elephant, and it can eat anything from a fox to a lion. It just doesn't see the point, when there is perfectly good grass right there.</p>
+      <p>On the board, put grass beside a tiger and its red frame lands on the grass, not on your animals. The face does not change at all. That is the tiger.</p>
+
+      <h2>The plan: two tigers make an elephant</h2>
+      <ul>
+        <li><strong>Build it from lions.</strong> Two lions side by side make a tiger. Your hand never deals one, so every tiger is built.</li>
+        <li><strong>Keep grass beside it.</strong> A tiger with grass next to it eats the grass and leaves your animals alone. It is the cheapest way to keep the top of your food chain fed.</li>
+        <li><strong>Watch the red frame.</strong> If it is on the grass, your animals are safe from this tiger. If it is on an animal, that one is the next meal.</li>
+        <li><strong>Pair it up for an elephant.</strong> Two tigers merge into the elephant, the top of the food chain. Build the second one right beside the first.</li>
+      </ul>
+
+      <h2>Real tigers</h2>
+      <p>Real tigers really are loners. Unlike lions, they live and hunt alone, keep to thick forest, and are rarely seen even where they live, which is a big part of why people find them so frightening. They are the largest of all the big cats. And while tigers are meat eaters through and through, they have been seen eating grass and other plants now and then, which may help their stomachs. So the soft spot is not entirely made up.</p>
+  </article>
+
+  <article class="page" id="elephant" hidden>
+    <h1 tabindex="-1">The Elephant</h1>
+      <p class="lead">The strongest. A phantom.</p>
+
+      <figure class="specimen">
+        <canvas class="living" data-animal="elephant" role="img" aria-label="The elephant from Bioconnect, slowly fading in and out like a phantom"></canvas>
+        <noscript><img src="../img/elephant-calm.png" alt="The elephant from Bioconnect" /></noscript>
+        <figcaption>Specimen No. 12 · Elephant · phantom</figcaption>
+      </figure>
+  </article>
+
+  <p class="back"><a href="../about/">About Bioconnect</a> · <a href="../legal/privacy.html">Privacy</a> · <a href="../legal/terms.html">Terms</a></p>
+</main>
+
+<button class="turn turn--prev" id="prev" type="button" aria-label="Previous animal">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg>
+  <small id="prevName"></small>
+</button>
+<button class="turn turn--next" id="next" type="button" aria-label="Next animal">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg>
+  <small id="nextName"></small>
+</button>
+<a class="home" href="../" aria-label="Back to the opening screen">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg>
+  Home
+</a>
+
+<script>
+(function () {
+  'use strict';
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.page'));
+  var ids = pages.map(function (p) { return p.id; });
+  var names = pages.map(function (p) { return p.querySelector('h1').textContent.replace(/^The /, ''); });
+  var prev = document.getElementById('prev'), next = document.getElementById('next');
+  var at = -1;
+
+  function show(i, focus) {
+    i = (i + pages.length) % pages.length;   // the book loops: after the elephant comes the rabbit
+    if (i === at) return;
+    if (at >= 0) pages[at].hidden = true;
+    at = i;
+    pages[i].hidden = false;
+    var p = (i - 1 + pages.length) % pages.length, n = (i + 1) % pages.length;
+    document.getElementById('prevName').textContent = names[p];
+    document.getElementById('nextName').textContent = names[n];
+    prev.setAttribute('aria-label', 'Previous animal: ' + names[p]);
+    next.setAttribute('aria-label', 'Next animal: ' + names[n]);
+    document.getElementById('count').textContent = (i + 1) + ' / ' + pages.length;
+    document.title = names[i] + ' – The Animals of Bioconnect';
+    window.scrollTo(0, 0);
+    if (focus) pages[i].querySelector('h1').focus({ preventScroll: true });
+    // the living portrait was hidden while its size was 0: redraw it
+    window.dispatchEvent(new Event('resize'));
+  }
+  function go(step) {
+    var i = (at + step + pages.length) % pages.length;
+    history.replaceState(null, '', '#' + ids[i]);
+    show(i, true);
+  }
+  function fromHash() {
+    var i = ids.indexOf(location.hash.slice(1));
+    show(i < 0 ? 0 : i, at >= 0);
+  }
+
+  prev.addEventListener('click', function () { go(-1); });
+  next.addEventListener('click', function () { go(1); });
+  window.addEventListener('hashchange', fromHash);
+  document.addEventListener('keydown', function (e) {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === 'ArrowLeft') go(-1);
+    else if (e.key === 'ArrowRight') go(1);
+  });
+  fromHash();
+})();
+</script>
+<script src="animal-rig.js?v=book1" defer></script>
+</body>
+</html>

@@ -5,7 +5,9 @@
 // Usage: <canvas class="living" data-animal="rabbit"></canvas>
 (function () {
   'use strict';
-  var IMG = '../../img/';
+  // the art sits in /img/ next to /animals/, wherever the page that loads
+  // this script lives (the field book /animals/ or an old /animals/<name>/)
+  var IMG = document.currentScript ? new URL('../img/', document.currentScript.src).href : '../../img/';
   var RIG = {
     rabbit: {
       fit: { span: 38, ox: 0, oy: 1.2, tilt: -7 },
@@ -403,7 +405,8 @@
       });
       var last = 0, taps = 0;
       (function frame(now) {
-        if (now - last >= 1000 / 30 && !document.hidden) {
+        // in the field book only the open page's portrait is drawn
+        if (now - last >= 1000 / 30 && !document.hidden && canvas.offsetParent) {
           last = now;
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
           if (rig.growl) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
