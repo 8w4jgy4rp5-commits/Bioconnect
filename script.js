@@ -3023,6 +3023,79 @@ function paintHeart(ctx, x, y, r, alpha) {
   ctx.restore();
 }
 
+// THE WOLF'S NERVE. The first big hunter, feared by every plant eater,
+// and brave enough to pick a fight with anything above it. Beside a
+// bear, lion, tiger or elephant it leans in and growls: three short
+// cartoon growl strokes at the mouth, twitching. It never wins, and it
+// never stops.
+const BRAVADO = {
+  wolf: { targets: ['bear', 'lion', 'tiger', 'elephant'], growl: { x: 15.6, y: -5.6 }, lean: 1.6, minPx: 1.1 }
+};
+// THE DEER'S MISTAKE. The wolf looks a lot like a fox, and the deer keeps
+// walking up to one thinking it is. Beside a wolf that is not hungry yet
+// the deer wears a little "?" ("a fox?"); once the wolf is hungry the
+// deer panics like it does beside any hunter.
+const MISTAKE = {
+  deer: { by: 'wolf', at: { x: -11, y: -9 }, minPx: 7 }
+};
+
+function wolfMood(i) {
+  if (i == null || i < 0) return '';
+  for (const n of tileNeighbours(state.cells, i)) {
+    const k = state.cells[n] && state.cells[n].kind;
+    if (k && BRAVADO.wolf.targets.indexOf(k) >= 0) return 'defiant';
+  }
+  return '';
+}
+
+function deerMood(i) {
+  if (i == null || i < 0) return '';
+  for (const n of tileNeighbours(state.cells, i)) {
+    if (state.cells[n] && state.cells[n].kind === MISTAKE.deer.by) return 'fooled';
+  }
+  return '';
+}
+
+// Feelings about the neighbours, per kind (painted only while calm).
+const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood };
+
+// Three short growl strokes fanning out from the mouth, dark ink with a
+// pale rim so they read on any tile.
+function paintGrowl(ctx, x, y, t, unitPx, minPx) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.lineCap = 'round';
+  const jit = Math.sin(t * 31) * .25;
+  for (const [color, k] of [['rgba(255,248,236,.85)', 2.3], ['#2b1d1a', 1]]) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(.42, minPx / unitPx) * k;
+    for (let q = -1; q <= 1; q++) {
+      const a = (q * 36 - 42) * Math.PI / 180, r0 = 1.2 + jit, r1 = 3.6 + jit + (q ? 0 : .6);
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+      ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+// The deer's "?": a bold question mark with a pale rim, bobbing.
+function paintQuery(ctx, x, y, size) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.font = '700 ' + size + 'px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = size * .22;
+  ctx.strokeStyle = 'rgba(255,248,236,.9)';
+  ctx.strokeText('?', 0, 0);
+  ctx.fillStyle = '#3a2a24';
+  ctx.fillText('?', 0, 0);
+  ctx.restore();
+}
+
 function paintAnimal(canvas, type, fed, motion, size, panic) {
   const rig = RIG[type];
   // `size` paints off-screen at an exact pixel size (the share card)
@@ -3072,11 +3145,14 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
   const shine = SPARKLE[type] && motion && motion.time != null && fed >= .34 && !panic ? SPARKLE[type] : null;
   const glint = shine ? motion.glint || 0 : 0;
   const lift = glint * (shine ? shine.glint.lift : 0);
-  if (pose && (action || lift)) {
+  const brave = BRAVADO[type] && motion && motion.mood === 'defiant' && !panic ? BRAVADO[type] : null;
+  // leaning in at the bigger animal, with a small lunge now and then
+  const lean = brave ? brave.lean * (1 + .5 * Math.max(0, Math.sin((motion.time || 0) * 3.1))) : 0;
+  if ((pose && (action || lift)) || lean) {
     const pivotY = rig.fit.span * .43 - rig.fit.oy - sag;
     ctx.translate(0, pivotY);
-    ctx.rotate((pose[0] + lift) * Math.PI / 180);
-    ctx.scale(pose[1], pose[2]);
+    ctx.rotate(((pose ? pose[0] : 0) + lift + lean) * Math.PI / 180);
+    if (pose) ctx.scale(pose[1], pose[2]);
     ctx.translate(0, -pivotY);
   }
   // Panic outranks hunger: the face is about the next second, not the meter.
@@ -3140,6 +3216,13 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       }
       ctx.globalAlpha = 1;
     }
+  }
+  // (not mid-howl: the mouth is somewhere else then)
+  if (brave && !(motion.amount > .3)) paintGrowl(ctx, brave.growl.x, brave.growl.y, motion.time || 0, s, brave.minPx);
+  const fooled = MISTAKE[type] && motion && motion.mood === 'fooled' && !panic ? MISTAKE[type] : null;
+  if (fooled) {
+    const t = motion.time || 0;
+    paintQuery(ctx, fooled.at.x, fooled.at.y + Math.sin(t * 2.4) * .6, Math.max(7.5, fooled.minPx / s));
   }
   if (shine) {
     const tw = shine.minPx.twinkle / s, gm = shine.minPx.glint / s;
@@ -3229,8 +3312,8 @@ function paintLivingArt(entry, still) {
     motion = { amount: motion.amount, progress: motion.progress, time: time + life.phase,
       glint: glintAmount(time - life.first * .5, { gap: g.gap * (life.period / ANIMAL_GESTURES[entry.cell.kind].gap), duration: g.duration }) };
   }
-  if (motion && VANITY[entry.cell.kind]) {
-    entry.mood = buffaloMood(entry.index);
+  if (motion && MOODS[entry.cell.kind]) {
+    entry.mood = MOODS[entry.cell.kind](entry.index);
     motion = Object.assign({}, motion, { mood: entry.mood, time: animalLife.time });
   }
   entry.art.dataset.acting = motion && motion.amount > .02 ? 'true' : 'false';
