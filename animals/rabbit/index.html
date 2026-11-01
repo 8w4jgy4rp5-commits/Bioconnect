@@ -18,6 +18,10 @@
   <style>
     .specimen { margin:16px 0 6px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 8px 10px; box-shadow:inset 0 0 0 4px var(--bg), inset 0 0 0 5px var(--plum); }
     .specimen img { width:160px; height:auto; }
+    .specimen canvas { display:block; width:220px; height:220px; margin:0 auto; cursor:pointer; transform-origin:center bottom; animation:rabbit-idle 2.6s ease-in-out infinite, breathe 1.5s ease-in-out infinite; }
+    @keyframes rabbit-idle { 0%, 100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
+    @keyframes breathe { 0%, 100% { scale:1 1; } 40%, 50% { scale:1.014 1.028; } 86% { scale:1 1; } }
+    @media (prefers-reduced-motion: reduce) { .specimen canvas { animation:none; } }
     .specimen figcaption { font:13px var(--type); color:var(--mute); }
     .facts { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:4px 14px; }
     .facts dt { font:15px var(--type); color:var(--accent); margin-top:10px; }
@@ -32,7 +36,8 @@
   <p class="lead">The rabbit is the first animal on Bioconnect's food chain. It lives anywhere there is grass, it loves to eat, and beyond that there is honestly not much to say about it. He hates being called an "ordinary rabbit", so please try not to say it to his face. But he is. He is a very ordinary rabbit.</p>
 
   <figure class="specimen">
-    <img src="../../img/rabbit-pose-v2.png" alt="The rabbit from Bioconnect, a plain cream-coloured rabbit with pink ears" width="171" height="220" />
+    <canvas class="living" data-animal="rabbit" role="img" aria-label="The rabbit from Bioconnect, a plain cream-coloured rabbit with pink ears, twitching its ears now and then"></canvas>
+    <noscript><img src="../../img/rabbit-pose-v2.png" alt="The rabbit from Bioconnect" width="171" height="220" /></noscript>
     <figcaption>Specimen No. 3 · Rabbit · thoroughly ordinary</figcaption>
   </figure>
 
@@ -71,5 +76,6 @@
   <p class="cta"><a class="play" href="../../">Play Bioconnect — free in your browser</a></p>
   <p class="back"><a href="../../about/">About Bioconnect</a> · <a href="../../legal/privacy.html">Privacy</a> · <a href="../../legal/terms.html">Terms</a></p>
 </main>
+<script src="../animal-rig.js" defer></script>
 </body>
 </html>
