@@ -55,7 +55,18 @@
       // 'listen': the whole deer leans back from the hooves and stands
       // a touch taller (script.js pose.deer)
       pose: { rot: -2.4, sy: 0.014 },
-      gesture: { gap: 11, duration: 1.9 }
+      gesture: { gap: 11, duration: 1.9 },
+      // Frightened about 80% of the day: in every 10 s, 8 s of shaking
+      // with black shock lines buzzing round him, 2 s of calm.
+      // Marks are [x, y, outward angle in degrees], in rig units.
+      fright: {
+        cycle: 10, scared: 8, shake: 0.28,
+        marks: [
+          [-3.5, -15.5, -110], [3.5, -17.5, -70], [9.5, -11, -25], [11, -3.5, 10],
+          [8.5, 3.5, 35], [5.5, 13.5, 60], [-6.5, 13, 125], [-11.5, 4.5, 160],
+          [-11.5, -3, 195], [-6, -7.5, 235]
+        ]
+      }
     }
   };
 
@@ -73,13 +84,32 @@
   // Same envelope as the game: ease in, hold, settle back.
   function motion(t, g) {
     var part = t % g.gap;
-    if (part >= g.duration) return 0;
+    if (part >= g.duration) return REST;
     var p = part / g.duration;
     var smooth = function (x) { return x * x * (3 - 2 * x); };
     var amount = p < .22 ? smooth(p / .22) : p > .72 ? smooth((1 - p) / .28) : 1;
     return { wave: Math.sin(p * Math.PI * 4) * amount, amount: amount };
   }
   var REST = { wave: 0, amount: 0 };
+
+  // One cartoon shock mark: a short zigzag pointing away from the body,
+  // black with a pale rim so it reads on the page's dark green.
+  function shock(ctx, x, y, deg, flick) {
+    var a = deg * Math.PI / 180, len = 2.9, n = 5;
+    var ux = Math.cos(a), uy = Math.sin(a), vx = -uy, vy = ux;
+    var pts = [];
+    for (var i = 0; i <= n; i++) {
+      var along = i / n * len, side = (i % 2 ? 1 : -1) * (i === 0 || i === n ? 0.2 : 0.55) * flick;
+      pts.push([x + ux * along + vx * side, y + uy * along + vy * side]);
+    }
+    ctx.lineJoin = 'miter'; ctx.lineCap = 'round';
+    [['rgba(236,228,200,.35)', 0.8], ['#0d0a07', 0.38]].forEach(function (pen) {
+      ctx.strokeStyle = pen[0]; ctx.lineWidth = pen[1];
+      ctx.beginPath();
+      pts.forEach(function (q, i) { i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); });
+      ctx.stroke();
+    });
+  }
 
   function paint(canvas, rig, imgs, m) {
     var px = canvas.clientWidth || 160;
@@ -97,6 +127,12 @@
     ctx.translate(px / 2 + (f.dx - rig.fit.ox) * s, px / 2 + (rig.fit.oy + f.dy) * s);
     ctx.scale(s, s);
     if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
+    var fr = rig.fright && m.scared ? m.tick : -1;
+    if (fr >= 0) {
+      // the shake: a new small offset every buzz tick
+      var r1 = Math.sin(fr * 12.9898) * 43758.5453, r2 = Math.sin(fr * 78.233) * 43758.5453;
+      ctx.translate((r1 - Math.floor(r1) - .5) * 2 * rig.fright.shake, (r2 - Math.floor(r2) - .5) * rig.fright.shake);
+    }
     if (rig.pose && m.amount) {
       // grounded accent: pivot near the hooves, same as the game tile
       var pivotY = rig.fit.span * .43 - rig.fit.oy;
@@ -120,6 +156,14 @@
       ctx.restore();
     });
     ctx.globalAlpha = 1;
+    if (fr >= 0) {
+      // two drawings swapped every tick, like the classic cartoon buzz
+      var odd = fr % 2;
+      rig.fright.marks.forEach(function (k, i) {
+        if ((i + odd) % 3 === 0) return;
+        shock(ctx, k[0] + (odd ? .4 : -.2), k[1] + (odd ? -.3 : .3), k[2] + (odd ? 8 : -6), odd ? -1 : 1);
+      });
+    }
     ctx.restore();
   }
 
@@ -142,7 +186,13 @@
       (function frame(now) {
         if (now - last >= 1000 / 30 && !document.hidden) {
           last = now;
-          paint(canvas, rig, imgs, motion((now - start) / 1000, rig.gesture));
+          var t = (now - start) / 1000, m = motion(t, rig.gesture);
+          if (rig.fright) {
+            var phase = (t + rig.fright.cycle) % rig.fright.cycle;
+            m = { wave: m.wave || 0, amount: m.amount || 0,
+              scared: phase < rig.fright.scared, tick: Math.floor(now / 90) };
+          }
+          paint(canvas, rig, imgs, m);
         }
         requestAnimationFrame(frame);
       })(performance.now());
