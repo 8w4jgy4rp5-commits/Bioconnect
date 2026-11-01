@@ -401,9 +401,9 @@ ok('a wolf takes the dealt fox over a raised rabbit', wm.length === 1 && wm[0].a
 board([[1, 1, 'wolf', starving('wolf')], [2, 1, 'deer', 0, RAISED]]);
 wm = X.ctx.feedEveryone();
 ok('...and still eats a raised deer when nothing dealt is beside it', wm.length === 1 && wm[0].ateKind === 'deer');
-board([[1, 1, 'lion', starving('lion')], [2, 1, 'deer', 0, RAISED], [0, 1, 'fox']]);
+board([[1, 1, 'lion', starving('lion')], [1, 2, 'deer', 0, RAISED], [0, 1, 'fox']]);
 wm = X.ctx.feedEveryone();
-ok('a lion can be fed a dealt fox', wm.length === 1 && wm[0].ateKind === 'fox' && cell(2, 1).kind === 'deer');
+ok('a lion can be fed a dealt fox', wm.length === 1 && wm[0].ateKind === 'fox' && cell(1, 2).kind === 'deer');
 board([[1, 1, 'tiger', starving('tiger')], [0, 1, 'fox']]);
 ok('so can a tiger', X.ctx.feedEveryone().length === 1);
 // The deal follows the clock, and raising a zebra jumps it to at least the
@@ -820,6 +820,20 @@ ok('she still waits for her hunger before eating', cell(1, 2) && cell(1, 2).kind
 board([[0, 2, 'bear', starving('bear')], [1, 2, 'rabbit']]);
 m = X.ctx.feedEveryone();
 ok('on the left edge she eats as before', !cell(1, 2));
+
+console.log('\nthe lion eats what is in front of its face');
+board([[2, 2, 'lion', starving('lion')], [3, 2, 'wolf', 0, RAISED], [1, 2, 'fox'], [2, 1, 'deer']]);
+m = X.ctx.feedEveryone();
+ok('a hungry lion eats the animal on its right before a cheaper or dealt one', !cell(3, 2) && cell(1, 2) && cell(2, 1), JSON.stringify(m));
+board([[2, 2, 'lion', starving('lion')], [3, 2, 'grass'], [1, 2, 'fox']]);
+m = X.ctx.feedEveryone();
+ok('grass in front is not a meal: it eats around itself as before', cell(3, 2) && !cell(1, 2), JSON.stringify(m));
+board([[2, 2, 'lion', starving('lion') - 1], [3, 2, 'wolf']]);
+m = X.ctx.feedEveryone();
+ok('it stays lazy until it is hungry', cell(3, 2) && cell(3, 2).kind === 'wolf');
+board([[4, 2, 'lion', starving('lion')], [3, 2, 'fox']]);
+m = X.ctx.feedEveryone();
+ok('on the right edge it eats as before', !cell(3, 2));
 
 console.log('\nthe page asks for the current files');
 ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());

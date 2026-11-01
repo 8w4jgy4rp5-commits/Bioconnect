@@ -395,7 +395,10 @@ const ANIMALS = {
   // MEAL_VALUE.elephant (24000) stays unreachable, and honestly so: the
   // apex of the ladder has nothing above it to be eaten by. It is dead
   // until the ladder grows a rung past the elephant.
-  lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: stamina(27), starveAt: stamina(37) },
+  // `guard: 'right'`: the lion only gets serious when hungry, and then it
+  // goes for what is right in front of its face (it faces right). See
+  // guardMeal. A wolf or bear parked there is a meal, however dear.
+  lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: stamina(27), starveAt: stamina(37), guard: 'right' },
   tiger: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: stamina(30), starveAt: stamina(41) },
 
   // THE ELEPHANT EATS ONLY WHAT YOU BUILT.
@@ -1799,15 +1802,21 @@ function feedEveryone() {
 // grass, and dealt or raised alike. Only animals: a patch of grass is
 // no threat to anybody. Same hunger clock as before, so she eats no
 // sooner and no more often; she only chooses differently.
+//
+// THE LION LOOKS STRAIGHT AHEAD. Lazy all day, serious only when hungry,
+// and then the animal right in front of its face (the square on its
+// right) goes first. Nothing there, and it eats around itself as before.
+// Same function as the bear, the other side.
 function guardMeal(i, cfg) {
-  if (cfg.guard !== 'left') return null;
+  if (cfg.guard !== 'left' && cfg.guard !== 'right') return null;
+  const step = cfg.guard === 'left' ? -1 : 1, edge = cfg.guard === 'left' ? 0 : SIZE - 1;
   const own = new Set(footprint(state.cells, i));
   let target = -1, worst = -1, kind = null;
   for (const o of own) {
-    if (o % SIZE === 0 || own.has(o - 1)) continue;
-    const p = state.cells[o - 1];
+    if (o % SIZE === edge || own.has(o + step)) continue;
+    const p = state.cells[o + step];
     if (!p || !isAnimal(p.kind) || cfg.diet.indexOf(p.kind) < 0 || !edible(cfg, p, p.kind)) continue;
-    if (p.clock > worst) { worst = p.clock; target = o - 1; kind = p.kind; }
+    if (p.clock > worst) { worst = p.clock; target = o + step; kind = p.kind; }
   }
   return target >= 0 ? { at: target, kind: kind } : null;
 }
@@ -3644,7 +3653,7 @@ function inReach() {
     if (!c || !isAnimal(c.kind) || isShadow(state.cells, i)) continue;
     const cfg = ANIMALS[c.kind];
     if (c.clock + 1 < cfg.eatAt) continue;
-    // the bear with something by her cub: that one, and only that one
+    // the bear by her cub, the lion in front of its face: that one only
     const guarded = guardMeal(i, cfg);
     if (guarded) { risk.add(guarded.at); continue; }
     for (const n of tileNeighbours(state.cells, i)) {

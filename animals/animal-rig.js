@@ -122,6 +122,17 @@
         marks: [[-1.6, 1.4, -95], [-10.2, 4.4, -135], [-11.6, 7.9, 180], [2.3, 5.4, -15]]
       }
     },
+    lion: {
+      fit: { span: 38, ox: 0, oy: 0.16 },
+      frame: { zoom: 1.12, dx: 0, dy: 0.4 },
+      parts: [
+        ['lion-calm.png', { w: 39, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'yawn': the head tips back a touch and the whole king stretches
+      // (script.js pose.lion), then flops back down
+      pose: { rot: -1.2, sy: 0.018 },
+      gesture: { gap: 8, duration: 3.6 }
+    },
     wolf: {
       fit: { span: 38, ox: 0, oy: 3.71 },
       frame: { zoom: 1.2, dx: 0, dy: 0.6 },
