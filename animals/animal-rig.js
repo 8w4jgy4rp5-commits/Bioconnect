@@ -9,6 +9,8 @@
   var RIG = {
     rabbit: {
       fit: { span: 38, ox: 0, oy: 1.2, tilt: -7 },
+      // portrait framing (page only): zoom out and nudge, in rig units
+      frame: { zoom: 1.25, dx: 0, dy: 3 },
       parts: [
         ['rabbit-leg-hind.png', { w: 10.8, x: -5.2, y: 5.1, px: 0.5, py: 0.12, r: 8 }, 0.72],
         ['rabbit-leg-front.png', { w: 5.9, x: 5.6, y: 4.3, px: 0.5, py: 0.10, r: -12 }, 0.72],
@@ -23,6 +25,25 @@
       // degrees each tagged part swings at the peak of the gesture
       swing: { ear: 18, earBack: -13, tail: 9 },
       gesture: { gap: 6, duration: 1.25 }
+    },
+    fox: {
+      fit: { span: 36, ox: 3, oy: 2 },
+      // the long tail reaches far left, so the fox sits right of centre
+      frame: { zoom: 1.4, dx: 9.5, dy: -2 },
+      parts: [
+        ['fox-leg-hind.png', { w: 6.1, x: -5.0, y: 5.1, px: 0.5, py: 0.10 }, 0.72],
+        ['fox-leg-front.png', { w: 3.6, x: 5.2, y: 5.1, px: 0.5, py: 0.10 }, 0.72],
+        // the tail art lies flat with its thick base on the left edge
+        ['fox-tail.png', { w: 21.7, x: -8.6, y: 1.4, px: 0.06, py: 0.55, flip: true }, 1, 'tail'],
+        ['fox-body.png', { w: 23.5, x: -1.2, y: 3.2, px: 0.5, py: 0.5 }, 1],
+        ['fox-leg-hind.png', { w: 6.1, x: -3.8, y: 5.4, px: 0.5, py: 0.10 }, 1],
+        ['fox-leg-front.png', { w: 3.6, x: 6.4, y: 5.4, px: 0.5, py: 0.10 }, 1],
+        ['fox-head-calm.png', { w: 19.5, x: 6.8, y: -2.2, px: 0.5, py: 0.5 }, 1, 'head']
+      ],
+      // the head lifts and holds (amount), the tail swishes (wave)
+      swing: { tail: 13 },
+      lift: { head: 3 },
+      gesture: { gap: 9, duration: 2.1 }
     }
   };
 
@@ -44,10 +65,11 @@
     var p = part / g.duration;
     var smooth = function (x) { return x * x * (3 - 2 * x); };
     var amount = p < .22 ? smooth(p / .22) : p > .72 ? smooth((1 - p) / .28) : 1;
-    return Math.sin(p * Math.PI * 4) * amount;
+    return { wave: Math.sin(p * Math.PI * 4) * amount, amount: amount };
   }
+  var REST = { wave: 0, amount: 0 };
 
-  function paint(canvas, rig, imgs, wave) {
+  function paint(canvas, rig, imgs, m) {
     var px = canvas.clientWidth || 160;
     var dpr = Math.min(3, window.devicePixelRatio || 1);
     var backing = Math.round(px * dpr);
@@ -55,20 +77,25 @@
     var ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, px, px);
-    // The game tile crops ear tips at its edge; a portrait gets headroom.
-    var s = px / (rig.fit.span * 1.25);
+    // The game tile crops ear tips and tails at its edge; a portrait
+    // zooms out and re-centres per animal (rig.frame).
+    var f = rig.frame || { zoom: 1.25, dx: 0, dy: 0 };
+    var s = px / (rig.fit.span * f.zoom);
     ctx.save();
-    ctx.translate(px / 2 - rig.fit.ox * s, px / 2 + (rig.fit.oy + 3) * s);
+    ctx.translate(px / 2 + (f.dx - rig.fit.ox) * s, px / 2 + (rig.fit.oy + f.dy) * s);
     ctx.scale(s, s);
     if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
     rig.parts.forEach(function (part, i) {
       var img = imgs[i]; if (!img) return;
       var p = part[1], w = p.w, h = w * img.height / img.width;
-      var turn = (p.r || 0) + (part[3] ? wave * rig.swing[part[3]] : 0);
+      var tag = part[3];
+      var turn = (p.r || 0) + (tag && rig.swing && rig.swing[tag] ? m.wave * rig.swing[tag] : 0)
+        + (tag && rig.lift && rig.lift[tag] ? m.amount * rig.lift[tag] : 0);
       ctx.globalAlpha = part[2];
       ctx.save();
       ctx.translate(p.x, p.y);
       if (turn) ctx.rotate(turn * Math.PI / 180);
+      if (p.flip) ctx.scale(-1, 1);
       ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
       ctx.restore();
     });
@@ -84,7 +111,7 @@
     Promise.all(rig.parts.map(function (p) { return load(p[0]); })).then(function (imgs) {
       // first twitch comes soon so a visitor sees it; tapping starts one now
       var start = performance.now() - (rig.gesture.gap - 1.2) * 1000;
-      paint(canvas, rig, imgs, 0);
+      paint(canvas, rig, imgs, REST);
       canvas.classList.add('ready');
       if (still) return;
       canvas.addEventListener('click', function () {
@@ -99,7 +126,7 @@
         }
         requestAnimationFrame(frame);
       })(performance.now());
-      window.addEventListener('resize', function () { paint(canvas, rig, imgs, 0); });
+      window.addEventListener('resize', function () { paint(canvas, rig, imgs, REST); });
     });
   });
 })();
