@@ -81,4 +81,4 @@ fail-01 — 20/25 squares filled (80%)
 
 `fatalSound` に書いたファイルが鳴ります（mp3 / wav）。ファイルがなければ鳴らないだけで、ゲームは止まりません。
 `make-fatal-voice.py` は、ミツバチ動画で使った Kokoro（PC内の無料音声AI）で男性の「Nooo!」候補を作るスクリプトです
-（Visual C++ ランタイムがPCに無いため、venv の Scripts にある DLL を onnxruntime/capi にコピーして動かした）。候補は fatal-a〜f（高め・震え・語尾が落ちるコミカルな悲鳴）、fail-01 は b。
+（Visual C++ ランタイムがPCに無いため、venv の Scripts にある DLL を onnxruntime/capi にコピーして動かした）。読み上げ声は「きれいすぎる」と却下。いまの声は make-fatal-growl.py で一から合成したゴロゴロ声（fatal-g1〜g4、約20回/秒の震え＋くり返し）、fail-01 は g1。
