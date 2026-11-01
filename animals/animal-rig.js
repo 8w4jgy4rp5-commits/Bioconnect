@@ -74,6 +74,8 @@
       parts: [
         ['zebra-calm.png', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
       ],
+      // the kime-gao, faded in over the first part with the big glint
+      poseFace: { src: 'zebra-pose.png', by: 'glint' },
       // 'weight-shift': a small side-to-side rock (script.js pose.zebra)
       pose: { rot: 0, rotWave: 1.2, sy: -0.012 },
       gesture: { gap: 13, duration: 2.5 },
@@ -94,6 +96,8 @@
       parts: [
         ['buffalo-calm.png', { w: 46.95, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
       ],
+      // "am I cute?": faded in over the first part while the mirror is up
+      poseFace: { src: 'buffalo-pose.png', by: 'amount' },
       // 'mirror-check': a hand mirror pops up and the head lifts to it
       // (script.js VANITY and pose.buffalo)
       pose: { rot: -1.6, sy: 0 },
@@ -232,6 +236,10 @@
       if (turn) ctx.rotate(turn * Math.PI / 180);
       if (p.flip) ctx.scale(-1, 1);
       ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
+      // same frame as the calm painting, so it simply covers it
+      var face = i === 0 && rig.poseFace && imgs.pose;
+      var fa = !face ? 0 : rig.poseFace.by === 'glint' ? Math.min(1, (m.glint || 0) * 1.6) : m.amount;
+      if (fa > .01) { ctx.globalAlpha = part[2] * fa; ctx.drawImage(face, -w * p.px, -h * p.py, w, h); }
       ctx.restore();
     });
     ctx.globalAlpha = 1;
@@ -273,7 +281,9 @@
   Array.prototype.forEach.call(document.querySelectorAll('canvas.living'), function (canvas) {
     var rig = RIG[canvas.dataset.animal];
     if (!rig) return;
-    Promise.all(rig.parts.map(function (p) { return load(p[0]); })).then(function (imgs) {
+    Promise.all(rig.parts.map(function (p) { return load(p[0]); })
+      .concat(rig.poseFace ? [load(rig.poseFace.src)] : [])).then(function (imgs) {
+      if (rig.poseFace) imgs.pose = imgs.pop();
       // first twitch comes soon so a visitor sees it; tapping starts one now
       var start = performance.now() - (rig.gesture.gap - 1.2) * 1000;
       // the zebra's glint keeps its own clock: first shine 1.5 s in

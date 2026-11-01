@@ -2226,6 +2226,10 @@ const SPRITE_FILES = {
   bearHungry: 'bear-hungry.png',
   buffaloCalm: 'buffalo-calm.png',
   buffaloHungry: 'buffalo-hungry.png',
+  // Optional pose faces: the calm painting with only the face redrawn,
+  // cut on the same frame ("am I cute?" at the mirror, the zebra's kime-gao).
+  buffaloPose: 'buffalo-pose.png',
+  zebraPose: 'zebra-pose.png',
   deerCalm: 'deer-calm.png',
   deerHungry: 'deer-hungry.png',
   // The second animal after the elephant to own a hungry painting, and
@@ -2439,7 +2443,7 @@ const RIG = {
     parts: [
       ['@head', { w: 46.95, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'buffaloCalm', hungry: 'buffaloHungry', panic: 'buffaloPanic' }
+    head: { calm: 'buffaloCalm', hungry: 'buffaloHungry', panic: 'buffaloPanic', pose: 'buffaloPose' }
   },
   // THE DEER IS THE NARROW ONE, AND NARROW IS NOT SMALL.
   //
@@ -2555,7 +2559,7 @@ const RIG = {
     parts: [
       ['@head', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
     ],
-    head: { calm: 'zebraCalm', hungry: 'zebraHungry', panic: 'zebraPanic' }
+    head: { calm: 'zebraCalm', hungry: 'zebraHungry', panic: 'zebraPanic', pose: 'zebraPose' }
   },
   // THE LION IS LYING DOWN, AND IT IS STILL THE SECOND BIGGEST THING HERE.
   //
@@ -2703,8 +2707,8 @@ function partsOf(kind) {
   for (const part of rig.parts) {
     if (part[0] !== '@head') keys.push(part[0]);
   }
-  // the panic face is optional: without it the animal keeps its usual face
-  for (const face in rig.head) if (face !== 'panic') keys.push(rig.head[face]);
+  // the panic and pose faces are optional: without them the animal keeps its usual face
+  for (const face in rig.head) if (face !== 'panic' && face !== 'pose') keys.push(rig.head[face]);
   return keys;
 }
 
@@ -2971,6 +2975,12 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
   }
   // Panic outranks hunger: the face is about the next second, not the meter.
   const headKey = panic && sprites[rig.head.panic] ? rig.head.panic : rig.head[fed < 0.34 ? 'hungry' : 'calm'];
+  // The pose face shows at the peak of the animal's own moment: the buffalo
+  // while the mirror is up, the zebra with the big glint. It fades in over
+  // the calm face (same frame, so nothing turns see-through).
+  const poseSprite = rig.head.pose && !panic && fed >= .34 && motion ? sprites[rig.head.pose] : null;
+  const poseAmount = !poseSprite ? 0 : type === 'buffalo' ? motion.amount
+    : type === 'zebra' ? Math.min(1, glint * 1.6) : 0;
 
   for (const [name, p, alpha] of rig.parts) {
     const sprite = sprites[name === '@head' ? headKey : name];
@@ -3000,6 +3010,10 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       ctx.drawImage(other.img, -w * p.px, h * (1 - p.py) - oh, w, oh);
     } else {
       ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+      if (name === '@head' && poseAmount > .01) {
+        ctx.globalAlpha = alpha * poseAmount;
+        ctx.drawImage(poseSprite.img, -w * p.px, -h * p.py, w, h);
+      }
     }
     ctx.restore();
   }
