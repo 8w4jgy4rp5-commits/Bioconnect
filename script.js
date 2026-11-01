@@ -399,7 +399,11 @@ const ANIMALS = {
   // goes for what is right in front of its face (it faces right). See
   // guardMeal. A wolf or bear parked there is a meal, however dear.
   lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: stamina(27), starveAt: stamina(37), guard: 'right' },
-  tiger: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: stamina(30), starveAt: stamina(41) },
+  // THE TIGER IS SOFT ON GRASS. A hard face and a gentle heart: it would
+  // honestly rather have a patch of grass, and `loves` makes grass beside
+  // it the first thing it eats, grown or dealt. No grass, and it eats an
+  // animal like before. Same hunger clock: it is thrifty, not slower.
+  tiger: { diet: ['grass', 'fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: stamina(30), starveAt: stamina(41), loves: 'grass' },
 
   // THE ELEPHANT EATS ONLY WHAT YOU BUILT.
   //
@@ -1824,6 +1828,15 @@ function guardMeal(i, cfg) {
 function pickMeal(i, cfg) {
   const guarded = guardMeal(i, cfg);
   if (guarded) return guarded;
+  if (cfg.loves) {
+    let target = -1, worst = -1;
+    for (const n of tileNeighbours(state.cells, i)) {
+      const p = state.cells[n];
+      if (!edible(cfg, p, cfg.loves)) continue;
+      if (p.clock > worst) { worst = p.clock; target = n; }
+    }
+    if (target >= 0) return { at: target, kind: cfg.loves };
+  }
   for (const dealtOnly of [true, false]) {
     for (const want of cfg.diet) {
       let target = -1, worst = -1;
@@ -3112,7 +3125,38 @@ function deerMood(i) {
 }
 
 // Feelings about the neighbours, per kind (painted only while calm).
-const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood };
+// THE TIGER'S SOFT SPOT. Beside a patch of grass, a small flower bobs in
+// front of the tiger's chest. The face stays exactly as hard as it was.
+const FONDNESS = { tiger: { at: { x: 20, y: 4.2 }, r: 1.7, minPx: 13 } };
+function tigerMood(i) {
+  if (i == null || i < 0) return '';
+  for (const n of tileNeighbours(state.cells, i)) {
+    if (state.cells[n] && state.cells[n].kind === 'grass') return 'fond';
+  }
+  return '';
+}
+
+function paintFlower(ctx, x, y, r, turn, alpha) {
+  if (r <= 0 || alpha <= 0) return;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(turn);
+  ctx.globalAlpha = alpha;
+  ctx.lineWidth = r * .16;
+  ctx.strokeStyle = 'rgba(90,40,50,.85)';
+  ctx.fillStyle = '#ffb3cf';
+  for (let k = 0; k < 5; k++) {
+    const a = k * Math.PI * 2 / 5;
+    ctx.beginPath();
+    ctx.ellipse(Math.cos(a) * r * .62, Math.sin(a) * r * .62, r * .48, r * .34, a, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+  }
+  ctx.fillStyle = '#ffd34d';
+  ctx.beginPath(); ctx.arc(0, 0, r * .32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+
+const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood, tiger: tigerMood };
 
 // Three short growl strokes fanning out from the mouth, dark ink with a
 // pale rim so they read on any tile.
@@ -3297,6 +3341,12 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       paintStar(ctx, g.x, g.y, R * Math.sqrt(glint), (1 - glint) * 1.6, Math.min(1, glint * 4));
       paintStar(ctx, g.x - 2.4, g.y + 2.2, R * .38 * glint, .4, Math.min(1, glint * 4));
     }
+    ctx.globalAlpha = 1;
+  }
+  const fond = FONDNESS[type] && motion && motion.mood === 'fond' && !panic ? FONDNESS[type] : null;
+  if (fond) {
+    const t = motion.time || 0, r = Math.max(fond.r, fond.minPx / s / 2);
+    paintFlower(ctx, fond.at.x, fond.at.y + Math.sin(t * 1.8) * .5, r, Math.sin(t * 1.1) * .25, 1);
     ctx.globalAlpha = 1;
   }
   const cub = CUB[type] && motion && motion.mood === 'guard' && !panic ? CUB[type] : null;
@@ -3656,6 +3706,9 @@ function inReach() {
     // the bear by her cub, the lion in front of its face: that one only
     const guarded = guardMeal(i, cfg);
     if (guarded) { risk.add(guarded.at); continue; }
+    // the tiger with grass in reach takes the grass, so only that is marked
+    const meal = cfg.loves ? pickMeal(i, cfg) : null;
+    if (meal && meal.kind === cfg.loves) { risk.add(meal.at); continue; }
     for (const n of tileNeighbours(state.cells, i)) {
       const p = state.cells[n];
       if (p && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) risk.add(n);

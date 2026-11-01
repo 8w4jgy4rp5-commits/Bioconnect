@@ -835,6 +835,17 @@ board([[4, 2, 'lion', starving('lion')], [3, 2, 'fox']]);
 m = X.ctx.feedEveryone();
 ok('on the right edge it eats as before', !cell(3, 2));
 
+console.log('\nthe tiger would rather have grass');
+board([[2, 2, 'tiger', starving('tiger')], [3, 2, 'grass', 0, RAISED], [1, 2, 'fox'], [2, 1, 'deer']]);
+m = X.ctx.feedEveryone();
+ok('a hungry tiger eats grass before any animal, even a dealt fox', !cell(3, 2) && cell(1, 2) && cell(2, 1), JSON.stringify(m));
+board([[2, 2, 'tiger', starving('tiger')], [1, 2, 'fox']]);
+m = X.ctx.feedEveryone();
+ok('with no grass beside it, it eats an animal as before', !cell(1, 2));
+board([[2, 2, 'tiger', starving('tiger') - 1], [3, 2, 'grass']]);
+m = X.ctx.feedEveryone();
+ok('it keeps the same hunger clock', cell(3, 2) && cell(3, 2).kind === 'grass');
+
 console.log('\nthe page asks for the current files');
 ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());
 
