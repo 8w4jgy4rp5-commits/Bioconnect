@@ -104,6 +104,19 @@
       // the page has room in front of the face (the game tile does not)
       mirror: { x: 24.4, y: -4.2, r: 3.5 },
       gesture: { gap: 7, duration: 2.4 }
+    },
+    wolf: {
+      fit: { span: 38, ox: 0, oy: 3.71 },
+      frame: { zoom: 1.2, dx: 0, dy: 0.6 },
+      parts: [
+        ['wolf-calm.png', { w: 37, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // gestures take turns: a howl (the game's howl painting, crossfaded
+      // and standing on the same paw line), then a growl: lean in, growl
+      // strokes at the mouth (script.js BRAVADO, beside a bigger animal)
+      poseFace: { src: 'wolf-howl.png', by: 'howl' },
+      growl: { x: 15.6, y: -5.6, lean: 1.6 },
+      gesture: { gap: 6, duration: 2.8 }
     }
   };
 
@@ -167,6 +180,25 @@
   }
 
   // The big "shing!": a fast pop, a glow, a long slow fade.
+  // the wolf's growl strokes (script.js paintGrowl)
+  function growlAt(ctx, x, y, t) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.lineCap = 'round';
+    var jit = Math.sin(t * 31) * .25;
+    [['rgba(255,248,236,.85)', 0.55], ['#2b1d1a', 0.24]].forEach(function (pen) {
+      ctx.strokeStyle = pen[0]; ctx.lineWidth = pen[1];
+      for (var q = -1; q <= 1; q++) {
+        var a = (q * 36 - 42) * Math.PI / 180, r0 = 1.2 + jit, r1 = 3.6 + jit + (q ? 0 : .6);
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+        ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+        ctx.stroke();
+      }
+    });
+    ctx.restore();
+  }
+
   function glintAt(t, g) {
     var part = t % g.gap;
     if (part >= g.duration) return 0;
@@ -216,6 +248,9 @@
       ctx.translate((r1 - Math.floor(r1) - .5) * 2 * rig.fright.shake, (r2 - Math.floor(r2) - .5) * rig.fright.shake);
     }
     var pose = rig.pose, lift = rig.sparkle ? (m.glint || 0) * rig.sparkle.glint.lift : 0;
+    var growl = rig.growl && m.amount && (m.n || 0) % 2 === 0 ? m.amount : 0;
+    if (growl) lift += rig.growl.lean * growl * (1 + .5 * Math.max(0, Math.sin((m.time || 0) * 3.1)));
+    if (!pose && lift) pose = { rot: 0, sy: 0 };
     if (pose && (m.amount || lift)) {
       // grounded accent: pivot near the hooves, same as the game tile
       var pivotY = rig.fit.span * .43 - rig.fit.oy;
@@ -235,11 +270,21 @@
       ctx.translate(p.x, p.y);
       if (turn) ctx.rotate(turn * Math.PI / 180);
       if (p.flip) ctx.scale(-1, 1);
-      ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
-      // same frame as the calm painting, so it simply covers it
-      var face = i === 0 && rig.poseFace && imgs.pose;
-      var fa = !face ? 0 : rig.poseFace.by === 'glint' ? Math.min(1, (m.glint || 0) * 1.6) : m.amount;
-      if (fa > .01) { ctx.globalAlpha = part[2] * fa; ctx.drawImage(face, -w * p.px, -h * p.py, w, h); }
+      var face = i === 0 && rig.poseFace && imgs.pose, by = face && rig.poseFace.by;
+      var fa = !face ? 0 : by === 'glint' ? Math.min(1, (m.glint || 0) * 1.6)
+        : by === 'howl' ? ((m.n || 0) % 2 ? m.amount : 0) : m.amount;
+      if (by === 'howl' && fa > .01) {
+        // a different pose, so a true crossfade, on the same paw line
+        var oh = w * face.height / face.width;
+        ctx.globalAlpha = part[2] * (1 - fa);
+        ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
+        ctx.globalAlpha = part[2] * fa;
+        ctx.drawImage(face, -w * p.px, h * (1 - p.py) - oh, w, oh);
+      } else {
+        ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
+        // same frame as the calm painting, so it simply covers it
+        if (fa > .01) { ctx.globalAlpha = part[2] * fa; ctx.drawImage(face, -w * p.px, -h * p.py, w, h); }
+      }
       ctx.restore();
     });
     ctx.globalAlpha = 1;
@@ -265,6 +310,7 @@
       }
       ctx.globalAlpha = 1;
     }
+    if (growl > .3) growlAt(ctx, rig.growl.x, rig.growl.y, m.time || 0);
     if (fr >= 0) {
       // two drawings swapped every tick, like the classic cartoon buzz
       var odd = fr % 2;
@@ -298,13 +344,15 @@
           if (gt >= rig.sparkle.glint.duration) shine = performance.now();
           return;
         }
-        if (t >= rig.gesture.duration) start = performance.now();
+        if (t >= rig.gesture.duration) { start = performance.now(); taps += 1; }
       });
-      var last = 0;
+      var last = 0, taps = 0;
       (function frame(now) {
         if (now - last >= 1000 / 30 && !document.hidden) {
           last = now;
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
+          if (rig.growl) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
+            n: Math.floor(t / rig.gesture.gap) + taps };
           if (rig.sparkle) {
             m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
               glint: glintAt((now - shine) / 1000, rig.sparkle.glint) };
