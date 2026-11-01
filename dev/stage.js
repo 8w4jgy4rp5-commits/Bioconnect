@@ -91,6 +91,10 @@
     moves = 0;
     frozen = preset.clockAfterMoves !== 0;
     queue = BioStage.apply(state, built, api());
+    // A fresh recording browser has met nobody, so every rung of a staged
+    // chain would stop the board with a "Welcome, bear!" card. Count every
+    // animal as already met (in memory only; writeMet is off).
+    for (const k of LADDER) met.add(k);
     syncClock();
     render();
     setTicker('Tap an empty square to plant. The meadow moves on its own.');
