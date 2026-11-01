@@ -3125,38 +3125,7 @@ function deerMood(i) {
 }
 
 // Feelings about the neighbours, per kind (painted only while calm).
-// THE TIGER'S SOFT SPOT. Beside a patch of grass, a small flower bobs in
-// front of the tiger's chest. The face stays exactly as hard as it was.
-const FONDNESS = { tiger: { at: { x: 20, y: 4.2 }, r: 1.7, minPx: 13 } };
-function tigerMood(i) {
-  if (i == null || i < 0) return '';
-  for (const n of tileNeighbours(state.cells, i)) {
-    if (state.cells[n] && state.cells[n].kind === 'grass') return 'fond';
-  }
-  return '';
-}
-
-function paintFlower(ctx, x, y, r, turn, alpha) {
-  if (r <= 0 || alpha <= 0) return;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(turn);
-  ctx.globalAlpha = alpha;
-  ctx.lineWidth = r * .16;
-  ctx.strokeStyle = 'rgba(90,40,50,.85)';
-  ctx.fillStyle = '#ffb3cf';
-  for (let k = 0; k < 5; k++) {
-    const a = k * Math.PI * 2 / 5;
-    ctx.beginPath();
-    ctx.ellipse(Math.cos(a) * r * .62, Math.sin(a) * r * .62, r * .48, r * .34, a, 0, Math.PI * 2);
-    ctx.fill(); ctx.stroke();
-  }
-  ctx.fillStyle = '#ffd34d';
-  ctx.beginPath(); ctx.arc(0, 0, r * .32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-  ctx.restore();
-}
-
-const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood, tiger: tigerMood };
+const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood };
 
 // Three short growl strokes fanning out from the mouth, dark ink with a
 // pale rim so they read on any tile.
@@ -3341,12 +3310,6 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       paintStar(ctx, g.x, g.y, R * Math.sqrt(glint), (1 - glint) * 1.6, Math.min(1, glint * 4));
       paintStar(ctx, g.x - 2.4, g.y + 2.2, R * .38 * glint, .4, Math.min(1, glint * 4));
     }
-    ctx.globalAlpha = 1;
-  }
-  const fond = FONDNESS[type] && motion && motion.mood === 'fond' && !panic ? FONDNESS[type] : null;
-  if (fond) {
-    const t = motion.time || 0, r = Math.max(fond.r, fond.minPx / s / 2);
-    paintFlower(ctx, fond.at.x, fond.at.y + Math.sin(t * 1.8) * .5, r, Math.sin(t * 1.1) * .25, 1);
     ctx.globalAlpha = 1;
   }
   const cub = CUB[type] && motion && motion.mood === 'guard' && !panic ? CUB[type] : null;

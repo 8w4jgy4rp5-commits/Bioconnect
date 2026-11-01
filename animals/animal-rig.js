@@ -130,11 +130,7 @@
       ],
       // 'stretch': a long, slow stretch forward (script.js pose.tiger)
       pose: { rot: 1.5, sy: -0.022 },
-      gesture: { gap: 9, duration: 3.0 },
-      // the soft spot: a small flower bobs in front of his chest for a
-      // few seconds now and then (on the board: beside grass, script.js
-      // FONDNESS)
-      flower: { x: 21, y: 3.4, r: 1.7, cycle: 10, on: 4 }
+      gesture: { gap: 9, duration: 3.0 }
     },
     lion: {
       fit: { span: 38, ox: 0, oy: 0.16 },
@@ -185,22 +181,6 @@
   var REST = { wave: 0, amount: 0 };
 
   // A four-point star: the cartoon sparkle. Gold rim, white heart.
-  // the tiger's flower (script.js paintFlower)
-  function flower(ctx, x, y, r, turn, alpha) {
-    if (r <= 0 || alpha <= 0) return;
-    ctx.save();
-    ctx.translate(x, y); ctx.rotate(turn); ctx.globalAlpha = alpha;
-    ctx.lineWidth = r * .16; ctx.strokeStyle = 'rgba(90,40,50,.85)'; ctx.fillStyle = '#ffb3cf';
-    for (var k = 0; k < 5; k++) {
-      var a = k * Math.PI * 2 / 5;
-      ctx.beginPath();
-      ctx.ellipse(Math.cos(a) * r * .62, Math.sin(a) * r * .62, r * .48, r * .34, a, 0, Math.PI * 2);
-      ctx.fill(); ctx.stroke();
-    }
-    ctx.fillStyle = '#ffd34d';
-    ctx.beginPath(); ctx.arc(0, 0, r * .32, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.restore();
-  }
   function star(ctx, x, y, r, turn, alpha) {
     if (r <= 0 || alpha <= 0) return;
     ctx.save();
@@ -371,13 +351,6 @@
       ctx.globalAlpha = 1;
     }
     if (growl > .3) growlAt(ctx, rig.growl.x, rig.growl.y, m.time || 0);
-    if (rig.flower && m.time != null) {
-      var fl = rig.flower, ph = m.time % fl.cycle;
-      // fade in and out over half a second at each end
-      var fa = ph > fl.on ? 0 : Math.min(1, ph * 2, (fl.on - ph) * 2);
-      if (fa > 0) flower(ctx, fl.x, fl.y + Math.sin(m.time * 1.8) * .5, fl.r * (.6 + .4 * fa), Math.sin(m.time * 1.1) * .25, fa);
-      ctx.globalAlpha = 1;
-    }
     if (fr >= 0) {
       // two drawings swapped every tick, like the classic cartoon buzz
       var odd = fr % 2;
@@ -422,7 +395,6 @@
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
           if (rig.growl) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
             n: Math.floor(t / rig.gesture.gap) + taps };
-          if (rig.flower) m = { wave: m.wave || 0, amount: m.amount || 0, time: t };
           if (rig.sparkle) {
             m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
               glint: glintAt((now - shine) / 1000, rig.sparkle.glint) };
