@@ -59,7 +59,7 @@ async function createLocalServer(port=0, opts={}) {
         if(opts.stage) html=html.replace('<script src="skin.js','<script src="dev/stage-core.js"></script>\n<script src="dev/stage.js"></script>\n<script src="skin.js');
         data=Buffer.from(html);
       }
-      const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.wav':'audio/wav'};
+      const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.wav':'audio/wav','.mp3':'audio/mpeg','.json':'application/json'};
       res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});res.end(data);
     } catch(e) { if(req.method==='POST') send({error:e.message},400);else {res.writeHead(404);res.end('Not found');} }
   });

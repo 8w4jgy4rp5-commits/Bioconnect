@@ -13,12 +13,14 @@ CANDIDATES = [  # (file, voice, text, speed)
     ('fatal-2-fenrir-ohno', 'am_fenrir', 'Oh noooooo!', 0.75),
     ('fatal-3-michael-waaah', 'am_michael', 'Waaaaaah!', 0.7),
     ('fatal-4-puck-nonono', 'am_puck', 'No, no, NOOOO!', 0.85),
+    ('fatal-5-kumo-uwaa', 'jm_kumo', 'うわあああああああっ！', 0.7, 'ja'),
+    ('fatal-6-onyx-uwaa', 'am_onyx', 'Uwaaaaaaah!', 0.65),
 ]
 SR = 48000
 k = Kokoro(str(TTS / 'kokoro-v1.0.onnx'), str(TTS / 'voices-v1.0.bin'))
 OUT.mkdir(exist_ok=True)
-for name, voice, text, speed in CANDIDATES:
-    s, sr = k.create(text, voice=voice, speed=speed, lang='en-us')
+for name, voice, text, speed, *lang in CANDIDATES:
+    s, sr = k.create(text, voice=voice, speed=speed, lang=lang[0] if lang else 'en-us')
     loud = np.nonzero(np.abs(s) > 0.01)[0]
     s = s[max(0, loud[0] - int(.01 * sr)): loud[-1] + int(.05 * sr)]
     # a touch deeper (played 8% slower) so it reads as anguish, not narration
