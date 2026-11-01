@@ -100,3 +100,5 @@ take_s('fatal-h3-scream-uwaa-x2', [dict(dur=1.2, f0=360), dict(dur=1.7, f0=380, 
 # no pitch sag, no darkening to "o", full voice until a short cut.
 take_s('fatal-h2e-scream-high-end', [dict(dur=1.8, f0=420, growl=.25, rise=1.15, fall=1.0, end_vowel='a', tail=.05)])
 take_s('fatal-h2f-scream-rising-end', [dict(dur=1.8, f0=420, growl=.25, rise=1.15, fall=1.12, end_vowel='a', tail=.05)])
+take_s('fatal-h1e-scream-high-end', [dict(dur=1.8, f0=330, fall=1.0, end_vowel='a', tail=.05)])
+take_s('fatal-h1f-scream-rising-end', [dict(dur=1.8, f0=330, fall=1.12, end_vowel='a', tail=.05)])
