@@ -44,6 +44,18 @@
       swing: { tail: 13 },
       lift: { head: 3 },
       gesture: { gap: 9, duration: 2.1 }
+    },
+    deer: {
+      fit: { span: 38, ox: 0, oy: 0.62 },
+      // one painting, tall and thin: a little zoom-out keeps the antlers in
+      frame: { zoom: 1.12, dx: 0, dy: -0.6 },
+      parts: [
+        ['deer-calm.png', { w: 22.96, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'listen': the whole deer leans back from the hooves and stands
+      // a touch taller (script.js pose.deer)
+      pose: { rot: -2.4, sy: 0.014 },
+      gesture: { gap: 11, duration: 1.9 }
     }
   };
 
@@ -85,6 +97,14 @@
     ctx.translate(px / 2 + (f.dx - rig.fit.ox) * s, px / 2 + (rig.fit.oy + f.dy) * s);
     ctx.scale(s, s);
     if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
+    if (rig.pose && m.amount) {
+      // grounded accent: pivot near the hooves, same as the game tile
+      var pivotY = rig.fit.span * .43 - rig.fit.oy;
+      ctx.translate(0, pivotY);
+      ctx.rotate(rig.pose.rot * m.amount * Math.PI / 180);
+      ctx.scale(1, 1 + rig.pose.sy * m.amount);
+      ctx.translate(0, -pivotY);
+    }
     rig.parts.forEach(function (part, i) {
       var img = imgs[i]; if (!img) return;
       var p = part[1], w = p.w, h = w * img.height / img.width;
