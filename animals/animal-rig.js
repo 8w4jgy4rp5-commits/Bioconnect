@@ -67,6 +67,24 @@
           [-11.5, -3, 195], [-6, -7.5, 235]
         ]
       }
+    },
+    zebra: {
+      fit: { span: 38, ox: 0, oy: -0.218 },
+      frame: { zoom: 1.15, dx: 0, dy: 0.4 },
+      parts: [
+        ['zebra-calm.png', { w: 19, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'weight-shift': a small side-to-side rock (script.js pose.zebra)
+      pose: { rot: 0, rotWave: 1.2, sy: -0.012 },
+      gesture: { gap: 13, duration: 2.5 },
+      // Always sparkling: little twinkles on the scarf and mane, [x, y,
+      // size, phase]. Every `gap` seconds the big glint ("shing!") goes
+      // off by the eye and the zebra lifts its chin into its best pose.
+      sparkle: {
+        twinkles: [[3.6, -6.4, 1.3, 0], [-1.8, -3.2, 1, 1.7], [0.8, 1.6, 1.1, 3.1],
+          [-3.2, -14.2, .9, 4.4], [6.2, -2.6, .7, 2.4], [-4.4, -8.6, .7, 5.3]],
+        glint: { x: 10.2, y: -14.2, size: 3.6, gap: 7, duration: 1.4, lift: -3 }
+      }
     }
   };
 
@@ -91,6 +109,33 @@
     return { wave: Math.sin(p * Math.PI * 4) * amount, amount: amount };
   }
   var REST = { wave: 0, amount: 0 };
+
+  // A four-point star: the cartoon sparkle. Gold rim, white heart.
+  function star(ctx, x, y, r, turn, alpha) {
+    if (r <= 0 || alpha <= 0) return;
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(turn);
+    ctx.globalAlpha = alpha;
+    [['rgba(255,214,90,.9)', 1], ['#fffbe8', .55]].forEach(function (pen) {
+      var R = r * pen[1], w = R * .22;
+      ctx.fillStyle = pen[0];
+      ctx.beginPath();
+      ctx.moveTo(0, -R); ctx.quadraticCurveTo(w * .3, -w * .3, R, 0);
+      ctx.quadraticCurveTo(w * .3, w * .3, 0, R); ctx.quadraticCurveTo(-w * .3, w * .3, -R, 0);
+      ctx.quadraticCurveTo(-w * .3, -w * .3, 0, -R);
+      ctx.fill();
+    });
+    ctx.restore();
+  }
+
+  // The big "shing!": a fast pop, a glow, a long slow fade.
+  function glintAt(t, g) {
+    var part = t % g.gap;
+    if (part >= g.duration) return 0;
+    var p = part / g.duration;
+    return p < .12 ? p / .12 : Math.pow(1 - (p - .12) / .88, 1.6);
+  }
 
   // One cartoon shock mark: a short zigzag pointing away from the body,
   // black with a pale rim so it reads on the page's dark green.
@@ -133,12 +178,13 @@
       var r1 = Math.sin(fr * 12.9898) * 43758.5453, r2 = Math.sin(fr * 78.233) * 43758.5453;
       ctx.translate((r1 - Math.floor(r1) - .5) * 2 * rig.fright.shake, (r2 - Math.floor(r2) - .5) * rig.fright.shake);
     }
-    if (rig.pose && m.amount) {
+    var pose = rig.pose, lift = rig.sparkle ? (m.glint || 0) * rig.sparkle.glint.lift : 0;
+    if (pose && (m.amount || lift)) {
       // grounded accent: pivot near the hooves, same as the game tile
       var pivotY = rig.fit.span * .43 - rig.fit.oy;
       ctx.translate(0, pivotY);
-      ctx.rotate(rig.pose.rot * m.amount * Math.PI / 180);
-      ctx.scale(1, 1 + rig.pose.sy * m.amount);
+      ctx.rotate(((pose.rot || 0) * m.amount + (pose.rotWave || 0) * m.wave + lift) * Math.PI / 180);
+      ctx.scale(1, 1 + pose.sy * m.amount);
       ctx.translate(0, -pivotY);
     }
     rig.parts.forEach(function (part, i) {
@@ -156,6 +202,23 @@
       ctx.restore();
     });
     ctx.globalAlpha = 1;
+    if (rig.sparkle && m.time != null) {
+      rig.sparkle.twinkles.forEach(function (k) {
+        var b = Math.sin(m.time * 2.2 + k[3]);
+        star(ctx, k[0], k[1], k[2] * Math.max(0, b), m.time * .6 + k[3], Math.min(1, Math.max(0, b) * 3));
+      });
+      var g = rig.sparkle.glint, gl = m.glint || 0;
+      if (gl > 0) {
+        var halo = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.size * 1.6);
+        halo.addColorStop(0, 'rgba(255,240,180,' + .55 * gl + ')');
+        halo.addColorStop(1, 'rgba(255,240,180,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(g.x, g.y, g.size * 1.6, 0, Math.PI * 2); ctx.fill();
+        star(ctx, g.x, g.y, g.size * Math.sqrt(gl), (1 - gl) * 1.6, Math.min(1, gl * 4));
+        star(ctx, g.x - 2.4, g.y + 2.2, g.size * .38 * gl, .4, Math.min(1, gl * 4));
+      }
+      ctx.globalAlpha = 1;
+    }
     if (fr >= 0) {
       // two drawings swapped every tick, like the classic cartoon buzz
       var odd = fr % 2;
@@ -175,11 +238,18 @@
     Promise.all(rig.parts.map(function (p) { return load(p[0]); })).then(function (imgs) {
       // first twitch comes soon so a visitor sees it; tapping starts one now
       var start = performance.now() - (rig.gesture.gap - 1.2) * 1000;
+      // the zebra's glint keeps its own clock: first shine 1.5 s in
+      var shine = rig.sparkle ? performance.now() - (rig.sparkle.glint.gap - 1.5) * 1000 : 0;
       paint(canvas, rig, imgs, REST);
       canvas.classList.add('ready');
       if (still) return;
       canvas.addEventListener('click', function () {
         var t = ((performance.now() - start) / 1000) % rig.gesture.gap;
+        if (rig.sparkle) {
+          var gt = ((performance.now() - shine) / 1000) % rig.sparkle.glint.gap;
+          if (gt >= rig.sparkle.glint.duration) shine = performance.now();
+          return;
+        }
         if (t >= rig.gesture.duration) start = performance.now();
       });
       var last = 0;
@@ -187,6 +257,10 @@
         if (now - last >= 1000 / 30 && !document.hidden) {
           last = now;
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
+          if (rig.sparkle) {
+            m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
+              glint: glintAt((now - shine) / 1000, rig.sparkle.glint) };
+          }
           if (rig.fright) {
             var phase = (t + rig.fright.cycle) % rig.fright.cycle;
             m = { wave: m.wave || 0, amount: m.amount || 0,
