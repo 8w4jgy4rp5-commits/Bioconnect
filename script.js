@@ -2888,6 +2888,50 @@ function paintShock(ctx, x, y, deg, flick, unitPx) {
   }
 }
 
+// THE ZEBRA'S SPARKLE. The meadow's fashion icon never stops shining:
+// little four-point stars twinkle on the scarf and mane, and every few
+// seconds a big glint goes off by its face ("shing!") as it lifts its
+// chin into its best pose. Only while it is fed and calm -- a hungry
+// zebra's scarf has come undone and a panicked one is not posing, so
+// both lose the shine. Same marks as animals/animal-rig.js. Twinkles are
+// [x, y, size, phase] in rig units; `minPx` keeps them readable at 44px.
+const SPARKLE = {
+  zebra: {
+    twinkles: [[3.6, -6.4, 1.3, 0], [-1.8, -3.2, 1, 1.7], [0.8, 1.6, 1.1, 3.1],
+      [-3.2, -14.2, .9, 4.4], [6.2, -2.6, .7, 2.4], [-4.4, -8.6, .7, 5.3]],
+    glint: { x: 10.2, y: -14.2, size: 3.6, gap: 7, duration: 1.4, lift: -3 },
+    minPx: { twinkle: 2.2, glint: 7 }
+  }
+};
+
+// The big glint's envelope: a fast pop, then a long shrink.
+function glintAmount(t, g) {
+  if (t < 0) return 0;
+  const p = (t % g.gap) / g.duration;
+  if (p >= 1) return 0;
+  return p < .12 ? p / .12 : Math.pow(1 - (p - .12) / .88, 1.6);
+}
+
+// A four-point cartoon star, gold rim and white heart. It shrinks rather
+// than fades, so the gold never muddies against the tile.
+function paintStar(ctx, x, y, r, turn, alpha) {
+  if (r <= 0 || alpha <= 0) return;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(turn);
+  ctx.globalAlpha = alpha;
+  for (const [color, k] of [['rgba(255,214,90,.9)', 1], ['#fffbe8', .55]]) {
+    const R = r * k, w = R * .22 * .3;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, -R); ctx.quadraticCurveTo(w, -w, R, 0);
+    ctx.quadraticCurveTo(w, w, 0, R); ctx.quadraticCurveTo(-w, w, -R, 0);
+    ctx.quadraticCurveTo(-w, -w, 0, -R);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function paintAnimal(canvas, type, fed, motion, size, panic) {
   const rig = RIG[type];
   // `size` paints off-screen at an exact pixel size (the share card)
@@ -2933,10 +2977,13 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     tiger: [1.5 * action, 1 + .038 * action, 1 - .022 * action],
     elephant: [.8 * wave, 1, 1 + .012 * action]
   }[type];
-  if (pose && action) {
+  const shine = SPARKLE[type] && motion && motion.time != null && fed >= .34 && !panic ? SPARKLE[type] : null;
+  const glint = shine ? motion.glint || 0 : 0;
+  const lift = glint * (shine ? shine.glint.lift : 0);
+  if (pose && (action || lift)) {
     const pivotY = rig.fit.span * .43 - rig.fit.oy - sag;
     ctx.translate(0, pivotY);
-    ctx.rotate(pose[0] * Math.PI / 180);
+    ctx.rotate((pose[0] + lift) * Math.PI / 180);
     ctx.scale(pose[1], pose[2]);
     ctx.translate(0, -pivotY);
   }
@@ -2975,6 +3022,24 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
+  if (shine) {
+    const tw = shine.minPx.twinkle / s, gm = shine.minPx.glint / s;
+    shine.twinkles.forEach(function (k) {
+      const b = Math.max(0, Math.sin(motion.time * 2.2 + k[3]));
+      paintStar(ctx, k[0], k[1], Math.max(k[2], tw) * b, motion.time * .6 + k[3], Math.min(1, b * 3));
+    });
+    if (glint > 0) {
+      const g = shine.glint, R = Math.max(g.size, gm);
+      const halo = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, R * 1.6);
+      halo.addColorStop(0, 'rgba(255,240,180,' + .55 * glint + ')');
+      halo.addColorStop(1, 'rgba(255,240,180,0)');
+      ctx.fillStyle = halo;
+      ctx.beginPath(); ctx.arc(g.x, g.y, R * 1.6, 0, Math.PI * 2); ctx.fill();
+      paintStar(ctx, g.x, g.y, R * Math.sqrt(glint), (1 - glint) * 1.6, Math.min(1, glint * 4));
+      paintStar(ctx, g.x - 2.4, g.y + 2.2, R * .38 * glint, .4, Math.min(1, glint * 4));
+    }
+    ctx.globalAlpha = 1;
+  }
   if (fright) {
     const odd = buzz % 2;
     fright.marks.forEach(function (k, i) {
@@ -3037,7 +3102,14 @@ function animalMotion(life) {
 }
 
 function paintLivingArt(entry, still) {
-  const motion = still ? null : animalMotion(entry.life);
+  let motion = still ? null : animalMotion(entry.life);
+  if (motion && SPARKLE[entry.cell.kind]) {
+    // the sparkle keeps its own clock, staggered per zebra like the gestures
+    const life = entry.life, g = SPARKLE[entry.cell.kind].glint;
+    const time = animalLife.time - life.born;
+    motion = { amount: motion.amount, progress: motion.progress, time: time + life.phase,
+      glint: glintAmount(time - life.first * .5, { gap: g.gap * (life.period / ANIMAL_GESTURES[entry.cell.kind].gap), duration: g.duration }) };
+  }
   entry.art.dataset.acting = motion && motion.amount > .02 ? 'true' : 'false';
   paintAnimal(entry.art, entry.cell.kind, entry.fed, motion, 0, entry.panic);
   entry.moving = !!(motion && motion.amount);
@@ -3060,7 +3132,8 @@ function animateAnimalLife(now) {
       if (!entry.art.isConnected) continue;
       const motion = animalMotion(entry.life);
       // a frightened deer buzzes every frame, gesture or not
-      if (motion.amount || entry.moving || (entry.panic && FRIGHT[entry.cell.kind])) paintLivingArt(entry);
+      if (motion.amount || entry.moving || (entry.panic && FRIGHT[entry.cell.kind])
+        || (SPARKLE[entry.cell.kind] && !entry.panic && entry.fed >= .34)) paintLivingArt(entry);
     }
   }
   animalLife.frame = requestAnimationFrame(animateAnimalLife);
