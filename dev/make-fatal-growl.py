@@ -74,3 +74,23 @@ take('fatal-g3-growl-uwaa-long', [dict(dur=2.6, f0=125, growl=.8, bright=1.0, ri
 take('fatal-g4-growl-uwaa-x3', [dict(dur=1.2, f0=120, growl=.75, bright=1.0),
                                 dict(dur=1.2, f0=124, growl=.75, bright=1.0),
                                 dict(dur=1.8, f0=112, growl=.85, bright=.9, fall=.65)])
+
+# 2026-11-01: the user wants a raw, HIGHER male scream (not the monster).
+# Real male screams sit around 300-450 Hz with a wide-open "a" (high F1),
+# so: high pitch, light rasp, bright formants.
+VOWEL['A'] = (900, 1350, 2700)    # screamed "a": mouth wide open
+VOWEL['W'] = (500, 1000, 2500)
+def scream(dur, f0, growl=.3, bright=1.3, rise=1.2, fall=.75):
+    saved = dict(VOWEL); VOWEL['u'], VOWEL['w'], VOWEL['a'], VOWEL['o'] = (420, 900, 2400), VOWEL['W'], VOWEL['A'], (700, 1100, 2500)
+    try: return wail(dur, f0, growl, bright, rise, fall)
+    finally: VOWEL.clear(); VOWEL.update(saved)
+def take_s(name, parts, gap=.1):
+    pieces = []
+    for p in parts: pieces += [scream(**p), np.zeros(int(gap * SR))]
+    y = np.concatenate(pieces + [np.zeros(int(.2 * SR))]).astype(np.float32)
+    d = int(.04 * SR); y[d:] += .12 * y[:-d]
+    y *= .89 / np.max(np.abs(y))
+    sf.write(OUT / f'{name}.wav', y, SR, subtype='PCM_16'); print(name, round(len(y) / SR, 2), 's')
+take_s('fatal-h1-scream-uwaa', [dict(dur=1.8, f0=330)])
+take_s('fatal-h2-scream-uwaa-high', [dict(dur=1.8, f0=420, growl=.25, rise=1.15)])
+take_s('fatal-h3-scream-uwaa-x2', [dict(dur=1.2, f0=360), dict(dur=1.7, f0=380, fall=.65)])

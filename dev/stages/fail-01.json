@@ -12,7 +12,7 @@
   "then": ["rabbit", "sprout", "grass"],
   "clockAfterMoves": 2,
   "firstTickMs": 900,
-  "fatalSound": "dev/sfx/fatal-g1-growl-uwaa-x2.wav",
+  "fatalSound": "dev/sfx/fatal-h1-scream-uwaa.wav",
   "script": [
     { "place": "r1c1", "wait": 2500 },
     { "place": "r3c3", "wait": 900 },
