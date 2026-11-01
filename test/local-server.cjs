@@ -3,7 +3,7 @@ const http=require('http'), fs=require('fs'), path=require('path');
 const {randomUUID}=require('crypto');
 const {createDB,ids}=require('./db.cjs');
 const products={crystals5:100,crystals11:200,crystals30:500,crystals65:1000,no_ads:300};
-async function createLocalServer(port=0) {
+async function createLocalServer(port=0, opts={}) {
   const db=await createDB(); const root=path.resolve(__dirname,'..'), orders=new Map();
   let dropNextRevival=false;
   const server=http.createServer(async (req,res)=>{
@@ -54,7 +54,10 @@ async function createLocalServer(port=0) {
         let html=data.toString().replace(/<script src="(?:https:\/\/cdn.jsdelivr.net\/npm\/@supabase[^\"]*|shared\/supabase-config[^\"]*|shared\/app-sync[^\"]*)"><\/script>/g,'');
         // Simulated previews never send real production analytics.
         html=html.replace(/<script[^>]*src="https:\/\/static\.cloudflareinsights\.com\/[^>]*><\/script>/g,'');
-        if(url.pathname!=='/plain.html') html=html.replace('<script src="monetization.js','<script src="/__test/adapter.js"></script>\n<script src="monetization.js'); data=Buffer.from(html);
+        if(url.pathname!=='/plain.html') html=html.replace('<script src="monetization.js','<script src="/__test/adapter.js"></script>\n<script src="monetization.js');
+        // Recording-only board staging (dev/README.md). Never in the live index.html.
+        if(opts.stage) html=html.replace('<script src="skin.js','<script src="dev/stage-core.js"></script>\n<script src="dev/stage.js"></script>\n<script src="skin.js');
+        data=Buffer.from(html);
       }
       const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.png':'image/png','.wav':'audio/wav'};
       res.writeHead(200,{'Content-Type':types[path.extname(file)]||'application/octet-stream'});res.end(data);
@@ -69,7 +72,8 @@ async function createLocalServer(port=0) {
     close:async()=>{server.closeAllConnections();await new Promise(resolve=>server.close(resolve));await db.close();}};
 }
 module.exports={createLocalServer};
-if(require.main===module) createLocalServer(8778).then(s=>{
+if(require.main===module) createLocalServer(8778,{stage:process.argv.includes('--stage')}).then(s=>{
   console.log(s.url+' — LOCAL SIMULATION only');
+  if(process.argv.includes('--stage')) console.log('Staging on: '+s.url+'/?stage=fail-01');
   for(const signal of ['SIGINT','SIGTERM']) process.on(signal,async()=>{await s.close();process.exit();});
 }).catch(e=>{console.error(e);process.exitCode=1});

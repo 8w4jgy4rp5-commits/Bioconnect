@@ -6,6 +6,8 @@
     "test:postgres": "node test/monetization.test.cjs --postgres",
     "test:browser": "node test/browser-check.cjs",
     "test:server": "node test/local-server.cjs",
+    "stage": "node test/local-server.cjs --stage",
+    "check:stages": "node dev/check-stages.cjs",
     "check:edge": "node test/edge-check.cjs",
     "sandbox": "node test/sandbox-server.cjs",
     "test:sandbox": "node test/sandbox-auth.test.cjs && node test/sandbox-records.test.cjs && node test/sandbox-payments-mode.test.cjs && node test/sandbox-server.test.cjs && node test/sandbox-revival-ui.test.cjs",

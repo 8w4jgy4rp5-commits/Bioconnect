@@ -1,0 +1,26 @@
+{
+  "name": "fail-01",
+  "note": "Move 1: sprout at r1c1 sets off an 8-chain (grass to bear). Move 2 (the mistake): the fox goes to r3c3 for a small merge instead of r4c1 beside the tiger. The clock starts, the hungry tiger eats the lion.",
+  "board": [
+    ".       sprout  grass   rabbit  fox",
+    "rabbit  stone   bones   .       deer",
+    "rabbit  fox~    .       scrub   zebra",
+    ".       zebra   .       grass   buffalo",
+    "tiger!  lion*   bear    grass   wolf"
+  ],
+  "hand": ["sprout", "fox", "grass"],
+  "then": ["rabbit", "sprout", "grass"],
+  "clockAfterMoves": 2,
+  "firstTickMs": 900,
+  "fatalSound": "dev/sfx/fatal.mp3",
+  "script": [
+    { "place": "r1c1", "wait": 2500 },
+    { "place": "r3c3", "wait": 900 },
+    "tick"
+  ],
+  "rescue": [
+    { "place": "r1c1" },
+    { "place": "r4c1" },
+    "tick"
+  ]
+}
