@@ -1,0 +1,152 @@
+<title>Bioconnect キメ顔キット</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&family=IM+Fell+English+SC&display=swap">
+<style>
+/* layout: one column of animal "work orders", each = 3 steps left→right (stacks on phone) */
+:root {
+  --bg: #f3efe6; --card: #fffdf8; --fg: #2d2433; --mute: #6f6577;
+  --line: #ddd3c6; --accent: #7a3d6e; --ok: #2f7a4a; --check: #e9e2d4;
+  --jp: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  --display: "IM Fell English SC", Georgia, serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1d1820; --card: #27212b; --fg: #eee6ef; --mute: #a99fae;
+  --line: #3d3442; --accent: #d79bcb; --ok: #7fcf98; --check: #332b37; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #1d1820; --card: #27212b; --fg: #eee6ef; --mute: #a99fae;
+  --line: #3d3442; --accent: #d79bcb; --ok: #7fcf98; --check: #332b37; color-scheme: dark; }
+body { background: var(--bg); color: var(--fg); font-family: var(--jp); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+main { max-width: 980px; margin: 0 auto; display: grid; gap: 28px; }
+header h1 { font-family: var(--display); font-weight: 400; font-size: 34px; margin: 0; letter-spacing: .02em; color: var(--accent); }
+header p { margin: 4px 0 0; color: var(--mute); max-width: 62ch; }
+.animal { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+.animal h2 { margin: 0; font-size: 20px; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.animal h2 small { font-size: 13px; color: var(--mute); font-weight: 500; }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+.step { border: 1px solid var(--line); border-radius: 10px; padding: 12px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.step h3 { margin: 0; font-size: 14px; color: var(--accent); }
+.thumb { background: repeating-conic-gradient(var(--check) 0 25%, transparent 0 50%) 0 0 / 16px 16px; border-radius: 8px; display: grid; place-items: center; height: 170px; overflow: hidden; }
+.thumb img { max-height: 160px; width: auto; }
+pre { margin: 0; font: 12px/1.5 var(--mono); white-space: pre-wrap; word-break: break-word; background: var(--bg); border-radius: 8px; padding: 10px; max-height: 170px; overflow: auto; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: 700 14px var(--jp); border: 1px solid var(--accent); background: var(--accent); color: var(--card); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+button.ghost { background: transparent; color: var(--accent); }
+button:focus-visible, .drop:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.note { font-size: 13px; color: var(--mute); min-height: 1.4em; margin: 0; }
+.note.ok { color: var(--ok); font-weight: 700; }
+.drop { border: 2px dashed var(--line); border-radius: 10px; min-height: 170px; display: grid; place-items: center; text-align: center; padding: 10px; color: var(--mute); cursor: pointer; }
+.drop.over { border-color: var(--accent); color: var(--accent); }
+.drop img { max-height: 150px; width: auto; }
+input[type=file] { display: none; }
+</style>
+
+<main>
+  <header>
+    <h1>Pose Faces</h1>
+    <p>ChatGPT に絵を描き替えてもらうための道具箱です。ローカルのファイルを探す必要はありません。左から順に：絵をコピー → 依頼文をコピー → できた絵をここに貼る。</p>
+  </header>
+  <div id="list"></div>
+</main>
+
+<script>
+const ANIMALS = [
+  { key: 'buffalo', name: 'バッファロー', when: '鏡を見た瞬間の「わたしかわいい？」顔', src: 'buffalo-source.png',
+    line: 'New expression: "Am I cute or what?" — admiring itself in a mirror. Eyes half-closed and coy with the long lashes fluttering, one eye in a playful wink, a small pleased pursed-lip smile (lipstick kept), cheeks blushing a little more. Keep the horns, the make-up and the pink cheek exactly as they are.' },
+  { key: 'zebra', name: 'シマウマ', when: '「きらーん」の瞬間のキメ顔', src: 'zebra-source.png',
+    line: 'New expression: a confident fashion-model "camera\'s on me" look. Eyes half-closed and smouldering, one eyebrow slightly raised, a small knowing smirk. Keep every stripe, the mane and the yellow scarf exactly as they are.' },
+];
+const COMMON = `Edit this image. Change ONLY the face. Everything else must stay exactly
+where it is: same pose, same body, same legs, same outline, same colours,
+same canvas size, transparent background.
+
+Keep the exact same art style: same line thickness and line colour, same
+flat colours and soft shading. Side profile facing right. No text, no
+background, no frame, no shadow, no added objects. Output a PNG with alpha
+at the same size as the input.
+
+`;
+const caps = { db: null, assets: null, downloads: null };
+const el = (tag, attrs = {}, ...kids) => { const n = document.createElement(tag); for (const k in attrs) k === 'class' ? n.className = attrs[k] : n.setAttribute(k, attrs[k]); n.append(...kids); return n; };
+const say = (node, text, ok) => { node.textContent = text; node.classList.toggle('ok', !!ok); };
+
+async function srcBlob(a) { const r = await fetch(a.src); return r.blob(); }
+
+function card(a) {
+  const prompt = COMMON + a.line;
+  const n1 = el('p', { class: 'note' }), n2 = el('p', { class: 'note' }), n3 = el('p', { class: 'note' });
+  const copyImg = el('button', { type: 'button', id: 'copy-img-' + a.key }, '絵をコピー');
+  const saveImg = el('button', { type: 'button', class: 'ghost', id: 'save-img-' + a.key }, '保存');
+  copyImg.onclick = async () => {
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': srcBlob(a) })]);
+      say(n1, 'コピーしました。ChatGPT の入力欄で Ctrl+V', true);
+    } catch { say(n1, 'このブラウザではコピーできませんでした。絵を右クリック →「画像をコピー」か、「保存」を使ってください'); }
+  };
+  saveImg.onclick = async () => {
+    if (!caps.downloads) return say(n1, '保存は使えません。絵を右クリック →「名前を付けて画像を保存」で保存してください');
+    try { await caps.downloads.save({ filename: a.src, data: await srcBlob(a) }); say(n1, '保存しました', true); }
+    catch (e) { say(n1, e && e.code === 'declined' ? '保存をやめました' : '保存できませんでした'); }
+  };
+  const copyTxt = el('button', { type: 'button', id: 'copy-txt-' + a.key }, '依頼文をコピー');
+  const pre = el('pre', {}, prompt);
+  copyTxt.onclick = async () => {
+    try { await navigator.clipboard.writeText(prompt); say(n2, 'コピーしました。絵のあとに貼り付けて送信', true); }
+    catch { const s = getSelection(); s.selectAllChildren(pre); say(n2, '文を選択しました。Ctrl+C でコピーしてください'); }
+  };
+
+  const file = el('input', { type: 'file', accept: 'image/png,image/webp,image/jpeg', id: 'file-' + a.key });
+  const drop = el('div', { class: 'drop', tabindex: '0', id: 'drop-' + a.key }, 'できた絵をここにドロップ／クリックして選ぶ／Ctrl+V で貼る');
+  drop.onclick = () => file.click();
+  drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); file.click(); } };
+  drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) send(f); };
+  drop.addEventListener('paste', e => { const f = [...e.clipboardData.files][0]; if (f) { e.preventDefault(); send(f); } });
+  file.onchange = () => file.files[0] && send(file.files[0]);
+  const show = (url, at) => { drop.replaceChildren(el('img', { src: url, alt: a.name + 'の新しい顔' })); if (at) say(n3, '届きました（' + new Date(at).toLocaleString('ja-JP') + '）。Claude に「貼った」と伝えてください', true); };
+  async function send(f) {
+    if (!/^image\//.test(f.type)) return say(n3, '画像ファイルを選んでください');
+    if (!caps.assets || !caps.db) return say(n3, 'ここでは受け取れません。claude.ai にログインして開き直してください');
+    say(n3, '送っています…');
+    try {
+      const up = await caps.assets.upload(f);
+      await caps.db.doc('poses/' + a.key).set({ assetId: up.id, type: up.contentType, at: Date.now() });
+      show(up.url, Date.now());
+    } catch (e) { say(n3, '送れませんでした（' + (e && e.code || 'error') + '）。もう一度試してください'); }
+  }
+  a.show = show;
+
+  return el('section', { class: 'animal', id: a.key },
+    el('h2', {}, a.name, el('small', {}, a.when)),
+    el('div', { class: 'steps' },
+      el('div', { class: 'step' }, el('h3', {}, '1. 元の絵'), el('div', { class: 'thumb' }, el('img', { src: a.src, alt: a.name + 'の元の絵' })), el('div', { class: 'row' }, copyImg, saveImg), n1),
+      el('div', { class: 'step' }, el('h3', {}, '2. 依頼文'), pre, el('div', { class: 'row' }, copyTxt), n2),
+      el('div', { class: 'step' }, el('h3', {}, '3. できた絵'), drop, file, n3)));
+}
+
+const list = document.getElementById('list');
+list.style.cssText = 'display:grid;gap:20px';
+ANIMALS.forEach(a => list.append(card(a)));
+document.addEventListener('paste', e => {
+  if (e.target.closest && e.target.closest('.drop')) return;
+  const f = [...e.clipboardData.files][0]; if (!f) return;
+  const target = ANIMALS.find(a => document.getElementById('drop-' + a.key) === document.activeElement);
+  if (target) document.getElementById('drop-' + target.key).dispatchEvent(new ClipboardEvent('paste', { clipboardData: e.clipboardData }));
+});
+
+(async () => {
+  const c = window.claude;
+  if (!c) return;
+  [caps.db, caps.assets, caps.downloads] = await Promise.all(['db', 'assets', 'downloads'].map(n => c.use(n).catch(() => null)));
+  if (!caps.downloads) ANIMALS.forEach(a => document.getElementById('save-img-' + a.key).hidden = true);
+  if (!caps.db) return;
+  for (const a of ANIMALS) {
+    try { const s = await caps.db.doc('poses/' + a.key).get(); const d = s && (s.data ? s.data() : s); if (d && d.assetId) a.show('/_blob/' + d.assetId, d.at); } catch {}
+  }
+})();
+</script>
