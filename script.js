@@ -2826,6 +2826,93 @@ function paintStar(ctx, x, y, r, turn, alpha) {
   ctx.restore();
 }
 
+// THE BUFFALO'S VANITY. Full make-up (it is painted on: lashes, shadow,
+// blush, lipstick) and never sure it is still right, so every few
+// seconds a hand mirror pops up in front of its face and it lifts its
+// head to check. Its neighbours set its mood: a zebra beside it (the
+// rival one rung down, far too stylish) gets an angry vein mark; a
+// tiger beside it (the crush, who would happily eat it) gets hearts.
+// Panic outranks both. Positions are rig units; `minPx` keeps the
+// strokes readable on a 44px tile.
+const VANITY = {
+  buffalo: {
+    mirror: { x: 15.4, y: -15.5, r: 3.1 },
+    mood: { x: -3.2, y: -13.2 },
+    minPx: 1.1
+  }
+};
+
+// Which of its neighbours the buffalo has feelings about. Love wins.
+function buffaloMood(i) {
+  if (i == null || i < 0) return '';
+  let mood = '';
+  for (const n of tileNeighbours(state.cells, i)) {
+    const k = state.cells[n] && state.cells[n].kind;
+    if (k === 'tiger') return 'love';
+    if (k === 'zebra') mood = 'rival';
+  }
+  return mood;
+}
+
+function paintMirror(ctx, m, pop, unitPx, minPx) {
+  if (pop <= 0) return;
+  const lw = Math.max(.55, minPx / unitPx);
+  ctx.save();
+  ctx.translate(m.x, m.y);
+  ctx.rotate(-.35 + (1 - pop) * .8);
+  ctx.scale(pop, pop);
+  // handle
+  ctx.strokeStyle = '#c4577a'; ctx.lineWidth = lw * 1.6; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(0, m.r * .9); ctx.lineTo(0, m.r * 2.1); ctx.stroke();
+  // glass and frame
+  const glass = ctx.createLinearGradient(-m.r, -m.r, m.r, m.r);
+  glass.addColorStop(0, '#f4fbff'); glass.addColorStop(1, '#a9cfe6');
+  ctx.fillStyle = glass;
+  ctx.beginPath(); ctx.ellipse(0, 0, m.r * .82, m.r, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e88aa6'; ctx.lineWidth = lw * 1.3; ctx.stroke();
+  // the shine on the glass
+  ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(-m.r * .35, -m.r * .45); ctx.lineTo(m.r * .05, -m.r * .7); ctx.stroke();
+  ctx.restore();
+}
+
+// The cartoon anger vein: four bulging corners round an empty middle.
+function paintVein(ctx, x, y, r, unitPx, minPx) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.lineCap = 'round';
+  for (const [color, k] of [['rgba(255,240,230,.8)', 2.2], ['#d8343c', 1]]) {
+    ctx.strokeStyle = color;
+    ctx.lineWidth = Math.max(.45, minPx / unitPx) * k;
+    for (let q = 0; q < 4; q++) {
+      ctx.save();
+      ctx.rotate(q * Math.PI / 2);
+      ctx.beginPath();
+      ctx.moveTo(r * .25, -r);
+      ctx.quadraticCurveTo(r * .3, -r * .3, r, -r * .25);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+function paintHeart(ctx, x, y, r, alpha) {
+  if (r <= 0 || alpha <= 0) return;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#f06a93';
+  ctx.strokeStyle = 'rgba(255,240,245,.9)';
+  ctx.lineWidth = r * .28;
+  ctx.beginPath();
+  ctx.moveTo(0, r * .9);
+  ctx.bezierCurveTo(-r * 1.4, -r * .1, -r * .7, -r * 1.2, 0, -r * .4);
+  ctx.bezierCurveTo(r * .7, -r * 1.2, r * 1.4, -r * .1, 0, r * .9);
+  ctx.stroke(); ctx.fill();
+  ctx.restore();
+}
+
 function paintAnimal(canvas, type, fed, motion, size, panic) {
   const rig = RIG[type];
   // `size` paints off-screen at an exact pixel size (the share card)
@@ -2865,7 +2952,8 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
   const pose = {
     deer: [-2.4 * action, 1, 1 + .014 * action],
     zebra: [1.2 * wave, 1, 1 - .012 * action],
-    buffalo: [2.8 * action, 1, 1],
+    // lifts its head toward the mirror
+    buffalo: [-1.6 * action, 1, 1],
     bear: [1.7 * wave, 1, 1],
     lion: [-1.2 * action, 1 + .025 * action, 1 + .018 * action],
     tiger: [1.5 * action, 1 + .038 * action, 1 - .022 * action],
@@ -2916,6 +3004,23 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     ctx.restore();
   }
   ctx.globalAlpha = 1;
+  const vanity = VANITY[type] && motion && !panic ? VANITY[type] : null;
+  if (vanity) {
+    paintMirror(ctx, vanity.mirror, Math.min(1, action * 1.25), s, vanity.minPx);
+    if (action > .5) paintStar(ctx, vanity.mirror.x + 1.2, vanity.mirror.y - 1.4,
+      Math.max(.9, 2.2 / s) * Math.sin((action - .5) * 2 * Math.PI / 2), .3, 1);
+    const t = motion.time || 0, at = vanity.mood;
+    if (motion.mood === 'rival') {
+      paintVein(ctx, at.x, at.y, 1.9 * (1 + .14 * Math.max(0, Math.sin(t * 9))), s, vanity.minPx);
+    } else if (motion.mood === 'love') {
+      for (let h = 0; h < 3; h++) {
+        const p = (t * .55 + h / 3) % 1;
+        paintHeart(ctx, at.x - 1.5 + h * 1.6 + Math.sin(p * 6 + h) * .6, at.y + 1.5 - p * 6,
+          Math.max(1.3, 2.4 / s) * (p < .2 ? p / .2 : p > .7 ? (1 - p) / .3 : 1), 1);
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
   if (shine) {
     const tw = shine.minPx.twinkle / s, gm = shine.minPx.glint / s;
     shine.twinkles.forEach(function (k) {
@@ -2952,7 +3057,7 @@ const ANIMAL_GESTURES = {
   fox:      { name: 'tail-swish',   gap: 9,  duration: 2.1 },
   deer:     { name: 'listen',       gap: 11, duration: 1.9 },
   zebra:    { name: 'weight-shift', gap: 13, duration: 2.5 },
-  buffalo:  { name: 'graze',        gap: 16, duration: 3.2 },
+  buffalo:  { name: 'mirror-check', gap: 7,  duration: 2.4 },
   wolf:     { name: 'howl',         gap: 18, duration: 2.8 },
   bear:     { name: 'family-sway',  gap: 15, duration: 2.8 },
   lion:     { name: 'yawn',         gap: 21, duration: 3.6 },
@@ -3004,6 +3109,10 @@ function paintLivingArt(entry, still) {
     motion = { amount: motion.amount, progress: motion.progress, time: time + life.phase,
       glint: glintAmount(time - life.first * .5, { gap: g.gap * (life.period / ANIMAL_GESTURES[entry.cell.kind].gap), duration: g.duration }) };
   }
+  if (motion && VANITY[entry.cell.kind]) {
+    entry.mood = buffaloMood(entry.index);
+    motion = Object.assign({}, motion, { mood: entry.mood, time: animalLife.time });
+  }
   entry.art.dataset.acting = motion && motion.amount > .02 ? 'true' : 'false';
   paintAnimal(entry.art, entry.cell.kind, entry.fed, motion, 0, entry.panic);
   entry.moving = !!(motion && motion.amount);
@@ -3027,7 +3136,8 @@ function animateAnimalLife(now) {
       const motion = animalMotion(entry.life);
       // a frightened deer buzzes every frame, gesture or not
       if (motion.amount || entry.moving || (entry.panic && FRIGHT[entry.cell.kind])
-        || (SPARKLE[entry.cell.kind] && !entry.panic && entry.fed >= .34)) paintLivingArt(entry);
+        || (SPARKLE[entry.cell.kind] && !entry.panic && entry.fed >= .34)
+        || (entry.mood && !entry.panic)) paintLivingArt(entry);
     }
   }
   animalLife.frame = requestAnimationFrame(animateAnimalLife);
