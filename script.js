@@ -540,12 +540,17 @@ function nextDifficultySeconds() {
 // thinks-every-3 lion 1-3%, tiger 0%. More animals did not buy tigers:
 // fox 27 / deer 48 (plants ~10%) still measured casual tiger 1-2%, since
 // the bots' runs end before two lions meet. The owner's play is the test.
+//
+// 2026-10-27: the owner saw deer take over the late board and asked for
+// more rabbits and foxes. Same 75% animals, reshuffled 18/21/36 ->
+// 25/26/24. `node sim.js 600`: casual lion 23% -> 22%, tiger 0 -> 1%;
+// thinks/3 bear 67% -> 52%, lion 3% -> 1%; median shown score 5874 -> 6220.
 const HAND_RAMP_TICKS = 125;
-const HAND_RABBIT_LATE = 18;
+const HAND_RABBIT_LATE = 25;
 const HAND_FOX_FROM = 25;
-const HAND_FOX_LATE = 21;
+const HAND_FOX_LATE = 26;
 const HAND_DEER_FROM = 50;
-const HAND_DEER_LATE = 36;
+const HAND_DEER_LATE = 24;
 const HAND_GRASS_MIN = 15;     // percent of every deal that is grass, at least
 const WIDE_HAND_FROM = 'zebra';
 const WIDE_HAND_AT = 75;
