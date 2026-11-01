@@ -1628,9 +1628,13 @@ body.is-modal { overflow: hidden; }
 .cell--buffalo:nth-child(3n+2) .tile-art { animation-delay: -2.1s; }
 .cell--buffalo:nth-child(3n+3) .tile-art { animation-delay: -4.2s; }
 
+/* 2026-11-01: the buffalo no longer grazes; it checks its make-up in a
+   hand mirror (script.js VANITY). The slow idle is now a small proud
+   lift of the chin -- same pivot, same timing, the rotation reversed
+   so the head goes up, never down into the mirror's way. */
 @keyframes buffalo-graze {
   0%, 100%  { transform: rotate(0deg); }
-  45%, 65%  { transform: translateY(calc(.4px * var(--idle))) rotate(calc(1.1deg * var(--idle))); }
+  45%, 65%  { transform: rotate(calc(-.7deg * var(--idle))); }
 }
 
 /* the arrival owns the tile for a third of a second, then the graze
