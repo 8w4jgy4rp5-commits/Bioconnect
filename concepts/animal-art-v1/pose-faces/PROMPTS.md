@@ -36,3 +36,6 @@ at the same size as the input.
 |---|---|---|
 | バッファロー | buffalo-source.png | `New expression: "Am I cute or what?" — admiring itself in a mirror. Eyes half-closed and coy with the long lashes fluttering, one eye in a playful wink, a small pleased pursed-lip smile (lipstick kept), cheeks blushing a little more. Keep the horns, the make-up and the pink cheek exactly as they are.` |
 | シマウマ | zebra-source.png | `New expression: a confident fashion-model "camera's on me" look. Eyes half-closed and smouldering, one eyebrow slightly raised, a small knowing smirk. Keep every stripe, the mane and the yellow scarf exactly as they are.` |
+| オオカミ | wolf-source.png | `New expression: a brave, defiant growl at a much bigger animal. Brows pulled down and eyes narrowed, staring straight ahead, the muzzle wrinkled, lips pulled back to show the teeth and fangs in a snarl, mouth only slightly open. Fierce but still cute and cartoonish, not scary. Keep the ears, the grey coat and the cream chest exactly as they are.` |
+
+オオカミは顔だけでなく体・尻尾も少し描き直して返ってきた（下半身の重なり 0.96）。同じ枠に合わせて `img/wolf-growl.png` にし、顔の重ね塗りではなく絵ごと切り替えている。

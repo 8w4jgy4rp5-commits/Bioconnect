@@ -115,7 +115,7 @@
       // and standing on the same paw line), then a growl: lean in, growl
       // strokes at the mouth (script.js BRAVADO, beside a bigger animal)
       poseFace: { src: 'wolf-howl.png', by: 'howl' },
-      growl: { x: 15.6, y: -5.6, lean: 1.6 },
+      growl: { x: 15.6, y: -5.6, lean: 1.6, face: 'wolf-growl.png' },
       gesture: { gap: 6, duration: 2.8 }
     }
   };
@@ -282,6 +282,8 @@
         ctx.drawImage(face, -w * p.px, h * (1 - p.py) - oh, w, oh);
       } else {
         ctx.drawImage(img, -w * p.px, -h * p.py, w, h);
+        // the painted growl face, same frame as the calm one
+        if (i === 0 && imgs.growl && growl > .01) { ctx.globalAlpha = part[2] * Math.min(1, growl * 1.6); ctx.drawImage(imgs.growl, -w * p.px, -h * p.py, w, h); }
         // same frame as the calm painting, so it simply covers it
         if (fa > .01) { ctx.globalAlpha = part[2] * fa; ctx.drawImage(face, -w * p.px, -h * p.py, w, h); }
       }
@@ -328,7 +330,9 @@
     var rig = RIG[canvas.dataset.animal];
     if (!rig) return;
     Promise.all(rig.parts.map(function (p) { return load(p[0]); })
-      .concat(rig.poseFace ? [load(rig.poseFace.src)] : [])).then(function (imgs) {
+      .concat(rig.poseFace ? [load(rig.poseFace.src)] : [])
+      .concat(rig.growl && rig.growl.face ? [load(rig.growl.face)] : [])).then(function (imgs) {
+      if (rig.growl && rig.growl.face) imgs.growl = imgs.pop();
       if (rig.poseFace) imgs.pose = imgs.pop();
       // first twitch comes soon so a visitor sees it; tapping starts one now
       var start = performance.now() - (rig.gesture.gap - 1.2) * 1000;

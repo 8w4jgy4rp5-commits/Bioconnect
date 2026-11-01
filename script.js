@@ -2322,6 +2322,9 @@ const SPRITE_FILES = {
   foxTail: 'fox-tail.png',
   wolfCalm: 'wolf-calm.png',
   wolfHowl: 'wolf-howl.png', // Optional gesture; normal art still works if this fails to load.
+  // Optional: the brave growl (painted, same frame as wolf-calm), worn
+  // beside a bigger animal. Without it the wolf keeps its calm face.
+  wolfGrowl: 'wolf-growl.png',
   wolfHungry: 'wolf-hungry.png',
   // Hunger told by posture, like the wolf, because this animal is one
   // flat near-black and has no bright colour to drain. The head drops
@@ -3180,18 +3183,20 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
     if (type === 'fox' && name === '@head') turn += action * 3;
     if (turn) ctx.rotate(turn * Math.PI / 180);
     if (p.flip) ctx.scale(-1, 1);
+    // beside a bigger animal the wolf wears its painted growl face
+    const base = brave && sprites.wolfGrowl ? sprites.wolfGrowl.img : sprite.img;
     const howl = type === 'wolf' && fed >= .34 && !panic && sprites.wolfHowl && motion ? motion.amount : 0;
     if (howl) {
       // Blend only while raising/lowering the head. Both poses share the
       // original width and paw baseline, including on small phone tiles.
       ctx.globalAlpha = alpha * (1 - howl);
-      ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+      ctx.drawImage(base, -w * p.px, -h * p.py, w, h);
       const other = sprites.wolfHowl;
       const oh = w * other.h / other.w;
       ctx.globalAlpha = alpha * howl;
       ctx.drawImage(other.img, -w * p.px, h * (1 - p.py) - oh, w, oh);
     } else {
-      ctx.drawImage(sprite.img, -w * p.px, -h * p.py, w, h);
+      ctx.drawImage(base, -w * p.px, -h * p.py, w, h);
       if (name === '@head' && poseAmount > .01) {
         ctx.globalAlpha = alpha * poseAmount;
         ctx.drawImage(poseSprite.img, -w * p.px, -h * p.py, w, h);

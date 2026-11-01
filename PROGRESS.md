@@ -2137,3 +2137,42 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 本番SQL未適用: 本人が Supabase の SQL Editor で上のmigrationを実行する必要あり。未適用の間は記録が静かに失敗するだけで、ゲームには影響しない。
 - 注意: 匿名の呼び出しなので、偽の記録を大量に送ることは技術的にできる（数字の目安として許容）。Cloudflare の数字と比べるときは、こちらは「遊んだ人」、Cloudflare は「開いた人」。
 - 次: 本人の端末（PC・スマホ）で一度ずつ https://bioconnectpazzle.com/?count=off を開く。Xのプロフィール欄は ?ref=x-bio、投稿は ?ref=x-post のリンクにする。1〜2週間たったら player_visits_daily を見る。
+
+## 2026-10-29 — ミツバチ試作動画に BGM と効果音を入れる（リポジトリ外）
+- 作業場所: C:/Users/tians/Videos/honeybee/。新規 sound.cjs（`node sound.cjs` で out/bgm.wav・sfx.wav・mix.wav を合成。素材の取得・費用なし）。v2-video.mp4 は残し、音つきは out/v3-video.mp4（30.0秒、AAC、全体 -13.6 LUFS 前後）。
+- 音の設計: BGM は120BPM・F長調のマリンバ＋ウクレレ風の弦。0〜2.5秒は巣の羽音だけ、12〜20秒で盛り上げ、20.0秒で音楽も羽音も全部止める、最後は温かい和音で29.95秒までに消える。効果音は compose.html の時刻（舌 4.2、吸う 4.6〜6.6、字幕・切りかえ・キラキラ・息切れ 15.0〜16.4・ろう3回・胸をはる・ふたの広がり）に合わせた。
+- 検証: 周波数の図と波形（out/spec.png・wave.png）で、各音が狙った時刻にあること、20.0〜20.25秒が無音になることを確認。区間ごとの音量は中盤 -12.5、ろうの場面 -16.9、最後 -15.4 LUFS（静かな場面はわざと小さめ）。
+- 未確認: 本人の聴感（Claude は音を聴けない）。スマホのスピーカーでの聞こえ方。
+- 次: 本人が v3-video.mp4 を聴いて、音量・音色・合わない音を指摘 → sound.cjs の該当行を直して作り直す。
+
+## 2026-10-29 — ミツバチ試作動画に男性ナレーションを追加（リポジトリ外）
+- 本人の希望「男性の落ち着く声」。方法は本人が Kokoro（無料・PC内で動く音声AI、Apache-2.0）を選択。honeybee/.venv-tts に kokoro-onnx、honeybee/tts-models/ に声のデータ（約340MB、GitHub の kokoro-onnx 配布物）。文はネットに送っていない。
+- 新規 narrate.py（`.venv-tts/Scripts/python narrate.py 声の名前 速さ` → out/vo/声/ に1文ずつと30秒の voice.wav）。文は字幕とほぼ同じ7文、20.0〜21.4秒は声なし。最後の文は26.2秒から（字幕より少し先に入る）。
+- sound.cjs: 声のある間だけ BGM を約-7dB下げ（効果音は下げない）、声は最後のフェードに巻き込まない。`VOICE=none node sound.cjs` で声なし。
+- 出力: out/v4-video.mp4（am_michael・速さ0.95、-14.6 LUFS）。聴き比べ用 out/voice-compare.wav（am_michael / bm_george / am_onyx / bm_lewis の順に最初と最後の文）。
+- 検証: 全7文が字幕の時間内に収まる（am_michael）。波形で声が前に出ていることを確認。bm_george・am_onyx は最初の文が2.2秒を少し超える。
+- 未確認: 本人の聴感（声の好み、読み方の自然さ、BGMとの音量差）。
+- 次: 声を選んでもらい、必要なら速さや文を調整して作り直す。
+
+## 2026-10-31 — Comeback Chain ショート動画の手直し（リポジトリ外）
+- 作業場所: C:/Users/tians/Videos/bioconnect/shorts/（Remotion）。外部レビューの指摘5点に対応。
+- ドメイン誤記の指摘は誤り（CNAME は bioconnectpazzle.com）。表記はそのまま、URLを最後の1秒の小さい表示 → 締めの文と一緒に約4秒・大きめに変更。
+- フックの静止: timeline.ts で、置く0.4秒前から始め、置いてから最初の合体までを3倍速に。最初の合体が約2.8秒 → 約1.1秒。
+- 山場: 途中の連鎖を1.25倍速、最後の合体を0.35倍速（旧0.5）＋停止1秒（旧0.5）、ズーム1.14倍（旧1.07）、揺れを強めた。
+- 締め: props の ctaText を「Can you beat 8 CHAIN?」（0003は7）に。改行は「8 CHAIN?」がまとまるよう、数字とCHAINの間を改行しないスペースにした。
+- 出力: out/chain-0001.mp4（14.0秒）・chain-0003.mp4。Downloads に bioconnect-comeback-chain-000{1,3}-v2.mp4 として複製。tsc 成功、静止画で冒頭・停止・締め・URLを確認。
+- 未対応: 「盤面のありえなさ」（今の盤面は空き4マス）。もっと詰まった試合を探す（例 `npm run find -- 800 8 2`）→ 録画からやり直す必要あり。Clip Kit ページの説明文（about に旧CTA）も未更新。
+- 未確認: 本人による通しの再生（動き・音のタイミング）。
+
+## 2026-11-01 — 撮影用の盤面仕込み（?stage=、開発専用）
+- 目的: 失敗編ショートの撮影で、狙った盤面・手札から始める。本番の index.html / script.js は無変更。`npm run stage`（test/local-server.cjs --stage）のときだけ dev/stage-core.js と dev/stage.js を差し込む。
+- 新規: dev/stage-core.js（プリセット→盤面・手札）、dev/stage.js（ブラウザ側。記録・実績・訪問数・練習を止め、時計を clockAfterMoves 手まで止める、大事な動物(*)が食べられたら fatalSound を鳴らす、R/T/H キー）、dev/check-stages.cjs（`npm run check:stages`、本物のルールで手順を試す）、dev/stages/fail-01.json、dev/README.md、dev/make-fatal-voice.py。
+- fail-01: 20/25マス。1手目 r1c1 の芽で8連鎖（芽→クマ）。2手目にキツネを r3c3 に置くミス → 0.9秒後に腹ぺこのトラがライオンを食べる。正しい r4c1 ならトラはキツネを食べてライオンは無事。
+- 検証: check-stages ✓。Chrome（Playwright）で盤面再現、2手まで時計停止、最初の食事でライオンが消える、--stage なしでは盤面が空のまま、紫の帯が隠れることを確認。
+- 未対応: 失敗時の男性の声の素材（dev/sfx/fatal.mp3 が未配置。Kokoro の venv が onnxruntime の DLL 読み込みエラーで動かない）。操作の自動再生（見積りのみ：手順の再生 2〜3時間、指カーソル演出込みでさらに半日）。
+
+## 2026-11-01 — オオカミの「グルル」顔（描いた絵）
+- 本人が ChatGPT で作った絵をキメ顔キット（Artifact）で受け取り → concepts/animal-art-v1/pose-faces/wolf-pose-src.png。`fit-panic.py` で wolf-calm.png の枠に合わせて img/wolf-growl.png（下半身IoU 0.96）。
+- ゲーム盤面: 格上（クマ・ライオン・トラ・ゾウ）の隣にいる間（BRAVADO）、平常の絵の代わりに wolf-growl.png を描く。遠吠え中はそこから遠吠えの絵へ切り替わる。絵が読めないときは今までどおり。
+- 動物ページ: 偶数回のしぐさ（うなる番）でグルル顔をフェードイン（animal-rig.js の growl.face）。
+- 検証: 動物ページを Chrome で撮影し、うなる瞬間に絵が替わり、しぐさの後は元に戻ることを確認。盤面は未確認（コードの分岐のみ）。
