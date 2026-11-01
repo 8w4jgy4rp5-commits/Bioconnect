@@ -85,6 +85,21 @@
           [-3.2, -14.2, .9, 4.4], [6.2, -2.6, .7, 2.4], [-4.4, -8.6, .7, 5.3]],
         glint: { x: 10.2, y: -14.2, size: 3.6, gap: 7, duration: 1.4, lift: -3 }
       }
+    },
+    buffalo: {
+      fit: { span: 38, ox: 1.88, oy: 5.09 },
+      // the game crops the painting to head and shoulder; the page shows
+      // all of it, so zoom out and re-centre
+      frame: { zoom: 1.42, dx: 0, dy: -4.4 },
+      parts: [
+        ['buffalo-calm.png', { w: 46.95, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'mirror-check': a hand mirror pops up and the head lifts to it
+      // (script.js VANITY and pose.buffalo)
+      pose: { rot: -1.6, sy: 0 },
+      // the page has room in front of the face (the game tile does not)
+      mirror: { x: 24.4, y: -4.2, r: 3.5 },
+      gesture: { gap: 7, duration: 2.4 }
     }
   };
 
@@ -126,6 +141,24 @@
       ctx.quadraticCurveTo(-w * .3, -w * .3, 0, -R);
       ctx.fill();
     });
+    ctx.restore();
+  }
+
+  function mirror(ctx, mm, pop) {
+    if (pop <= 0) return;
+    ctx.save();
+    ctx.translate(mm.x, mm.y);
+    ctx.rotate(-.35 + (1 - pop) * .8);
+    ctx.scale(pop, pop);
+    ctx.strokeStyle = '#c4577a'; ctx.lineWidth = .9; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, mm.r * .9); ctx.lineTo(0, mm.r * 2.1); ctx.stroke();
+    var glass = ctx.createLinearGradient(-mm.r, -mm.r, mm.r, mm.r);
+    glass.addColorStop(0, '#f4fbff'); glass.addColorStop(1, '#a9cfe6');
+    ctx.fillStyle = glass;
+    ctx.beginPath(); ctx.ellipse(0, 0, mm.r * .82, mm.r, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#e88aa6'; ctx.lineWidth = .7; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = .5;
+    ctx.beginPath(); ctx.moveTo(-mm.r * .35, -mm.r * .45); ctx.lineTo(mm.r * .05, -mm.r * .7); ctx.stroke();
     ctx.restore();
   }
 
@@ -202,6 +235,11 @@
       ctx.restore();
     });
     ctx.globalAlpha = 1;
+    if (rig.mirror && m.amount) {
+      mirror(ctx, rig.mirror, Math.min(1, m.amount * 1.25));
+      if (m.amount > .5) star(ctx, rig.mirror.x + 1.2, rig.mirror.y - 1.4, 1.1 * Math.sin((m.amount - .5) * Math.PI), .3, 1);
+      ctx.globalAlpha = 1;
+    }
     if (rig.sparkle && m.time != null) {
       rig.sparkle.twinkles.forEach(function (k) {
         var b = Math.sin(m.time * 2.2 + k[3]);
