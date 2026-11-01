@@ -30,11 +30,11 @@ def resonate(x, freqs, bw):
         y[i] = v; y2 = y1; y1 = v
     return y
 
-def scream(seed, dur=1.8, f0=420, crack=True, crack_at=.55, breath=.35, rasp=.25):
+def scream(seed, dur=1.8, f0=420, crack=True, crack_at=.55, breath=.35, rasp=.25, high_end=False):
     rng = np.random.default_rng(seed)
     n = int(dur * SR); t = np.arange(n) / SR; pos = t / dur
     # pitch: scoop up from below, overshoot, wander, sag and give out
-    contour = np.interp(pos, [0, .08, .18, .7, 1], [.72, 1.08, 1.0, .97, .78])
+    contour = np.interp(pos, [0, .08, .18, .7, 1], [.72, 1.08, 1.0, .97, 1.03 if high_end else .78])
     contour *= 1 + smooth_noise(rng, n, 6, .025) + smooth_noise(rng, n, 1.5, .03)
     if crack:  # the voice flips up for ~70 ms and back
         c = np.exp(-((t - crack_at * dur) / .035) ** 2)
@@ -55,7 +55,7 @@ def scream(seed, dur=1.8, f0=420, crack=True, crack_at=.55, breath=.35, rasp=.25
     # h2's light ~20 Hz gurgle, kept on purpose: it is the take the user picked
     src *= 1 - .25 * (.5 + .5 * np.sin(2 * np.pi * np.cumsum((20 + smooth_noise(rng, n, 2, 3)) / SR)))
     # breath: noise that puffs with each cycle, louder as the voice gives out
-    voice_env = np.interp(pos, [0, .05, .82, 1], [0, 1, .9, .15])
+    voice_env = np.interp(pos, [0, .05, .82, 1], [0, 1, .9, .9 if high_end else .15])
     breath_env = np.interp(pos, [0, .05, .82, 1], [.6, .35, .5, 1.0])
     puff = .4 + .6 * np.sin(np.pi * ph) ** 2
     noise = rng.normal(0, 1, n) * puff * breath * breath_env
@@ -64,11 +64,11 @@ def scream(seed, dur=1.8, f0=420, crack=True, crack_at=.55, breath=.35, rasp=.25
     F = [(450, 900, 80), (950, 1450, 110), (2500, 2800, 170), (3300, 3500, 260), (4200, 4300, 320)]
     out = 0
     for k, (fu, fa, bw) in enumerate(F):
-        fk = np.interp(pos, [0, .1, 1], [fu, fa, fa * .96]) * (1 + smooth_noise(rng, n, 3, .03))
+        fk = np.interp(pos, [0, .1, 1], [fu, fa, fa * (1.0 if high_end else .96)]) * (1 + smooth_noise(rng, n, 3, .03))
         gain = [1.0, 1.0, .9, .75, .55][k]
         out = out + gain * resonate(excite, fk, bw)
     out = np.append(out[0], np.diff(out) * 1.5 + out[1:] * .5)   # lips radiate highs
-    out *= np.interp(pos, [0, .03, .9, 1], [0, 1, .8, 0])
+    out *= np.interp(pos, [0, .03, .96 if high_end else .9, 1], [0, 1, 1 if high_end else .8, 0])
     return out / np.max(np.abs(out))
 
 def finish(y, double=False, seed=0):
@@ -94,6 +94,9 @@ TAKES = {
     'fatal-h2b-human': finish(scream(3), seed=3),
     'fatal-h2c-human-crack': finish(scream(5, crack_at=.5, breath=.45, rasp=.35), seed=5),
     'fatal-h2d-human-double': finish(scream(8, breath=.4, rasp=.3), double=True, seed=8),
+    # the end stays high and breaks off up there (user, 2026-11-01)
+    'fatal-h2g-human-high-end': finish(scream(3, high_end=True), seed=3),
+    'fatal-h2h-human-crack-high-end': finish(scream(5, crack_at=.5, breath=.45, rasp=.35, high_end=True), seed=5),
 }
 for name, y in TAKES.items():
     sf.write(OUT / f'{name}.wav', y, SR, subtype='PCM_16'); print(name, round(len(y) / SR, 2), 's')

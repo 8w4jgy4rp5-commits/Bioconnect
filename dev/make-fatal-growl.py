@@ -28,7 +28,7 @@ def resonate(x, freqs, bw):
         y[i] = v; y2 = y1; y1 = v
     return y
 
-def wail(dur, f0, growl, bright, rise=1.15, fall=0.78):
+def wail(dur, f0, growl, bright, rise=1.15, fall=0.78, end_vowel='o', tail=.2):
     n = int(dur * SR); t = np.arange(n) / SR; pos = t / dur
     # pitch: scoop up into the "wa", hold with a 4.5 Hz wobble, sag at the end
     contour = np.interp(pos, [0, .15, .7, 1], [.85, rise, 1.0, fall])
@@ -45,13 +45,13 @@ def wail(dur, f0, growl, bright, rise=1.15, fall=0.78):
     src *= 1 - growl * (.5 + .5 * np.sin(2 * np.pi * np.cumsum(flutter / SR)))
     src += rng.normal(0, .12 + .1 * growl, n)       # breath and rasp
     # vowel path u -> w -> a ... -> o
-    path = [(0, 'u'), (.12, 'w'), (.25, 'a'), (.75, 'a'), (1, 'o')]
+    path = [(0, 'u'), (.12, 'w'), (.25, 'a'), (.75, 'a'), (1, end_vowel)]
     xs = [p for p, _ in path]
     out = 0
     for k, (gain, bw) in enumerate([(1.0, 90), (.7 * bright, 110), (.35 * bright, 160)]):
         fk = np.interp(pos, xs, [VOWEL[v][k] for _, v in path])
         out = out + gain * resonate(src, fk, bw)
-    env = np.interp(pos, [0, .06, .8, 1], [0, 1, .85, 0]) ** 1.2
+    env = np.interp(pos, [0, .06, 1 - tail, 1], [0, 1, .85 if tail >= .2 else 1, 0]) ** 1.2
     out *= env
     return np.tanh(2.2 * out / np.max(np.abs(out)))  # push it into a rough shout
 
@@ -80,9 +80,9 @@ take('fatal-g4-growl-uwaa-x3', [dict(dur=1.2, f0=120, growl=.75, bright=1.0),
 # so: high pitch, light rasp, bright formants.
 VOWEL['A'] = (900, 1350, 2700)    # screamed "a": mouth wide open
 VOWEL['W'] = (500, 1000, 2500)
-def scream(dur, f0, growl=.3, bright=1.3, rise=1.2, fall=.75):
+def scream(dur, f0, growl=.3, bright=1.3, rise=1.2, fall=.75, **more):
     saved = dict(VOWEL); VOWEL['u'], VOWEL['w'], VOWEL['a'], VOWEL['o'] = (420, 900, 2400), VOWEL['W'], VOWEL['A'], (700, 1100, 2500)
-    try: return wail(dur, f0, growl, bright, rise, fall)
+    try: return wail(dur, f0, growl, bright, rise, fall, **more)
     finally: VOWEL.clear(); VOWEL.update(saved)
 def take_s(name, parts, gap=.1):
     pieces = []
@@ -94,3 +94,9 @@ def take_s(name, parts, gap=.1):
 take_s('fatal-h1-scream-uwaa', [dict(dur=1.8, f0=330)])
 take_s('fatal-h2-scream-uwaa-high', [dict(dur=1.8, f0=420, growl=.25, rise=1.15)])
 take_s('fatal-h3-scream-uwaa-x2', [dict(dur=1.2, f0=360), dict(dur=1.7, f0=380, fall=.65)])
+
+# 2026-11-01: the user — the drop at the end of h2 is what sounds wrong.
+# Keep the "waaa" HIGH right to the end and let it break off up there:
+# no pitch sag, no darkening to "o", full voice until a short cut.
+take_s('fatal-h2e-scream-high-end', [dict(dur=1.8, f0=420, growl=.25, rise=1.15, fall=1.0, end_vowel='a', tail=.05)])
+take_s('fatal-h2f-scream-rising-end', [dict(dur=1.8, f0=420, growl=.25, rise=1.15, fall=1.12, end_vowel='a', tail=.05)])
