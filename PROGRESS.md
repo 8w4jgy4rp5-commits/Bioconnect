@@ -2199,3 +2199,8 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 動物ページ: animals/tiger/ 新規（Specimen No. 11）。花は10秒中4秒ふわっと出る（animal-rig.js の flower）。ライオンの「Next: Tiger」、guide の一覧・食べ物表、sitemap。
 - 検証: rules.test.js 284/284（新規3件）。sim.js 300 前後比較は誤差の範囲。Chrome で動物ページ（花）と盤面（左に手札のキツネ・右に草 → 赤枠は草だけ、花が見える、1手後に草を食べてキツネは残る）を確認。
 - 2026-11-01 トラの花はユーザー判断で削除（盤面FONDNESS/tigerMood・動物ページのflowerとも）。草が先のルールは残す。
+
+## 2026-11-01 ぞう（最強。まぼろし。）
+- ユーザー指定は「最強。まぼろし。以上。説明もこれだけに」。ルールは変更なし（超レア・育てた動物だけ食べる、は据え置き）。
+- 盤面: ぞうは6秒周期で不透明度1→0.6→1とゆっくり透ける（PHANTOM, elephantMood）。
+- 動物ページ: animals/elephant/ 新規（Specimen No. 12）。本文は「The strongest. A phantom.」だけ。トラのNext、guide一覧、sitemap。

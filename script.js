@@ -3125,7 +3125,12 @@ function deerMood(i) {
 }
 
 // Feelings about the neighbours, per kind (painted only while calm).
-const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood };
+// THE ELEPHANT. The strongest, and a phantom: it slowly fades toward
+// see-through and back, all the time (the 'phantom' mood keeps it painting).
+const PHANTOM = { elephant: { cycle: 6, low: .6 } };
+function elephantMood() { return 'phantom'; }
+
+const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood, elephant: elephantMood };
 
 // Three short growl strokes fanning out from the mouth, dark ink with a
 // pale rim so they read on any tile.
@@ -3232,7 +3237,10 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
   const poseAmount = !poseSprite ? 0 : type === 'buffalo' ? motion.amount
     : type === 'zebra' ? Math.min(1, glint * 1.6) : 0;
 
-  for (const [name, p, alpha] of rig.parts) {
+  const ph = PHANTOM[type] && motion && motion.mood === 'phantom' ? PHANTOM[type] : null;
+  const ghost = ph ? ph.low + (1 - ph.low) * (.5 + .5 * Math.cos((motion.time || 0) * Math.PI * 2 / ph.cycle)) : 1;
+  for (const [name, p, a0] of rig.parts) {
+    const alpha = a0 * ghost;
     const sprite = sprites[name === '@head' ? headKey : name];
     if (!sprite) continue;
     const w = p.w, h = p.w * (sprite.h / sprite.w);

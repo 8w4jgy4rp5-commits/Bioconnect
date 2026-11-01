@@ -132,6 +132,18 @@
       pose: { rot: 1.5, sy: -0.022 },
       gesture: { gap: 9, duration: 3.0 }
     },
+    elephant: {
+      fit: { span: 48, ox: 0, oy: 6.4 },
+      frame: { zoom: 1.2, dx: 0, dy: -2 },
+      parts: [
+        ['elephant-calm.png', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'heavy-sway' (script.js pose.elephant)
+      pose: { rot: 0, rotWave: 0.8, sy: 0.012 },
+      gesture: { gap: 25, duration: 4.2 },
+      // a phantom: slowly fades toward see-through and back (script.js PHANTOM)
+      phantom: { cycle: 6, low: 0.6 }
+    },
     lion: {
       fit: { span: 38, ox: 0, oy: 0.16 },
       frame: { zoom: 1.12, dx: 0, dy: 0.4 },
@@ -303,7 +315,8 @@
       var tag = part[3];
       var turn = (p.r || 0) + (tag && rig.swing && rig.swing[tag] ? m.wave * rig.swing[tag] : 0)
         + (tag && rig.lift && rig.lift[tag] ? m.amount * rig.lift[tag] : 0);
-      ctx.globalAlpha = part[2];
+      ctx.globalAlpha = part[2] * (rig.phantom && m.time != null
+        ? rig.phantom.low + (1 - rig.phantom.low) * (.5 + .5 * Math.cos(m.time * Math.PI * 2 / rig.phantom.cycle)) : 1);
       ctx.save();
       ctx.translate(p.x, p.y);
       if (turn) ctx.rotate(turn * Math.PI / 180);
@@ -395,6 +408,7 @@
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
           if (rig.growl) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
             n: Math.floor(t / rig.gesture.gap) + taps };
+          if (rig.phantom) m = { wave: m.wave || 0, amount: m.amount || 0, time: t };
           if (rig.sparkle) {
             m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
               glint: glintAt((now - shine) / 1000, rig.sparkle.glint) };
