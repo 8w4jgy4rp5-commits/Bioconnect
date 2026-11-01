@@ -372,7 +372,9 @@ const ANIMALS = {
   zebra: { diet: ['grass', 'sprout'], eatAt: 21, starveAt: 29 },
   buffalo: { diet: ['grass', 'sprout'], eatAt: 24, starveAt: 33 },
   wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: stamina(WOLF_EAT_AT), starveAt: stamina(WOLF_STARVE_AT) },
-  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: stamina(20), starveAt: stamina(27) },
+  // `guard: 'left'`: the cub walks on the mother's left (the painting
+  // has it there), so an animal on that side is eaten first. See pickMeal.
+  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: stamina(20), starveAt: stamina(27), guard: 'left' },
   // THE BIG MEALS, AND WHY THEY SIT AT THE END OF THE LIST.
   //
   // MEAL_VALUE priced a wolf at 8000 and a tiger at 18000, but nothing ate
@@ -1791,7 +1793,28 @@ function feedEveryone() {
 // wolf still eats the deer if that is all there is — but a dealt rabbit
 // placed beside it now saves the deer, so the player can defend a build
 // by feeding it. The elephant eats only raised animals and is unaffected.
+//
+// THE BEAR GUARDS HER CUB. The cub walks on her left, and an animal
+// standing on that side is the one she deals with first — before the
+// grass, and dealt or raised alike. Only animals: a patch of grass is
+// no threat to anybody. Same hunger clock as before, so she eats no
+// sooner and no more often; she only chooses differently.
+function guardMeal(i, cfg) {
+  if (cfg.guard !== 'left') return null;
+  const own = new Set(footprint(state.cells, i));
+  let target = -1, worst = -1, kind = null;
+  for (const o of own) {
+    if (o % SIZE === 0 || own.has(o - 1)) continue;
+    const p = state.cells[o - 1];
+    if (!p || !isAnimal(p.kind) || cfg.diet.indexOf(p.kind) < 0 || !edible(cfg, p, p.kind)) continue;
+    if (p.clock > worst) { worst = p.clock; target = o - 1; kind = p.kind; }
+  }
+  return target >= 0 ? { at: target, kind: kind } : null;
+}
+
 function pickMeal(i, cfg) {
+  const guarded = guardMeal(i, cfg);
+  if (guarded) return guarded;
   for (const dealtOnly of [true, false]) {
     for (const want of cfg.diet) {
       let target = -1, worst = -1;
@@ -2871,6 +2894,26 @@ const FRIGHT = {
   ] }
 };
 
+// THE CUB'S NERVES. The cub on the bear's left is timid, about a third
+// as jumpy as the deer: while any animal stands on that side it buzzes
+// for one second in every three, with four marks round the cub only (no
+// shake, since the mother is in the same painting and she is not
+// scared). It also tells the player who the mother is about to eat.
+const CUB = {
+  bear: { every: 3, on: 1, marks: [[-1.6, 1.4, -95], [-10.2, 4.4, -135], [-11.6, 7.9, 180], [2.3, 5.4, -15]] }
+};
+
+function bearMood(i) {
+  if (i == null || i < 0) return '';
+  const own = new Set(footprint(state.cells, i));
+  for (const o of own) {
+    if (o % SIZE === 0 || own.has(o - 1)) continue;
+    const p = state.cells[o - 1];
+    if (p && isAnimal(p.kind)) return 'guard';
+  }
+  return '';
+}
+
 function frightTick() { return Math.floor(performance.now() / 90); }
 
 // One shock mark: a short zigzag pointing away from the body, black with
@@ -3060,7 +3103,7 @@ function deerMood(i) {
 }
 
 // Feelings about the neighbours, per kind (painted only while calm).
-const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood };
+const MOODS = { buffalo: buffaloMood, wolf: wolfMood, deer: deerMood, bear: bearMood };
 
 // Three short growl strokes fanning out from the mouth, dark ink with a
 // pale rim so they read on any tile.
@@ -3246,6 +3289,14 @@ function paintAnimal(canvas, type, fed, motion, size, panic) {
       paintStar(ctx, g.x - 2.4, g.y + 2.2, R * .38 * glint, .4, Math.min(1, glint * 4));
     }
     ctx.globalAlpha = 1;
+  }
+  const cub = CUB[type] && motion && motion.mood === 'guard' && !panic ? CUB[type] : null;
+  if (cub && ((motion.time || 0) % cub.every) < cub.on) {
+    const odd = frightTick() % 2;
+    cub.marks.forEach(function (k, i) {
+      if ((i + odd) % 4 === 0) return;
+      paintShock(ctx, k[0] + (odd ? .3 : -.15), k[1] + (odd ? -.2 : .2), k[2] + (odd ? 8 : -6), odd ? -1 : 1, s);
+    });
   }
   if (fright) {
     const odd = buzz % 2;
@@ -3593,6 +3644,9 @@ function inReach() {
     if (!c || !isAnimal(c.kind) || isShadow(state.cells, i)) continue;
     const cfg = ANIMALS[c.kind];
     if (c.clock + 1 < cfg.eatAt) continue;
+    // the bear with something by her cub: that one, and only that one
+    const guarded = guardMeal(i, cfg);
+    if (guarded) { risk.add(guarded.at); continue; }
     for (const n of tileNeighbours(state.cells, i)) {
       const p = state.cells[n];
       if (p && cfg.diet.indexOf(p.kind) >= 0 && edible(cfg, p, p.kind)) risk.add(n);

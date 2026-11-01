@@ -365,9 +365,9 @@ const bearGrowth = X.ctx.growFrom(at(2, 1));
 ok('wolves merge into a bear on the existing square', cell(1, 1).kind === 'bear' && !cell(2, 1));
 ok('bear growth awards 1500 base points', X.ctx.growValue('bear') === 1500);
 ok('creating a bear does not end the run', !S.over);
-board([[1, 1, 'bear', starving('bear')], [2, 1, 'grass'], [0, 1, 'rabbit']]);
+board([[1, 1, 'bear', starving('bear')], [2, 1, 'grass'], [1, 2, 'rabbit']]);
 m = X.ctx.feedEveryone();
-ok('bear prefers grass over rabbits', m.length === 1 && m[0].ateKind === 'grass' && cell(0, 1).kind === 'rabbit');
+ok('bear prefers grass over rabbits', m.length === 1 && m[0].ateKind === 'grass' && cell(1, 2).kind === 'rabbit');
 board([[1, 1, 'bear', starving('bear')], [2, 1, 'rabbit']]);
 m = X.ctx.feedEveryone();
 ok('bear can eat rabbits when grass is absent', m.length === 1 && m[0].points === 500);
@@ -806,6 +806,20 @@ for (const [k, e, d] of [['wolf', 17, 21], ['bear', 20, 27], ['lion', 27, 37], [
 ok('the small animals keep their old pace', X.ANIMALS.rabbit.starveAt === 11 && X.ANIMALS.fox.starveAt === 16 && X.ANIMALS.deer.starveAt === 25);
 ok('the elephant is still the hungriest thing on the board',
    X.ANIMALS.elephant.starveAt < X.ANIMALS.tiger.starveAt && X.ANIMALS.elephant.starveAt < X.ANIMALS.wolf.starveAt);
+
+console.log('\nthe bear guards her cub on the left');
+board([[2, 2, 'bear', starving('bear')], [1, 2, 'deer', 0, RAISED], [3, 2, 'grass'], [2, 1, 'rabbit']]);
+m = X.ctx.feedEveryone();
+ok('a hungry bear eats the animal on her left before grass or a dealt rabbit', !cell(1, 2) && cell(3, 2) && cell(2, 1), JSON.stringify(m));
+board([[2, 2, 'bear', starving('bear')], [1, 2, 'grass'], [3, 2, 'rabbit']]);
+m = X.ctx.feedEveryone();
+ok('grass on her left is no threat: she eats as before', !cell(1, 2) && cell(3, 2), JSON.stringify(m));
+board([[2, 2, 'bear', starving('bear') - 1], [1, 2, 'deer']]);
+m = X.ctx.feedEveryone();
+ok('she still waits for her hunger before eating', cell(1, 2) && cell(1, 2).kind === 'deer');
+board([[0, 2, 'bear', starving('bear')], [1, 2, 'rabbit']]);
+m = X.ctx.feedEveryone();
+ok('on the left edge she eats as before', !cell(1, 2));
 
 console.log('\nthe page asks for the current files');
 ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());

@@ -105,6 +105,23 @@
       mirror: { x: 24.4, y: -4.2, r: 3.5 },
       gesture: { gap: 7, duration: 2.4 }
     },
+    bear: {
+      fit: { span: 38, ox: 4.79, oy: -0.48 },
+      frame: { zoom: 1.26, dx: 4.79, dy: 0.4 },
+      parts: [
+        ['bear-calm.png', { w: 44.48, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
+      ],
+      // 'stand tall': the mother lifts her head and stands up a little
+      pose: { rot: -1.6, sy: 0.012 },
+      gesture: { gap: 9, duration: 2.4 },
+      // the cub is a third as jumpy as the deer: 10 s cycle, about 3 s
+      // of buzzing, four marks round the cub only and no shake (the
+      // mother is in the same painting). Same marks as script.js CUB.
+      fright: {
+        cycle: 10, scared: 3.3, shake: 0,
+        marks: [[-1.6, 1.4, -95], [-10.2, 4.4, -135], [-11.6, 7.9, 180], [2.3, 5.4, -15]]
+      }
+    },
     wolf: {
       fit: { span: 38, ox: 0, oy: 3.71 },
       frame: { zoom: 1.2, dx: 0, dy: 0.6 },
