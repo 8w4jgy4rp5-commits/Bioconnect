@@ -12,16 +12,17 @@
   <meta property="og:url" content="https://bioconnectpazzle.com/animals/rabbit/" />
   <meta property="og:image" content="https://bioconnectpazzle.com/og-image.jpg" />
   <link rel="icon" href="../../favicon.ico" />
-  <link rel="stylesheet" href="../../guide/guide.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Special+Elite&display=swap" />
+  <link rel="stylesheet" href="../../guide/guide.css?v=3" />
   <style>
-    .portrait { display:flex; gap:12px; align-items:center; margin:14px 0 4px; }
-    .portrait figure { margin:0; flex:1; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 4px 6px; }
-    .portrait img { width:72px; height:72px; object-fit:contain; }
-    .portrait figcaption { font-size:13px; color:var(--mute); }
+    .specimen { margin:16px 0 6px; text-align:center; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 8px 10px; box-shadow:inset 0 0 0 4px var(--bg), inset 0 0 0 5px var(--plum); }
+    .specimen img { width:160px; height:auto; }
+    .specimen figcaption { font:13px var(--type); color:var(--mute); }
     .facts { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:4px 14px; }
-    .facts dt { font-weight:600; margin-top:10px; }
+    .facts dt { font:15px var(--type); color:var(--accent); margin-top:10px; }
     .facts dd { margin:0 0 10px; }
-    .steps { display:flex; justify-content:space-between; gap:8px; margin:28px 0 0; font-size:14px; }
+    .steps { font-family:var(--type); display:flex; justify-content:space-between; gap:8px; margin:28px 0 0; font-size:14px; }
   </style>
 </head>
 <body>
@@ -30,11 +31,10 @@
   <h1>The Rabbit</h1>
   <p class="lead">The rabbit is the first animal on Bioconnect's food chain. It lives anywhere there is grass, it loves to eat, and beyond that there is honestly not much to say about it. He hates being called an "ordinary rabbit", so please try not to say it to his face. But he is. He is a very ordinary rabbit.</p>
 
-  <div class="portrait" aria-label="The rabbit's moods">
-    <figure><img src="../../img/rabbit-head-calm.png" alt="The rabbit, calm" /><figcaption>Calm</figcaption></figure>
-    <figure><img src="../../img/rabbit-head-eat.png" alt="The rabbit, eating" /><figcaption>Eating</figcaption></figure>
-    <figure><img src="../../img/rabbit-head-panic.png" alt="The rabbit, starving" /><figcaption>Starving</figcaption></figure>
-  </div>
+  <figure class="specimen">
+    <img src="../../img/rabbit-pose-v2.png" alt="The rabbit from Bioconnect, a plain cream-coloured rabbit with pink ears" width="171" height="220" />
+    <figcaption>Specimen No. 3 · Rabbit · thoroughly ordinary</figcaption>
+  </figure>
 
   <dl class="facts">
     <dt>Place on the food chain</dt>
