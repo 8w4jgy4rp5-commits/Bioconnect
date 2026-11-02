@@ -162,8 +162,8 @@
 }
 .skin-eldritch .start-controls .start-play { font-size: clamp(1.05rem, 4.6vw, 1.3rem); }
 .skin-eldritch .start-controls .start-icon svg { display: none; }
-.skin-eldritch .start-controls button { text-decoration: none; }
-.skin-eldritch .start-controls button span:not(.ledger-dot) { font: inherit; letter-spacing: inherit; }
+.skin-eldritch .start-controls :is(button, a) { text-decoration: none; }
+.skin-eldritch .start-controls :is(button, a) span:not(.ledger-dot) { font: inherit; letter-spacing: inherit; }
 .skin-eldritch .start-controls .start-basics { font-size: 0; }
 .skin-eldritch .start-controls .start-basics::after { content: "Practice"; font-size: clamp(.92rem, 3.9vw, 1.08rem); }
 .skin-eldritch .start-controls .start-icon[hidden] { display: none; }
