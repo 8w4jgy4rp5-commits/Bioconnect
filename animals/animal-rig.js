@@ -136,7 +136,8 @@
     },
     elephant: {
       fit: { span: 48, ox: 0, oy: 6.4 },
-      frame: { zoom: 1.08, dx: 0, dy: -2 },
+      // the field book shows it wide (16:11), so it fills the width
+      frame: { zoom: 1.0, dx: 0, dy: -6.4 },
       parts: [
         ['elephant-calm.png', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
       ],
@@ -278,19 +279,21 @@
   }
 
   function paint(canvas, rig, imgs, m) {
-    var px = canvas.clientWidth || 160;
+    // square by default; a wide canvas (the elephant) keeps the width as
+    // its measure and centres the animal in the shorter height
+    var px = canvas.clientWidth || 160, ph = canvas.clientHeight || px;
     var dpr = Math.min(3, window.devicePixelRatio || 1);
-    var backing = Math.round(px * dpr);
-    if (canvas.width !== backing) { canvas.width = backing; canvas.height = backing; }
+    var backing = Math.round(px * dpr), backingH = Math.round(ph * dpr);
+    if (canvas.width !== backing || canvas.height !== backingH) { canvas.width = backing; canvas.height = backingH; }
     var ctx = canvas.getContext('2d');
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, px, px);
+    ctx.clearRect(0, 0, px, ph);
     // The game tile crops ear tips and tails at its edge; a portrait
     // zooms out and re-centres per animal (rig.frame).
     var f = rig.frame || { zoom: 1.25, dx: 0, dy: 0 };
     var s = px / (rig.fit.span * f.zoom);
     ctx.save();
-    ctx.translate(px / 2 + (f.dx - rig.fit.ox) * s, px / 2 + (rig.fit.oy + f.dy) * s);
+    ctx.translate(px / 2 + (f.dx - rig.fit.ox) * s, ph / 2 + (rig.fit.oy + f.dy) * s);
     ctx.scale(s, s);
     if (rig.fit.tilt) ctx.rotate(rig.fit.tilt * Math.PI / 180);
     var fr = rig.fright && m.scared ? m.tick : -1;

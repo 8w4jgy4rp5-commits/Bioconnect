@@ -62,8 +62,10 @@
     /* calm, even, unbothered */
     @keyframes tiger-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.006 1.01; } }
     /* the elephant gets the biggest portrait: the strongest needs room */
-    #elephant .specimen canvas { width:min(420px, 100%); height:auto; aspect-ratio:1; animation:elephant-breathe 5s ease-in-out infinite; }
+    #elephant .specimen canvas { width:100%; max-width:none; height:auto; aspect-ratio:16/11.6; animation:elephant-breathe 5s ease-in-out infinite; }
     @keyframes elephant-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.008 1.012; } }
+    /* on a phone the elephant's box reaches out under the page-turn arrows */
+    @media (max-width:839px) { #elephant .specimen { margin-left:-44px; margin-right:-44px; padding-left:4px; padding-right:4px; } }
     @media (prefers-reduced-motion: reduce) { .specimen canvas { animation:none !important; } }
 
     .turn { position:fixed; top:50%; transform:translateY(-50%); z-index:5; width:44px; height:64px; display:grid; place-items:center; padding:0; border:1px solid var(--line); background:color-mix(in srgb, var(--card) 88%, transparent); color:var(--accent); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.4); }
@@ -540,6 +542,6 @@
   fromHash();
 })();
 </script>
-<script src="animal-rig.js?v=book2" defer></script>
+<script src="animal-rig.js?v=book4" defer></script>
 </body>
 </html>
