@@ -136,8 +136,9 @@
     },
     elephant: {
       fit: { span: 48, ox: 0, oy: 6.4 },
-      // the field book shows it wide (16:11), so it fills the width
-      frame: { zoom: 1.0, dx: 0, dy: -6.4 },
+      // the field book shows it wide, so it fills the width, a little left
+      // of centre to leave air in front of the trunk for the steam
+      frame: { zoom: 1.1, dx: -2.6, dy: -6.6 },
       parts: [
         ['elephant-calm.png', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
       ],
@@ -145,7 +146,11 @@
       pose: { rot: 0, rotWave: 0.8, sy: 0.012 },
       gesture: { gap: 25, duration: 4.2 },
       // a phantom: slowly fades toward see-through and back (script.js PHANTOM)
-      phantom: { cycle: 6, low: 0.6 }
+      phantom: { cycle: 6, low: 0.6 },
+      // during the sway it snorts: puffs of steam from the trunk's tip
+      // (the curled end of the trunk, in rig units), at these seconds into
+      // the gesture; each snort is a few puffs rising and spreading
+      steam: { x: 19, y: 8.2, at: [0.7, 2.3], life: 1.6, puffs: 5, reach: 6 }
     },
     lion: {
       fit: { span: 38, ox: 0, oy: 0.16 },
@@ -234,6 +239,39 @@
 
   // The big "shing!": a fast pop, a glow, a long slow fade.
   // the wolf's growl strokes (script.js paintGrowl)
+  // Snorted steam: a cartoon "pshh!" - small round clouds fanned out of
+  // the trunk tip (forward and up), each racing out, then slowing,
+  // swelling and fading. gt = seconds into the gesture.
+  var STEAM_FAN = [[-12, 1, 0], [-38, .9, .1], [-62, .8, .05], [8, .7, .16], [-25, .65, .24]];
+  function cloud(ctx, x, y, r, alpha) {
+    // three overlapping blobs read as a puff, not a ball
+    [[0, 0, 1], [-.55, .25, .7], [.5, .3, .75]].forEach(function (b) {
+      var cx = x + b[0] * r, cy = y + b[1] * r, cr = r * b[2];
+      var g = ctx.createRadialGradient(cx, cy - cr * .3, 0, cx, cy, cr);
+      g.addColorStop(0, 'rgba(255,255,252,' + alpha + ')');
+      g.addColorStop(.7, 'rgba(240,242,240,' + alpha * .85 + ')');
+      g.addColorStop(1, 'rgba(230,234,232,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function steamAt(ctx, st, gt) {
+    st.at.forEach(function (t0) {
+      STEAM_FAN.forEach(function (f, i) {
+        if (i >= st.puffs) return;
+        var a = (gt - t0 - f[2]) / st.life;     // 0 → 1 over a puff's life
+        if (a <= 0 || a >= 1) return;
+        var e = 1 - Math.pow(1 - a, 3);           // shoots out, then floats
+        var ang = f[0] * Math.PI / 180, dist = st.reach * f[1] * e;
+        var x = st.x + Math.cos(ang) * dist;
+        var y = st.y + Math.sin(ang) * dist - a * a * 2.5;   // drifts up as it slows
+        var r = .7 + 1.9 * e * f[1];
+        var alpha = (a < .08 ? a / .08 : Math.pow(1 - (a - .08) / .92, 1.4)) * .9;
+        cloud(ctx, x, y, r, alpha);
+      });
+    });
+  }
+
   function growlAt(ctx, x, y, t) {
     ctx.save();
     ctx.translate(x, y);
@@ -369,6 +407,7 @@
       ctx.globalAlpha = 1;
     }
     if (growl > .3) growlAt(ctx, rig.growl.x, rig.growl.y, m.time || 0);
+    if (rig.steam && m.gt != null && m.gt < rig.gesture.duration + rig.steam.life) steamAt(ctx, rig.steam, m.gt);
     if (fr >= 0) {
       // two drawings swapped every tick, like the classic cartoon buzz
       var odd = fr % 2;
@@ -414,7 +453,8 @@
           var t = (now - start) / 1000, m = motion(t, rig.gesture);
           if (rig.growl) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
             n: Math.floor(t / rig.gesture.gap) + taps };
-          if (rig.phantom) m = { wave: m.wave || 0, amount: m.amount || 0, time: t };
+          if (rig.phantom) m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
+            gt: rig.steam ? ((t % rig.gesture.gap) + rig.gesture.gap) % rig.gesture.gap : null };
           if (rig.sparkle) {
             m = { wave: m.wave || 0, amount: m.amount || 0, time: t,
               glint: glintAt((now - shine) / 1000, rig.sparkle.glint) };
