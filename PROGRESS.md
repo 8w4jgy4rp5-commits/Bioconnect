@@ -2220,3 +2220,8 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 変更: index.html のメニュー（PLAY / Practice / No Ads / Achievements）の最後に `animals/` へのリンク「Animals」（#startAnimalsLink）。夕暮れの文字メニューでは他と同じ書体・字間で並ぶ（dusk.css の button 向けルールを a にも適用）。月夜/ポップの見た目では Achievements と同じ形のアイコンボタン（本の絵）。style.css / dusk.css の ?v= を更新（他のファイルの stamp は改行差で変わるため触らない）。
 - 検証: rules.test.js 283成功・1失敗（stamp一致。変更前から同じく失敗する既存の改行差）。Chromium 390×844 / 360×640 / 1280×800 / 812×375 で、Tap to begin のあとにメニュー4行目として表示、動物の影絵と重ならない、押すと /animals/ が開くことを確認。
 - 未確認: スマホ実機。
+
+## 2026-11-02 — 図鑑のゾウの絵を大きく
+- 依頼: ゾウのページで、横幅に対してゾウの絵が小さい。
+- 変更: animals/index.html でゾウの絵の枠を 240px → 最大420px（狭い画面では枠の幅いっぱい）に。animal-rig.js のゾウの寄り（frame.zoom）を 1.2 → 1.08 にして枠の中でも大きく。rig の ?v= を book2 に。
+- 検証: Chromium 1280幅で絵の幅 約190px → 約360px、390幅で約120px → 約225px。端は切れていない（描画範囲を測定）。他の動物は変更なし。

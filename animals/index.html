@@ -61,7 +61,8 @@
     #tiger .specimen canvas { width:240px; height:240px; animation:tiger-breathe 4s ease-in-out infinite; }
     /* calm, even, unbothered */
     @keyframes tiger-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.006 1.01; } }
-    #elephant .specimen canvas { width:240px; height:240px; animation:elephant-breathe 5s ease-in-out infinite; }
+    /* the elephant gets the biggest portrait: the strongest needs room */
+    #elephant .specimen canvas { width:min(420px, 100%); height:auto; aspect-ratio:1; animation:elephant-breathe 5s ease-in-out infinite; }
     @keyframes elephant-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.008 1.012; } }
     @media (prefers-reduced-motion: reduce) { .specimen canvas { animation:none !important; } }
 
@@ -539,6 +540,6 @@
   fromHash();
 })();
 </script>
-<script src="animal-rig.js?v=book1" defer></script>
+<script src="animal-rig.js?v=book2" defer></script>
 </body>
 </html>

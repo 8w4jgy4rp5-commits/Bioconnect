@@ -136,7 +136,7 @@
     },
     elephant: {
       fit: { span: 48, ox: 0, oy: 6.4 },
-      frame: { zoom: 1.2, dx: 0, dy: -2 },
+      frame: { zoom: 1.08, dx: 0, dy: -2 },
       parts: [
         ['elephant-calm.png', { w: 45, x: 0, y: 0, px: 0.5, py: 0.5 }, 1]
       ],
