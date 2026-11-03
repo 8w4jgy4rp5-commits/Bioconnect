@@ -2,7 +2,8 @@
 window.BioEconomy = (() => {
   'use strict';
   const cfg = window.BioMonetizationConfig || {};
-  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
+  // The iPhone app also runs at localhost (capacitor://localhost); it is never a test bench.
+  const loopback = !window.BIO_APP && ['127.0.0.1', 'localhost', '[::1]'].includes(location.hostname);
   const test = loopback ? window.__BIOCONNECT_TEST_ADAPTER__ : null;
   let session = null, wallet = null, known = false, epoch = 0, busy = false;
   let panel = null, adPanel = null, adActive = false, pending = null, refreshTimer = 0, opener = null;
@@ -115,6 +116,9 @@ window.BioEconomy = (() => {
     if ($('confirmBack')) $('confirmBack').disabled = busy || leaving;
     if ($('reviveCrystal')) {
       const used = !s?.over || s.revived || !storeOn;
+      // With no store (the iPhone app for now) there is nothing to revive with,
+      // so the heading, its line and its divider go too.
+      for (const el of document.querySelectorAll('#gameover .go-rule, #gameover .revive-heading, #gameover .revive-summary')) el.hidden = !storeOn;
       // One revive button at a time: a pending retry first, then the daily
       // dawn, then a Crystal, then a rewarded ad, then a way to the store.
       const adOk = !paid && known && !(session && !wallet) && (!!test || cfg.adsEnabled);

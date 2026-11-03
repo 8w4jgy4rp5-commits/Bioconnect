@@ -23,6 +23,9 @@ const FILES = [
   'legal/privacy.html', 'legal/terms.html', 'legal/legal.css'
 ];
 const DIRS = ['img', 'audio', 'watch'];
+// The app's own privacy policy and terms (also on the website, for the App
+// Store listing) stand in for the website's, which describe Stripe and ads.
+const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html' };
 const SKIP = new Set(['img/ref']);   // reference art for drawing, not used by the game
 
 // Scripts and tags the app must not load (they need the network or an account).
@@ -45,7 +48,7 @@ const FACES = [
 ];
 
 function copy(rel) {
-  const from = path.join(ROOT, rel), to = path.join(OUT, rel);
+  const from = path.join(ROOT, SWAP[rel.split(path.sep).join('/')] || rel), to = path.join(OUT, rel);
   if (SKIP.has(rel.replace(/\\/g, '/'))) return;
   if (fs.statSync(from).isDirectory()) {
     for (const name of fs.readdirSync(from)) copy(path.join(rel, name));
@@ -77,14 +80,64 @@ function page(rel) {
   // The night skin adds its fonts from a script; point that at the bundle too.
   html = html.replace(/'https:\/\/fonts\.googleapis\.com\/css2[^']*'/g, `'${up}fonts/fonts.css'`);
   html = html.replace(/<head>/, '<head>\n<script>window.BIO_APP = true;</script>');
+
+  // Pages the app does not ship (the web landing page, the Stripe seller page):
+  // drop their links, with the " · " that joined them to a neighbour.
+  html = html.replace(/\s*·\s*<a href="(\.\.\/)?about\/">[^<]*<\/a>/g, '')
+    .replace(/<a href="(\.\.\/)?about\/">[^<]*<\/a>\s*·\s*/g, '')
+    .replace(/\s*·\s*<a href="(legal\/)?commerce\.html"[^>]*>[^<]*<\/a>/g, '')
+    .replace(/<a href="(legal\/)?commerce\.html"[^>]*>[^<]*<\/a>\s*·\s*/g, '');
+  // Inside the app, a path ending in "/" opens the game's front page, not the
+  // folder's page, so every link names its index.html.
+  html = html.replace(/href="((?:\.\.\/)*(?:[a-z-]+\/)*)(#[^"]*)?"/g, (m, dir, hash) =>
+    dir === '' && hash ? m : `href="${dir}index.html${hash || ''}"`);
+  // The app has no browser tabs: local pages open in place.
+  html = html.replace(/(<a href="(?!https?:|mailto:)[^"]*")\s+target="_blank"\s+rel="noopener noreferrer"/g, '$1');
+  // The swapped-in legal pages link to each other by their app names.
+  html = html.replace(/href="app-(privacy|terms)\.html"/g, 'href="$1.html"')
+    .replace(/\s*The website version has <a href="privacy\.html">its own privacy policy<\/a>\./, '');
+  // Words written for a browser.
+  html = html.replace(/saved in this browser \(and synced when you are logged in\)/g, 'saved on this device')
+    .replace(/saved in this browser/g, 'saved on this device')
+    .replace(/Play Bioconnect — free in your browser/g, 'Play Bioconnect');
   if (/https:\/\/(cdn\.jsdelivr|fonts\.googleapis|static\.cloudflareinsights)/.test(html)) {
     throw new Error(rel + ' still loads something from the network');
   }
   fs.writeFileSync(file, html);
 }
 
+// The app has no sign-in, store or ads yet: purchases arrive through Apple
+// later. With the store off, the shop, wallet and revive buttons stay hidden.
+const APP_CONFIG = `// App build (app/build-app.cjs): no sign-in, no Stripe, no ads.
+window.BioMonetizationConfig = Object.freeze({
+  storeEnabled: false,
+  paymentsEnabled: false,
+  adsEnabled: false,
+  adClient: '',
+  adTestMode: false
+});
+`;
+
+// Every local link and file reference must land on a file that ships, and
+// no link may end in "/" (see page()).
+function checkLinks(htmlFiles) {
+  const broken = [];
+  for (const rel of htmlFiles) {
+    const html = fs.readFileSync(path.join(OUT, rel), 'utf8');
+    for (const [, url] of html.matchAll(/(?:href|src)="([^"]*)"/g)) {
+      if (/^(https?:|mailto:|data:|#|\/\/)/.test(url) || url === '') continue;
+      const clean = url.split('#')[0].split('?')[0];
+      if (clean.endsWith('/') || !fs.existsSync(path.join(OUT, path.dirname(rel), clean))) broken.push(`${rel}: ${url}`);
+    }
+  }
+  if (broken.length) throw new Error('broken links in the app build:\n  ' + broken.join('\n  '));
+}
+
 fs.rmSync(OUT, { recursive: true, force: true });
 for (const rel of [...FILES, ...DIRS]) copy(rel);
 fonts();
-for (const rel of FILES.filter(f => f.endsWith('.html'))) page(rel);
+fs.writeFileSync(path.join(OUT, 'shared', 'monetization-config.js'), APP_CONFIG);
+const pages = FILES.filter(f => f.endsWith('.html'));
+for (const rel of pages) page(rel);
+checkLinks(pages);
 console.log('app/www built');

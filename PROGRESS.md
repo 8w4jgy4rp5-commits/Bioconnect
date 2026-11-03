@@ -2248,3 +2248,11 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - iOS設定: iPhone専用（TARGETED_DEVICE_FAMILY=1）、縦画面のみ、ITSAppUsesNonExemptEncryption=false、スプラッシュは Capacitor ロゴを外して #10150e の無地。アイコンは icon-512 を1024に拡大した仮（ハロウィン版の絵）。
 - 検証: node app/check-offline.cjs（Chrome / --webkit）で、外部通信をすべて遮断したままタイトル→プレイ→図鑑・ガイド・規約が開け、ページエラー・欠けファイル・フォント欠けなし。.github/workflows/ios-build.yml でMac上の署名なしシミュレータ用ビルドを確認する。
 - 未対応: アプリ内のログイン・ショップ・Stripe・Aboutリンク・外部リンクの表示（②③で BIO_APP を見て隠す）、Apple課金（①）、正式な1024アイコン、署名とTestFlight送信。
+
+## 2026-11-03 — iPhoneアプリ化 ②③：アプリ版はログイン・ショップなし
+- アイコン: 本人指定の「月夜のうさぎ」（concepts/app-icon-v1/final/icon-square.svg）を1024pxで描き直してアプリアイコンに。
+- monetization.js: アプリ内は capacitor://localhost で動くため、window.BIO_APP のときは localhost をテスト環境扱いしない（テスト用アダプタ・ショップ自動ONを防ぐ）。ショップOFF時はゲームオーバーの「Revive — keep your score」見出し・説明・区切り線も隠す（ウェブ版は storeEnabled=true なので見た目は変わらない）。
+- app/build-app.cjs: アプリ用 monetization-config（store/payments/ads すべてOFF）を書き出す。About・Seller informationへのリンクを外す。「/」で終わるリンクは index.html 付きに直す（アプリ内では拡張子なしの住所がトップ画面になるため）。ローカルリンクの target="_blank" を外す。「saved in this browser」→「saved on this device」。規約・プライバシーはアプリ用（legal/app-terms.html・app-privacy.html、ウェブにも公開＝App Storeに載せるURL）に差し替え。リンク切れがあればビルド失敗。
+- アプリ版は通信も収集もなし → App Storeのプライバシー欄は「データの収集なし」で申告できる。
+- 検証: node app/check-offline.cjs（Chrome / --webkit）で、アプリと同じ住所ルールのサーバー・外部通信遮断のまま、プレイ→ゲームオーバー→タイトルの図鑑ボタン→ガイド→プライバシー→規約→ホームをリンクでたどり、ショップ・ウォレット・復活ボタンや「Sign in / Crystal / No Ads / Stripe / browser」の文字が出ないこと、フォント・ページエラーなしを確認。npm test は stamp 1件のみ失敗（手元のCRLFが原因で、公開中のLF内容とは一致。既知）。
+- 次: ① Apple課金（Developer登録後）。X共有ボタンがアプリ内でSafariに開くかは実機（TestFlight）で確認。

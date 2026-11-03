@@ -17,7 +17,8 @@ const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/cs
 function serve() {
   const server = http.createServer((req, res) => {
     let rel = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-    if (rel.endsWith('/')) rel += 'index.html';
+    // Like the app (Capacitor): a path with no file extension gets the front page.
+    if (!path.extname(rel)) rel = '/index.html';
     const file = path.join(WWW, rel);
     if (!file.startsWith(WWW) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
       res.writeHead(404); res.end(); return;
@@ -63,6 +64,19 @@ function serve() {
   await page.goto(base);
   await page.locator('#startBtn').waitFor({ state: 'visible' });
   await fontsOk('title');
+  // No sign-in, store, wallet or ads anywhere in the app.
+  const noStore = async where => {
+    const seen = await page.evaluate(() => {
+      const ids = ['startShopBtn', 'startWallet', 'startNoAdsBtn', 'shopBtn', 'shopModal', 'reviveDawnLocked',
+        'reviveDaily', 'reviveCrystal', 'reviveAd', 'reviveFind'];
+      const shown = ids.filter(id => { const el = document.getElementById(id); return el && el.checkVisibility(); });
+      const text = document.body.innerText;
+      const words = ['Sign in', 'Crystal', 'No Ads', 'Stripe', 'browser'].filter(w => text.includes(w));
+      return shown.concat(words.map(w => `"${w}"`));
+    });
+    if (seen.length) problems.push(`${where}: visible in the app: ${seen.join(', ')}`);
+  };
+  await noStore('title');
   await page.locator('#startBtn').focus(); await page.locator('#startBtn').press('Enter');  // it pulses, so a click never sees it still
   if (await page.locator('#lessonBar').isVisible()) await page.locator('#lessonSkip').click();
   await page.locator('#countdown').waitFor({ state: 'hidden', timeout: 15000 });
@@ -75,17 +89,39 @@ function serve() {
   if (!placed) problems.push('game: nothing was placed on the board');
   await page.screenshot({ path: path.join(__dirname, 'offline-game.png') });
 
-  for (const rel of ['animals/', 'guide/', 'legal/privacy.html', 'legal/terms.html']) {
-    await page.goto(base + rel);
+  // A finished game: the results must not offer a paid revive or a sign-in.
+  await page.evaluate(() => { state.over = false; state.paused = true; render(); endRun(); });
+  await page.locator('#gameover').waitFor({ state: 'visible' });
+  await page.waitForTimeout(1200);
+  await noStore('game over');
+  await page.screenshot({ path: path.join(__dirname, 'offline-gameover.png') });
+
+  // Walk the pages by their own links, as a player would, and back home.
+  const walk = [['#startAnimalsLink', 'animals/index.html'], ['a[href="../guide/index.html"]', 'guide/index.html'],
+    ['a[href="../legal/privacy.html"]', 'legal/privacy.html'], ['a[href="terms.html"]', 'legal/terms.html'],
+    ['a[href="../index.html"]', 'index.html']];
+  await page.goto(base);
+  for (const [link, rel] of walk) {
+    if (link === '#startAnimalsLink') {  // the dusk opening asks for one tap before its buttons
+      await page.locator('#startBtn').waitFor({ state: 'visible' });
+      await page.locator('.start-stage').click({ position: { x: 195, y: 300 } });
+      await page.waitForTimeout(1500);
+    }
+    await page.locator(link).first().click({ timeout: 5000 });
+    await page.waitForURL(u => (new URL(u).pathname.slice(1) || 'index.html') === rel, { timeout: 8000 }).catch(() => {});
+    await page.waitForLoadState('load');
+    const at = new URL(page.url()).pathname.slice(1) || 'index.html';
+    if (process.env.DEBUG_WALK) console.log('after', link, '->', page.url());
+    if (at !== rel) problems.push(`link ${link} led to ${at}, not ${rel}`);
     await fontsOk(rel);
+    await noStore(rel);
+    if (rel === 'animals/index.html') await page.screenshot({ path: path.join(__dirname, 'offline-book.png') });
   }
-  await page.goto(base + 'animals/');
-  await page.screenshot({ path: path.join(__dirname, 'offline-book.png') });
 
   await browser.close(); server.close();
   if (problems.length) {
     console.log([...new Set(problems)].join('\n'));
     process.exit(1);
   }
-  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 4 pages opened, no network used`);
+  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links, no store or sign-in shown, no network used`);
 })().catch(e => { console.error(e); process.exit(1); });
