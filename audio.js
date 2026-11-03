@@ -7,7 +7,9 @@ window.BioAudio = (() => {
   let playingKinds = [], pinch = false, playingPinch = false;
   // Fetch our local asset early, then decode once the browser has an audio context.
   // Failure leaves the usual merge sounds intact; never substitute synthetic claps.
-  const load = url => fetch(url)
+  // Resolved next to this script, so the field book (animals/) finds them too.
+  const base = document.currentScript ? document.currentScript.src : location.href;
+  const load = url => fetch(new URL(url, base))
     .then(response => response.ok ? response.arrayBuffer() : null).catch(() => null);
   const applauseData = load('audio/applause-02.mp3'), cheerData = load('audio/cheer-crowd01-6.mp3');
   // Missing until the owner's recording is added; a 404 just means no voice.

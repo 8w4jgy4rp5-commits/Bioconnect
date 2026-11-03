@@ -548,8 +548,10 @@
     show(i < 0 ? 0 : i, at >= 0);
   }
 
-  prev.addEventListener('click', function () { go(-1); });
-  next.addEventListener('click', function () { go(1); });
+  // The opening screen's music box keeps playing here; a page turn clicks like the game's buttons.
+  function coin() { if (window.BioAudio && window.BioAudio.coin) window.BioAudio.coin(); }
+  prev.addEventListener('click', function () { coin(); go(-1); });
+  next.addEventListener('click', function () { coin(); go(1); });
   window.addEventListener('hashchange', fromHash);
   document.addEventListener('keydown', function (e) {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -559,6 +561,8 @@
   fromHash();
 })();
 </script>
+<script src="../audio-synth.js?v=e1ef0f99"></script>
+<script src="../audio.js?v=3c3da7d7"></script>
 <script src="animal-rig.js?v=book8" defer></script>
 </body>
 </html>
