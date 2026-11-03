@@ -1,0 +1,9 @@
+{
+  "appId": "com.bioconnectpazzle.game",
+  "appName": "Bioconnect",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#10150e"
+  }
+}

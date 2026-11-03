@@ -1,0 +1,17 @@
+{
+  "name": "bioconnect-ios",
+  "private": true,
+  "scripts": {
+    "build": "node build-app.cjs",
+    "check": "node check-offline.cjs"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.10",
+    "@capacitor/core": "^7.6.10",
+    "@capacitor/ios": "^7.6.10",
+    "@fontsource/fredoka": "^5.3.0",
+    "@fontsource/im-fell-english": "^5.3.0",
+    "@fontsource/im-fell-english-sc": "^5.3.0",
+    "@fontsource/special-elite": "^5.3.0"
+  }
+}

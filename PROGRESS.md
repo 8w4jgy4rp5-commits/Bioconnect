@@ -2241,3 +2241,10 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 依頼: スマホの図鑑が不格好。A/B案（下にまとめる／上に置く）からB「上に置く」を採用。うさぎの前をぞうにするとぶれるので、うさぎは右のきつねだけ、ぞうは左のトラだけ。
 - 変更（animals/index.html のみ）: 839px以下では前後ボタンを画面上の帯（高さ60px）に「‹ Tiger」「Fox ›」の形で置く。Home は右下のまま。矢印が絵にかからなくなったので、ぞうの枠を矢印の下まで広げる指定は削除。ループをやめ、うさぎでは前ボタン、ぞうでは次ボタンを隠す（キーボードの←→も端で止まる）。PCは位置そのまま、端のボタンが消えるだけ。
 - 検証: Chrome 390×844 / 360×640 / 1280×800 で、うさぎで←が効かず前ボタンなし、→10回でぞうで止まり次ボタンなし、ライオンで次→トラ（前Lion・次Elephant）、横スクロールなし、エラーなし。オープニングは変更なし（本人判断）。
+
+## 2026-11-03 — iPhoneアプリ化 ④：オフラインで動くアプリの土台
+- 方針（本人決定）: App Store版は Apple課金のみ（Stripeはアプリ版だけ外す、ウェブ版は据え置き）。アプリ版はログインなし（②アカウント削除・③Appleでサインインを不要にする）。会社のMacは使わず、GitHub ActionsのMacでビルド。Apple Developer Programは本人が手続き中。
+- 追加: app/（Capacitor 7、iOS、SPM）。app/build-app.cjs がウェブ版から app/www を作る。フォント4種を同梱（@fontsource）し、Supabase・app-sync・Cloudflare解析・AdSense meta・manifestを外し、各ページに window.BIO_APP = true を入れる。img/ref は含めない。ウェブ版のファイルは変更なし。
+- iOS設定: iPhone専用（TARGETED_DEVICE_FAMILY=1）、縦画面のみ、ITSAppUsesNonExemptEncryption=false、スプラッシュは Capacitor ロゴを外して #10150e の無地。アイコンは icon-512 を1024に拡大した仮（ハロウィン版の絵）。
+- 検証: node app/check-offline.cjs（Chrome / --webkit）で、外部通信をすべて遮断したままタイトル→プレイ→図鑑・ガイド・規約が開け、ページエラー・欠けファイル・フォント欠けなし。.github/workflows/ios-build.yml でMac上の署名なしシミュレータ用ビルドを確認する。
+- 未対応: アプリ内のログイン・ショップ・Stripe・Aboutリンク・外部リンクの表示（②③で BIO_APP を見て隠す）、Apple課金（①）、正式な1024アイコン、署名とTestFlight送信。

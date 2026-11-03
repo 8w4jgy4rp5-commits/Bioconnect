@@ -1,0 +1,38 @@
+# Builds the iPhone app on GitHub's Mac, without signing, to prove the
+# Xcode project compiles. Uploading to the App Store comes later, once the
+# Apple Developer account exists and its keys are stored as secrets.
+name: iOS build check
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - '.github/workflows/ios-build.yml'
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install app tools
+        working-directory: app
+        run: npm ci
+      - name: Build the app's game files
+        run: node app/build-app.cjs
+      - name: Copy them into the Xcode project
+        working-directory: app
+        run: npx cap sync ios
+      - name: Compile for the iPhone simulator
+        working-directory: app/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App \
+            -sdk iphonesimulator -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build | tail -40
+          test "${PIPESTATUS[0]}" -eq 0
