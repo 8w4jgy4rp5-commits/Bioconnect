@@ -64,8 +64,6 @@
     /* the elephant gets the biggest portrait: the strongest needs room */
     #elephant .specimen canvas { width:100%; max-width:none; height:auto; aspect-ratio:16/11.6; animation:elephant-breathe 5s ease-in-out infinite; }
     @keyframes elephant-breathe { 0%, 100% { scale:1 1; } 50% { scale:1.008 1.012; } }
-    /* on a phone the elephant's box reaches out under the page-turn arrows */
-    @media (max-width:839px) { #elephant .specimen { margin-left:-44px; margin-right:-44px; padding-left:4px; padding-right:4px; } }
     @media (prefers-reduced-motion: reduce) { .specimen canvas { animation:none !important; } }
 
     .turn { position:fixed; top:50%; transform:translateY(-50%); z-index:5; width:44px; height:64px; display:grid; place-items:center; padding:0; border:1px solid var(--line); background:color-mix(in srgb, var(--card) 88%, transparent); color:var(--accent); cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.4); }
@@ -81,6 +79,19 @@
       .turn { width:56px; height:80px; }
       .turn--prev { left:calc(50% - 360px - 76px); border-left:1px solid var(--line); border-radius:12px; }
       .turn--next { right:calc(50% - 360px - 76px); border-right:1px solid var(--line); border-radius:12px; }
+    }
+
+    .turn[hidden] { display:none; }
+    /* on a phone the page-turn buttons sit in a bar along the top, clear of the words and the portrait */
+    @media (max-width:839px) {
+      main { padding-left:16px; padding-right:16px; padding-top:calc(64px + env(safe-area-inset-top, 0px)); }
+      body::before { content:""; position:fixed; left:0; right:0; top:0; height:calc(60px + env(safe-area-inset-top, 0px)); z-index:4; background:color-mix(in srgb, var(--bg) 92%, transparent); border-bottom:1px solid var(--line); }
+      .turn { top:calc(8px + env(safe-area-inset-top, 0px)); transform:none; width:auto; height:44px; padding:0 14px; display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:999px; }
+      .turn--prev { left:max(12px, env(safe-area-inset-left, 0px)); border-left:1px solid var(--line); border-radius:999px; }
+      .turn--next { right:max(12px, env(safe-area-inset-right, 0px)); border-right:1px solid var(--line); border-radius:999px; }
+      .turn svg { width:18px; height:18px; }
+      .turn small { position:static; margin:0; font-size:13px; color:var(--ink); }
+      .turn--next small { order:-1; }
     }
 
     .home { position:fixed; right:16px; bottom:max(16px, env(safe-area-inset-bottom)); z-index:5; display:flex; align-items:center; gap:8px; padding:10px 18px 10px 14px; border-radius:999px; background:var(--accent); color:var(--on-accent); font:17px/1.2 var(--caps); text-decoration:none; box-shadow:0 0 0 3px var(--bg), 0 0 0 4px var(--plum), 0 4px 14px rgba(0,0,0,.45); }
@@ -504,16 +515,21 @@
   var at = -1;
 
   function show(i, focus) {
-    i = (i + pages.length) % pages.length;   // the book loops: after the elephant comes the rabbit
-    if (i === at) return;
+    if (i < 0 || i >= pages.length || i === at) return;   // the book has ends: nothing before the rabbit, nothing after the elephant
     if (at >= 0) pages[at].hidden = true;
     at = i;
     pages[i].hidden = false;
-    var p = (i - 1 + pages.length) % pages.length, n = (i + 1) % pages.length;
-    document.getElementById('prevName').textContent = names[p];
-    document.getElementById('nextName').textContent = names[n];
-    prev.setAttribute('aria-label', 'Previous animal: ' + names[p]);
-    next.setAttribute('aria-label', 'Next animal: ' + names[n]);
+    var p = i - 1, n = i + 1;
+    prev.hidden = p < 0;
+    next.hidden = n >= pages.length;
+    if (p >= 0) {
+      document.getElementById('prevName').textContent = names[p];
+      prev.setAttribute('aria-label', 'Previous animal: ' + names[p]);
+    }
+    if (n < pages.length) {
+      document.getElementById('nextName').textContent = names[n];
+      next.setAttribute('aria-label', 'Next animal: ' + names[n]);
+    }
     document.getElementById('count').textContent = (i + 1) + ' / ' + pages.length;
     document.title = names[i] + ' – The Animals of Bioconnect';
     window.scrollTo(0, 0);
@@ -522,7 +538,8 @@
     window.dispatchEvent(new Event('resize'));
   }
   function go(step) {
-    var i = (at + step + pages.length) % pages.length;
+    var i = at + step;
+    if (i < 0 || i >= pages.length) return;
     history.replaceState(null, '', '#' + ids[i]);
     show(i, true);
   }
