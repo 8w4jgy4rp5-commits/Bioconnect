@@ -15,10 +15,17 @@ on:
 
 jobs:
   upload:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      # App Store Connect accepts only apps built with the iOS 26 SDK or later.
+      - name: Use the newest Xcode 26
+        run: |
+          ls -d /Applications/Xcode_26*.app
+          XC=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
       - uses: actions/setup-node@v4
         with:
           node-version: 22
