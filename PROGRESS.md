@@ -2256,3 +2256,13 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - アプリ版は通信も収集もなし → App Storeのプライバシー欄は「データの収集なし」で申告できる。
 - 検証: node app/check-offline.cjs（Chrome / --webkit）で、アプリと同じ住所ルールのサーバー・外部通信遮断のまま、プレイ→ゲームオーバー→タイトルの図鑑ボタン→ガイド→プライバシー→規約→ホームをリンクでたどり、ショップ・ウォレット・復活ボタンや「Sign in / Crystal / No Ads / Stripe / browser」の文字が出ないこと、フォント・ページエラーなしを確認。npm test は stamp 1件のみ失敗（手元のCRLFが原因で、公開中のLF内容とは一致。既知）。
 - 次: ① Apple課金（Developer登録後）。X共有ボタンがアプリ内でSafariに開くかは実機（TestFlight）で確認。
+
+## 2026-11-07 iPhone アプリ: Apple 課金（①）
+- 変更: `app/app-economy.js` を追加し、アプリ版ビルドでは `monetization.js` をこれに差し替え。クリスタル4種（crystals5/11/30/65、消耗型）を Apple 課金（@capgo/native-purchases 7.19.3、StoreKit 2）で販売。残高は端末の localStorage（`bioconnect:app-wallet`）、取引IDで二重加算を防止、保存してから取引を完了（finish）。後から届く取引（承認待ちなど）は transactionUpdated で加算。無料3クリスタル（端末で1回）、復活は1クリスタル。価格は Apple から取得した現地通貨表示。
+- アプリには広告がないので No Ads は売らない → 非消耗型がないため「購入を復元」ボタンは不要（Apple のルール上も必須ではない）。
+- `build-app.cjs`: ショップからログイン・Google連携・No Ads・Stripe確認画面・アカウント更新/ログアウト・No Ads 系の復活ボタンを切り取り（見つからなければビルド失敗）。
+- `legal/app-terms.html` にクリスタルの項、`legal/app-privacy.html` に購入の項を追加（日付 2026-11-07）。
+- iOS: 最低対応を iOS 15 に（StoreKit 2 のため）。CapApp-SPM にプラグインを追加。
+- 検証: `node app/check-offline.cjs`（Chromium / WebKit）に偽の Apple ストアを入れ、価格表示・無料3個・購入・同じ取引の二重防止・キャンセル・後から届く取引・復活・残高の保持・ストア無しでの「unavailable」表示まで通過。`npm test` 283 passed / 1 failed（既知の手元CRLFスタンプ）。
+- 未確認: 実機/サンドボックスでの購入（App Store Connect に商品登録が必要）。
+- 次: Welcome メール後、App Store Connect に商品4つ（ID は上と同じ、価格 $0.99/$1.99/$4.99/$9.99 目安）を登録 → TestFlight 用の署名ワークフロー。

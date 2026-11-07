@@ -25,7 +25,9 @@ const FILES = [
 const DIRS = ['img', 'audio', 'watch'];
 // The app's own privacy policy and terms (also on the website, for the App
 // Store listing) stand in for the website's, which describe Stripe and ads.
-const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html' };
+const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html',
+  // The app's store: Crystals through Apple, no account (app/app-economy.js).
+  'monetization.js': 'app/app-economy.js' };
 const SKIP = new Set(['img/ref']);   // reference art for drawing, not used by the game
 
 // Scripts and tags the app must not load (they need the network or an account).
@@ -100,14 +102,43 @@ function page(rel) {
   html = html.replace(/saved in this browser \(and synced when you are logged in\)/g, 'saved on this device')
     .replace(/saved in this browser/g, 'saved on this device')
     .replace(/Play Bioconnect — free in your browser/g, 'Play Bioconnect');
+  if (rel === 'index.html') html = appShop(html);
   if (/https:\/\/(cdn\.jsdelivr|fonts\.googleapis|static\.cloudflareinsights)/.test(html)) {
     throw new Error(rel + ' still loads something from the network');
   }
   fs.writeFileSync(file, html);
 }
 
-// The app has no sign-in, store or ads yet: purchases arrive through Apple
-// later. With the store off, the shop, wallet and revive buttons stay hidden.
+// The shop in the app: Crystals through Apple only. The sign-in, No Ads,
+// Stripe review step and their revive buttons are cut out of the page.
+// Each cut must find its text, so a change on the website cannot slip through.
+const SHOP_CUTS = [
+  [/\s*<div id="authControls">[\s\S]*?<\/div>\s*<\/div>/, ''],
+  [/\s*<button class="btn" id="googleLink"[^>]*>[^<]*<\/button>/, ''],
+  [/\s*<p id="googleLinkInfo" hidden><\/p>/, ''],
+  [/\s*<p id="accountLabel"><\/p>/, ''],
+  [/\s*<div class="no-ads-product">[\s\S]*?<p id="dailyInfo"><\/p>\s*<\/div>/, ''],
+  [/\s*<div class="checkout-confirm" id="checkoutConfirm" hidden>[\s\S]*?<\/dl>[\s\S]*?<\/div>\s*<\/div>/, ''],
+  [/<button class="btn" id="refreshWallet" type="button">[^<]*<\/button>/, ''],
+  [/<button class="btn" id="signOutBtn" type="button" hidden>[^<]*<\/button>/, ''],
+  [/Claim 3 free Crystals · once per account/, 'Claim 3 free Crystals'],
+  [/Purchases are non-refundable, except where required by applicable law\./, 'Paid through your Apple Account. Refunds are handled by Apple.'],
+  [/Sign in is required for purchases and the free Crystal claim\./, ''],
+  [/\s*<button class="btn revive-btn revive-btn--locked" id="reviveDawnLocked"[\s\S]*?<\/button>(?=\s*<p class="revive-hush")/, ''],
+  [/\s*<p class="revive-hush" id="reviveHush" hidden>[^<]*<\/p>/, ''],
+  [/\s*<button class="start-icon start-noads" id="startNoAdsBtn"[\s\S]*?<\/button>/, ''],
+  [/<h2 id="shopTitle">Crystals &amp; No Ads<\/h2>/, '<h2 id="shopTitle">Crystals</h2>']
+];
+function appShop(html) {
+  for (const [re, to] of SHOP_CUTS) {
+    if (!re.test(html)) throw new Error('index.html changed; app shop cut not found: ' + re);
+    html = html.replace(re, to);
+  }
+  if (/Stripe|Sign in|No Ads/.test(html.slice(html.indexOf('id="shopModal"')))) throw new Error('the app shop still mentions the website store');
+  return html;
+}
+
+// The app has no sign-in or ads; its store (app-economy.js) does not read these.
 const APP_CONFIG = `// App build (app/build-app.cjs): no sign-in, no Stripe, no ads.
 window.BioMonetizationConfig = Object.freeze({
   storeEnabled: false,

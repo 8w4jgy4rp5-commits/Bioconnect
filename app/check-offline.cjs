@@ -1,5 +1,6 @@
 // Plays the app build (app/www) with the network cut off: any request that
-// is not to the local server is blocked and reported. Fails on page errors,
+// is not to the local server is blocked and reported. Apple's store is a
+// stand-in here; the shop, a purchase and a revive are played through it. Fails on page errors,
 // on blocked requests, or when a page falls back to a system font.
 //
 //   node app/check-offline.cjs            Chromium
@@ -42,6 +43,23 @@ function serve() {
     problems.push('blocked network request: ' + url);
     return route.abort();
   });
+  // A stand-in for Apple's store (the app reads window.__BIO_APP_STORE__ only off the iPhone).
+  await context.addInitScript(() => {
+    const prices = { crystals5: '$0.99', crystals11: '$1.99', crystals30: '$4.99', crystals65: '$9.99' };
+    let n = 0;
+    window.__BIO_APP_STORE__ = {
+      call: async (method, o) => {
+        if (method === 'getProducts') return { products: o.productIdentifiers.map(id => ({ identifier: id, priceString: prices[id] })) };
+        if (method === 'purchaseProduct') {
+          if (window.__fakeCancel) throw new Error('User cancelled');
+          return { transactionId: window.__fakeTx || String(++n), productIdentifier: o.productIdentifier, quantity: 1 };
+        }
+        if (method === 'acknowledgePurchase') return {};
+        throw new Error('unexpected store call ' + method);
+      },
+      listen: (event, fn) => { if (event === 'transactionUpdated') window.__fakeEmit = fn; }
+    };
+  });
   const page = await context.newPage();
   page.on('pageerror', e => problems.push('page error: ' + e.message));
   page.on('response', r => { if (r.status() >= 400) problems.push(`missing file (${r.status()}): ${r.url()}`); });
@@ -64,19 +82,44 @@ function serve() {
   await page.goto(base);
   await page.locator('#startBtn').waitFor({ state: 'visible' });
   await fontsOk('title');
-  // No sign-in, store, wallet or ads anywhere in the app.
-  const noStore = async where => {
+  // No sign-in, Stripe or No Ads anywhere in the app; Crystals only, through Apple.
+  const noWebStore = async where => {
     const seen = await page.evaluate(() => {
-      const ids = ['startShopBtn', 'startWallet', 'startNoAdsBtn', 'shopBtn', 'shopModal', 'reviveDawnLocked',
-        'reviveDaily', 'reviveCrystal', 'reviveAd', 'reviveFind'];
+      const ids = ['startNoAdsBtn', 'reviveDawnLocked', 'reviveDaily', 'reviveAd'];
       const shown = ids.filter(id => { const el = document.getElementById(id); return el && el.checkVisibility(); });
       const text = document.body.innerText;
-      const words = ['Sign in', 'Crystal', 'No Ads', 'Stripe', 'browser'].filter(w => text.includes(w));
+      const words = ['Sign in', 'No Ads', 'Stripe', 'browser'].filter(w => text.includes(w));
       return shown.concat(words.map(w => `"${w}"`));
     });
     if (seen.length) problems.push(`${where}: visible in the app: ${seen.join(', ')}`);
   };
-  await noStore('title');
+  const crystals = () => page.evaluate(() => BioEconomy.summary().wallet.crystals);
+  const expect = async (what, want) => { const got = await crystals(); if (got !== want) problems.push(`${what}: ${got} Crystals, expected ${want}`); };
+  await noWebStore('title');
+  if (!await page.locator('#startWallet').isVisible() || await page.locator('#startCrystalCount').textContent() !== '0') problems.push('title: Crystal balance 0 not shown');
+
+  // The shop, with the stand-in Apple store: prices from Apple, the free 3,
+  // a purchase, a repeated transaction, a cancel, and one Apple finishes later.
+  await page.evaluate(() => BioEconomy.openShop());
+  await page.locator('[data-product="crystals5"] .pack-price', { hasText: '$0.99' }).waitFor({ timeout: 5000 });
+  await noWebStore('shop');
+  await page.screenshot({ path: path.join(__dirname, 'offline-shop.png') });
+  await page.locator('#claimBtn').click(); await expect('free Crystals', 3);
+  if (await page.locator('#claimBtn').isVisible()) problems.push('shop: free Crystals offered twice');
+  await page.locator('[data-product="crystals5"]').click();
+  await page.locator('#shopStatus', { hasText: '5 Crystals added.' }).waitFor({ timeout: 5000 }).catch(() => {});
+  await expect('after buying 5', 8);
+  await page.evaluate(() => { window.__fakeTx = '1'; });
+  await page.locator('[data-product="crystals11"]').click(); await page.waitForTimeout(300);
+  await expect('same transaction again', 8);
+  await page.evaluate(() => { window.__fakeTx = null; window.__fakeCancel = true; });
+  await page.locator('[data-product="crystals65"]').click();
+  await page.locator('#shopStatus', { hasText: 'cancelled' }).waitFor({ timeout: 5000 }).catch(() => problems.push('shop: cancel not reported'));
+  await expect('after a cancel', 8);
+  await page.evaluate(() => { window.__fakeCancel = false; window.__fakeEmit({ transactionId: '99', productIdentifier: 'crystals30' }); });
+  await expect('purchase finished later', 38);
+  await page.locator('#shopClose').click();
+
   await page.locator('#startBtn').focus(); await page.locator('#startBtn').press('Enter');  // it pulses, so a click never sees it still
   if (await page.locator('#lessonBar').isVisible()) await page.locator('#lessonSkip').click();
   await page.locator('#countdown').waitFor({ state: 'hidden', timeout: 15000 });
@@ -89,12 +132,16 @@ function serve() {
   if (!placed) problems.push('game: nothing was placed on the board');
   await page.screenshot({ path: path.join(__dirname, 'offline-game.png') });
 
-  // A finished game: the results must not offer a paid revive or a sign-in.
+  // A finished game: revive with 1 Crystal, nothing about ads or signing in.
   await page.evaluate(() => { state.over = false; state.paused = true; render(); endRun(); });
   await page.locator('#gameover').waitFor({ state: 'visible' });
   await page.waitForTimeout(1200);
-  await noStore('game over');
+  await noWebStore('game over');
   await page.screenshot({ path: path.join(__dirname, 'offline-gameover.png') });
+  await page.locator('#reviveCrystal').click({ timeout: 5000 });
+  await page.waitForTimeout(500);
+  await expect('after a revive', 37);
+  if (!await page.evaluate(() => state.revived)) problems.push('game over: revive did not happen');
 
   // Walk the pages by their own links, as a player would, and back home.
   const walk = [['#startAnimalsLink', 'animals/index.html'], ['a[href="../guide/index.html"]', 'guide/index.html'],
@@ -114,14 +161,24 @@ function serve() {
     if (process.env.DEBUG_WALK) console.log('after', link, '->', page.url());
     if (at !== rel) problems.push(`link ${link} led to ${at}, not ${rel}`);
     await fontsOk(rel);
-    await noStore(rel);
+    await noWebStore(rel);
     if (rel === 'animals/index.html') await page.screenshot({ path: path.join(__dirname, 'offline-book.png') });
   }
 
+  if (await page.locator('#startCrystalCount').textContent() !== '37') problems.push('the Crystal balance was not kept on the device');
+
+  // Without a store (no connection to Apple): it says so and sells nothing.
+  const bare = await browser.newPage();
+  bare.on('pageerror', e => problems.push('page error (no store): ' + e.message));
+  await bare.goto(base); await bare.locator('#startBtn').waitFor({ state: 'visible' });
+  await bare.evaluate(() => BioEconomy.openShop());
+  await bare.waitForTimeout(300);
+  if (!/unavailable/.test(await bare.locator('#shopStatus').textContent())) problems.push('no store: the shop does not say it is unavailable');
+  if (await bare.locator('[data-product]:not([disabled])').count()) problems.push('no store: a pack can still be bought');
   await browser.close(); server.close();
   if (problems.length) {
     console.log([...new Set(problems)].join('\n'));
     process.exit(1);
   }
-  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links, no store or sign-in shown, no network used`);
+  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links, Crystals bought, kept and spent, no sign-in or web store shown, no network used`);
 })().catch(e => { console.error(e); process.exit(1); });
