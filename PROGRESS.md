@@ -2266,3 +2266,9 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証: `node app/check-offline.cjs`（Chromium / WebKit）に偽の Apple ストアを入れ、価格表示・無料3個・購入・同じ取引の二重防止・キャンセル・後から届く取引・復活・残高の保持・ストア無しでの「unavailable」表示まで通過。`npm test` 283 passed / 1 failed（既知の手元CRLFスタンプ）。
 - 未確認: 実機/サンドボックスでの購入（App Store Connect に商品登録が必要）。
 - 次: Welcome メール後、App Store Connect に商品4つ（ID は上と同じ、価格 $0.99/$1.99/$4.99/$9.99 目安）を登録 → TestFlight 用の署名ワークフロー。
+
+## 2026-11-07 App Store Connect 準備と TestFlight 初アップロード
+- App Store Connect: 有料アプリ契約・口座は処理中、W-8BEN 有効、DSA 審査中。Bundle ID `com.bioconnectpazzle.game` 登録、アプリ名「Bioconnect: Food Chain Puzzle」（「Bioconnect」は他者が使用済み、ホーム画面表示は Bioconnect のまま）。課金商品 crystals5/11/30/65（消耗型、$0.99/$1.99/$4.99/$9.99）登録、審査用スクショ 1290×2796（App Store Kit Artifact: https://claude.ai/artifact/PLXF1BgdWhBfbZQBSUWDoi ）。
+- `.github/workflows/ios-testflight.yml`（手動実行のみ）: macos-26 + Xcode 26 で未署名アーカイブ → API キー（Admin）で配布署名して App Store Connect へアップロード。Secrets: ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8 / APPLE_TEAM_ID。
+- 失敗と対処: ①開発用署名は登録端末が必要 → 未署名アーカイブ＋書き出し時に配布署名 ②iOS 18.5 SDK は受付不可 → Xcode 26.6。run #4 でアップロード成功（ビルド番号 4）。
+- 次: TestFlight で実機確認（音、X共有、課金はサンドボックス）。有料アプリ契約が有効になるまで商品は取得できない。
