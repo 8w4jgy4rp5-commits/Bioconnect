@@ -2272,3 +2272,12 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - `.github/workflows/ios-testflight.yml`（手動実行のみ）: macos-26 + Xcode 26 で未署名アーカイブ → API キー（Admin）で配布署名して App Store Connect へアップロード。Secrets: ASC_KEY_ID / ASC_ISSUER_ID / ASC_KEY_P8 / APPLE_TEAM_ID。
 - 失敗と対処: ①開発用署名は登録端末が必要 → 未署名アーカイブ＋書き出し時に配布署名 ②iOS 18.5 SDK は受付不可 → Xcode 26.6。run #4 でアップロード成功（ビルド番号 4）。
 - 次: TestFlight で実機確認（音、X共有、課金はサンドボックス）。有料アプリ契約が有効になるまで商品は取得できない。
+
+## 2026-11-08 TestFlight 実機の指摘を修正
+- タイトルへ戻る: 一時停止メニューとゲームオーバーに「Title screen」。途中の回は止めたまま残り PLAY で続き、終わった回は PLAY で新しい回（Web は従来どおり広告判定を通る）。Web 版にも入る。
+- 図鑑が「ウサギだけ」・画面上部の重なり: アプリの全ページに `viewport-fit=cover` が無く safe-area が 0 → ページめくりボタンと上部のクリスタル表示が時計/カメラの下に隠れていた。ビルドで付与。
+- BGM: 図鑑・How to play・規約はアプリ内で `app/app-pages.js` によりゲームの上に重ねて開く（iframe、safe-area の内側）。ページは親の BioAudio を借りる（`audio.js` は `window.BIO_HOST_AUDIO` があればそれを使う）ので曲が途切れず最初に戻らない。ゲームへ戻るリンクは重ねたページを閉じる。
+- クリスタル: ゲーム中の右上（一時停止の左）に残高チップ（押すとショップ）。加算時（購入・後から届く取引・無料3個）に「チャリン」（`audio-synth.js` chime）と残高の光る演出。Web 版ではチップは隠れたまま。
+- X共有: アプリでは `app/app-share.js` で iPhone の共有シートに結果カード（盤面がいちばん埋まった時＋スコア）を添付。@capacitor/share 7.0.4 / @capacitor/filesystem 7.1.8 を追加。
+- 検証: `npm test` 284 passed / 0 failed。`node app/check-offline.cjs` Chromium/WebKit 通過（残高チップ・Title screen・図鑑が重ねて開きページめくりで 3/10・ページ間リンク・Home で閉じる）。
+- 未確認: 実機での safe-area 位置、共有シートで X に画像が付くか、チャリンの聞こえ方。

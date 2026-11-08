@@ -143,26 +143,50 @@ function serve() {
   await expect('after a revive', 37);
   if (!await page.evaluate(() => state.revived)) problems.push('game over: revive did not happen');
 
-  // Walk the pages by their own links, as a player would, and back home.
+  // In play: the Crystal balance sits top right, and Pause → Title screen
+  // goes back to the opening screen with the run kept for PLAY.
+  await page.evaluate(() => { state.revivalWait = false; document.getElementById('reviveResume').hidden = true; });
+  if (await page.locator('#gameCrystalCount').textContent() !== '37') problems.push('game: the Crystal balance is not shown during play');
+  await page.locator('#pauseBtn').click();
+  await page.locator('#pauseHome').click();
+  if (!await page.locator('#startScreen').isVisible()) problems.push('pause: Title screen did not open the opening screen');
+  if (await page.evaluate(() => BioAudio.band().theme) !== 'title') problems.push('pause: the title music did not come back');
+
+  // Walk the pages by their own links, as a player would. They open over the
+  // game in a frame, share its music player, and a link home closes them.
   const walk = [['#startAnimalsLink', 'animals/index.html'], ['a[href="../guide/index.html"]', 'guide/index.html'],
     ['a[href="../legal/privacy.html"]', 'legal/privacy.html'], ['a[href="terms.html"]', 'legal/terms.html'],
     ['a[href="../index.html"]', 'index.html']];
   await page.goto(base);
+  const frame = () => page.frames().find(f => f !== page.mainFrame());
   for (const [link, rel] of walk) {
     if (link === '#startAnimalsLink') {  // the dusk opening asks for one tap before its buttons
       await page.locator('#startBtn').waitFor({ state: 'visible' });
       await page.locator('.start-stage').click({ position: { x: 195, y: 300 } });
       await page.waitForTimeout(1500);
+      await page.locator(link).click({ timeout: 5000 });
+    } else {
+      await frame().locator(link).first().click({ timeout: 5000 });
     }
-    await page.locator(link).first().click({ timeout: 5000 });
-    await page.waitForURL(u => (new URL(u).pathname.slice(1) || 'index.html') === rel, { timeout: 8000 }).catch(() => {});
-    await page.waitForLoadState('load');
-    const at = new URL(page.url()).pathname.slice(1) || 'index.html';
-    if (process.env.DEBUG_WALK) console.log('after', link, '->', page.url());
-    if (at !== rel) problems.push(`link ${link} led to ${at}, not ${rel}`);
-    await fontsOk(rel);
-    await noWebStore(rel);
-    if (rel === 'animals/index.html') await page.screenshot({ path: path.join(__dirname, 'offline-book.png') });
+    await page.waitForTimeout(800);
+    const layerOpen = await page.locator('.app-page-layer').isVisible().catch(() => false);
+    if (rel === 'index.html') {
+      if (layerOpen) problems.push('the link home did not close the page layer');
+      if (new URL(page.url()).pathname !== '/') problems.push('the link home reloaded the game');
+      continue;
+    }
+    const f = frame();
+    const at = f && new URL(f.url()).pathname.slice(1);
+    if (!layerOpen || at !== rel) { problems.push(`link ${link} led to ${at}, not ${rel} over the game`); continue; }
+    if (new URL(page.url()).pathname !== '/') problems.push(`link ${link} left the game page`);
+    if (!await f.evaluate(() => !window.BioAudio || window.BioAudio === window.parent.BioAudio)) problems.push(rel + ': has its own music player');
+    if (rel === 'animals/index.html') {
+      await f.locator('#next').click();
+      await f.locator('#next').click();
+      const count = await f.locator('#count').textContent();
+      if (!/^3 \/ 10$/.test(count)) problems.push('field book: Next did not turn the page (' + count + ')');
+      await page.screenshot({ path: path.join(__dirname, 'offline-book.png') });
+    }
   }
 
   if (await page.locator('#startCrystalCount').textContent() !== '37') problems.push('the Crystal balance was not kept on the device');
@@ -180,5 +204,5 @@ function serve() {
     console.log([...new Set(problems)].join('\n'));
     process.exit(1);
   }
-  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links, Crystals bought, kept and spent, no sign-in or web store shown, no network used`);
+  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links over the game, Crystals bought, kept and spent, no sign-in or web store shown, no network used`);
 })().catch(e => { console.error(e); process.exit(1); });

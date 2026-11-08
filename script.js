@@ -4634,6 +4634,30 @@ function startOverFromPause() {
   Promise.resolve(started).then(function () { if (!counting) resumeIfAllowed(); });
 }
 
+// Back to the opening screen. A run in progress waits behind it, paused,
+// and PLAY picks it up again; a finished run is replaced by a new one there.
+function showTitle() {
+  if (window.BioEconomy?.isBlocking()) return;
+  if (pauseOpen()) { el.pauseSheet.hidden = true; if (window.BioAudio) window.BioAudio.hold(false); }
+  disarmNew();
+  coinSound();
+  state.revivalWait = false;
+  if (el.reviveResume) el.reviveResume.hidden = true;
+  el.gameover.hidden = true;
+  closeElephantPop();
+  el.startScreen.hidden = false;
+  document.body.classList.add('is-modal');
+  setPaused(true);
+  if (window.BioAudio) window.BioAudio.theme('title');
+  if (el.startBest) el.startBest.textContent = scoreLabel(state.best, state.bestRevived);
+  window.BioEconomy?.draw();
+  el.startBtn.focus();
+}
+function playFromTitle() {
+  if (state.over) { if (window.BioEconomy) window.BioEconomy.newGame(); else replay(); }
+  else playIntro();
+}
+
 // A short "Ready?? / Go!!" beat stands between the button and the first
 // move, so the meadow does not begin ticking under the player's thumb.
 // The title screen lifts at once — the board is already dealt — but the
@@ -5114,6 +5138,11 @@ function shareHint(text) {
 // post link, so it goes on the clipboard to paste into the post.
 function shareRun() {
   const text = shareText();
+  // The app hands the card to the iPhone share sheet instead (app/app-share.js).
+  if (window.BioShare) {
+    window.BioShare(text, cardBlob).catch(function () { shareHint('Sharing did not open. Please try again.'); });
+    return;
+  }
   const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
   const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
   if (cardBlob && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
@@ -5233,7 +5262,7 @@ async function init() {
     'nextKindName', 'growthCurrentTile', 'growthCurrentName', 'growthNextTile', 'growthNextName', 'growthNextLabel',
     'growthFinalTile', 'growthProgress', 'growthTrack', 'ladderStrip', 'moveHint', 'previewLayer',
     'growthCurrentTile2', 'goalHead', 'goalSub', 'menuBtn', 'menuSheet', 'menuClose',
-    'pauseBtn', 'pauseSheet', 'pauseMain', 'pauseConfirm', 'pauseResume', 'pauseNew', 'pauseYes', 'pauseNo',
+    'pauseBtn', 'pauseSheet', 'pauseMain', 'pauseConfirm', 'pauseResume', 'pauseNew', 'pauseYes', 'pauseNo', 'pauseHome', 'goHome',
     'startLedgerBtn', 'ledgerDot', 'ledgerModal', 'ledgerClose', 'ledgerCount', 'ledgerBody', 'sealToasts'];
   for (const id of ids) el[id] = document.getElementById(id);
   el.handSlots = Array.prototype.slice.call(document.querySelectorAll('.hand-tile'));
@@ -5359,7 +5388,9 @@ async function init() {
   newGame();
   el.startBest.textContent = displayScore(state.best).toLocaleString();
   document.body.classList.add('is-modal');
-  el.startBtn.addEventListener('click', playIntro);
+  el.startBtn.addEventListener('click', playFromTitle);
+  el.pauseHome.addEventListener('click', showTitle);
+  el.goHome.addEventListener('click', showTitle);
   el.startBtn.focus();
 
   window.BioGame = {

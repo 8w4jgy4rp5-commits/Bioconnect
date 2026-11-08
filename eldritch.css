@@ -51,6 +51,8 @@
 .skin-eldritch .scorebar .score-label,
 .skin-eldritch .scorebar .score--best .score-value { font-family: var(--el-serif); font-style: italic; color: var(--el-mute); }
 
+.skin-eldritch .game-crystals { font-family: var(--el-type); font-weight: 400; color: var(--el-ink); }
+
 .skin-eldritch .season.pop-chip,
 .skin-eldritch .season[data-season] {
   background: rgba(168, 198, 108, .08);

@@ -497,6 +497,28 @@ window.BioSound = (() => {
       });
     }
 
+    // Crystals landing in the wallet: a "cha-ching" — a short metal click,
+    // then a bright rising sparkle of bell notes. Outside `voices`, like coin().
+    function chime(time = ctx.currentTime + .005) {
+      const bell = (freq, start, duration, level, type) => {
+        const source = ctx.createOscillator(), gain = ctx.createGain();
+        source.type = type;
+        source.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(level, start + .003);
+        gain.gain.exponentialRampToValueAtTime(.00001, start + duration);
+        source.connect(gain); gain.connect(effects);
+        source.onended = () => { source.disconnect(); gain.disconnect(); };
+        source.start(start); source.stop(start + duration + .02);
+      };
+      bell(hz(76), time, .05, .05, 'square');
+      bell(hz(79), time + .045, .06, .045, 'square');
+      [88, 91, 95, 100].forEach((n, i) => {
+        bell(hz(n), time + .13 + i * .055, .55, .07, 'sine');
+        bell(hz(n + 12), time + .13 + i * .055, .25, .02, 'triangle');
+      });
+    }
+
     function cancel(busName) {
       const bus = busName === 'music' ? music : busName === 'effects' ? effects : null;
       const now = ctx.currentTime;
@@ -512,7 +534,7 @@ window.BioSound = (() => {
       }
     }
 
-    return { musicBeat, effect, coin, cancel, setEnsemble, instrumentPreview, setApplause, setCheer, setAnnouncer };
+    return { musicBeat, effect, coin, chime, cancel, setEnsemble, instrumentPreview, setApplause, setCheer, setAnnouncer };
   }
   const beatLength = (theme, pinch = false) =>
     theme === 'title' ? TITLE_BEAT : pinch && theme === 'game' ? PINCH_BEAT : BEAT;

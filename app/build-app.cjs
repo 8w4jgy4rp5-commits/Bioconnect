@@ -16,7 +16,7 @@ const FONTS = path.join(__dirname, 'node_modules', '@fontsource');
 const FILES = [
   'index.html', 'favicon.ico', 'apple-touch-icon.png',
   'style.css', 'pop.css', 'dusk.css', 'eldritch.css', 'feedback.css', 'onboarding.css',
-  'script.js', 'audio-synth.js', 'audio.js', 'monetization.js', 'watch.js', 'skin.js',
+  'script.js', 'audio-synth.js', 'audio.js', 'monetization.js', 'app-pages.js', 'app-share.js', 'watch.js', 'skin.js',
   'shared/lang-detect.js', 'shared/monetization-config.js', 'shared/app-footer.css',
   'animals/index.html', 'animals/animal-rig.js',
   'guide/index.html', 'guide/guide.css',
@@ -27,7 +27,8 @@ const DIRS = ['img', 'audio', 'watch'];
 // Store listing) stand in for the website's, which describe Stripe and ads.
 const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html',
   // The app's store: Crystals through Apple, no account (app/app-economy.js).
-  'monetization.js': 'app/app-economy.js' };
+  'monetization.js': 'app/app-economy.js', 'app-pages.js': 'app/app-pages.js',
+  'app-share.js': 'app/app-share.js' };
 const SKIP = new Set(['img/ref']);   // reference art for drawing, not used by the game
 
 // Scripts and tags the app must not load (they need the network or an account).
@@ -102,12 +103,35 @@ function page(rel) {
   html = html.replace(/saved in this browser \(and synced when you are logged in\)/g, 'saved on this device')
     .replace(/saved in this browser/g, 'saved on this device')
     .replace(/Play Bioconnect — free in your browser/g, 'Play Bioconnect');
-  if (rel === 'index.html') html = appShop(html);
+  // Phones with a notch: let the pages reach the screen edges so the CSS
+  // safe-area insets are real numbers (otherwise they read 0 and the top
+  // of the page hides under the clock and the camera).
+  if (!/<meta name="viewport" content="width=device-width, initial-scale=1(\.0)?"/.test(html)) throw new Error(rel + ': viewport tag not found');
+  html = html.replace(/(<meta name="viewport" content="width=device-width, initial-scale=1(?:\.0)?)"/, '$1, viewport-fit=cover"');
+  if (rel === 'index.html') {
+    html = appShop(html);
+    // Other pages open over the game (app/app-pages.js).
+    html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n</body>');
+  } else {
+    // Opened over the game: use its music and close the layer on a link home.
+    html = html.replace(/<head>/, '<head>\n' + SUBPAGE);
+  }
   if (/https:\/\/(cdn\.jsdelivr|fonts\.googleapis|static\.cloudflareinsights)/.test(html)) {
     throw new Error(rel + ' still loads something from the network');
   }
   fs.writeFileSync(file, html);
 }
+
+const SUBPAGE = `<script>(function () {
+  var host = null;
+  try { host = window.parent !== window && window.parent.BioPages; } catch (e) {}
+  if (!host) return;
+  window.BIO_HOST_AUDIO = window.parent.BioAudio;
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href]');
+    if (a && host.isGame(new URL(a.getAttribute('href'), location.href))) { e.preventDefault(); host.close(); }
+  });
+})();</script>`;
 
 // The shop in the app: Crystals through Apple only. The sign-in, No Ads,
 // Stripe review step and their revive buttons are cut out of the page.

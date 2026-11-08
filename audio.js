@@ -1,6 +1,8 @@
 // Music and effects are always on; the device's silent mode is the switch.
 // Browsers hold audio until the first touch or key, so that unlocks it.
-window.BioAudio = (() => {
+// Inside the app, the field book and guide open over the game in a frame
+// and borrow the game's player (app/app-pages.js), so the tune carries on.
+window.BioAudio = window.BIO_HOST_AUDIO || (() => {
   let ctx, synth, paused = true, theme = 'title', adMuted = false, held = false;
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
@@ -126,6 +128,11 @@ window.BioAudio = (() => {
     coin() {
       if (adMuted || document.hidden || !context()) return;
       synth.coin();
+    },
+    // Crystals added: plays even while the meadow is paused (the shop pauses it).
+    chime() {
+      if (adMuted || document.hidden || !context()) return;
+      synth.chime();
     },
     effect(kind, count = 1) {
       if (adMuted || document.hidden || !ctx || ctx.state !== 'running') return;

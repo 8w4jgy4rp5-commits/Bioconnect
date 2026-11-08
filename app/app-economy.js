@@ -36,8 +36,17 @@ window.BioEconomy = (() => {
     if (!amount || !id || wallet.credited.includes(id)) return 0;
     wallet.crystals += amount * Math.max(1, Number(t.quantity) || 1);
     wallet.credited = wallet.credited.concat(id).slice(-200);
-    save(); draw();
+    save(); draw(); celebrate();
     return amount;
+  }
+  // Crystals arrived: a cha-ching, and the balances flash.
+  function celebrate() {
+    window.BioAudio?.chime?.();
+    for (const id of ['gameCrystals', 'startCrystalBalance', 'walletLabel']) {
+      const node = $(id);
+      if (!node) continue;
+      node.classList.remove('crystal-gain'); void node.offsetWidth; node.classList.add('crystal-gain');
+    }
   }
 
   function isBlocking() { return busy || !!panel; }
@@ -51,7 +60,9 @@ window.BioEconomy = (() => {
         $('recordList').appendChild(row);
       }
     }
-    for (const id of ['shopBtn', 'startShopBtn', 'startWallet']) if ($(id)) $(id).hidden = false;
+    for (const id of ['shopBtn', 'startShopBtn', 'startWallet', 'gameCrystals']) if ($(id)) $(id).hidden = false;
+    if ($('gameCrystalCount')) $('gameCrystalCount').textContent = String(wallet.crystals);
+    if ($('gameCrystals')) $('gameCrystals').setAttribute('aria-label', `Crystals: ${wallet.crystals}. Open the Crystal shop`);
     // No ads in the app, so nothing about No Ads, a daily revival or ads shows.
     for (const id of ['startNoAdsBtn', 'reviveDaily', 'reviveAd']) if ($(id)) $(id).hidden = true;
     if ($('shopBtn')) $('shopBtn').textContent = 'Crystals';
@@ -123,7 +134,7 @@ window.BioEconomy = (() => {
   function claim() {
     if (wallet.welcome_claimed) return;
     wallet.crystals += 3; wallet.welcome_claimed = true;
-    save(); message('Your 3 free Crystals are ready.'); draw();
+    save(); message('Your 3 free Crystals are ready.'); draw(); celebrate();
   }
 
   async function revive() {
@@ -165,6 +176,7 @@ window.BioEconomy = (() => {
 
   async function init() {
     $('shopBtn').onclick = () => openShop(); $('startShopBtn').onclick = () => openShop();
+    if ($('gameCrystals')) $('gameCrystals').onclick = () => openShop();
     $('shopClose').onclick = closeShop; $('shopModal').onclick = e => { if (e.target === $('shopModal')) closeShop(); };
     $('claimBtn').onclick = claim;
     document.querySelectorAll('[data-product]').forEach(btn => btn.onclick = () => buy(btn.dataset.product));
