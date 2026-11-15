@@ -18,6 +18,7 @@ window.BioEconomy = (() => {
   } : window.__BIO_APP_STORE__ || null;
 
   let wallet = load(), prices = null, busy = false, panel = null, opener = null;
+  let shown = wallet.crystals, counter = 0, wasOver = false, music = null;
 
   function load() {
     try {
@@ -27,7 +28,13 @@ window.BioEconomy = (() => {
     return { crystals: 0, welcome_claimed: false, credited: [] };
   }
   function save() { localStorage.setItem(KEY, JSON.stringify(wallet)); }
-  const message = text => { for (const id of ['shopStatus', 'reviveStatus']) if ($(id)) $(id).textContent = text; };
+  // A message goes where the player is looking: the shop while it is open,
+  // otherwise the game over card. It never waits around for a later screen.
+  const SHOP_NOTE = 'Crystals are saved on this iPhone. Deleting the app removes them.';
+  const message = text => {
+    if ($('shopStatus')) $('shopStatus').textContent = panel ? text : '';
+    if ($('reviveStatus')) $('reviveStatus').textContent = panel ? '' : text;
+  };
   const notice = text => { message(text); if (panel) $('shopStatus')?.scrollIntoView({ block: 'nearest' }); };
 
   // Each Apple transaction adds its Crystals once, even if Apple reports it twice.
@@ -39,43 +46,60 @@ window.BioEconomy = (() => {
     save(); draw(); celebrate();
     return amount;
   }
-  // Crystals arrived: a cha-ching, and the balances flash.
+  // Crystals arrived: a cha-ching, the balances glow, and the numbers count
+  // up to the new total, so the purchase is seen as well as heard.
   function celebrate() {
     window.BioAudio?.chime?.();
-    for (const id of ['gameCrystals', 'startCrystalBalance', 'walletLabel']) {
+    for (const id of ['gameCrystals', 'startCrystalBalance', 'shopBalance']) {
       const node = $(id);
       if (!node) continue;
       node.classList.remove('crystal-gain'); void node.offsetWidth; node.classList.add('crystal-gain');
     }
+    countUp();
+  }
+  function showCount(n) {
+    for (const id of ['gameCrystalCount', 'startCrystalCount', 'shopBalanceCount']) if ($(id)) $(id).textContent = String(n);
+  }
+  function countUp() {
+    clearInterval(counter); counter = 0;
+    const from = shown, to = wallet.crystals;
+    if (to <= from || matchMedia('(prefers-reduced-motion: reduce)').matches) { shown = to; showCount(to); return; }
+    const steps = Math.min(to - from, 20), started = performance.now(), length = 700;
+    counter = setInterval(() => {
+      const done = Math.min(1, (performance.now() - started) / length);
+      shown = Math.round(from + (to - from) * (1 - (1 - done) ** 2));
+      if (done >= 1) { clearInterval(counter); counter = 0; shown = to; }
+      showCount(shown);
+    }, length / steps);
   }
 
   function isBlocking() { return busy || !!panel; }
   function draw() {
     const s = game()?.summary();
-    if ($('recordList') && game()?.records) {
-      $('recordList').replaceChildren();
-      for (const record of game().records()) {
-        const row = document.createElement('p');
-        row.textContent = record.label;
-        $('recordList').appendChild(row);
-      }
-    }
-    for (const id of ['shopBtn', 'startShopBtn', 'startWallet', 'gameCrystals']) if ($(id)) $(id).hidden = false;
-    if ($('gameCrystalCount')) $('gameCrystalCount').textContent = String(wallet.crystals);
-    if ($('gameCrystals')) $('gameCrystals').setAttribute('aria-label', `Crystals: ${wallet.crystals}. Open the Crystal shop`);
+    // A new game over starts with a clean card (no message from earlier).
+    if (s?.over && !wasOver && $('reviveStatus')) $('reviveStatus').textContent = '';
+    wasOver = !!s?.over;
+    // Crystals are bought on the title screen and at game over, not mid-game:
+    // the balance in play only shows the number.
+    for (const id of ['startShopBtn', 'startWallet', 'gameCrystals']) if ($(id)) $(id).hidden = false;
+    if ($('shopBtn')) $('shopBtn').hidden = true;
+    if (!counter || shown > wallet.crystals) { clearInterval(counter); counter = 0; shown = wallet.crystals; showCount(shown); }
+    if ($('gameCrystals')) { $('gameCrystals').setAttribute('aria-label', `Crystals: ${wallet.crystals}`); $('gameCrystals').tabIndex = -1; }
+    if ($('shopBalance')) $('shopBalance').setAttribute('aria-label', `Your Crystals: ${wallet.crystals}`);
     // No ads in the app, so nothing about No Ads, a daily revival or ads shows.
     for (const id of ['startNoAdsBtn', 'reviveDaily', 'reviveAd']) if ($(id)) $(id).hidden = true;
     if ($('shopBtn')) $('shopBtn').textContent = 'Crystals';
     if ($('shopTitle')) $('shopTitle').textContent = 'Crystals';
-    if ($('startCrystalCount')) $('startCrystalCount').textContent = String(wallet.crystals);
     if ($('startCrystalBalance')) $('startCrystalBalance').setAttribute('aria-label', 'Crystals: ' + wallet.crystals);
     if ($('walletLabel')) $('walletLabel').textContent = `${wallet.crystals} Crystals`;
     if ($('claimBtn')) { $('claimBtn').hidden = wallet.welcome_claimed; $('claimBtn').disabled = busy; }
     for (const btn of document.querySelectorAll('[data-product]')) {
       const price = prices?.[btn.dataset.product];
       btn.disabled = busy || !price;
+      const waiting = !price && !!loading;
+      btn.classList.toggle('is-loading', waiting);
       const tag = btn.querySelector('.pack-price');
-      if (tag) tag.textContent = price || '…';
+      if (tag) tag.textContent = price || (waiting ? 'Loading' : '—');
       btn.setAttribute('aria-label', `${PACKS[btn.dataset.product]} Crystals, ${price || 'price unavailable'}`);
     }
     if ($('reviveCrystal')) {
@@ -84,7 +108,7 @@ window.BioEconomy = (() => {
       $('reviveFind').hidden = !open || wallet.crystals >= 1;
       $('reviveCrystal').disabled = $('reviveFind').disabled = $('goAgain').disabled = busy;
       $('reviveCrystal').querySelector('em').textContent = `1 Crystal · balance: ${wallet.crystals}`;
-      if (s?.revived) $('reviveStatus').textContent = 'Revival already used in this game.';
+      if (s?.revived && s.over && !panel) $('reviveStatus').textContent = 'Revival already used in this game.';
     }
   }
 
@@ -96,17 +120,27 @@ window.BioEconomy = (() => {
   }
 
   // Prices come from Apple, in the player's own currency.
-  async function loadPrices() {
-    if (prices) return;
-    if (!store) { message('The store is unavailable here.'); return; }
-    try {
-      const { products } = await store.call('getProducts', { productIdentifiers: Object.keys(PACKS), productType: 'inapp' });
-      const found = {};
-      for (const p of products || []) if (PACKS[p.identifier] && p.priceString) found[p.identifier] = p.priceString;
-      if (Object.keys(found).length) { prices = found; message('Crystals are saved on this iPhone. Deleting the app removes them.'); }
-      else message('The store is unavailable right now. Please try again later.');
-    } catch { message('The store needs an internet connection. Please try again later.'); }
+  // Asked for once at launch (and again if that failed), so the shop
+  // usually opens with its prices ready.
+  let loading = null, storeDown = '';
+  function loadPrices() {
+    if (prices) return Promise.resolve();
+    if (!store) { storeDown = 'The store is unavailable here.'; if (panel) message(storeDown); return Promise.resolve(); }
+    if (loading) return loading;
+    loading = (async () => {
+      try {
+        const { products } = await store.call('getProducts', { productIdentifiers: Object.keys(PACKS), productType: 'inapp' });
+        const found = {};
+        for (const p of products || []) if (PACKS[p.identifier] && p.priceString) found[p.identifier] = p.priceString;
+        if (Object.keys(found).length) { prices = found; storeDown = ''; }
+        else storeDown = 'The store is unavailable right now. Please try again later.';
+      } catch { storeDown = 'The store needs an internet connection. Please try again later.'; }
+      loading = null;
+      if (panel && !busy) message(storeDown || SHOP_NOTE);
+      draw();
+    })();
     draw();
+    return loading;
   }
 
   async function buy(sku) {
@@ -126,8 +160,8 @@ window.BioEconomy = (() => {
       }
       if (t?.productIdentifier !== sku) throw new Error('The purchase could not be confirmed. Please contact us.');
       const added = credit(t);
-      try { await store.call('acknowledgePurchase', { purchaseToken: String(t.transactionId) }); } catch {}
       message(added ? `${added} Crystals added.` : 'This purchase was already added.');
+      try { await store.call('acknowledgePurchase', { purchaseToken: String(t.transactionId) }); } catch {}
     });
   }
 
@@ -157,12 +191,20 @@ window.BioEconomy = (() => {
     panel.dataset.shopView = 'crystals';
     panel.hidden = false;
     panel.querySelector('.shop-card').scrollTop = 0;
+    // The shop has its own music box tune; closing it brings back what played before.
+    music = window.BioAudio?.band?.().theme || null;
+    window.BioAudio?.theme?.('shop');
+    message(prices ? SHOP_NOTE : storeDown);
     game()?.pause(); draw(); $('shopClose').focus();
     loadPrices();
   }
   function closeShop() {
     if (!panel || busy) return;
-    panel.hidden = true; panel = null; game()?.resumeIfAllowed(); opener?.focus();
+    panel.hidden = true; panel = null;
+    if ($('shopStatus')) $('shopStatus').textContent = '';
+    if (music) window.BioAudio?.theme?.(music);
+    music = null;
+    game()?.resumeIfAllowed(); opener?.focus();
   }
   function trapFocus(e) {
     if (!panel) return;
@@ -176,7 +218,6 @@ window.BioEconomy = (() => {
 
   async function init() {
     $('shopBtn').onclick = () => openShop(); $('startShopBtn').onclick = () => openShop();
-    if ($('gameCrystals')) $('gameCrystals').onclick = () => openShop();
     $('shopClose').onclick = closeShop; $('shopModal').onclick = e => { if (e.target === $('shopModal')) closeShop(); };
     $('claimBtn').onclick = claim;
     document.querySelectorAll('[data-product]').forEach(btn => btn.onclick = () => buy(btn.dataset.product));
@@ -188,6 +229,7 @@ window.BioEconomy = (() => {
     try { store?.listen('transactionUpdated', t => { const added = credit(t); if (added) message(`${added} Crystals added.`); }); } catch {}
     await game().accountChanged(null);
     draw();
+    loadPrices();
   }
 
   return { init, draw, isBlocking, newGame, openShop, summary: () => ({ owner: null, wallet, busy, pending: false, known: true }) };

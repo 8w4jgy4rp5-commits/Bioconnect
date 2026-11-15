@@ -1,0 +1,103 @@
+/* The iPhone app's own layout touches, loaded after the game's styles
+   (app/build-app.cjs adds it and the .bio-app class). The website is not
+   affected. */
+
+/* ---------- play: the Crystal balance only shows the number ---------- */
+.bio-app .game-crystals { pointer-events: none; cursor: default; }
+
+/* Small print that was too small to read on a phone. */
+.bio-app .scorebar .score-label,
+.bio-app .scorebar .score--best .score-value { font-size: 15px; }
+.bio-app .season .season-name { font-size: 16px; }
+.bio-app .season .season-mult { font-size: 13px; }
+.bio-app .goal-words small { font-size: 13px; }
+.bio-app .meadow-notes .ticker { font-size: 16px; }
+.bio-app .el-aside { font-size: 13px; }
+
+/* ---------- shop ---------- */
+.bio-app .shop-card .economy-head { gap: 10px; }
+.bio-app .shop-card .economy-head h2 { flex: 1; }
+.bio-app .shop-card #shopClose { flex: none; width: auto; min-height: 40px; padding: 6px 16px; font-size: 15px; }
+.bio-app .shop-card #walletLabel { display: none; }
+.bio-app .shop-card .shop-account { margin: 0; }
+
+/* The balance at the top of the shop: big, and it glows and counts up
+   when Crystals arrive (app-economy.js). */
+.bio-app .shop-balance { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px 5px 10px; border-radius: 999px;
+  background: rgba(201, 232, 138, .1); box-shadow: inset 0 0 0 1.5px rgba(201, 232, 138, .55);
+  color: #f3eee2; font-family: inherit; font-weight: 700; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1; }
+.bio-app .shop-balance svg { width: 20px; height: 24px; flex: none; }
+.bio-app .shop-balance.crystal-gain { animation: app-gain 1.1s ease-out; }
+@keyframes app-gain {
+  0% { transform: scale(1); box-shadow: inset 0 0 0 1.5px rgba(201, 232, 138, .55); }
+  18% { transform: scale(1.28); background: rgba(201, 232, 138, .45); box-shadow: inset 0 0 0 2px #e6ffb0, 0 0 28px 8px rgba(201, 232, 138, .65); }
+  60% { transform: scale(1.06); box-shadow: inset 0 0 0 1.5px #e6ffb0, 0 0 16px 4px rgba(201, 232, 138, .35); }
+  100% { transform: scale(1); }
+}
+
+/* The free 3: a gift card above the packs. */
+.bio-app .shop-card .shop-claim { display: flex; align-items: center; gap: 12px; width: 100%; margin: 14px 0 4px; padding: 10px 14px;
+  border-radius: 8px; text-align: left; text-decoration: none; color: #1d2414;
+  background: linear-gradient(180deg, #e6f5b8, #c9e88a); box-shadow: 0 0 0 1.5px #e6ffb0, 0 0 22px rgba(201, 232, 138, .3); }
+.bio-app .shop-card .shop-claim[hidden] { display: none; }
+.bio-app .claim-gems { width: 54px; height: 40px; flex: none; }
+.bio-app .claim-words strong { display: block; font-weight: 700; font-size: 18px; }
+.bio-app .claim-words small { display: block; font-size: 13px; opacity: .75; }
+
+/* Prices still on their way from Apple: say so, gently. */
+.bio-app .crystal-pack.is-loading { opacity: 1; }
+.bio-app .crystal-pack.is-loading > *:not(.pack-price) { opacity: .45; }
+.bio-app .crystal-pack.is-loading .pack-price { background: transparent; color: #6b6450; font-weight: 600; animation: app-loading 1.2s ease-in-out infinite; }
+@keyframes app-loading { 50% { opacity: .35; } }
+
+.bio-app .shop-card .economy-status { font-size: 14px; }
+.bio-app .shop-card .economy-status:empty { display: none; }
+
+/* ---------- game over: the result, then Revive first ---------- */
+.bio-app .gameover-card { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 18px; padding: 18px 18px 12px; }
+.bio-app .gameover-card > * { flex: 0 0 100%; }
+.bio-app .gameover-card .go-candles,
+.bio-app .gameover-card .go-note,
+.bio-app .gameover-card .run-recap,
+.bio-app .gameover-card .go-rule,
+.bio-app .gameover-card .revive-heading,
+.bio-app .gameover-card .revive-summary { display: none !important; }
+.bio-app .gameover-card h2 { order: 1; }
+.bio-app .gameover-card .result-score-row { order: 2; }
+.bio-app .gameover-card .go-level { order: 3; margin-bottom: 14px; }
+.bio-app .gameover-card .revive-options { order: 4; margin: 0 0 4px; }
+.bio-app .gameover-card #reviveStatus { order: 5; margin: 0 0 6px; font-size: 13px; }
+.bio-app .gameover-card .go-again { order: 6; }
+.bio-app .gameover-card .go-home { order: 7; }
+.bio-app .gameover-card .go-share-box { order: 8; }
+
+.bio-app .gameover-card .go-score strong { font-size: 2.2rem; }
+.bio-app .gameover-card .revive-btn { width: 100%; min-height: 64px; padding: 10px 16px; justify-content: center; }
+.bio-app .gameover-card .revive-btn strong { font-size: 22px; }
+.bio-app .gameover-card .revive-btn em { font-size: 13px; opacity: .85; }
+.bio-app .gameover-card .revive-ico { width: 28px; height: 28px; }
+
+/* New game: a plain, full-width button under Revive. */
+.bio-app .gameover-card .go-again { margin-top: 6px; min-height: 50px; padding: 8px; border-radius: 8px; font-style: normal;
+  background: #e9e2d0; color: #1d2414; box-shadow: none; }
+.bio-app .gameover-card .go-again span { font-size: 18px; font-weight: 600; }
+.bio-app .gameover-card .go-again small { display: none; }
+
+/* Title screen and Share, side by side as quiet links. */
+.bio-app .gameover-card .go-home,
+.bio-app .gameover-card .go-share-box { flex: 0 0 auto; margin-top: 12px; }
+.bio-app .gameover-card .go-home,
+.bio-app .gameover-card .go-share { min-height: 40px; margin: 0; padding: 6px 10px; background: none; box-shadow: none; border: 0;
+  color: var(--el-mute, #b8b098); font-size: 15px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+.bio-app .gameover-card .go-share-hint { flex-basis: 100%; }
+
+/* Revive is the brightest thing on the card; New game is the calm second
+   choice (ids so these win over the skins). */
+.bio-app .gameover-card #reviveCrystal,
+.bio-app .gameover-card #reviveFind { background: linear-gradient(180deg, #e6f5b8, #c9e88a); color: #1d2414;
+  box-shadow: 0 0 0 1.5px #e6ffb0, 0 0 26px rgba(201, 232, 138, .35); }
+.bio-app .gameover-card #reviveCrystal .revive-ico--gem,
+.bio-app .gameover-card #reviveFind .revive-ico--gem { background: #4f7a1f; }
+.bio-app .gameover-card #goAgain { background: transparent; color: var(--el-ink, #ece4c8); box-shadow: inset 0 0 0 1.5px rgba(236, 228, 200, .45); }
+.bio-app .gameover-card #goAgain small { display: none; }
+.bio-app .gameover-card #goShare { background: none; box-shadow: none; color: var(--el-mute, #b8b098); }

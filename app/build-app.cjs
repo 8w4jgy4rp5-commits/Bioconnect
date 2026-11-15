@@ -20,7 +20,8 @@ const FILES = [
   'shared/lang-detect.js', 'shared/monetization-config.js', 'shared/app-footer.css',
   'animals/index.html', 'animals/animal-rig.js',
   'guide/index.html', 'guide/guide.css',
-  'legal/privacy.html', 'legal/terms.html', 'legal/legal.css'
+  'legal/privacy.html', 'legal/terms.html', 'legal/legal.css',
+  'app.css'
 ];
 const DIRS = ['img', 'audio', 'watch'];
 // The app's own privacy policy and terms (also on the website, for the App
@@ -28,7 +29,9 @@ const DIRS = ['img', 'audio', 'watch'];
 const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html',
   // The app's store: Crystals through Apple, no account (app/app-economy.js).
   'monetization.js': 'app/app-economy.js', 'app-pages.js': 'app/app-pages.js',
-  'app-share.js': 'app/app-share.js' };
+  'app-share.js': 'app/app-share.js',
+  // The app's own layout touches (shop, game over, text sizes), loaded last.
+  'app.css': 'app/app.css' };
 const SKIP = new Set(['img/ref']);   // reference art for drawing, not used by the game
 
 // Scripts and tags the app must not load (they need the network or an account).
@@ -82,7 +85,7 @@ function page(rel) {
   html = html.replace(GOOGLE_FONTS, `<link rel="stylesheet" href="${up}fonts/fonts.css" />`);
   // The night skin adds its fonts from a script; point that at the bundle too.
   html = html.replace(/'https:\/\/fonts\.googleapis\.com\/css2[^']*'/g, `'${up}fonts/fonts.css'`);
-  html = html.replace(/<head>/, '<head>\n<script>window.BIO_APP = true;</script>');
+  html = html.replace(/<head>/, '<head>\n<script>window.BIO_APP = true; document.documentElement.classList.add(\'bio-app\');</script>');
 
   // Pages the app does not ship (the web landing page, the Stripe seller page):
   // drop their links, with the " · " that joined them to a neighbour.
@@ -110,6 +113,7 @@ function page(rel) {
   html = html.replace(/(<meta name="viewport" content="width=device-width, initial-scale=1(?:\.0)?)"/, '$1, viewport-fit=cover"');
   if (rel === 'index.html') {
     html = appShop(html);
+    html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n</head>');
     // Other pages open over the game (app/app-pages.js).
     html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n</body>');
   } else {
@@ -151,7 +155,14 @@ const SHOP_CUTS = [
   [/\s*<button class="btn revive-btn revive-btn--locked" id="reviveDawnLocked"[\s\S]*?<\/button>(?=\s*<p class="revive-hush")/, ''],
   [/\s*<p class="revive-hush" id="reviveHush" hidden>[^<]*<\/p>/, ''],
   [/\s*<button class="start-icon start-noads" id="startNoAdsBtn"[\s\S]*?<\/button>/, ''],
-  [/<h2 id="shopTitle">Crystals &amp; No Ads<\/h2>/, '<h2 id="shopTitle">Crystals</h2>']
+  [/<h2 id="shopTitle">Crystals &amp; No Ads<\/h2>/, '<h2 id="shopTitle">Crystals</h2>'],
+  // The balance sits at the top of the shop and counts up when Crystals arrive.
+  [/<h2 id="shopTitle">Crystals<\/h2>/, '<h2 id="shopTitle">Crystals</h2><span class="shop-balance" id="shopBalance" role="status" aria-label="Your Crystals: 0"><svg viewBox="0 0 26 26" aria-hidden="true"><use href="#shopGem"/></svg><span id="shopBalanceCount">0</span></span>'],
+  // The free 3 is a gift card above the packs, not a small text link below them.
+  [/<button class="btn shop-claim" id="claimBtn" type="button">Claim 3 free Crystals<\/button>/, ''],
+  [/(?=<h3 class="shop-section" id="crystalShopHeading">)/, '<button class="btn shop-claim" id="claimBtn" type="button"><svg class="claim-gems" aria-hidden="true"><use href="#shopGems1"/></svg><span class="claim-words"><strong>3 free Crystals</strong><small>A welcome gift · tap to claim</small></span></button>'],
+  // Saved game records belong to the website's account page, not the shop.
+  [/\s*<div id="recordList" class="record-list"[^>]*><\/div>/, '']
 ];
 function appShop(html) {
   for (const [re, to] of SHOP_CUTS) {

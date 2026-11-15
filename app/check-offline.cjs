@@ -103,6 +103,8 @@ function serve() {
   await page.evaluate(() => BioEconomy.openShop());
   await page.locator('[data-product="crystals5"] .pack-price', { hasText: '$0.99' }).waitFor({ timeout: 5000 });
   await noWebStore('shop');
+  if (await page.evaluate(() => BioAudio.band().theme) !== 'shop') problems.push('shop: the shop music is not playing');
+  if (await page.locator('#recordList').count()) problems.push('shop: saved game records are shown in the shop');
   await page.screenshot({ path: path.join(__dirname, 'offline-shop.png') });
   await page.locator('#claimBtn').click(); await expect('free Crystals', 3);
   if (await page.locator('#claimBtn').isVisible()) problems.push('shop: free Crystals offered twice');
@@ -118,7 +120,11 @@ function serve() {
   await expect('after a cancel', 8);
   await page.evaluate(() => { window.__fakeCancel = false; window.__fakeEmit({ transactionId: '99', productIdentifier: 'crystals30' }); });
   await expect('purchase finished later', 38);
+  await page.waitForTimeout(900);
+  if (await page.locator('#shopBalanceCount').textContent() !== '38') problems.push('shop: the balance at the top of the shop did not reach 38');
   await page.locator('#shopClose').click();
+  if (await page.evaluate(() => BioAudio.band().theme) !== 'title') problems.push('shop: closing it did not bring back the title music');
+  if (await page.locator('#shopStatus').textContent()) problems.push('shop: a message stayed after closing');
 
   await page.locator('#startBtn').focus(); await page.locator('#startBtn').press('Enter');  // it pulses, so a click never sees it still
   if (await page.locator('#lessonBar').isVisible()) await page.locator('#lessonSkip').click();
@@ -128,6 +134,10 @@ function serve() {
     if (await empty.count()) await empty.click({ force: true });
     await page.waitForTimeout(400);
   }
+  // Crystals are not sold mid-game: the balance in play is only a number.
+  await page.locator('#gameCrystals').click({ force: true });
+  if (await page.locator('#shopModal').isVisible()) { problems.push('game: the shop opened during play'); await page.locator('#shopClose').click(); }
+  if (await page.locator('#shopBtn').isVisible()) problems.push('game: a shop button shows during play');
   const placed = await page.evaluate(() => state.cells.filter(Boolean).length);
   if (!placed) problems.push('game: nothing was placed on the board');
   await page.screenshot({ path: path.join(__dirname, 'offline-game.png') });

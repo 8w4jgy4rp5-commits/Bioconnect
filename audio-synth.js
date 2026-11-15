@@ -7,6 +7,20 @@ window.BioSound = (() => {
   const TITLE_BEAT = 60 / 84;
   // A nearly full meadow plays the same tune faster, over a ticking clock.
   const PINCH_BEAT = 60 / 144, NORMAL_BEAT = BEAT;
+  // The Crystal shop: its own music box tune, in a major key, so opening
+  // the shop sounds like stepping into a little store.
+  const SHOP_BEAT = 60 / 96;
+  // [bass MIDI, chord, melody as [beat in bar, MIDI]]  F – Dm – B♭ – C, F – Am – B♭ – C→F
+  const SHOP_BARS = [
+    [53, [65, 69, 72], [[0, 81], [1, 84], [2, 81], [3, 77]]],
+    [50, [62, 65, 69], [[0, 81], [1, 77], [2, 74], [3, 77]]],
+    [46, [62, 65, 70], [[0, 82], [1, 81], [2, 79], [3, 77]]],
+    [48, [64, 67, 72], [[0, 76], [1, 79], [2, 84]]],
+    [53, [65, 69, 72], [[0, 81], [1, 84], [2, 89], [3, 88]]],
+    [45, [64, 69, 72], [[0, 84], [1, 81], [2, 76], [3, 81]]],
+    [46, [62, 65, 70], [[0, 82], [1, 86], [2, 84], [3, 79]]],
+    [48, [64, 67, 72], [[0, 76], [1, 79], [2, 77]]]
+  ];
   // Each newly encountered species joins the band once during this run.
   const INSTRUMENTS = Object.freeze([
     { kind: 'rabbit', name: 'Piano' },
@@ -150,6 +164,16 @@ window.BioSound = (() => {
         notes.slice(1).forEach((midi, i) => tone(hz(midi - 12), time + i * .05, TITLE_BEAT * 3.8, .006, music, 'triangle', .3));
         tone(hz(notes[0] - 12), time, TITLE_BEAT * 2.8, .027, music, 'sine', .12);
       }
+    }
+
+    function shopBeat(beat, time) {
+      const [bass, chord, melody] = SHOP_BARS[Math.floor(beat / 4) % 8], within = beat % 4;
+      for (const [position, midi] of melody) {
+        if (position === within) { box(midi, time, .04); box(midi + 12, time, .006); }
+      }
+      // A soft plucked chord under the tune, low and quiet.
+      box(chord[within % 3] - 12, time + SHOP_BEAT * .5, .012);
+      if (within === 0 || within === 2) tone(hz(within ? bass + 7 : bass), time, SHOP_BEAT * 1.6, .03, music, 'sine', .02);
     }
 
     // Whistled notes enter from below. A little vibrato gives the tune
@@ -329,6 +353,7 @@ window.BioSound = (() => {
       const beat = ((index % BEATS) + BEATS) % BEATS;
       if (theme === 'rest') return;
       if (theme === 'title') return titleBeat(beat, time);
+      if (theme === 'shop') return shopBeat(beat, time);
       const BEAT = pinch ? PINCH_BEAT : NORMAL_BEAT;
       setEnsemble(kinds, time);
       const bar = Math.floor(beat / 4), within = beat % 4;
@@ -537,6 +562,6 @@ window.BioSound = (() => {
     return { musicBeat, effect, coin, chime, cancel, setEnsemble, instrumentPreview, setApplause, setCheer, setAnnouncer };
   }
   const beatLength = (theme, pinch = false) =>
-    theme === 'title' ? TITLE_BEAT : pinch && theme === 'game' ? PINCH_BEAT : BEAT;
+    theme === 'title' ? TITLE_BEAT : theme === 'shop' ? SHOP_BEAT : pinch && theme === 'game' ? PINCH_BEAT : BEAT;
   return { create, BPM, BEAT, BEATS, beatLength, instruments: INSTRUMENTS, title: 'Tiptoe Hollow — Meadow Band' };
 })();
