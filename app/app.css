@@ -146,3 +146,26 @@
 .app-curtain { position: fixed; inset: 0; z-index: 2800; background: #0b0f0a; opacity: 0; pointer-events: none; transition: opacity .9s ease; }
 .app-curtain.is-closed { opacity: 1; pointer-events: auto; transition-duration: .6s; }
 .bio-return .start-hero { animation: dawn-title .9s ease-out .3s both; }
+
+/* ---------- revive: everyone startles, then the cleared squares vanish one by one ---------- */
+.bio-app #board.is-startled .cell.filled { animation: revive-jolt .55s ease-out both; }
+.bio-app #board.is-startled .cell.filled:nth-child(3n) { animation-delay: .06s; }
+.bio-app #board.is-startled .cell.filled:nth-child(3n+1) { animation-delay: .12s; }
+@keyframes revive-jolt {
+  0% { transform: none; }
+  22% { transform: translateY(-7px) scale(1.07); }
+  45% { transform: translateY(0) scale(.97); }
+  70% { transform: translateY(-2px) scale(1.01); }
+  100% { transform: none; }
+}
+.bio-app .cell--vanish > * { animation: revive-vanish .5s ease-in var(--vanish-delay, 0ms) both; }
+@keyframes revive-vanish {
+  0% { opacity: 1; transform: none; filter: none; }
+  35% { opacity: 1; transform: scale(1.12); filter: brightness(1.7); }
+  100% { opacity: 0; transform: translateY(-10px) scale(.3); filter: brightness(2); }
+}
+.bio-app .countdown-word--revive { color: #c9e88a; }
+@media (prefers-reduced-motion: reduce) { .bio-app #board.is-startled .cell.filled, .bio-app .cell--vanish > * { animation-duration: .01s; } }
+/* the startle is the point: no dimming behind "Revive!!", the word sits low */
+.bio-app .countdown:has(.countdown-word--revive) { background: transparent; backdrop-filter: none; align-items: end; padding-bottom: 6%; }
+.bio-app .countdown-word--revive { text-shadow: 0 0 3px #10150e, 0 0 18px rgba(16, 21, 14, .9), 0 4px 0 #10150e; }

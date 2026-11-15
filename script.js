@@ -3693,8 +3693,11 @@ function inReach() {
 //   - the next tile in the hand would sweep it into a merge somewhere
 //     (the same forecast that draws the merge badges on empty squares)
 //   - a starving mouth beside it bites next turn (inReach)
+// During the app's revive, every animal on the board is startled at once.
+let reviveShock = false;
 function panickedAnimals(risk) {
   const panic = new Set(risk);
+  if (reviveShock) for (let i = 0; i < CELLS; i++) if (state.cells[i] && isAnimal(state.cells[i].kind)) panic.add(i);
   for (let i = 0; i < CELLS; i++) {
     if (state.cells[i]) continue;
     for (const at of mergeVictims(previewGrowth(i))) panic.add(at);
@@ -5167,15 +5170,49 @@ function reviveRun() {
       for (const j of footprint(state.cells, i)) keep.add(j);
     }
   }
-  for (let i = 0; i < CELLS; i++) if (!keep.has(i)) state.cells[i] = null;
+  const gone = [];
+  for (let i = 0; i < CELLS; i++) if (!keep.has(i) && state.cells[i]) gone.push(i);
   state.revived = true; state.over = false; state.paused = true; state.revivalWait = true;
   if (state.score === state.best) { state.bestRevived = true; writeBest(state.best); }
-  recordRun();
   el.gameover.hidden = true;
+  // The website clears the board at once. The app first gives the meadow a
+  // beat: everyone startles, then what is cleared vanishes square by square,
+  // and only then does Resume appear (styles in app/app.css).
+  if (!window.BIO_APP || !gone.length) {
+    for (const i of gone) state.cells[i] = null;
+    finishRevive();
+    return true;
+  }
+  reviveShock = true;
+  showWord('Revive!!', ' countdown-word--revive');
+  if (window.BioAudio) window.BioAudio.effect('ready');
+  el.board.classList.add('is-startled');
+  render(); syncClock();
+  setTicker('Something is happening in the meadow…');
+  setTimeout(function () {
+    hideWord();
+    el.board.classList.remove('is-startled');
+    const nodes = el.board.querySelectorAll('.cell');
+    gone.forEach(function (i, n) {
+      const node = nodes[i];
+      if (!node) return;
+      node.style.setProperty('--vanish-delay', Math.min(n * 45, 700) + 'ms');
+      node.classList.add('cell--vanish');
+    });
+    if (window.BioAudio) window.BioAudio.effect('go');
+    setTimeout(function () {
+      for (const i of gone) state.cells[i] = null;
+      reviveShock = false;
+      finishRevive();
+    }, Math.min(gone.length * 45, 700) + 520);
+  }, 1300);
+  return true;
+}
+function finishRevive() {
+  recordRun();
   if (el.reviveResume) { el.reviveResume.hidden = false; el.reviveResume.focus(); }
   render(); syncClock();
   setTicker('Revived · press Resume when you are ready.');
-  return true;
 }
 function snapshotRun() {
   const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','runId','runStats'];

@@ -158,6 +158,9 @@ function serve() {
   await page.waitForTimeout(500);
   await expect('after a revive', 37);
   if (!await page.evaluate(() => state.revived)) problems.push('game over: revive did not happen');
+  // The revive takes a beat (everyone startles, the cleared squares vanish) before Resume.
+  if (await page.locator('#reviveResume').isVisible()) problems.push('revive: Resume showed before the startle');
+  await page.locator('#reviveResume').waitFor({ state: 'visible', timeout: 6000 }).catch(() => problems.push('revive: Resume never appeared'));
 
   // In play: the Crystal balance sits top right, and Pause → Title screen
   // goes back to the opening screen with the run kept for PLAY.
