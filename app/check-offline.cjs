@@ -79,10 +79,11 @@ function serve() {
   };
 
   // The opening (the sun coming up) ends on its own; taps wait for it.
-  const dawnDone = p => p.waitForFunction(() => !document.documentElement.classList.contains('bio-dawn'), null, { timeout: 8000 });
+  const dawnDone = p => p.waitForFunction(() => !/bio-(loading|dawn)/.test(document.documentElement.className), null, { timeout: 12000 });
   // The game: title, play, a few placements.
   await page.goto(base);
-  if (!await page.evaluate(() => document.documentElement.classList.contains('bio-dawn'))) problems.push('opening: the dawn did not play');
+  if (!await page.evaluate(() => document.documentElement.classList.contains('bio-loading') && !!document.getElementById('appLoading'))) problems.push('opening: no loading screen');
+  await page.waitForFunction(() => document.documentElement.classList.contains('bio-dawn'), null, { timeout: 8000 }).catch(() => problems.push('opening: the dawn did not play'));
   await dawnDone(page).catch(() => problems.push('opening: the dawn never ended'));
   if (!/maximum-scale=1/.test(await page.getAttribute('meta[name="viewport"]', 'content'))) problems.push('the app screen can still zoom');
   await page.locator('#startBtn').waitFor({ state: 'visible' });
@@ -163,7 +164,14 @@ function serve() {
   await page.evaluate(() => { state.revivalWait = false; document.getElementById('reviveResume').hidden = true; });
   if (await page.locator('#gameCrystalCount').textContent() !== '37') problems.push('game: the Crystal balance is not shown during play');
   await page.locator('#pauseBtn').click();
+  // Leaving a game asks first; "No" keeps the pause menu.
   await page.locator('#pauseHome').click();
+  if (!await page.locator('#appConfirm').isVisible()) problems.push('pause: Title screen did not ask first');
+  await page.locator('#appConfirmNo').click();
+  if (await page.locator('#startScreen').isVisible() || !await page.locator('#pauseSheet').isVisible()) problems.push('pause: "No, go back" did not keep the game');
+  await page.locator('#pauseHome').click();
+  await page.locator('#appConfirmYes').click();
+  await page.waitForTimeout(2000);  // the fade through dark
   if (!await page.locator('#startScreen').isVisible()) problems.push('pause: Title screen did not open the opening screen');
   if (await page.evaluate(() => BioAudio.band().theme) !== 'title') problems.push('pause: the title music did not come back');
 

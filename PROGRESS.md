@@ -2298,3 +2298,10 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 不具合: 課金でAppleのパスワード入力（キーボード）が出たあと、アプリ全体が拡大されたまま戻らなかった。アプリのページを拡大不可に（viewport に minimum/maximum-scale=1, user-scalable=no）、`capacitor.config.json` の ios.scrollEnabled=false で画面全体のスクロールも止めた。実機でのみ再現するため、確認は TestFlight で。
 - 開いたときの間（本人がA案「夜明け」を選択）: 暗い湖から太陽が上がり、木と動物が浮かび、最後にタイトル文字（合わせて約2.6秒）。タップで飛ばせて、そのタップはほかに効かない。タイトル文字のフェードが終わった時点で終わる（読み込みが遅くても途中で切れない）。動きを減らす設定の端末では出さない。`app/app.css`（.bio-dawn）と build-app.cjs の DAWN スクリプト。
 - 検証: `node app/check-offline.cjs` Chromium/WebKit 通過（夜明けが出て終わる・拡大不可を追加）。Playwright でコマ撮りして順番を確認。
+
+## 2026-11-15 build 7 の実機確認を受けて（読み込み画面・BGM・確認・タイトルへの戻り）
+- 読み込み画面: アプリを開いた最初の一コマから、暗い背景にアイコン（うさぎと月）・「Bioconnect」・細いバー。バーは画像の読み込みに合わせて伸び、最短約1.5秒。終わるとその下で夜明けが始まる（`app/app-flow.js`、`#appLoading`）。
+- BGM: 開いた瞬間には鳴らさず、夜明けが終わってタイトルが出た時点から（audio.js は `window.BIO_MUSIC_WAIT` のときだけ停止状態で始まる。ウェブ版は変化なし）。
+- 確認: 一時停止の Title screen、ゲームオーバーの New game / Title screen に「本当に？」の1枚（`#appConfirm`）。復活できる状態なら「もう復活できない」と書く。一時停止の New game は元からある確認のまま。
+- タイトルへの戻り: いきなり切り替えず、暗転（約0.6秒）→ タイトルに切り替え → ふわっと明るくしてタイトル文字をフェード（約0.9秒）。
+- 検証: `npm test` 284/0。`node app/check-offline.cjs` Chromium/WebKit 通過（読み込み画面→夜明け、確認の No で戻る・Yes でタイトル、を追加）。

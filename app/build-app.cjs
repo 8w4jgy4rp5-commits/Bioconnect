@@ -21,7 +21,7 @@ const FILES = [
   'animals/index.html', 'animals/animal-rig.js',
   'guide/index.html', 'guide/guide.css',
   'legal/privacy.html', 'legal/terms.html', 'legal/legal.css',
-  'app.css'
+  'app.css', 'app-flow.js'
 ];
 const DIRS = ['img', 'audio', 'watch'];
 // The app's own privacy policy and terms (also on the website, for the App
@@ -31,7 +31,9 @@ const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html
   'monetization.js': 'app/app-economy.js', 'app-pages.js': 'app/app-pages.js',
   'app-share.js': 'app/app-share.js',
   // The app's own layout touches (shop, game over, text sizes), loaded last.
-  'app.css': 'app/app.css' };
+  'app.css': 'app/app.css',
+  // Loading screen, dawn opening, confirmations, the fade back to the title.
+  'app-flow.js': 'app/app-flow.js' };
 const SKIP = new Set(['img/ref']);   // reference art for drawing, not used by the game
 
 // Scripts and tags the app must not load (they need the network or an account).
@@ -115,9 +117,10 @@ function page(rel) {
   html = html.replace(/(<meta name="viewport" content="width=device-width, initial-scale=1(?:\.0)?)"/, '$1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"');
   if (rel === 'index.html') {
     html = appShop(html);
-    html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n' + DAWN + '</head>');
+    html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n' + OPENING_HEAD + '</head>');
+    html = html.replace(/<body([^>]*)>/, (m) => m + '\n' + APP_LAYERS);
     // Other pages open over the game (app/app-pages.js).
-    html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n</body>');
+    html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n<script src="app-flow.js"></script>\n</body>');
   } else {
     // Opened over the game: use its music and close the layer on a link home.
     html = html.replace(/<head>/, '<head>\n' + SUBPAGE);
@@ -128,25 +131,26 @@ function page(rel) {
   fs.writeFileSync(file, html);
 }
 
-// Opening the app: the sun comes up over the lake before the title (styles
-// in app/app.css). A tap skips it, and that tap does nothing else.
-const DAWN = `<script>(function () {
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var root = document.documentElement, done = false, swallowUntil = 0;
-  root.classList.add('bio-dawn');
-  function end() { if (done) return; done = true; root.classList.remove('bio-dawn'); }
-  function skip(e) {
-    if (!done) { end(); swallowUntil = Date.now() + 500; }
-    if (Date.now() < swallowUntil) { e.stopImmediatePropagation(); e.preventDefault(); }
-  }
-  ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click', 'keydown'].forEach(function (type) {
-    window.addEventListener(type, skip, { capture: true, passive: false });
-  });
-  // Ends when the title has faded in (the last step), however long the page
-  // took to draw; the timer is only a safety net.
-  window.addEventListener('animationend', function (e) { if (e.animationName === 'dawn-title') end(); });
-  setTimeout(end, 5000);
-})();</script>
+// Opening the app (app/app-flow.js): the loading screen shows from the very
+// first frame, and the music waits until the title is up.
+const OPENING_HEAD = `<script>window.BIO_MUSIC_WAIT = true; document.documentElement.classList.add('bio-loading');</script>
+`;
+// The loading screen, the "are you sure?" sheet and the curtain used when
+// going back to the title. Words are the game's (English).
+const APP_LAYERS = `<div class="app-loading" id="appLoading" role="status" aria-label="Loading">
+  <img class="app-loading-icon" src="apple-touch-icon.png" alt="" width="96" height="96">
+  <p class="app-loading-name">Bioconnect</p>
+  <div class="app-loading-bar"><i id="appLoadingFill"></i></div>
+</div>
+<div class="app-confirm" id="appConfirm" hidden>
+  <section class="app-confirm-card" role="alertdialog" aria-modal="true" aria-labelledby="appConfirmTitle" aria-describedby="appConfirmText">
+    <h2 id="appConfirmTitle">Are you sure?</h2>
+    <p id="appConfirmText"></p>
+    <button class="btn app-confirm-yes" id="appConfirmYes" type="button">Yes</button>
+    <button class="btn app-confirm-no" id="appConfirmNo" type="button">No, go back</button>
+  </section>
+</div>
+<div class="app-curtain" id="appCurtain" hidden></div>
 `;
 
 const SUBPAGE = `<script>(function () {

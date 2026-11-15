@@ -3,7 +3,8 @@
 // Inside the app, the field book and guide open over the game in a frame
 // and borrow the game's player (app/app-pages.js), so the tune carries on.
 window.BioAudio = window.BIO_HOST_AUDIO || (() => {
-  let ctx, synth, paused = true, theme = 'title', adMuted = false, held = false;
+  // The app holds the music until its opening has finished (app/app-flow.js).
+  let ctx, synth, paused = true, theme = 'title', adMuted = false, held = !!window.BIO_MUSIC_WAIT;
   let timer = 0, beat = 0, nextTime = 0, lastEffect = -1;
   const discovered = new Set();
   let playingKinds = [], pinch = false, playingPinch = false;
