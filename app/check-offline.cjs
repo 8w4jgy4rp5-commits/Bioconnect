@@ -78,8 +78,13 @@ function serve() {
     if (missing.length) problems.push(`${name}: font not loaded: ${missing.join(', ')}`);
   };
 
+  // The opening (the sun coming up) ends on its own; taps wait for it.
+  const dawnDone = p => p.waitForFunction(() => !document.documentElement.classList.contains('bio-dawn'), null, { timeout: 8000 });
   // The game: title, play, a few placements.
   await page.goto(base);
+  if (!await page.evaluate(() => document.documentElement.classList.contains('bio-dawn'))) problems.push('opening: the dawn did not play');
+  await dawnDone(page).catch(() => problems.push('opening: the dawn never ended'));
+  if (!/maximum-scale=1/.test(await page.getAttribute('meta[name="viewport"]', 'content'))) problems.push('the app screen can still zoom');
   await page.locator('#startBtn').waitFor({ state: 'visible' });
   await fontsOk('title');
   // No sign-in, Stripe or No Ads anywhere in the app; Crystals only, through Apple.
@@ -167,7 +172,7 @@ function serve() {
   const walk = [['#startAnimalsLink', 'animals/index.html'], ['a[href="../guide/index.html"]', 'guide/index.html'],
     ['a[href="../legal/privacy.html"]', 'legal/privacy.html'], ['a[href="terms.html"]', 'legal/terms.html'],
     ['a[href="../index.html"]', 'index.html']];
-  await page.goto(base);
+  await page.goto(base); await dawnDone(page);
   const frame = () => page.frames().find(f => f !== page.mainFrame());
   for (const [link, rel] of walk) {
     if (link === '#startAnimalsLink') {  // the dusk opening asks for one tap before its buttons
@@ -204,7 +209,7 @@ function serve() {
   // Without a store (no connection to Apple): it says so and sells nothing.
   const bare = await browser.newPage();
   bare.on('pageerror', e => problems.push('page error (no store): ' + e.message));
-  await bare.goto(base); await bare.locator('#startBtn').waitFor({ state: 'visible' });
+  await bare.goto(base); await dawnDone(bare); await bare.locator('#startBtn').waitFor({ state: 'visible' });
   await bare.evaluate(() => BioEconomy.openShop());
   await bare.waitForTimeout(300);
   if (!/unavailable/.test(await bare.locator('#shopStatus').textContent())) problems.push('no store: the shop does not say it is unavailable');

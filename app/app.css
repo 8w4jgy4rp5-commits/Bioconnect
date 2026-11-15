@@ -101,3 +101,20 @@
 .bio-app .gameover-card #goAgain { background: transparent; color: var(--el-ink, #ece4c8); box-shadow: inset 0 0 0 1.5px rgba(236, 228, 200, .45); }
 .bio-app .gameover-card #goAgain small { display: none; }
 .bio-app .gameover-card #goShare { background: none; box-shadow: none; color: var(--el-mute, #b8b098); }
+
+/* ---------- opening: dawn over the lake (about 2.6s, a tap skips it) ----------
+   html.bio-dawn is set before the page draws and removed by the script in
+   build-app.cjs when the sequence ends. Everything lands on the normal
+   title screen, so removing the class early just shows the title. */
+.bio-dawn .start-dusk { animation: dawn-light 1.9s ease-out both; }
+.bio-dawn .dusk-sky, .bio-dawn .dusk-water { animation: dawn-fade 1.5s ease-out .3s both; }
+.bio-dawn .dusk-sky { overflow: hidden; }
+.bio-dawn .dusk-sun { animation: dawn-sun 1.6s cubic-bezier(.2, .7, .3, 1) .5s both; }
+.bio-dawn .dusk-tree, .bio-dawn .dusk-pair { animation: dawn-fade 1s ease-out 1.2s both; }
+.bio-dawn .start-hero { animation: dawn-title .8s ease-out 1.8s both; }
+.bio-dawn .start-topline, .bio-dawn .start-intro, .bio-dawn .dusk-press, .bio-dawn .start-menu { visibility: hidden; }
+.bio-dawn .dusk-fly { animation-duration: 3s; }
+@keyframes dawn-light { from { filter: brightness(.15); } to { filter: none; } }
+@keyframes dawn-fade { from { opacity: 0; } }
+@keyframes dawn-sun { from { transform: translateY(70%); opacity: .4; } }
+@keyframes dawn-title { from { opacity: 0; transform: translateY(8px); } }

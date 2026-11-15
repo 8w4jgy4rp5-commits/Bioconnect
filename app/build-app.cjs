@@ -110,10 +110,12 @@ function page(rel) {
   // safe-area insets are real numbers (otherwise they read 0 and the top
   // of the page hides under the clock and the camera).
   if (!/<meta name="viewport" content="width=device-width, initial-scale=1(\.0)?"/.test(html)) throw new Error(rel + ': viewport tag not found');
-  html = html.replace(/(<meta name="viewport" content="width=device-width, initial-scale=1(?:\.0)?)"/, '$1, viewport-fit=cover"');
+  // A game screen never zooms: without these, Apple's password sheet (its
+  // keyboard shrinks the view) left the whole app zoomed in after a purchase.
+  html = html.replace(/(<meta name="viewport" content="width=device-width, initial-scale=1(?:\.0)?)"/, '$1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"');
   if (rel === 'index.html') {
     html = appShop(html);
-    html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n</head>');
+    html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n' + DAWN + '</head>');
     // Other pages open over the game (app/app-pages.js).
     html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n</body>');
   } else {
@@ -125,6 +127,27 @@ function page(rel) {
   }
   fs.writeFileSync(file, html);
 }
+
+// Opening the app: the sun comes up over the lake before the title (styles
+// in app/app.css). A tap skips it, and that tap does nothing else.
+const DAWN = `<script>(function () {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var root = document.documentElement, done = false, swallowUntil = 0;
+  root.classList.add('bio-dawn');
+  function end() { if (done) return; done = true; root.classList.remove('bio-dawn'); }
+  function skip(e) {
+    if (!done) { end(); swallowUntil = Date.now() + 500; }
+    if (Date.now() < swallowUntil) { e.stopImmediatePropagation(); e.preventDefault(); }
+  }
+  ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'click', 'keydown'].forEach(function (type) {
+    window.addEventListener(type, skip, { capture: true, passive: false });
+  });
+  // Ends when the title has faded in (the last step), however long the page
+  // took to draw; the timer is only a safety net.
+  window.addEventListener('animationend', function (e) { if (e.animationName === 'dawn-title') end(); });
+  setTimeout(end, 5000);
+})();</script>
+`;
 
 const SUBPAGE = `<script>(function () {
   var host = null;

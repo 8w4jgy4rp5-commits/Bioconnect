@@ -2293,3 +2293,8 @@ Stage 1〜3(草だけ/草+ウサギ/食物連鎖)、条件を一定時間「維�
 - 検証: `npm test` 284 passed / 0 failed。`node app/check-offline.cjs` Chromium/WebKit 通過（ショップ曲・閉じたらタイトル曲・残高38まで数え上げ・閉じたらメッセージが消える・プレイ中にショップが開かない、を追加）。Playwright で 390×844 のショップ/購入中/ゲームオーバー（残高あり・0）を確認。
 - 未確認: 実機でのオルゴールの音量・聞こえ方、数え上げの見え方。
 - 次: TestFlight ビルドで本人が確認 → 審査用の画面録画 → App Review 情報のメモ欄（英文案はチャットにあり）→ 再提出（押す前に本人確認）。
+
+## 2026-11-15 build 6 の実機確認を受けて（画面の拡大・開いたときの間）
+- 不具合: 課金でAppleのパスワード入力（キーボード）が出たあと、アプリ全体が拡大されたまま戻らなかった。アプリのページを拡大不可に（viewport に minimum/maximum-scale=1, user-scalable=no）、`capacitor.config.json` の ios.scrollEnabled=false で画面全体のスクロールも止めた。実機でのみ再現するため、確認は TestFlight で。
+- 開いたときの間（本人がA案「夜明け」を選択）: 暗い湖から太陽が上がり、木と動物が浮かび、最後にタイトル文字（合わせて約2.6秒）。タップで飛ばせて、そのタップはほかに効かない。タイトル文字のフェードが終わった時点で終わる（読み込みが遅くても途中で切れない）。動きを減らす設定の端末では出さない。`app/app.css`（.bio-dawn）と build-app.cjs の DAWN スクリプト。
+- 検証: `node app/check-offline.cjs` Chromium/WebKit 通過（夜明けが出て終わる・拡大不可を追加）。Playwright でコマ撮りして順番を確認。
