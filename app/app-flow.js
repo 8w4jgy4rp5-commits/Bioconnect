@@ -72,7 +72,9 @@
   const ASK = {
     pauseHome: () => ({ title: 'Back to the title?', text: 'Your meadow waits. PLAY picks this game up again.', yes: 'Go to the title' }),
     goHome: () => ({ title: 'Back to the title?', text: canRevive() ? 'This game ends here. You can no longer revive it.' : 'This game ends here.', yes: 'Go to the title' }),
-    goAgain: () => ({ title: 'Start a new game?', text: canRevive() ? 'This meadow is cleared, and you can no longer revive it.' : 'This meadow is cleared and a new one begins.', yes: 'Start a new game' })
+    goAgain: () => ({ title: 'Start a new game?', text: canRevive() ? 'This meadow is cleared, and you can no longer revive it.' : 'This meadow is cleared and a new one begins.', yes: 'Start a new game' }),
+    // Spending a Crystal is never a single tap.
+    reviveCrystal: () => ({ title: 'Use 1 Crystal to revive?', text: 'Animals smaller than the deer leave the meadow. The big ones stay, and your score carries on.', yes: 'Revive · 1 Crystal' })
   };
   function canRevive() { const s = window.BioGame?.summary?.(); return !!(s && s.over && !s.revived); }
 
@@ -94,13 +96,13 @@
   }
 
   document.addEventListener('click', e => {
-    const btn = e.target.closest?.('#pauseHome, #goHome, #goAgain');
+    const btn = e.target.closest?.('#pauseHome, #goHome, #goAgain, #reviveCrystal');
     if (!btn || passing) return;
     e.stopImmediatePropagation(); e.preventDefault();
     window.BioAudio?.coin?.();
     ask(ASK[btn.id]()).then(ok => {
       if (!ok) return;
-      if (btn.id === 'goAgain') { press(btn); return; }
+      if (btn.id === 'goAgain' || btn.id === 'reviveCrystal') { press(btn); return; }
       toTitle(btn);
     });
   }, true);

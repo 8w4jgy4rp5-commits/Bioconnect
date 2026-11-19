@@ -155,6 +155,12 @@ function serve() {
   await noWebStore('game over');
   await page.screenshot({ path: path.join(__dirname, 'offline-gameover.png') });
   await page.locator('#reviveCrystal').click({ timeout: 5000 });
+  // Spending a Crystal asks first; "No" spends nothing.
+  if (!await page.locator('#appConfirm').isVisible()) problems.push('revive: did not ask before spending a Crystal');
+  await page.locator('#appConfirmNo').click();
+  if (await page.evaluate(() => state.revived)) problems.push('revive: "No" still revived');
+  await page.locator('#reviveCrystal').click({ timeout: 5000 });
+  await page.locator('#appConfirmYes').click();
   await page.waitForTimeout(500);
   await expect('after a revive', 37);
   if (!await page.evaluate(() => state.revived)) problems.push('game over: revive did not happen');
