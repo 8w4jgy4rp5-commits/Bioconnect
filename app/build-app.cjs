@@ -19,7 +19,7 @@ const FILES = [
   'script.js', 'audio-synth.js', 'audio.js', 'monetization.js', 'app-pages.js', 'watch.js', 'skin.js',
   'shared/lang-detect.js', 'shared/monetization-config.js', 'shared/app-footer.css',
   'animals/index.html', 'animals/animal-rig.js',
-  'guide/index.html', 'guide/guide.css',
+  'guide/index.html', 'guide/guide.css', 'guide/guide.js',
   'legal/privacy.html', 'legal/terms.html', 'legal/legal.css',
   'app.css', 'app-flow.js'
 ];
