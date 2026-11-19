@@ -83,12 +83,19 @@
 .bio-app .gameover-card .go-again span { font-size: 18px; font-weight: 600; }
 .bio-app .gameover-card .go-again small { display: none; }
 
-/* Title screen and Share, side by side as quiet links. */
+/* Title screen and Share: two outlined buttons side by side under New game,
+   clearly buttons but quieter than it. */
 .bio-app .gameover-card .go-home,
-.bio-app .gameover-card .go-share-box { flex: 0 0 auto; margin-top: 12px; }
+.bio-app .gameover-card .go-share-box { flex: 1 1 0; min-width: 0; margin-top: 10px; }
+.bio-app .gameover-card .go-home { margin-right: 5px; }
+.bio-app .gameover-card .go-share-box { margin-left: 5px; }
 .bio-app .gameover-card .go-home,
-.bio-app .gameover-card .go-share { min-height: 40px; margin: 0; padding: 6px 10px; background: none; box-shadow: none; border: 0;
-  color: var(--el-mute, #b8b098); font-size: 15px; font-weight: 500; text-decoration: underline; text-underline-offset: 4px; }
+.bio-app .gameover-card .go-share { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
+  min-height: 48px; margin: 0; padding: 6px 10px; border-radius: 8px; background: rgba(233, 226, 208, .08);
+  border: 1.5px solid rgba(233, 226, 208, .7); box-shadow: none; color: #e9e2d0; font-size: 16px; font-weight: 600; text-decoration: none; }
+.bio-app .gameover-card .go-home::before { content: ''; width: 16px; height: 16px; flex: none; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 3 2 11.5h3V21h5.5v-6h3v6H19v-9.5h3z'/%3E%3C/svg%3E") center/contain no-repeat; }
 .bio-app .gameover-card .go-share-hint { flex-basis: 100%; }
 
 /* Revive is the brightest thing on the card; New game is the calm second
@@ -100,7 +107,13 @@
 .bio-app .gameover-card #reviveFind .revive-ico--gem { background: #4f7a1f; }
 .bio-app .gameover-card #goAgain { background: transparent; color: var(--el-ink, #ece4c8); box-shadow: inset 0 0 0 1.5px rgba(236, 228, 200, .45); }
 .bio-app .gameover-card #goAgain small { display: none; }
-.bio-app .gameover-card #goShare { background: none; box-shadow: none; color: var(--el-mute, #b8b098); }
+/* Title screen and Share read as buttons too, a step quieter than New game. */
+.bio-app .gameover-card #goHome,
+.bio-app .gameover-card #goShare { background: rgba(236, 228, 200, .06); color: var(--el-ink, #ece4c8);
+  box-shadow: inset 0 0 0 1.5px rgba(236, 228, 200, .45); border: 0; border-radius: 8px; min-height: 48px; padding: 6px 10px;
+  font: 600 16px/1.2 var(--go-btn-font, inherit); }
+.bio-app .gameover-card #goHome { margin: 10px 5px 0 0; }
+.bio-app .gameover-card #goShareBox { margin: 10px 0 0 5px; padding: 0; border: 0; background: none; }
 
 /* ---------- opening: dawn over the lake (about 2.6s, a tap skips it) ----------
    html.bio-dawn is set before the page draws and removed by the script in
@@ -158,14 +171,45 @@
   70% { transform: translateY(-2px) scale(1.01); }
   100% { transform: none; }
 }
-.bio-app .cell--vanish > * { animation: revive-vanish .5s ease-in var(--vanish-delay, 0ms) both; }
-@keyframes revive-vanish {
+/* Pop: each leaving animal swells up over its neighbours, then bursts like a
+   soap bubble into a ring and a spray of specks (sound: script.js reviveRun). */
+.bio-app .cell--vanish { z-index: 4; overflow: visible; }
+/* The meadow is paused while this plays, so the pause must not freeze it. */
+.bio-app #board .cell--vanish > *,
+.bio-app #board .cell--vanish::before,
+.bio-app #board .cell--vanish::after { animation-play-state: running !important; }
+.bio-app #board .cell--vanish > * { animation: revive-swell .62s cubic-bezier(.3, .7, .4, 1) var(--vanish-delay, 0ms) both !important; }
+/* Only the animal swells; its hunger bar just fades. */
+.bio-app #board .cell--vanish > .meter { animation: revive-meter .2s ease-out var(--vanish-delay, 0ms) both !important; }
+@keyframes revive-meter { to { opacity: 0; } }
+@keyframes revive-swell {
   0% { opacity: 1; transform: none; filter: none; }
-  35% { opacity: 1; transform: scale(1.12); filter: brightness(1.7); }
-  100% { opacity: 0; transform: translateY(-10px) scale(.3); filter: brightness(2); }
+  48% { opacity: 1; transform: scale(1.75); filter: brightness(1.12) drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
+  56% { opacity: 1; transform: scale(1.62) rotate(-4deg); filter: brightness(1.2) drop-shadow(0 4px 6px rgba(0, 0, 0, .45)); }
+  64% { opacity: 1; transform: scale(1.95) rotate(3deg); filter: brightness(1.8); }
+  74%, 100% { opacity: 0; transform: scale(2.2); filter: brightness(2.2); }
+}
+.bio-app .cell--vanish::before,
+.bio-app .cell--vanish::after { content: ''; position: absolute; left: 50%; top: 50%; pointer-events: none; opacity: 0;
+  animation: .42s ease-out calc(var(--vanish-delay, 0ms) + .4s) both; }
+.bio-app .cell--vanish::after { width: 100%; height: 100%; margin: -50% 0 0 -50%; border-radius: 50%;
+  border: 3px solid #f4f0d8; box-shadow: 0 0 12px rgba(244, 240, 216, .8); animation-name: revive-ring; }
+.bio-app .cell--vanish::before { width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff6c8;
+  box-shadow: 0 -16px #fff6c8, 14px -8px #c9e88a, 14px 8px #fff6c8, 0 16px #c9e88a, -14px 8px #fff6c8, -14px -8px #c9e88a;
+  animation-name: revive-specks; }
+@keyframes revive-ring {
+  0% { opacity: 0; transform: scale(.9); }
+  1% { opacity: 1; transform: scale(.9); }
+  100% { opacity: 0; transform: scale(2.3); border-width: 1px; }
+}
+@keyframes revive-specks {
+  0% { opacity: 0; transform: scale(.6); }
+  1% { opacity: 1; transform: scale(.6); }
+  100% { opacity: 0; transform: scale(3.4); }
 }
 .bio-app .countdown-word--revive { color: #c9e88a; }
-@media (prefers-reduced-motion: reduce) { .bio-app #board.is-startled .cell.filled, .bio-app .cell--vanish > * { animation-duration: .01s; } }
+@media (prefers-reduced-motion: reduce) { .bio-app #board.is-startled .cell.filled, .bio-app .cell--vanish > *,
+  .bio-app .cell--vanish::before, .bio-app .cell--vanish::after { animation-duration: .01s; } }
 /* the startle is the point: no dimming behind "Revive!!", the word sits low */
 .bio-app .countdown:has(.countdown-word--revive) { background: transparent; backdrop-filter: none; align-items: end; padding-bottom: 6%; }
 .bio-app .countdown-word--revive { text-shadow: 0 0 3px #10150e, 0 0 18px rgba(16, 21, 14, .9), 0 4px 0 #10150e; }

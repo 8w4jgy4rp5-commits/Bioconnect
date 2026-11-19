@@ -16,7 +16,7 @@ const FONTS = path.join(__dirname, 'node_modules', '@fontsource');
 const FILES = [
   'index.html', 'favicon.ico', 'apple-touch-icon.png',
   'style.css', 'pop.css', 'dusk.css', 'eldritch.css', 'feedback.css', 'onboarding.css',
-  'script.js', 'audio-synth.js', 'audio.js', 'monetization.js', 'app-pages.js', 'app-share.js', 'watch.js', 'skin.js',
+  'script.js', 'audio-synth.js', 'audio.js', 'monetization.js', 'app-pages.js', 'watch.js', 'skin.js',
   'shared/lang-detect.js', 'shared/monetization-config.js', 'shared/app-footer.css',
   'animals/index.html', 'animals/animal-rig.js',
   'guide/index.html', 'guide/guide.css',
@@ -29,7 +29,6 @@ const DIRS = ['img', 'audio', 'watch'];
 const SWAP = { 'legal/privacy.html': 'legal/app-privacy.html', 'legal/terms.html': 'legal/app-terms.html',
   // The app's store: Crystals through Apple, no account (app/app-economy.js).
   'monetization.js': 'app/app-economy.js', 'app-pages.js': 'app/app-pages.js',
-  'app-share.js': 'app/app-share.js',
   // The app's own layout touches (shop, game over, text sizes), loaded last.
   'app.css': 'app/app.css',
   // Loading screen, dawn opening, confirmations, the fade back to the title.
@@ -120,7 +119,7 @@ function page(rel) {
     html = html.replace(/<\/head>/, '<link rel="stylesheet" href="app.css" />\n' + OPENING_HEAD + '</head>');
     html = html.replace(/<body([^>]*)>/, (m) => m + '\n' + APP_LAYERS);
     // Other pages open over the game (app/app-pages.js).
-    html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-share.js"></script>\n<script src="app-flow.js"></script>\n</body>');
+    html = html.replace(/<\/body>/, '<script src="app-pages.js"></script>\n<script src="app-flow.js"></script>\n</body>');
   } else {
     // Opened over the game: use its music and close the layer on a link home.
     html = html.replace(/<head>/, '<head>\n' + SUBPAGE);

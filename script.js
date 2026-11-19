@@ -5141,11 +5141,6 @@ function shareHint(text) {
 // post link, so it goes on the clipboard to paste into the post.
 function shareRun() {
   const text = shareText();
-  // The app hands the card to the iPhone share sheet instead (app/app-share.js).
-  if (window.BioShare) {
-    window.BioShare(text, cardBlob).catch(function () { shareHint('Sharing did not open. Please try again.'); });
-    return;
-  }
   const intent = 'https://x.com/intent/post?text=' + encodeURIComponent(text);
   const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
   if (cardBlob && navigator.clipboard && navigator.clipboard.write && window.ClipboardItem) {
@@ -5193,18 +5188,21 @@ function reviveRun() {
     hideWord();
     el.board.classList.remove('is-startled');
     const nodes = el.board.querySelectorAll('.cell');
+    // One at a time so the loss can be counted; the pops climb in pitch.
+    const gap = Math.min(150, 1700 / gone.length);
     gone.forEach(function (i, n) {
       const node = nodes[i];
       if (!node) return;
-      node.style.setProperty('--vanish-delay', Math.min(n * 45, 700) + 'ms');
+      node.style.setProperty('--vanish-delay', Math.round(n * gap) + 'ms');
       node.classList.add('cell--vanish');
+      const step = gone.length > 1 ? Math.round(n * 10 / (gone.length - 1)) : 5;
+      setTimeout(function () { if (window.BioAudio) window.BioAudio.effect('revivepop', step); }, n * gap + 400);
     });
-    if (window.BioAudio) window.BioAudio.effect('go');
     setTimeout(function () {
       for (const i of gone) state.cells[i] = null;
       reviveShock = false;
       finishRevive();
-    }, Math.min(gone.length * 45, 700) + 520);
+    }, (gone.length - 1) * gap + 950);
   }, 1300);
   return true;
 }

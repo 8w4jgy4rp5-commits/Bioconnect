@@ -143,7 +143,7 @@ window.BioAudio = window.BIO_HOST_AUDIO || (() => {
     },
     effect(kind, count = 1) {
       if (adMuted || document.hidden || !ctx || ctx.state !== 'running') return;
-      if (paused && kind !== 'ready' && kind !== 'go' && kind !== 'gameover') return;
+      if (paused && kind !== 'ready' && kind !== 'go' && kind !== 'gameover' && kind !== 'revivepop') return;
       // Replace the preceding move's queued pops on a rapid new placement.
       if (kind === 'place') { synth.cancel('effects'); lastEffect = ctx.currentTime; }
       if (kind === 'eat' && ctx.currentTime - lastEffect < .45) return;

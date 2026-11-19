@@ -488,6 +488,11 @@ window.BioSound = (() => {
         // wah, wah, wah, waaaah: three falling steps, then a long droop
         [55, 54, 53].forEach((n, i) => sag(n, time + i * .42, .36, .05, .6));
         sag(52, time + 1.26, 1.15, .055, 2.5, 4);
+      } else if (kind === 'revivepop') {
+        // Revive: a bubble bursting, a step higher each time, with a glint.
+        const step = Math.min(10, Math.max(0, Math.floor(Number(count) || 0)));
+        pop(time, step, .2);
+        tone(hz(86 + [0,2,4,7,9,12,14,16,19,21,24][step] / 2), time + .02, .09, .025, effects, 'triangle', .002);
       } else if (kind === 'eat') {
         pop(time, 0, .052);
       } else if (kind === 'preview') {
