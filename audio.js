@@ -26,7 +26,10 @@ window.BioAudio = window.BIO_HOST_AUDIO || (() => {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC || !window.BioSound) return null;
       if (!ctx) {
-        ctx = new AC(); synth = window.BioSound.create(ctx); ctx.onstatechange = sync;
+        ctx = new AC(); synth = window.BioSound.create(ctx);
+        // iOS leaves the context "interrupted" after another app took over and
+        // may refuse to resume without a touch, so listen for one again.
+        ctx.onstatechange = () => { sync(); if (ctx.state !== 'running' && !document.hidden) arm(); };
         applauseData.then(data => data && ctx.decodeAudioData(data))
           .then(buffer => { if (buffer) synth.setApplause(buffer); }).catch(() => {});
         cheerData.then(data => data && ctx.decodeAudioData(data))
@@ -73,7 +76,8 @@ window.BioAudio = window.BIO_HOST_AUDIO || (() => {
       unlockEvents.forEach(type => document.removeEventListener(type, unlock, true));
     }
   }
-  unlockEvents.forEach(type => document.addEventListener(type, unlock, true));
+  function arm() { unlockEvents.forEach(type => document.addEventListener(type, unlock, true)); }
+  arm();
   // Some browsers allow sound on open without a touch; try right away.
   document.addEventListener('DOMContentLoaded', () => { if (context()) sync(); });
 
@@ -83,6 +87,8 @@ window.BioAudio = window.BIO_HOST_AUDIO || (() => {
       sync();
       if (ctx) ctx.suspend().catch(() => {});
     } else if (ctx) {
+      // If iOS will not resume on its own, the next touch brings the music back.
+      arm();
       ctx.resume().then(sync).catch(() => {});
     }
   });
