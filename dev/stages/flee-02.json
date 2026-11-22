@@ -1,0 +1,23 @@
+{
+  "name": "flee-02",
+  "note": "try/flee busy board. Move 1: grass at r3c3 sets off a 6-chain (grass to wolf). Then the hungry wolf at r4c2 scares the rabbit and the deer: the rabbit lands beside its friend and starts a 3-chain (rabbit to zebra).",
+  "board": [
+    "sprout  grass   sprout  deer    zebra",
+    "grass   sprout  rabbit  fox     buffalo",
+    ".       grass   .       .       sprout",
+    "deer    wolf!   sprout  fox     deer",
+    ".       rabbit  .       rabbit  grass"
+  ],
+  "hand": [
+    "grass",
+    "sprout",
+    "grass"
+  ],
+  "then": [
+    "sprout",
+    "grass",
+    "sprout"
+  ],
+  "clockAfterMoves": 1,
+  "firstTickMs": 7000
+}

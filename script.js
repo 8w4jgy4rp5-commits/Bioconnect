@@ -1635,8 +1635,12 @@ function playHops(hops, wait) {
     // it is still standing there until its own turn to run, and so is
     // the friend it will land beside
     h.hold = fleeStandIn(h.from, h.kind, true);
-    h.partners = h.grew.length ? h.grew[0].from.filter(function (g) { return g !== h.to; })
-      .map(function (g) { return fleeStandIn(g, h.grew[0].was, false); }) : [];
+    // every tile a landing chain will swallow stays visible until its rung
+    h.partners = h.grew.map(function (step, n) {
+      const mine = n ? h.grew[n - 1].at : h.to;
+      return step.from.filter(function (g) { return g !== mine; })
+        .map(function (g) { return fleeStandIn(g, step.was, false); });
+    });
   }
   hops.forEach(function (h, k) {
     setTimeout(function () { playOneHop(h, still); }, wait + k * 380);
@@ -1693,13 +1697,22 @@ function playOneHop(h, still) {
     if (cellNodes[h.from]) cellNodes[h.from].classList.remove('cell--leaving');
   };
   const arrive = function () {
-    if (cellNodes[h.end]) cellNodes[h.end].classList.remove('cell--arriving');
-    for (const p of h.partners || []) if (p) p.remove();
-    if (h.grew.length) {
-      for (const g of h.grew[0].from) if (g !== h.grew[0].at) ghostInto(g, h.grew[0].at, h.grew[0].was);
-      ringAt(h.end, h.grew.length + 1);
-      if (window.BioAudio) window.BioAudio.effect('merge', h.grew.length);
+    if (!h.grew.length) {
+      if (cellNodes[h.end]) cellNodes[h.end].classList.remove('cell--arriving');
+      return;
     }
+    // the landing sets off a chain: play it rung by rung, like a placed one
+    if (window.BioAudio) window.BioAudio.effect('merge', h.grew.length);
+    h.grew.forEach(function (step, n) {
+      setTimeout(function () {
+        for (const p of h.partners[n] || []) if (p) p.remove();
+        for (const g of step.from) if (g !== step.at) ghostInto(g, step.at, step.was);
+        ringAt(step.at, n + 1);
+        if (n >= 2) chainSparkles(step.at, n + 1, n === h.grew.length - 1);
+        if (n > 0) showChain(n + 1, n === h.grew.length - 1);
+        if (n === h.grew.length - 1 && cellNodes[h.end]) cellNodes[h.end].classList.remove('cell--arriving');
+      }, n * CHAIN_STEP_MS);
+    });
   };
   if (still) {
     setTimeout(function () { free(); runner.remove(); arrive(); }, HOP.notice);
