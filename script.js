@@ -1578,7 +1578,7 @@ function fleeFromDanger() {
       state.cells[n] = null; state.cells[i] = c;
       return !hit;
     });
-    const pool = safe.length ? safe : open;
+    const pool = c.caught === state.ticks ? [] : (safe.length ? safe : open);
     if (!pool.length) { hops.push({ from: i, to: i, by: by, kind: c.kind, stuck: true, grew: [] }); continue; }
     const friends = pool.filter(function (n) {
       return neighbours(n).some(function (m) { return m !== i && state.cells[m] && state.cells[m].kind === c.kind; });
@@ -1587,7 +1587,27 @@ function fleeFromDanger() {
     const to = pick[Math.floor(Math.random() * pick.length)];
     state.cells[i] = null; state.cells[to] = c;
     const grew = growFrom(to);
-    hops.push({ from: i, to: to, by: by, kind: c.kind, grew: grew, end: grew.length ? grew[grew.length - 1].at : to });
+    const end = grew.length ? grew[grew.length - 1].at : to;
+    hops.push({ from: i, to: to, by: by, kind: c.kind, grew: grew, end: end, chase: null });
+  }
+  // Everyone has run; now each hungry mouth that lost its meal takes one
+  // step after one of them: into a free square of its own that touches
+  // where the prey ended up (the square the prey left, if that one does).
+  // Caught prey freezes and is eaten on the next tick, before it can run.
+  const chased = new Set();
+  for (const h of hops) {
+    if (h.stuck || h.by == null || chased.has(h.by)) continue;
+    const hunter = state.cells[h.by], prey = state.cells[h.end];
+    if (!hunter || !prey || bigSide(hunter.kind) > 1 || ANIMALS[hunter.kind].diet.indexOf(prey.kind) < 0) continue;
+    if (neighbours(h.by).indexOf(h.end) >= 0) continue;
+    const steps = neighbours(h.by).filter(function (n) { return !state.cells[n] && neighbours(n).indexOf(h.end) >= 0; });
+    if (!steps.length) continue;
+    const step = steps.indexOf(h.from) >= 0 ? h.from : steps[0];
+    state.cells[h.by] = null;
+    state.cells[step] = hunter;
+    prey.caught = state.ticks;
+    chased.add(h.by);
+    h.chase = { from: h.by, to: step, kind: hunter.kind, prey: h.end, preyKind: prey.kind };
   }
   return hops;
 }
@@ -1606,7 +1626,7 @@ function fleeSpark(cls, x, y, life) {
   fxAdd(n, life);
   return n;
 }
-function fleeStandIn(at, kind, panic) {
+function fleeStandIn(at, kind, panic, fed) {
   const p = fxAt(at);
   if (!p) return null;
   const n = document.createElement('span');
@@ -1618,8 +1638,8 @@ function fleeStandIn(at, kind, panic) {
   const body = document.createElement('span');
   body.className = 'flee-body';
   n.appendChild(body);
-  paintTile(body, kind, 1, panic);
-  fxAdd(n, 5000);
+  paintTile(body, kind, fed == null ? 1 : fed, panic);
+  fxAdd(n, 8000);
   return n;
 }
 function playHops(hops, wait) {
@@ -1635,6 +1655,11 @@ function playHops(hops, wait) {
     // it is still standing there until its own turn to run, and so is
     // the friend it will land beside
     h.hold = fleeStandIn(h.from, h.kind, true);
+    if (h.chase) {
+      if (cellNodes[h.chase.to]) cellNodes[h.chase.to].classList.add('cell--arriving');
+      if (cellNodes[h.chase.from]) cellNodes[h.chase.from].classList.add('cell--leaving');
+      h.hunterHold = fleeStandIn(h.chase.from, h.chase.kind, false, 0.1);
+    }
     // every tile a landing chain will swallow stays visible until its rung
     h.partners = h.grew.map(function (step, n) {
       const mine = n ? h.grew[n - 1].at : h.to;
@@ -1642,6 +1667,10 @@ function playHops(hops, wait) {
         .map(function (g) { return fleeStandIn(g, step.was, false); });
     });
   }
+  // a mouth that moves to chase is the same mouth every hop snaps from
+  const holdAt = {};
+  for (const h of ran) if (h.chase) holdAt[h.chase.from] = h.hunterHold;
+  for (const h of hops) if (!h.hunterHold && h.by != null && holdAt[h.by]) h.hunterHold = holdAt[h.by];
   hops.forEach(function (h, k) {
     setTimeout(function () { playOneHop(h, still); }, wait + k * 380);
   });
@@ -1660,7 +1689,8 @@ function playOneHop(h, still) {
   const alert = fleeSpark('flee-alert', a.x + a.w * 0.22, a.y - a.h * 0.3, 900);
   alert.textContent = '!';
   const snap = function () {
-    const mouth = h.by != null && cellNodes[h.by] && cellNodes[h.by].querySelector('.tile-art');
+    const mouth = h.hunterHold ? h.hunterHold.querySelector('.tile-art')
+      : h.by != null && cellNodes[h.by] && cellNodes[h.by].querySelector('.tile-art');
     const m = h.by != null && fxAt(h.by);
     if (!mouth || !m || still) return;
     const d = Math.hypot(a.x - m.x, a.y - m.y) || 1;
@@ -1745,6 +1775,40 @@ function playOneHop(h, still) {
     fleeSpark('flee-dust', b.x, b.y + b.h * 0.3, 500);
   }, HOP.notice + HOP.crouch + HOP.air);
   setTimeout(arrive, total);
+  if (h.chase) setTimeout(function () { playChase(h); }, total + h.grew.length * CHAIN_STEP_MS + 260);
+}
+
+function playChase(h) {
+  const c = h.chase, a = fxAt(c.from), b = fxAt(c.to), runner = h.hunterHold;
+  const done = function () {
+    if (runner) runner.remove();
+    if (cellNodes[c.from]) cellNodes[c.from].classList.remove('cell--leaving');
+    if (cellNodes[c.to]) cellNodes[c.to].classList.remove('cell--arriving');
+    // the prey it caught up with freezes
+    const p = fxAt(c.prey);
+    if (p) fleeSpark('flee-alert', p.x + p.w * 0.22, p.y - p.h * 0.3, 900).textContent = '!';
+    const node = cellNodes[c.prey];
+    if (node) { node.classList.remove('cell--shiver'); void node.offsetWidth; node.classList.add('cell--shiver'); }
+    setTicker('The ' + c.kind + ' gave chase! The ' + c.preyKind + ' is cornered.');
+  };
+  if (!a || !b || !runner) { done(); return; }
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const body = runner.querySelector('.flee-body');
+  if (body && dx < -1) body.style.transform = 'scaleX(-1)';
+  const T = function (x, y, sx, sy) {
+    return 'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px)) scale(' + sx + ',' + sy + ')';
+  };
+  const ms = 520;
+  runner.animate([
+    { transform: T(0, 0, 1, 1), offset: 0 },
+    { transform: T(-dx * 0.08, -dy * 0.08 + a.h * 0.04, 1.08, 0.9), offset: 0.28 },
+    { transform: T(dx * 0.55, dy * 0.55 - a.h * 0.16, 1.12, 0.94), offset: 0.62, easing: 'cubic-bezier(.5,0,.8,.6)' },
+    { transform: T(dx, dy + b.h * 0.04, 1.12, 0.86), offset: 0.82 },
+    { transform: T(dx, dy, 1, 1), offset: 1 }
+  ], { duration: ms, fill: 'forwards' });
+  setTimeout(function () { fleeSpark('flee-dust', a.x, a.y + a.h * 0.3, 500); }, ms * 0.3);
+  setTimeout(function () { fleeSpark('flee-dust', b.x, b.y + b.h * 0.3, 500); }, ms * 0.82);
+  setTimeout(done, ms);
 }
 
 // ---------- The world's move ----------
