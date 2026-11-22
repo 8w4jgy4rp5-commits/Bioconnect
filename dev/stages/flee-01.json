@@ -1,0 +1,15 @@
+{
+  "name": "flee-01",
+  "note": "try/flee demo. Move 1: grass at r5c3 merges into a rabbit. Then the wolf (hungry) threatens the rabbit, deer and fox: the rabbit hops next to its friend and grows into a fox, the deer hops away, the fox is boxed in by grass and shivers. Tick: the wolf eats.",
+  "board": [
+    ".       grass   sprout  .       .",
+    "grass   fox     grass   .       .",
+    ".       wolf!   rabbit  .       rabbit",
+    ".       deer    .       .       .",
+    "sprout  .       .       grass   ."
+  ],
+  "hand": ["grass", "sprout", "grass"],
+  "then": ["sprout", "grass", "sprout"],
+  "clockAfterMoves": 1,
+  "firstTickMs": 2600
+}

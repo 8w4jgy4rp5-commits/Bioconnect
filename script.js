@@ -1490,6 +1490,8 @@ function placeTile(i) {
   if (state.topKind !== topBefore) state.peakCells = state.cells.map(function (c) { return c && Object.assign({}, c); });
   const before = state.score;
   scoreGrowth(grew);
+  const hops = fleeFromDanger();
+  for (const h of hops) if (h.grew.length) scoreGrowth(h.grew);
   // What the player is told is what the scale actually moved. Late in a
   // run the same chain is worth less, and this is where they see that.
   const gained = displayScore(state.score) - displayScore(before);
@@ -1517,6 +1519,7 @@ function placeTile(i) {
     for (const at of growthClearings(grew, beforeGrowth)) blockerWas[at] = beforeGrowth[at].kind;
     replayChain(grew, before, blockerWas);
   }
+  playHops(hops, grew.length ? chainStepAt(grew.length) + 200 : 120);
   announceFirsts(dealtFirst ? [{ kind: dealtKind }].concat(grew) : grew);
   const giants = grew.filter(function (g) { return g.kind === 'elephant'; }).length;
   if (countRaised(grew) && !giants) writeMet();
@@ -1542,6 +1545,91 @@ function nudgeHand() {
   nudgeTimer = setTimeout(function () {
     el.hand.classList.remove('hand-slot--nudge');
   }, 900);
+}
+
+// ---------- try/flee: prey runs from a mouth that bites next turn ----------
+// Experiment only (branch try/flee, `?flee` in the address). After every
+// merge and chain has settled, an animal standing on a square a starving
+// mouth will take next turn hops to a free square beside it: one nobody
+// hungry can reach if there is one, next to its own kind if it can. With
+// nowhere to go it stays and shivers. Landing beside its own kind merges.
+const FLEE = !window.NO_FLEE;
+const FLEE_MS = 560;
+function fleeFromDanger() {
+  if (!FLEE) return [];
+  const hops = [], tried = new Set();
+  for (let pass = 0; pass < CELLS; pass++) {
+    const risk = inReach();
+    const i = Array.from(risk).find(function (at) {
+      const c = state.cells[at];
+      return c && isAnimal(c.kind) && bigSide(c.kind) === 1 && !tried.has(c);
+    });
+    if (i === undefined) break;
+    const c = state.cells[i];
+    tried.add(c);
+    const open = neighbours(i).filter(function (n) { return !state.cells[n]; });
+    const safe = open.filter(function (n) {
+      state.cells[i] = null; state.cells[n] = c;
+      const hit = inReach().has(n);
+      state.cells[n] = null; state.cells[i] = c;
+      return !hit;
+    });
+    const pool = safe.length ? safe : open;
+    if (!pool.length) { hops.push({ from: i, to: i, kind: c.kind, stuck: true, grew: [] }); continue; }
+    const friends = pool.filter(function (n) {
+      return neighbours(n).some(function (m) { return m !== i && state.cells[m] && state.cells[m].kind === c.kind; });
+    });
+    const pick = friends.length ? friends : pool;
+    const to = pick[Math.floor(Math.random() * pick.length)];
+    state.cells[i] = null; state.cells[to] = c;
+    const grew = growFrom(to);
+    hops.push({ from: i, to: to, kind: c.kind, grew: grew, end: grew.length ? grew[grew.length - 1].at : to });
+  }
+  return hops;
+}
+
+function playHops(hops, wait) {
+  if (!hops.length || !el.fx) return;
+  setTimeout(function () {
+    for (const h of hops) {
+      if (h.stuck) {
+        const node = cellNodes[h.from];
+        if (node) { node.classList.remove('cell--shiver'); void node.offsetWidth; node.classList.add('cell--shiver'); }
+        continue;
+      }
+      const a = fxAt(h.from), b = fxAt(h.to);
+      if (!a || !b) continue;
+      const node = cellNodes[h.end];
+      if (node) node.classList.add('cell--arriving');
+      const ghost = document.createElement('span');
+      ghost.className = 'ghost ghost--flee ghost--panic';
+      ghost.style.left = a.x + 'px';
+      ghost.style.top = a.y + 'px';
+      ghost.style.width = (a.w * 0.92) + 'px';
+      ghost.style.height = (a.h * 0.82) + 'px';
+      ghost.style.setProperty('--dx', (b.x - a.x) + 'px');
+      ghost.style.setProperty('--dy', (b.y - a.y) + 'px');
+      ghost.style.animationDuration = FLEE_MS + 'ms';
+      fxAdd(ghost, FLEE_MS + 40);
+      paintTile(ghost, h.kind, 1, true);
+      setTimeout(function () {
+        if (node) node.classList.remove('cell--arriving');
+        if (h.grew.length) {
+          for (const g of h.grew[0].from) if (g !== h.grew[0].at) ghostInto(g, h.grew[0].at, h.grew[0].was);
+          ringAt(h.end, h.grew.length + 1);
+          if (window.BioAudio) window.BioAudio.effect('merge', h.grew.length);
+        }
+      }, FLEE_MS);
+    }
+    const ran = hops.filter(function (h) { return !h.stuck; });
+    const lucky = ran.filter(function (h) { return h.grew.length; });
+    const stuck = hops.filter(function (h) { return h.stuck; });
+    const say = [];
+    if (ran.length) say.push((ran.length > 1 ? ran.length + ' animals' : 'The ' + ran[0].kind) + ' ran from a hungry mouth!');
+    if (lucky.length) say.push('...and grew into a ' + lucky[0].grew[lucky[0].grew.length - 1].kind + ' where it landed!');
+    if (stuck.length) say.push('The ' + stuck[0].kind + ' has nowhere to run.');
+    if (say.length) setTicker(say.join(' '));
+  }, wait);
 }
 
 // ---------- The world's move ----------
@@ -1573,6 +1661,8 @@ function worldTick() {
 
   const before = state.score;
   scoreMeals(meals);
+  const hops = fleeFromDanger();
+  for (const h of hops) if (h.grew.length) scoreGrowth(h.grew);
   const gained = displayScore(state.score) - displayScore(before);
   if (meals.length && window.BioAudio) window.BioAudio.effect("eat", meals.length);
   bankScore();
@@ -1585,6 +1675,7 @@ function worldTick() {
   if (stone) lost.push(stone);
   render([], meals, lost);
   setTicker(tickMessage(meals, deaths, withered, stone, gained, dealt));
+  playHops(hops, 450);
 
   // One pop per mouth, each showing that meal's own share of the turn.
   // The shares add up to `gained` exactly, so a two-meal turn reads as

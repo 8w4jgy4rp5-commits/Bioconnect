@@ -2457,3 +2457,14 @@ body.is-celebrating { overflow: hidden; }
 /* The pause card carries the guide, the pace and the store now that the menu button is gone. */
 .pause-extras { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 4px; }
 .pause-extras .btn { min-height: 44px; font-size: 14px; padding: 8px 12px; }
+
+/* try/flee: the hop from a square a starving mouth will take */
+.ghost--flee { opacity: 1; animation-name: flee-hop; animation-timing-function: cubic-bezier(.3, .7, .4, 1); z-index: 5; }
+@keyframes flee-hop {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  45% { transform: translate(calc(-50% + var(--dx, 0px) * .5), calc(-50% + var(--dy, 0px) * .5 - 34px)) scale(1.12); }
+  100% { opacity: 1; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(1); }
+}
+.cell--arriving > * { opacity: 0; }
+.cell--shiver { animation: flee-shiver .09s linear 8; }
+@keyframes flee-shiver { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
