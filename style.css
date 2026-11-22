@@ -2459,12 +2459,33 @@ body.is-celebrating { overflow: hidden; }
 .pause-extras .btn { min-height: 44px; font-size: 14px; padding: 8px 12px; }
 
 /* try/flee: the hop from a square a starving mouth will take */
-.ghost--flee { opacity: 1; animation-name: flee-hop; animation-timing-function: cubic-bezier(.3, .7, .4, 1); z-index: 5; }
-@keyframes flee-hop {
-  0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  45% { transform: translate(calc(-50% + var(--dx, 0px) * .5), calc(-50% + var(--dy, 0px) * .5 - 34px)) scale(1.12); }
-  100% { opacity: 1; transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(1); }
-}
-.cell--arriving > * { opacity: 0; }
-.cell--shiver { animation: flee-shiver .09s linear 8; }
+.flee-runner { position: absolute; transform: translate(-50%, -50%); transform-origin: 50% 90%; z-index: 6; pointer-events: none; }
+.flee-body { display: block; width: 100%; height: 100%; }
+.cell--arriving > *, .cell--leaving > * { opacity: 0 !important; }
+.cell--shiver > .tile-art { animation: flee-shiver .07s linear 12; }
 @keyframes flee-shiver { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+.flee-alert {
+  position: absolute; z-index: 7; pointer-events: none;
+  font: 800 26px/1 Georgia, serif; color: #fff2c4;
+  text-shadow: 0 2px 0 #7a3b1c, 0 0 8px #ff9a5c;
+  transform: translate(-50%, -50%) scale(0);
+  animation: flee-alert 900ms cubic-bezier(.3, 1.6, .5, 1) forwards;
+}
+@keyframes flee-alert {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-12deg); opacity: 1; }
+  18% { transform: translate(-50%, -70%) scale(1.25) rotate(6deg); }
+  30% { transform: translate(-50%, -60%) scale(1) rotate(0); }
+  75% { opacity: 1; }
+  100% { transform: translate(-50%, -75%) scale(1); opacity: 0; }
+}
+.flee-dust {
+  position: absolute; z-index: 5; pointer-events: none; width: 44px; height: 14px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, #e9dfc0cc, #e9dfc000);
+  border-radius: 50%;
+  animation: flee-dust 500ms ease-out forwards;
+}
+@keyframes flee-dust {
+  0% { transform: translate(-50%, -50%) scale(.4, .5); opacity: .9; }
+  100% { transform: translate(-50%, -60%) scale(2.2, 1.3); opacity: 0; }
+}

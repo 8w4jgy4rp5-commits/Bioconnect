@@ -1567,6 +1567,10 @@ function fleeFromDanger() {
     if (i === undefined) break;
     const c = state.cells[i];
     tried.add(c);
+    const by = neighbours(i).find(function (n) {
+      const m = state.cells[n];
+      return m && isAnimal(m.kind) && m.clock + 1 >= ANIMALS[m.kind].eatAt && ANIMALS[m.kind].diet.indexOf(c.kind) >= 0;
+    });
     const open = neighbours(i).filter(function (n) { return !state.cells[n]; });
     const safe = open.filter(function (n) {
       state.cells[i] = null; state.cells[n] = c;
@@ -1575,7 +1579,7 @@ function fleeFromDanger() {
       return !hit;
     });
     const pool = safe.length ? safe : open;
-    if (!pool.length) { hops.push({ from: i, to: i, kind: c.kind, stuck: true, grew: [] }); continue; }
+    if (!pool.length) { hops.push({ from: i, to: i, by: by, kind: c.kind, stuck: true, grew: [] }); continue; }
     const friends = pool.filter(function (n) {
       return neighbours(n).some(function (m) { return m !== i && state.cells[m] && state.cells[m].kind === c.kind; });
     });
@@ -1583,53 +1587,151 @@ function fleeFromDanger() {
     const to = pick[Math.floor(Math.random() * pick.length)];
     state.cells[i] = null; state.cells[to] = c;
     const grew = growFrom(to);
-    hops.push({ from: i, to: to, kind: c.kind, grew: grew, end: grew.length ? grew[grew.length - 1].at : to });
+    hops.push({ from: i, to: to, by: by, kind: c.kind, grew: grew, end: grew.length ? grew[grew.length - 1].at : to });
   }
   return hops;
 }
 
+// The hop, told as a little story: it notices (a jolt and a "!"), the
+// mouth beside it snaps at it, it crouches, turns to face where it is
+// going and jumps in an arc, kicking up dust, then lands with a squash.
+// The board underneath is already final; the squares involved are kept
+// blank until the runner has left / arrived so nothing is seen twice.
+const HOP = { notice: 420, crouch: 150, air: 430, land: 260 };
+function fleeSpark(cls, x, y, life) {
+  const n = document.createElement('span');
+  n.className = cls;
+  n.style.left = x + 'px';
+  n.style.top = y + 'px';
+  fxAdd(n, life);
+  return n;
+}
+function fleeStandIn(at, kind, panic) {
+  const p = fxAt(at);
+  if (!p) return null;
+  const n = document.createElement('span');
+  n.className = 'flee-runner';
+  n.style.left = p.x + 'px';
+  n.style.top = p.y + 'px';
+  n.style.width = (p.w * 0.92) + 'px';
+  n.style.height = (p.h * 0.86) + 'px';
+  const body = document.createElement('span');
+  body.className = 'flee-body';
+  n.appendChild(body);
+  paintTile(body, kind, 1, panic);
+  fxAdd(n, 5000);
+  return n;
+}
 function playHops(hops, wait) {
   if (!hops.length || !el.fx) return;
+  const still = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const ran = hops.filter(function (h) { return !h.stuck; });
+  const lucky = ran.filter(function (h) { return h.grew.length; });
+  const stuck = hops.filter(function (h) { return h.stuck; });
+  // blank the squares right away, before the first frame shows them
+  for (const h of ran) {
+    if (cellNodes[h.end]) cellNodes[h.end].classList.add('cell--arriving');
+    if (cellNodes[h.from]) cellNodes[h.from].classList.add('cell--leaving');
+    // it is still standing there until its own turn to run, and so is
+    // the friend it will land beside
+    h.hold = fleeStandIn(h.from, h.kind, true);
+    h.partners = h.grew.length ? h.grew[0].from.filter(function (g) { return g !== h.to; })
+      .map(function (g) { return fleeStandIn(g, h.grew[0].was, false); }) : [];
+  }
+  hops.forEach(function (h, k) {
+    setTimeout(function () { playOneHop(h, still); }, wait + k * 380);
+  });
   setTimeout(function () {
-    for (const h of hops) {
-      if (h.stuck) {
-        const node = cellNodes[h.from];
-        if (node) { node.classList.remove('cell--shiver'); void node.offsetWidth; node.classList.add('cell--shiver'); }
-        continue;
-      }
-      const a = fxAt(h.from), b = fxAt(h.to);
-      if (!a || !b) continue;
-      const node = cellNodes[h.end];
-      if (node) node.classList.add('cell--arriving');
-      const ghost = document.createElement('span');
-      ghost.className = 'ghost ghost--flee ghost--panic';
-      ghost.style.left = a.x + 'px';
-      ghost.style.top = a.y + 'px';
-      ghost.style.width = (a.w * 0.92) + 'px';
-      ghost.style.height = (a.h * 0.82) + 'px';
-      ghost.style.setProperty('--dx', (b.x - a.x) + 'px');
-      ghost.style.setProperty('--dy', (b.y - a.y) + 'px');
-      ghost.style.animationDuration = FLEE_MS + 'ms';
-      fxAdd(ghost, FLEE_MS + 40);
-      paintTile(ghost, h.kind, 1, true);
-      setTimeout(function () {
-        if (node) node.classList.remove('cell--arriving');
-        if (h.grew.length) {
-          for (const g of h.grew[0].from) if (g !== h.grew[0].at) ghostInto(g, h.grew[0].at, h.grew[0].was);
-          ringAt(h.end, h.grew.length + 1);
-          if (window.BioAudio) window.BioAudio.effect('merge', h.grew.length);
-        }
-      }, FLEE_MS);
-    }
-    const ran = hops.filter(function (h) { return !h.stuck; });
-    const lucky = ran.filter(function (h) { return h.grew.length; });
-    const stuck = hops.filter(function (h) { return h.stuck; });
     const say = [];
     if (ran.length) say.push((ran.length > 1 ? ran.length + ' animals' : 'The ' + ran[0].kind) + ' ran from a hungry mouth!');
     if (lucky.length) say.push('...and grew into a ' + lucky[0].grew[lucky[0].grew.length - 1].kind + ' where it landed!');
     if (stuck.length) say.push('The ' + stuck[0].kind + ' has nowhere to run.');
     if (say.length) setTicker(say.join(' '));
   }, wait);
+}
+function playOneHop(h, still) {
+  const a = fxAt(h.from);
+  if (!a) return;
+  // "!" over its head, whether or not it can get away
+  const alert = fleeSpark('flee-alert', a.x + a.w * 0.22, a.y - a.h * 0.3, 900);
+  alert.textContent = '!';
+  const snap = function () {
+    const mouth = h.by != null && cellNodes[h.by] && cellNodes[h.by].querySelector('.tile-art');
+    const m = h.by != null && fxAt(h.by);
+    if (!mouth || !m || still) return;
+    const d = Math.hypot(a.x - m.x, a.y - m.y) || 1;
+    const ux = (a.x - m.x) / d, uy = (a.y - m.y) / d;
+    mouth.animate([
+      { transform: 'translate(0,0)' },
+      { transform: 'translate(' + (ux * m.w * 0.22) + 'px,' + (uy * m.h * 0.22) + 'px) scale(1.08)', offset: 0.4 },
+      { transform: 'translate(0,0)' }
+    ], { duration: 420, easing: 'cubic-bezier(.3,.9,.4,1)' });
+  };
+  setTimeout(snap, HOP.notice - 120);
+  if (h.stuck) {
+    const node = cellNodes[h.from];
+    if (node) { node.classList.remove('cell--shiver'); void node.offsetWidth; node.classList.add('cell--shiver'); }
+    return;
+  }
+  const b = fxAt(h.to);
+  if (!b) return;
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const runner = document.createElement('span');
+  runner.className = 'flee-runner';
+  runner.style.left = a.x + 'px';
+  runner.style.top = a.y + 'px';
+  runner.style.width = (a.w * 0.92) + 'px';
+  runner.style.height = (a.h * 0.86) + 'px';
+  const body = document.createElement('span');
+  body.className = 'flee-body';
+  runner.appendChild(body);
+  paintTile(body, h.kind, 1, true);
+  if (h.hold) h.hold.remove();
+  const total = HOP.notice + HOP.crouch + HOP.air + HOP.land;
+  fxAdd(runner, total + 40);
+  const free = function () {
+    if (cellNodes[h.from]) cellNodes[h.from].classList.remove('cell--leaving');
+  };
+  const arrive = function () {
+    if (cellNodes[h.end]) cellNodes[h.end].classList.remove('cell--arriving');
+    for (const p of h.partners || []) if (p) p.remove();
+    if (h.grew.length) {
+      for (const g of h.grew[0].from) if (g !== h.grew[0].at) ghostInto(g, h.grew[0].at, h.grew[0].was);
+      ringAt(h.end, h.grew.length + 1);
+      if (window.BioAudio) window.BioAudio.effect('merge', h.grew.length);
+    }
+  };
+  if (still) {
+    setTimeout(function () { free(); runner.remove(); arrive(); }, HOP.notice);
+    return;
+  }
+  // face the way it runs (the art faces right)
+  if (dx < -1) body.style.transform = 'scaleX(-1)';
+  const T = function (x, y, sx, sy) {
+    return 'translate(calc(-50% + ' + x + 'px), calc(-50% + ' + y + 'px)) scale(' + sx + ',' + sy + ')';
+  };
+  const lift = -(a.h * 0.55 + Math.hypot(dx, dy) * 0.18);
+  const t1 = HOP.notice / total, t2 = (HOP.notice + HOP.crouch) / total, t3 = (HOP.notice + HOP.crouch + HOP.air) / total;
+  runner.animate([
+    { transform: T(0, 0, 1, 1), offset: 0 },
+    { transform: T(-3, 0, 1, 1), offset: t1 * 0.2 },
+    { transform: T(3, 0, 1, 1), offset: t1 * 0.4 },
+    { transform: T(-2, 0, 1, 1), offset: t1 * 0.6 },
+    { transform: T(0, 0, 1, 1), offset: t1 },
+    { transform: T(0, a.h * 0.06, 1.14, 0.8), offset: t2, easing: 'cubic-bezier(.2,.6,.4,1)' },
+    { transform: T(dx * 0.5, dy * 0.5 + lift, 0.9, 1.14), offset: t2 + (t3 - t2) * 0.5, easing: 'cubic-bezier(.6,0,.8,.6)' },
+    { transform: T(dx, dy + b.h * 0.05, 1.18, 0.8), offset: t3 },
+    { transform: T(dx, dy - b.h * 0.04, 0.96, 1.06), offset: t3 + (1 - t3) * 0.55 },
+    { transform: T(dx, dy, 1, 1), offset: 1 }
+  ], { duration: total, fill: 'forwards' });
+  setTimeout(function () {
+    free();
+    fleeSpark('flee-dust', a.x, a.y + a.h * 0.3, 500);
+  }, HOP.notice + HOP.crouch);
+  setTimeout(function () {
+    fleeSpark('flee-dust', b.x, b.y + b.h * 0.3, 500);
+  }, HOP.notice + HOP.crouch + HOP.air);
+  setTimeout(arrive, total);
 }
 
 // ---------- The world's move ----------
