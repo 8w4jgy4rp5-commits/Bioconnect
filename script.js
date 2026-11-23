@@ -1555,7 +1555,9 @@ function nudgeHand() {
 // nowhere to go it stays and shivers. Landing beside its own kind merges.
 const FLEE = !window.NO_FLEE;
 const FLEE_MS = 560;
-const CHASE = false;   // tried 2026-11-22: a moving hunter broke the player's pairs
+const CHASE = false;
+const FLEE_REACH = 3;
+const FLEE_WILD = 1;   // tried 2026-11-22: a moving hunter broke the player's pairs
 // Only a raised animal runs, and only from the mouth that is actually
 // going to take it next turn (pickMeal, the same choice the bite makes).
 // Animals dealt from the hand are wild and unbothered: they stay, and
@@ -1570,7 +1572,7 @@ function fleeTargets() {
     const meal = pickMeal(i, ANIMALS[m.kind]);
     if (!meal) continue;
     const t = state.cells[meal.at];
-    if (t && isAnimal(t.kind) && isRaised(t) && bigSide(t.kind) === 1) out.push({ at: meal.at, by: i });
+    if (t && isAnimal(t.kind) && (FLEE_WILD || isRaised(t)) && bigSide(t.kind) === 1) out.push({ at: meal.at, by: i });
   }
   return out;
 }
@@ -1591,10 +1593,31 @@ function fleeFromDanger() {
       return !hit;
     });
     const pool = c.caught === state.ticks ? [] : (safe.length ? safe : open);
-    if (!pool.length) { hops.push({ from: i, to: i, by: by, kind: c.kind, stuck: true, grew: [] }); continue; }
-    const friends = pool.filter(function (n) {
+    const touchesFriend = function (n) {
       return neighbours(n).some(function (m) { return m !== i && state.cells[m] && state.cells[m].kind === c.kind; });
-    });
+    };
+    let friends = pool.filter(touchesFriend);
+    // Nobody of its kind next door: it bounds further, up to FLEE_REACH
+    // squares, to land beside one -- the jump that turns a rescue into a
+    // merge. Only to a square no hungry mouth will take.
+    if (!friends.length && FLEE_REACH > 1 && c.caught !== state.ticks) {
+      const r0 = (i / SIZE) | 0, c0 = i % SIZE;
+      const far = [];
+      for (let n = 0; n < CELLS; n++) {
+        if (state.cells[n] || n === i) continue;
+        const d = Math.abs(((n / SIZE) | 0) - r0) + Math.abs(n % SIZE - c0);
+        if (d > FLEE_REACH || !touchesFriend(n)) continue;
+        state.cells[i] = null; state.cells[n] = c;
+        const hit = inReach().has(n);
+        state.cells[n] = null; state.cells[i] = c;
+        if (!hit) far.push({ n: n, d: d });
+      }
+      if (far.length) {
+        const best = Math.min.apply(null, far.map(function (f) { return f.d; }));
+        friends = far.filter(function (f) { return f.d === best; }).map(function (f) { return f.n; });
+      }
+    }
+    if (!pool.length && !friends.length) { hops.push({ from: i, to: i, by: by, kind: c.kind, stuck: true, grew: [] }); continue; }
     const pick = friends.length ? friends : pool;
     const to = pick[Math.floor(Math.random() * pick.length)];
     state.cells[i] = null; state.cells[to] = c;
