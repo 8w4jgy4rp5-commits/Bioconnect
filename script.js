@@ -1490,7 +1490,7 @@ function placeTile(i) {
   if (state.topKind !== topBefore) state.peakCells = state.cells.map(function (c) { return c && Object.assign({}, c); });
   const before = state.score;
   scoreGrowth(grew);
-  const hops = fleeFromDanger();
+  const hops = fleeFromDanger([grew.length ? grew[grew.length - 1].at : i]);
   for (const h of hops) if (h.grew.length) scoreGrowth(h.grew);
   // What the player is told is what the scale actually moved. Late in a
   // run the same chain is worth less, and this is where they see that.
@@ -1558,13 +1558,24 @@ const FLEE_MS = 560;
 const CHASE = false;   // tried 2026-11-22: a moving hunter broke the player's pairs
 const FLEE_REACH = 3;
 const FLEE_WILD = 1;   // 0 = only raised animals run
+const FLEE_ON_ARRIVAL = 1;
 // Only a raised animal runs, and only from the mouth that is actually
 // going to take it next turn (pickMeal, the same choice the bite makes).
 // Animals dealt from the hand are wild and unbothered: they stay, and
 // stay the food the hungry eat first (rules 19), so the top of the chain
 // is not starved by this. Nobody hungry ever moves.
-function fleeTargets() {
+// A meat-eater that has just arrived (placed, or the top of a chain)
+// startles the animals it eats that stand beside it, hungry or not.
+function fleeTargets(scarers) {
   const out = [];
+  for (const p of scarers || []) {
+    const m = state.cells[p];
+    if (!m || !isAnimal(m.kind) || bigSide(m.kind) > 1) continue;
+    for (const n of neighbours(p)) {
+      const t = state.cells[n];
+      if (t && isAnimal(t.kind) && bigSide(t.kind) === 1 && ANIMALS[m.kind].diet.indexOf(t.kind) >= 0) out.push({ at: n, by: p });
+    }
+  }
   for (let i = 0; i < CELLS; i++) {
     const m = state.cells[i];
     if (!m || !isAnimal(m.kind) || isShadow(state.cells, i)) continue;
@@ -1576,11 +1587,12 @@ function fleeTargets() {
   }
   return out;
 }
-function fleeFromDanger() {
+function fleeFromDanger(scarers) {
   if (!FLEE) return [];
+  if (!FLEE_ON_ARRIVAL) scarers = [];
   const hops = [], tried = new Set();
   for (let pass = 0; pass < CELLS; pass++) {
-    const target = fleeTargets().find(function (t) { return !tried.has(state.cells[t.at]); });
+    const target = fleeTargets(scarers).find(function (t) { return !tried.has(state.cells[t.at]); });
     if (!target) break;
     const i = target.at, by = target.by;
     const c = state.cells[i];
@@ -1588,7 +1600,7 @@ function fleeFromDanger() {
     const open = neighbours(i).filter(function (n) { return !state.cells[n]; });
     const safe = open.filter(function (n) {
       state.cells[i] = null; state.cells[n] = c;
-      const hit = inReach().has(n);
+      const hit = inReach().has(n) || neighbours(n).indexOf(by) >= 0;
       state.cells[n] = null; state.cells[i] = c;
       return !hit;
     });
@@ -1608,7 +1620,7 @@ function fleeFromDanger() {
         const d = Math.abs(((n / SIZE) | 0) - r0) + Math.abs(n % SIZE - c0);
         if (d > FLEE_REACH || !touchesFriend(n)) continue;
         state.cells[i] = null; state.cells[n] = c;
-        const hit = inReach().has(n);
+        const hit = inReach().has(n) || neighbours(n).indexOf(by) >= 0;
         state.cells[n] = null; state.cells[i] = c;
         if (!hit) far.push({ n: n, d: d });
       }
