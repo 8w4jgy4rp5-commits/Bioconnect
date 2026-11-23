@@ -1555,22 +1555,34 @@ function nudgeHand() {
 // nowhere to go it stays and shivers. Landing beside its own kind merges.
 const FLEE = !window.NO_FLEE;
 const FLEE_MS = 560;
+const CHASE = false;   // tried 2026-11-22: a moving hunter broke the player's pairs
+// Only a raised animal runs, and only from the mouth that is actually
+// going to take it next turn (pickMeal, the same choice the bite makes).
+// Animals dealt from the hand are wild and unbothered: they stay, and
+// stay the food the hungry eat first (rules 19), so the top of the chain
+// is not starved by this. Nobody hungry ever moves.
+function fleeTargets() {
+  const out = [];
+  for (let i = 0; i < CELLS; i++) {
+    const m = state.cells[i];
+    if (!m || !isAnimal(m.kind) || isShadow(state.cells, i)) continue;
+    if (m.clock + 1 < ANIMALS[m.kind].eatAt) continue;
+    const meal = pickMeal(i, ANIMALS[m.kind]);
+    if (!meal) continue;
+    const t = state.cells[meal.at];
+    if (t && isAnimal(t.kind) && isRaised(t) && bigSide(t.kind) === 1) out.push({ at: meal.at, by: i });
+  }
+  return out;
+}
 function fleeFromDanger() {
   if (!FLEE) return [];
   const hops = [], tried = new Set();
   for (let pass = 0; pass < CELLS; pass++) {
-    const risk = inReach();
-    const i = Array.from(risk).find(function (at) {
-      const c = state.cells[at];
-      return c && isAnimal(c.kind) && bigSide(c.kind) === 1 && !tried.has(c);
-    });
-    if (i === undefined) break;
+    const target = fleeTargets().find(function (t) { return !tried.has(state.cells[t.at]); });
+    if (!target) break;
+    const i = target.at, by = target.by;
     const c = state.cells[i];
     tried.add(c);
-    const by = neighbours(i).find(function (n) {
-      const m = state.cells[n];
-      return m && isAnimal(m.kind) && m.clock + 1 >= ANIMALS[m.kind].eatAt && ANIMALS[m.kind].diet.indexOf(c.kind) >= 0;
-    });
     const open = neighbours(i).filter(function (n) { return !state.cells[n]; });
     const safe = open.filter(function (n) {
       state.cells[i] = null; state.cells[n] = c;
@@ -1595,7 +1607,7 @@ function fleeFromDanger() {
   // where the prey ended up (the square the prey left, if that one does).
   // Caught prey freezes and is eaten on the next tick, before it can run.
   const chased = new Set();
-  for (const h of hops) {
+  if (CHASE) for (const h of hops) {
     if (h.stuck || h.by == null || chased.has(h.by)) continue;
     const hunter = state.cells[h.by], prey = state.cells[h.end];
     if (!hunter || !prey || bigSide(hunter.kind) > 1 || ANIMALS[hunter.kind].diet.indexOf(prey.kind) < 0) continue;
