@@ -511,10 +511,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 23);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 24);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 23, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 24, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;
@@ -845,6 +845,32 @@ ok('with no grass beside it, it eats an animal as before', !cell(1, 2));
 board([[2, 2, 'tiger', starving('tiger') - 1], [3, 2, 'grass']]);
 m = X.ctx.feedEveryone();
 ok('it keeps the same hunger clock', cell(3, 2) && cell(3, 2).kind === 'grass');
+
+console.log('\nan animal in danger runs (rules 24)');
+const count = (kind) => S.cells.filter((c) => c && c.kind === kind).length;
+const near = (x, y, kind) => [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]
+  .some(([a, b]) => a >= 0 && b >= 0 && a < X.SIZE && b < X.SIZE && cell(a, b) && cell(a, b).kind === kind);
+board([[2, 2, 'wolf', starving('wolf') - 1], [3, 2, 'rabbit', 0, RAISED]]);
+X.ctx.fleeFromDanger([]);
+ok('a rabbit the starving wolf would take next turn hops away', count('rabbit') === 1 && !near(2, 2, 'rabbit'));
+ok('the wolf does not move', cell(2, 2) && cell(2, 2).kind === 'wolf');
+board([[2, 2, 'wolf', starving('wolf') - 1], [3, 2, 'rabbit', 0, RAISED], [4, 4, 'rabbit']]);
+X.ctx.fleeFromDanger([]);
+ok('it bounds to land beside another rabbit, and the two make a fox', count('rabbit') === 0 && count('fox') === 1);
+board([[0, 0, 'rabbit', 0, RAISED], [1, 0, 'wolf', starving('wolf') - 1], [0, 1, 'grass']]);
+X.ctx.fleeFromDanger([]);
+ok('boxed in, it stays put', cell(0, 0) && cell(0, 0).kind === 'rabbit');
+X.ctx.bumpClocks(); X.ctx.feedEveryone();
+ok('...and is eaten on the next tick', !cell(0, 0));
+board([[2, 2, 'wolf'], [3, 2, 'deer']]);
+X.ctx.fleeFromDanger([at(2, 2)]);
+ok('a wolf that has just arrived startles the deer beside it, hungry or not', count('deer') === 1 && !near(2, 2, 'deer'));
+board([[2, 2, 'wolf'], [3, 2, 'deer']]);
+X.ctx.fleeFromDanger([]);
+ok('a fed wolf that was already there does not', cell(3, 2) && cell(3, 2).kind === 'deer');
+board([[2, 2, 'fox', starving('fox') - 1], [3, 2, 'grass']]);
+X.ctx.fleeFromDanger([at(2, 2)]);
+ok('plants never run', cell(3, 2) && cell(3, 2).kind === 'grass');
 
 console.log('\nthe page asks for the current files');
 ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());

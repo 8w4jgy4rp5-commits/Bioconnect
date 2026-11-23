@@ -611,7 +611,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 23;
+const RULES_VERSION = 24;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -1547,15 +1547,22 @@ function nudgeHand() {
   }, 900);
 }
 
-// ---------- try/flee: prey runs from a mouth that bites next turn ----------
-// Experiment only (branch try/flee, `?flee` in the address). After every
-// merge and chain has settled, an animal standing on a square a starving
-// mouth will take next turn hops to a free square beside it: one nobody
-// hungry can reach if there is one, next to its own kind if it can. With
-// nowhere to go it stays and shivers. Landing beside its own kind merges.
-const FLEE = !window.NO_FLEE;
+// ---------- Running away (rules 24) ----------
+// After every merge and chain has settled, an animal in danger hops to
+// a free square: one nobody hungry can reach, and if it can, one beside
+// its own kind, up to FLEE_REACH squares away. Landing beside its own
+// kind merges, and that merge can chain. With nowhere to go it stays and
+// shivers. Two things put an animal in danger:
+//   - a starving mouth beside it is going to take it next turn, or
+//   - a meat-eater that eats it has just arrived beside it (placed from
+//     the hand, or the top of a chain).
+// Meat-eaters themselves never move, so a pair the player is building
+// stays where it was put. The landing square is rolled with gameRandom()
+// so a seeded run replays; the bot replay (?watch) predates the rule and
+// plays without it.
+const FLEE = !window.NO_FLEE && !(typeof location !== 'undefined' && /[?&](?:watch|celebrate)\b/.test(location.search));
 const FLEE_MS = 560;
-const CHASE = false;   // tried 2026-11-22: a moving hunter broke the player's pairs
+const CHASE = false;   // tried 2026-11-22: a hunter that steps after its prey broke the player's pairs
 const FLEE_REACH = 3;
 const FLEE_WILD = 1;   // 0 = only raised animals run
 const FLEE_ON_ARRIVAL = 1;
@@ -1631,7 +1638,7 @@ function fleeFromDanger(scarers) {
     }
     if (!pool.length && !friends.length) { hops.push({ from: i, to: i, by: by, kind: c.kind, stuck: true, grew: [] }); continue; }
     const pick = friends.length ? friends : pool;
-    const to = pick[Math.floor(Math.random() * pick.length)];
+    const to = pick[Math.floor(gameRandom() * pick.length)];
     state.cells[i] = null; state.cells[to] = c;
     const grew = growFrom(to);
     const end = grew.length ? grew[grew.length - 1].at : to;
