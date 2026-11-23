@@ -1555,9 +1555,9 @@ function nudgeHand() {
 // nowhere to go it stays and shivers. Landing beside its own kind merges.
 const FLEE = !window.NO_FLEE;
 const FLEE_MS = 560;
-const CHASE = false;
+const CHASE = false;   // tried 2026-11-22: a moving hunter broke the player's pairs
 const FLEE_REACH = 3;
-const FLEE_WILD = 1;   // tried 2026-11-22: a moving hunter broke the player's pairs
+const FLEE_WILD = 1;   // 0 = only raised animals run
 // Only a raised animal runs, and only from the mouth that is actually
 // going to take it next turn (pickMeal, the same choice the bite makes).
 // Animals dealt from the hand are wild and unbothered: they stay, and
