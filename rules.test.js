@@ -511,10 +511,10 @@ S.paused = false;
 X.ctx.worldTick();
 ok('world time advances difficulty without granting passive score', S.ticks === 25
    && X.ctx.scoreMultiplier() === 2 && S.score === 0);
-ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 24);
+ok('scores from earlier rules use a different rules version', X.RULES_VERSION === 25);
 vm.runInContext('scoreStore = { get: () => ({ rules: 15, best: 999999 }) };', X.ctx);
 ok('old high-supply records cannot become the new best', X.ctx.readBest() === 0);
-vm.runInContext('scoreStore = { get: () => ({ rules: 24, best: 15000 }) };', X.ctx);
+vm.runInContext('scoreStore = { get: () => ({ rules: 25, best: 15000 }) };', X.ctx);
 ok('current-rule records still load normally', X.ctx.readBest() === 15000);
 vm.runInContext('scoreStore = null;', X.ctx);
 S.topKind = 'sprout'; S.ticks = 0;
@@ -799,8 +799,9 @@ S.celebrating = false;
 
 console.log('\nthe big animals wait for a partner');
 for (const [k, e, d] of [['wolf', 17, 21], ['bear', 20, 27], ['lion', 27, 37], ['tiger', 30, 41]]) {
-  ok('a ' + k + ' can wait ' + X.BIG_STAMINA_PCT + '% as long as before',
-     X.ANIMALS[k].eatAt === Math.round(e * X.BIG_STAMINA_PCT / 100) && X.ANIMALS[k].starveAt === Math.round(d * X.BIG_STAMINA_PCT / 100),
+  // rules 25: hungry on the old clock, starving on the doubled one
+  ok('a ' + k + ' gets hungry on its old clock but takes ' + X.BIG_STAMINA_PCT + '% as long to starve',
+     X.ANIMALS[k].eatAt === e && X.ANIMALS[k].starveAt === Math.round(d * X.BIG_STAMINA_PCT / 100),
      X.ANIMALS[k].eatAt + '/' + X.ANIMALS[k].starveAt);
 }
 ok('the small animals keep their old pace', X.ANIMALS.rabbit.starveAt === 11 && X.ANIMALS.fox.starveAt === 16 && X.ANIMALS.deer.starveAt === 25);
@@ -871,6 +872,15 @@ ok('a fed wolf that was already there does not', cell(3, 2) && cell(3, 2).kind =
 board([[2, 2, 'fox', starving('fox') - 1], [3, 2, 'grass']]);
 X.ctx.fleeFromDanger([at(2, 2)]);
 ok('plants never run', cell(3, 2) && cell(3, 2).kind === 'grass');
+
+console.log('\nnothing eats the rung just below it (rules 25)');
+ok('the lion leaves the bear alone', X.ANIMALS.lion.diet.indexOf('bear') < 0);
+ok('the tiger leaves the lion alone', X.ANIMALS.tiger.diet.indexOf('lion') < 0);
+ok('the fox still eats rabbits', X.ANIMALS.fox.diet.indexOf('rabbit') >= 0);
+ok('the elephant still eats the tiger', X.ANIMALS.elephant.diet.indexOf('tiger') >= 0);
+board([[2, 2, 'tiger'], [3, 2, 'lion', 0, RAISED]]);
+X.ctx.fleeFromDanger([at(2, 2)]);
+ok('a lion beside a newly arrived tiger stays where it was put', cell(3, 2) && cell(3, 2).kind === 'lion');
 
 console.log('\nthe page asks for the current files');
 ok('index.html stamps match the files (run `node stamp.js`)', !require('./stamp.js').stale());

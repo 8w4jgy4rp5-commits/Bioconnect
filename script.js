@@ -371,10 +371,18 @@ const ANIMALS = {
   deer: { diet: ['grass', 'sprout'], eatAt: 18, starveAt: 25 },
   zebra: { diet: ['grass', 'sprout'], eatAt: 21, starveAt: 29 },
   buffalo: { diet: ['grass', 'sprout'], eatAt: 24, starveAt: 33 },
-  wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: stamina(WOLF_EAT_AT), starveAt: stamina(WOLF_STARVE_AT) },
+  // RULES 25: the wolf, bear, lion and tiger get hungry on their old
+  // clock again (eatAt is no longer doubled) but still take the doubled
+  // time to starve. Hungry sooner means the animals beside them run
+  // (rules 24) and meals happen; the long stretch between hungry and
+  // starving is the time the player has to box a meal in or bring the
+  // partner, which is what BIG_STAMINA_PCT was for in the first place.
+  // sim.js, 300 runs of the casual bot: runs 14 -> 47, meals 7.5 -> 10.8,
+  // starved 4.2 -> 4.1.
+  wolf: { diet: ['rabbit', 'fox', 'deer', 'zebra'], eatAt: WOLF_EAT_AT, starveAt: stamina(WOLF_STARVE_AT) },
   // `guard: 'left'`: the cub walks on the mother's left (the painting
   // has it there), so an animal on that side is eaten first. See pickMeal.
-  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: stamina(20), starveAt: stamina(27), guard: 'left' },
+  bear: { diet: ['grass', 'rabbit', 'deer'], eatAt: 20, starveAt: stamina(27), guard: 'left' },
   // THE BIG MEALS, AND WHY THEY SIT AT THE END OF THE LIST.
   //
   // MEAL_VALUE priced a wolf at 8000 and a tiger at 18000, but nothing ate
@@ -398,12 +406,18 @@ const ANIMALS = {
   // `guard: 'right'`: the lion only gets serious when hungry, and then it
   // goes for what is right in front of its face (it faces right). See
   // guardMeal. A wolf or bear parked there is a meal, however dear.
-  lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: stamina(27), starveAt: stamina(37), guard: 'right' },
+  // RULES 25: nothing eats the rung just below its own (the elephant
+  // aside). Two lions make the tiger, so a tiger that eats lions -- or,
+  // since rules 24, scares them off -- tears down the very pair it is
+  // waiting for; the lion and the bear the same. The fox keeps its
+  // rabbits: they come cheap and often, and they are the first food
+  // chain a new player meets.
+  lion: { diet: ['fox', 'deer', 'zebra', 'buffalo', 'wolf'], eatAt: 27, starveAt: stamina(37), guard: 'right' },
   // THE TIGER IS SOFT ON GRASS. A hard face and a gentle heart: it would
   // honestly rather have a patch of grass, and `loves` makes grass beside
   // it the first thing it eats, grown or dealt. No grass, and it eats an
   // animal like before. Same hunger clock: it is thrifty, not slower.
-  tiger: { diet: ['grass', 'fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear', 'lion'], eatAt: stamina(30), starveAt: stamina(41), loves: 'grass' },
+  tiger: { diet: ['grass', 'fox', 'deer', 'zebra', 'buffalo', 'wolf', 'bear'], eatAt: 30, starveAt: stamina(41), loves: 'grass' },
 
   // THE ELEPHANT EATS ONLY WHAT YOU BUILT.
   //
@@ -611,7 +625,7 @@ const SLUG = 'ecosystem-puzzle';
 // under different arithmetic is not a record, it is a leftover, so one
 // from an older ruleset is ignored rather than left standing as a target
 // that cannot be compared to anything the player can score now.
-const RULES_VERSION = 24;
+const RULES_VERSION = 25;
 
 // ---------- WHAT A SCORE MEANS ----------
 //
@@ -1119,7 +1133,18 @@ function isPlant(kind) { return !!PLANTS[kind]; }
 function isBlocker(kind) { return BLOCKERS.indexOf(kind) >= 0; }
 
 // 1 just after a meal (or a planting) and 0 at the moment it is lost.
+// An animal's bar turns red (a third left) exactly when it starts
+// reaching for food (eatAt), then runs out at starveAt. Since rules 25
+// the big animals get hungry well before half their time is up, and a
+// straight line would show them eating on a green bar; the player reads
+// "red means it eats", so the bar bends at eatAt to keep that true.
+const HUNGRY_LINE = 0.33;
 function vitality(cell) {
+  if (isAnimal(cell.kind)) {
+    const cfg = ANIMALS[cell.kind];
+    if (cell.clock <= cfg.eatAt) return 1 - (1 - HUNGRY_LINE) * cell.clock / cfg.eatAt;
+    return Math.max(0, HUNGRY_LINE * (1 - (cell.clock - cfg.eatAt) / (cfg.starveAt - cfg.eatAt)));
+  }
   const limit = isAnimal(cell.kind) ? ANIMALS[cell.kind].starveAt
     : isPlant(cell.kind) ? plantLimit(cell.kind)
       : 0;
