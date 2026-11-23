@@ -394,6 +394,15 @@ window.BioSound = (() => {
       rustle(time, .045, .023, 1150, effects);
     }
 
+    // "Pon!": the animal a rung grew jumping out of its square. A quick
+    // upward flick, like a cork, a step higher on every rung.
+    function pon(time, step = 0, volume = .12) {
+      const pitch = [0,2,4,7,9,12,14,16,19,21,24][Math.min(10, Math.max(0, step))];
+      const f = hz(66 + pitch);
+      tone(f, time, .1, volume, effects, 'sine', .002, f * 1.9);
+      tone(f * 2.5, time, .03, volume * .25, effects, 'triangle', .001);
+    }
+
     // A muted horn that sags: the pitch slides down through the note and
     // a slow wobble rides on it, like a deflating "wah".
     function sag(midi, time, duration, volume, drop, wobble = 0) {
@@ -469,7 +478,10 @@ window.BioSound = (() => {
       if (kind === 'place') plant(time);
       else if (kind === 'merge' || kind === 'finish') {
         const steps = Math.min(11, Math.max(1, Math.floor(Number(count) || 1)));
-        for (let i = 0; i < steps; i++) pop(time + .105 + i * .145, i, .18 / (1 + i * .055));
+        for (let i = 0; i < steps; i++) {
+          pop(time + .105 + i * .145, i, .18 / (1 + i * .055));
+          if (kind === 'merge') pon(time + .125 + i * .145, i);
+        }
         if (kind === 'finish') {
           [74,78,81].forEach((n, i) => wood(n, time + .16 + steps * .145 + i * .10, .07, effects));
           if (steps >= 7) announce(time + .105 + (steps - 1) * .145 + .04);
@@ -493,6 +505,17 @@ window.BioSound = (() => {
         const step = Math.min(10, Math.max(0, Math.floor(Number(count) || 0)));
         pop(time, step, .2);
         tone(hz(86 + [0,2,4,7,9,12,14,16,19,21,24][step] / 2), time + .02, .09, .025, effects, 'triangle', .002);
+      } else if (kind === 'shupin') {
+        // "Shupin!": an air swish climbing fast, then a bright ping.
+        const swish = ctx.createBufferSource(), band = ctx.createBiquadFilter();
+        swish.buffer = noise;
+        band.type = 'bandpass'; band.Q.value = 1.4;
+        band.frequency.setValueAtTime(700, time);
+        band.frequency.exponentialRampToValueAtTime(7000, time + .16);
+        voice(swish, effects, time, .2, .22, .03, band);
+        tone(hz(96), time + .15, .5, .07, effects, 'sine', .002);
+        tone(hz(103), time + .15, .32, .03, effects, 'sine', .002);
+        tone(hz(91), time + .15, .06, .05, effects, 'triangle', .001, hz(103));
       } else if (kind === 'eat') {
         pop(time, 0, .052);
       } else if (kind === 'preview') {

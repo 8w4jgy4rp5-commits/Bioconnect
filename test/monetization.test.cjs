@@ -147,7 +147,12 @@ async function main() {
     for(const i of [24,25,30,31]) s.cells[i]={kind:'elephant',clock:10,big:24,born:'raised'};
     s.stock=['grass','fox']; s.score=3000; s.best=3000; s.ticks=126; s.runId=randomUUID(); s.over=true;
     const before=ctx.X.snapshotRun(); assert.equal(ctx.X.reviveRun(),true);
-    for(let i=0;i<7;i++) assert.equal(s.cells[i],null);
+    for(let i=0;i<7;i++) assert.ok(s.cells[i]===null||['grass','rabbit'].includes(s.cells[i].kind));
+    const seeded=s.cells.filter(c=>c&&c.clock===0&&['grass','rabbit'].includes(c.kind)&&c.born==='wild');
+    assert.equal(seeded.filter(c=>c.kind==='grass').length,3); assert.equal(seeded.filter(c=>c.kind==='rabbit').length,3);
+    assert.equal(s.revivedAt,126);
+    s.ticks=130; assert.equal(vm.runInContext('stoneEvery()',ctx),12);
+    s.ticks=126+200; assert.equal(vm.runInContext('stoneEvery()',ctx),2); s.ticks=126;
     for(let i=7;i<14;i++) assert.equal(s.cells[i].clock,0);
     for(const i of [24,25,30,31]) assert.equal(s.cells[i].kind,'elephant');
     assert.equal(s.cells[24].clock,0); assert.equal(s.score,before.score); assert.equal(s.ticks,before.ticks);

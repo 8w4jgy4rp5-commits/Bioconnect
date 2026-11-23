@@ -526,7 +526,14 @@ function pressureTier() { return Math.min(3, difficultyStage()); }
 function stoneEvery() {
   const stage = difficultyStage(), mid = STONE_EVERY_MID_STAGE;
   const early = Math.round(STONE_EVERY_FIRST + (STONE_EVERY_MID - STONE_EVERY_FIRST) * Math.min(stage, mid) / mid);
-  return Math.max(STONE_EVERY_MIN, early - Math.max(0, stage - mid));
+  const normal = Math.max(STONE_EVERY_MIN, early - Math.max(0, stage - mid));
+  // After a revival the ground calms to its opening pace for one stage,
+  // then climbs back over the next, so the rebuilt chain has room to grow.
+  if (state.revivedAt == null) return normal;
+  const since = state.ticks - state.revivedAt;
+  if (since >= 2 * STAGE_LENGTH) return normal;
+  const t = Math.max(0, since - STAGE_LENGTH) / STAGE_LENGTH;
+  return Math.max(normal, Math.round(STONE_EVERY_FIRST + (normal - STONE_EVERY_FIRST) * t));
 }
 function witherBonus() {
   // Gradual shortening avoids the old ten-tick lifespan loss at a season
@@ -1089,6 +1096,7 @@ const state = {
   best: 0,
   bestRevived: false,
   revived: false,
+  revivedAt: null,    // the tick a revival happened; calms the stones for a while
   revivalWait: false,
   runId: null,
   ticks: 0,           // the world's own clock. Stages, stones and the hand read it
@@ -1430,6 +1438,7 @@ function newGame() {
   state.runStats = newRunStats();
   state.runId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'simulation';
   state.revived = false;
+  state.revivedAt = null;
   state.revivalWait = false;
   if (el.reviveResume) el.reviveResume.hidden = true;
   if (overTimer) { clearTimeout(overTimer); overTimer = 0; hideWord(); }
@@ -1817,6 +1826,7 @@ function playOneHop(h, still) {
         for (const p of h.partners[n] || []) if (p) p.remove();
         for (const g of step.from) if (g !== step.at) ghostInto(g, step.at, step.was);
         ringAt(step.at, n + 1);
+        leapOut(step.at, step.kind, n + 1);
         if (n >= 2) chainSparkles(step.at, n + 1, n === h.grew.length - 1);
         if (n > 0) showChain(n + 1, n === h.grew.length - 1);
         if (n === h.grew.length - 1 && cellNodes[h.end]) cellNodes[h.end].classList.remove('cell--arriving');
@@ -4327,12 +4337,14 @@ function clearFx() {
 // The number that was missing. It leaves from the square that earned it,
 // so the score and the move that made it are the same event rather than
 // a tally that moves on its own in the corner.
-function popScore(i, amount, kind) {
+function popScore(i, amount, kind, rung = 0) {
   if (!el.fx || !amount) return;
   const at = fxAt(i);
   if (!at) return;
   const pop = document.createElement('span');
-  pop.className = 'pop pop--' + kind;
+  pop.className = 'pop pop--' + kind + (rung ? ' pop--rung' : '');
+  // Each rung of a chain shouts a little louder than the one before it.
+  if (rung) { pop.style.setProperty('--rung', Math.min(rung, 8)); pop.dataset.tier = rung >= 7 ? 3 : rung >= 5 ? 2 : rung >= 3 ? 1 : 0; }
   pop.textContent = '+' + Math.round(amount).toLocaleString();
   pop.style.left = at.x + 'px';
   pop.style.top = at.y + 'px';
@@ -4342,6 +4354,60 @@ function popScore(i, amount, kind) {
 // A chain is the one thing in the game that is purely a good decision —
 // luck deals the tile, but only the player picks the square that makes
 // it land twice. So it gets said out loud.
+// The whole chain's points, landed once the last rung is in.
+function popTotal(i, amount, steps) {
+  if (!el.fx || !amount) return;
+  const at = fxAt(i);
+  if (!at) return;
+  const pop = document.createElement('span');
+  pop.className = 'pop-total';
+  pop.dataset.tier = steps >= 7 ? 3 : steps >= 5 ? 2 : 1;
+  pop.textContent = '+' + Math.round(amount).toLocaleString();
+  // kept off the board's edges so the big number is never cut in half
+  const w = el.fx.clientWidth || at.x * 2, h = el.fx.clientHeight || at.y * 2;
+  pop.style.left = Math.min(w * 0.72, Math.max(w * 0.28, at.x)) + 'px';
+  pop.style.top = Math.min(h * 0.85, Math.max(h * 0.15, at.y - at.h * 0.6)) + 'px';
+  fxAdd(pop, 1500);
+}
+
+// The animal a rung grew jumps out of its square and lands with a bounce;
+// later rungs jump higher. The real tile hides underneath meanwhile.
+const LEAP_MS = 460;
+const leapHeld = new Map();
+function leapOut(i, kind, rung) {
+  const at = fxAt(i), node = cellNodes[i];
+  if (!at || !isAnimal(kind)) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  for (const old of el.fx.querySelectorAll('.leap[data-at="' + i + '"]')) old.remove();
+  const leap = document.createElement('span');
+  leap.className = 'leap';
+  leap.dataset.at = i;
+  leap.style.left = at.x + 'px';
+  leap.style.top = at.y + 'px';
+  leap.style.width = (at.w * 0.92) + 'px';
+  leap.style.height = (at.h * 0.82) + 'px';
+  paintTile(leap, kind, 1, false);
+  fxAdd(leap, LEAP_MS + 40);
+  if (node) { node.classList.add('cell--leaping'); leapHeld.set(i, (leapHeld.get(i) || 0) + 1); }
+  const up = -at.h * (0.28 + 0.09 * Math.min(rung, 6));
+  const big = 1.12 + 0.05 * Math.min(rung, 6);
+  const T = (y, sx, sy) => 'translate(-50%, calc(-50% + ' + y + 'px)) scale(' + sx + ',' + sy + ')';
+  leap.animate([
+    { transform: T(0, 1.1, 0.8), offset: 0 },
+    { transform: T(up, big * 0.92, big * 1.1), offset: 0.42, easing: 'cubic-bezier(.5,0,.9,.5)' },
+    { transform: T(at.h * 0.04, 1.2, 0.8), offset: 0.72 },
+    { transform: T(-at.h * 0.05, 0.96, 1.06), offset: 0.86 },
+    { transform: T(0, 1, 1), offset: 1 }
+  ], { duration: LEAP_MS, fill: 'forwards' });
+  setTimeout(function () { releaseLeap(i); }, LEAP_MS);
+}
+function releaseLeap(i, all) {
+  const left = all ? 0 : (leapHeld.get(i) || 1) - 1;
+  if (left > 0) { leapHeld.set(i, left); return; }
+  leapHeld.delete(i);
+  if (cellNodes[i]) cellNodes[i].classList.remove('cell--leaping');
+}
+
 function showChain(steps, final = false) {
   if (!el.fx) return;
   for (const old of el.fx.querySelectorAll('.fx-chain')) old.remove();
@@ -4366,7 +4432,14 @@ function showChain(steps, final = false) {
 // lettering just stays off so the two never sit on top of each other.
 function shoutBioconnect() {
   if (!el.fx || el.fx.querySelector('.first')) return;
-  for (const old of el.fx.querySelectorAll('.fx-shout')) old.remove();
+  for (const old of document.querySelectorAll('.fx-shout, .fx-shout-beam')) old.remove();
+  // Over the whole screen, not just the board: a beam of light sweeps
+  // across ("shupin!") and the name slams in on top of it.
+  const beam = document.createElement('span');
+  beam.className = 'fx-shout-beam';
+  document.body.appendChild(beam);
+  setTimeout(function () { beam.remove(); }, 900);
+  if (window.BioAudio) window.BioAudio.effect('shupin');
   const shout = document.createElement('span');
   shout.className = 'fx-shout';
   'BIOCONNECT!'.split('').forEach(function (ch, n) {
@@ -4375,7 +4448,50 @@ function shoutBioconnect() {
     letter.style.setProperty('--n', n);
     shout.appendChild(letter);
   });
-  fxAdd(shout, 1900);
+  document.body.appendChild(shout);
+  fitShout(shout);
+  // The face may still be loading the first time; fit again once it is in.
+  if (document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(function () { fitShout(shout); });
+  setTimeout(function () { shout.remove(); }, 1900);
+}
+
+// Sizes the arched name to fill nine tenths of the screen's width (or
+// a third of its height on a wide window), measured after bending.
+const SHOUT_REACH = 1.05;
+function fitShout(shout) {
+  const target = Math.min(window.innerWidth * 0.95, window.innerHeight * 1.1);
+  let size = parseFloat(getComputedStyle(shout).fontSize) || 48;
+  for (let pass = 0; pass < 3; pass++) {
+    shout.style.fontSize = size + 'px';
+    // measured from layout, not the screen: the letters are mid-slam
+    const wide = archLetters(shout, SHOUT_REACH);
+    if (!(wide > 0)) return;
+    size *= target / wide;
+  }
+  shout.style.fontSize = size + 'px';
+  archLetters(shout, SHOUT_REACH);
+}
+
+// Bends a row of letters into a rainbow arch. Each letter keeps its place
+// along the curve, so the word is narrower than when it is straight and
+// can be set larger. `reach` is the half-angle of the arch in radians.
+function archLetters(row, reach) {
+  const letters = [...row.children], width = row.offsetWidth;
+  if (!width || letters.length < 2) return 0;
+  const radius = width / 2 / reach, drop = radius * (1 - Math.cos(reach));
+  let left = Infinity, right = -Infinity;
+  for (const letter of letters) {
+    const along = letter.offsetLeft + letter.offsetWidth / 2 - width / 2;
+    const angle = along / radius;
+    const x = radius * Math.sin(angle) - along, y = radius * (1 - Math.cos(angle)) - drop / 2;
+    letter.style.translate = x.toFixed(1) + 'px ' + y.toFixed(1) + 'px';
+    letter.style.rotate = angle.toFixed(3) + 'rad';
+    // how far this tilted letter reaches sideways once it sits on the arch
+    const cx = radius * Math.sin(angle), w = letter.offsetWidth / 2, h = letter.offsetHeight / 2;
+    const reachX = w * Math.abs(Math.cos(angle)) + h * Math.abs(Math.sin(angle));
+    left = Math.min(left, cx - reachX); right = Math.max(right, cx + reachX);
+  }
+  return right - left;
 }
 
 // A blocker the long chain shook loose, crumbling on its own square.
@@ -4445,8 +4561,11 @@ let chainTimers = [];
 function cancelChain() {
   for (const t of chainTimers) clearTimeout(t);
   chainTimers = [];
+  for (const i of [...leapHeld.keys()]) releaseLeap(i, true);
   if (!el.fx) return;
-  for (const n of el.fx.querySelectorAll('.ghost, .ring, .fx-chain, .fx-shout, .chain-spark, .chain-edge')) n.remove();
+  for (const n of document.querySelectorAll('.fx-shout, .fx-shout-beam')) n.remove();
+  if (!el.fx) return;
+  for (const n of el.fx.querySelectorAll('.ghost, .ring, .fx-chain, .chain-spark, .chain-edge, .leap, .pop-total')) n.remove();
 }
 
 // The tiles that are gone, shown going. A ghost leaves the square it
@@ -4513,10 +4632,15 @@ function replayChain(grew, before, blockerWas = {}) {
       if (!still) {
         for (const g of step.from) if (g !== step.at) ghostInto(g, step.at, step.was);
         ringAt(step.at, n + 1);
+        leapOut(step.at, step.kind, n + 1);
         if (n >= 2) chainSparkles(step.at, n + 1, n === grew.length - 1);
       }
-      if (gain >= 1) popScore(step.at, gain, step.kind);
+      if (gain >= 1) popScore(step.at, gain, step.kind, grew.length > 1 ? n + 1 : 0);
       if (n > 0) showChain(n + 1, n === grew.length - 1);
+      if (n === grew.length - 1 && grew.length >= 3) {
+        const total = Math.round(displayScore(raw) - displayScore(before));
+        chainTimers.push(setTimeout(function () { popTotal(step.at, total, grew.length); }, 260));
+      }
       if (n === grew.length - 1 && grew.length >= BIG_CHAIN_AT) {
         if (grew.length >= SHOUT_AT) shoutBioconnect();
         if (!still) for (const b of step.bones) if (blockerWas[b]) crumble(b, blockerWas[b]);
@@ -5516,7 +5640,7 @@ function reviveRun() {
   }
   const gone = [];
   for (let i = 0; i < CELLS; i++) if (!keep.has(i) && state.cells[i]) gone.push(i);
-  state.revived = true; state.over = false; state.paused = true; state.revivalWait = true;
+  state.revived = true; state.revivedAt = state.ticks; state.over = false; state.paused = true; state.revivalWait = true;
   if (state.score === state.best) { state.bestRevived = true; writeBest(state.best); }
   el.gameover.hidden = true;
   // The website clears the board at once. The app first gives the meadow a
@@ -5524,6 +5648,7 @@ function reviveRun() {
   // and only then does Resume appear (styles in app/app.css).
   if (!window.BIO_APP || !gone.length) {
     for (const i of gone) state.cells[i] = null;
+    seedMeadow();
     finishRevive();
     return true;
   }
@@ -5550,24 +5675,46 @@ function reviveRun() {
     setTimeout(function () {
       for (const i of gone) state.cells[i] = null;
       reviveShock = false;
+      seedMeadow();
       finishRevive();
     }, (gone.length - 1) * gap + 950);
   }, 1300);
   return true;
 }
+// A revived meadow is not left with only the big animals: a few patches of
+// grass, each with a rabbit beside it, so the chain can be rebuilt from
+// the bottom. They go where no animal is next to them if there is room.
+const REVIVE_GRASS = 3;
+function seedMeadow() {
+  const open = [];
+  for (let i = 0; i < CELLS; i++) if (!state.cells[i]) open.push(i);
+  const calm = i => neighbours(i).every(n => !state.cells[n] || !isAnimal(state.cells[n].kind));
+  for (let g = 0; g < REVIVE_GRASS; g++) {
+    const free = open.filter(i => !state.cells[i]);
+    if (free.length < 2) break;
+    const quiet = free.filter(i => calm(i) && neighbours(i).some(n => !state.cells[n]));
+    const pool = quiet.length ? quiet : free.filter(i => neighbours(i).some(n => !state.cells[n]));
+    if (!pool.length) break;
+    const at = pool[(gameRandom() * pool.length) | 0];
+    state.cells[at] = makeTile('grass');
+    const beside = neighbours(at).filter(n => !state.cells[n]);
+    state.cells[beside[(gameRandom() * beside.length) | 0]] = makeTile('rabbit');
+  }
+}
 function finishRevive() {
   recordRun();
   if (el.reviveResume) { el.reviveResume.hidden = false; el.reviveResume.focus(); }
   render(); syncClock();
-  setTicker('Revived · press Resume when you are ready.');
+  setTicker('Revived · fresh grass and rabbits, and the stones slow down for a while. Press Resume when you are ready.');
 }
 function snapshotRun() {
-  const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','runId','runStats'];
+  const keys = ['cells','stock','next','refill','score','ticks','over','elephants','relaxed','topKind','seen','revived','revivedAt','runId','runStats'];
   return { ...Object.fromEntries(keys.map(k => [k, JSON.parse(JSON.stringify(state[k]))])), startScreenVisible: !el.startScreen.hidden };
 }
 function restoreRun(data) {
   if (!data || !Array.isArray(data.cells) || data.cells.length !== CELLS || !Array.isArray(data.stock)
     || !Number.isFinite(data.score) || !Number.isFinite(data.ticks) || typeof data.runId !== 'string') return;
+  state.revivedAt = null;
   for (const k of Object.keys(snapshotRun())) if (k !== 'startScreenVisible' && k in data) state[k] = JSON.parse(JSON.stringify(data[k]));
   state.runStats = readRunStats(data.runStats);
   const atTitle = data.startScreenVisible === true && !state.over;
