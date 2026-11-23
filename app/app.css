@@ -213,3 +213,6 @@
 /* the startle is the point: no dimming behind "Revive!!", the word sits low */
 .bio-app .countdown:has(.countdown-word--revive) { background: transparent; backdrop-filter: none; align-items: end; padding-bottom: 6%; }
 .bio-app .countdown-word--revive { text-shadow: 0 0 3px #10150e, 0 0 18px rgba(16, 21, 14, .9), 0 4px 0 #10150e; }
+/* No Ads (sold through Apple): Restore purchases sits under the terms */
+.bio-app .no-ads-restore { margin-top: 10px; }
+.bio-app .ad-privacy { margin-top: 8px; }

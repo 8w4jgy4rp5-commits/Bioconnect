@@ -6,6 +6,7 @@
     "check": "node check-offline.cjs"
   },
   "devDependencies": {
+    "@capacitor-community/admob": "7.2.0",
     "@capacitor/cli": "^7.6.10",
     "@capacitor/core": "^7.6.10",
     "@capacitor/filesystem": "^7.1.8",

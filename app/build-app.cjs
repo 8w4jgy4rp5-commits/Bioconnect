@@ -171,16 +171,18 @@ const SHOP_CUTS = [
   [/\s*<button class="btn" id="googleLink"[^>]*>[^<]*<\/button>/, ''],
   [/\s*<p id="googleLinkInfo" hidden><\/p>/, ''],
   [/\s*<p id="accountLabel"><\/p>/, ''],
-  [/\s*<div class="no-ads-product">[\s\S]*?<p id="dailyInfo"><\/p>\s*<\/div>/, ''],
+  // No Ads is sold through Apple: its price comes from Apple, and Apple's
+  // rules ask for a way to restore it on another iPhone.
+  [/>US\$3<\/button>/, '>Loading</button>'],
+  [/ aria-label="Buy No Ads, US\$3, one-time purchase"/, ' aria-label="Buy No Ads, one-time purchase"'],
+  [/ Normal play needs no sign-in\.<\/p>/, ' Paid through Apple, who handles refunds.</p>'],
+  [/<p id="dailyInfo"><\/p>/, '<p id="dailyInfo"></p>\n      <button class="btn no-ads-restore" id="restoreBtn" type="button">Restore purchases</button>'],
   [/\s*<div class="checkout-confirm" id="checkoutConfirm" hidden>[\s\S]*?<\/dl>[\s\S]*?<\/div>\s*<\/div>/, ''],
   [/<button class="btn" id="refreshWallet" type="button">[^<]*<\/button>/, ''],
   [/<button class="btn" id="signOutBtn" type="button" hidden>[^<]*<\/button>/, ''],
   [/Claim 3 free Crystals · once per account/, 'Claim 3 free Crystals'],
   [/Purchases are non-refundable, except where required by applicable law\./, 'Paid through your Apple Account. Refunds are handled by Apple.'],
   [/Sign in is required for purchases and the free Crystal claim\./, ''],
-  [/\s*<button class="btn revive-btn revive-btn--locked" id="reviveDawnLocked"[\s\S]*?<\/button>(?=\s*<p class="revive-hush")/, ''],
-  [/\s*<p class="revive-hush" id="reviveHush" hidden>[^<]*<\/p>/, ''],
-  [/\s*<button class="start-icon start-noads" id="startNoAdsBtn"[\s\S]*?<\/button>/, ''],
   [/<h2 id="shopTitle">Crystals &amp; No Ads<\/h2>/, '<h2 id="shopTitle">Crystals</h2>'],
   // The balance sits at the top of the shop and counts up when Crystals arrive.
   [/<h2 id="shopTitle">Crystals<\/h2>/, '<h2 id="shopTitle">Crystals</h2><span class="shop-balance" id="shopBalance" role="status" aria-label="Your Crystals: 0"><svg viewBox="0 0 26 26" aria-hidden="true"><use href="#shopGem"/></svg><span id="shopBalanceCount">0</span></span>'],
@@ -188,19 +190,23 @@ const SHOP_CUTS = [
   [/<button class="btn shop-claim" id="claimBtn" type="button">Claim 3 free Crystals<\/button>/, ''],
   [/(?=<h3 class="shop-section" id="crystalShopHeading">)/, '<button class="btn shop-claim" id="claimBtn" type="button"><svg class="claim-gems" aria-hidden="true"><use href="#shopGems1"/></svg><span class="claim-words"><strong>3 free Crystals</strong><small>A welcome gift · tap to claim</small></span></button>'],
   // Saved game records belong to the website's account page, not the shop.
-  [/\s*<div id="recordList" class="record-list"[^>]*><\/div>/, '']
+  [/\s*<div id="recordList" class="record-list"[^>]*><\/div>/, ''],
+  // Players in Europe and the UK can change their ad consent (Google's form).
+  [/(<p class="economy-status" id="shopStatus"[^>]*>[^<]*<\/p>)/,
+    '$1\n    <button class="btn ad-privacy" id="adPrivacyBtn" type="button" hidden>Ad privacy choices</button>']
 ];
 function appShop(html) {
   for (const [re, to] of SHOP_CUTS) {
     if (!re.test(html)) throw new Error('index.html changed; app shop cut not found: ' + re);
     html = html.replace(re, to);
   }
-  if (/Stripe|Sign in|No Ads/.test(html.slice(html.indexOf('id="shopModal"')))) throw new Error('the app shop still mentions the website store');
+  if (/Stripe|Sign in|US\$3/.test(html.slice(html.indexOf('id="shopModal"')))) throw new Error('the app shop still mentions the website store');
   return html;
 }
 
-// The app has no sign-in or ads; its store (app-economy.js) does not read these.
-const APP_CONFIG = `// App build (app/build-app.cjs): no sign-in, no Stripe, no ads.
+// The app has no sign-in and no Stripe. Its store and ads (Apple and AdMob,
+// app-economy.js) do not read these website switches.
+const APP_CONFIG = `// App build (app/build-app.cjs): no sign-in, no Stripe, no web ads.
 window.BioMonetizationConfig = Object.freeze({
   storeEnabled: false,
   paymentsEnabled: false,

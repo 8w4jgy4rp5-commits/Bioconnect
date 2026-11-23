@@ -43,9 +43,10 @@ function serve() {
     problems.push('blocked network request: ' + url);
     return route.abort();
   });
-  // A stand-in for Apple's store (the app reads window.__BIO_APP_STORE__ only off the iPhone).
-  await context.addInitScript(() => {
-    const prices = { crystals5: '$0.99', crystals11: '$1.99', crystals30: '$4.99', crystals65: '$9.99' };
+  // Stand-ins for Apple's store and Google AdMob (the app reads
+  // window.__BIO_APP_STORE__ / __BIO_APP_ADS__ only off the iPhone).
+  const standIns = () => {
+    const prices = { crystals5: '$0.99', crystals11: '$1.99', crystals30: '$4.99', crystals65: '$9.99', no_ads: '$2.99' };
     let n = 0;
     window.__BIO_APP_STORE__ = {
       call: async (method, o) => {
@@ -55,11 +56,39 @@ function serve() {
           return { transactionId: window.__fakeTx || String(++n), productIdentifier: o.productIdentifier, quantity: 1 };
         }
         if (method === 'acknowledgePurchase') return {};
+        if (method === 'getPurchases') return { purchases: window.__fakeOwned ? [{ transactionId: '500', productIdentifier: 'no_ads' }] : [] };
+        if (method === 'restorePurchases') return {};
         throw new Error('unexpected store call ' + method);
       },
       listen: (event, fn) => { if (event === 'transactionUpdated') window.__fakeEmit = fn; }
     };
-  });
+    // Like the plugin: a rewarded ad answers only once the reward is earned,
+    // and every full-screen ad reports when it closes.
+    const handlers = {}, emit = e => (handlers[e] || []).forEach(fn => fn({}));
+    window.__adsShown = { reward: 0, next: 0 };
+    window.__BIO_APP_ADS__ = {
+      call: async method => {
+        if (method === 'requestConsentInfo') return { status: 'NOT_REQUIRED', canRequestAds: true, privacyOptionsRequirementStatus: 'NOT_REQUIRED' };
+        if (method === 'initialize' || method === 'showPrivacyOptionsForm') return {};
+        if (method === 'prepareRewardVideoAd' || method === 'prepareInterstitial') { if (window.__noFill) throw new Error('Loading failed'); return {}; }
+        if (method === 'showRewardVideoAd') return new Promise(resolve => {
+          window.__adsShown.reward++; emit('onRewardedVideoAdShowed');
+          setTimeout(() => {
+            if (!window.__adSkip) { emit('onRewardedVideoAdReward'); resolve({ type: 'revive', amount: 1 }); }
+            setTimeout(() => emit('onRewardedVideoAdDismissed'), 50);
+          }, 100);
+        });
+        if (method === 'showInterstitial') {
+          window.__adsShown.next++; emit('interstitialAdShowed');
+          setTimeout(() => emit('interstitialAdDismissed'), 100);
+          return {};
+        }
+        throw new Error('unexpected ad call ' + method);
+      },
+      listen: (event, fn) => { (handlers[event] = handlers[event] || []).push(fn); }
+    };
+  };
+  await context.addInitScript(standIns);
   const page = await context.newPage();
   page.on('pageerror', e => problems.push('page error: ' + e.message));
   page.on('response', r => { if (r.status() >= 400) problems.push(`missing file (${r.status()}): ${r.url()}`); });
@@ -88,13 +117,13 @@ function serve() {
   if (!/maximum-scale=1/.test(await page.getAttribute('meta[name="viewport"]', 'content'))) problems.push('the app screen can still zoom');
   await page.locator('#startBtn').waitFor({ state: 'visible' });
   await fontsOk('title');
-  // No sign-in, Stripe or No Ads anywhere in the app; Crystals only, through Apple.
-  const noWebStore = async where => {
-    const seen = await page.evaluate(() => {
-      const ids = ['startNoAdsBtn', 'reviveDawnLocked', 'reviveDaily', 'reviveAd'];
+  // No sign-in or Stripe anywhere in the app; Crystals and No Ads through Apple.
+  const noWebStore = async (where, p = page) => {
+    const seen = await p.evaluate(() => {
+      const ids = ['authControls', 'checkoutConfirm', 'refreshWallet', 'signOutBtn'];
       const shown = ids.filter(id => { const el = document.getElementById(id); return el && el.checkVisibility(); });
       const text = document.body.innerText;
-      const words = ['Sign in', 'No Ads', 'Stripe', 'browser'].filter(w => text.includes(w));
+      const words = ['Sign in', 'Stripe', 'browser', 'US$3'].filter(w => text.includes(w));
       return shown.concat(words.map(w => `"${w}"`));
     });
     if (seen.length) problems.push(`${where}: visible in the app: ${seen.join(', ')}`);
@@ -231,10 +260,87 @@ function serve() {
   await bare.waitForTimeout(300);
   if (!/unavailable/.test(await bare.locator('#shopStatus').textContent())) problems.push('no store: the shop does not say it is unavailable');
   if (await bare.locator('[data-product]:not([disabled])').count()) problems.push('no store: a pack can still be bought');
+  if (await bare.locator('#startNoAdsBtn').isVisible()) problems.push('no store: No Ads is offered');
+
+  // Ads and No Ads, from a fresh iPhone with no Crystals.
+  const fresh = async () => {
+    const c = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: engine === pw.chromium, hasTouch: true });
+    await c.route('**/*', route => route.request().url().startsWith(base) ? route.continue() : (problems.push('blocked network request: ' + route.request().url()), route.abort()));
+    await c.addInitScript(standIns);
+    const p = await c.newPage();
+    p.on('pageerror', e => problems.push('page error (ads): ' + e.message));
+    await p.goto(base); await dawnDone(p); await p.locator('#startBtn').waitFor({ state: 'visible' });
+    return p;
+  };
+  const play = async p => {
+    await p.locator('#startBtn').focus(); await p.locator('#startBtn').press('Enter');
+    if (await p.locator('#lessonBar').isVisible()) await p.locator('#lessonSkip').click();
+    await p.locator('#countdown').waitFor({ state: 'hidden', timeout: 15000 });
+  };
+  const gameOver = async p => {
+    await p.evaluate(() => { state.over = false; state.paused = true; render(); endRun(); });
+    await p.locator('#gameover').waitFor({ state: 'visible' }); await p.waitForTimeout(1200);
+  };
+  const visible = (p, id) => p.locator('#' + id).isVisible();
+  const newGameNow = async p => { await p.locator('#goAgain').click(); if (await visible(p, 'appConfirm')) await p.locator('#appConfirmYes').click(); await p.waitForTimeout(600); };
+  const ad = await fresh();
+  await noWebStore('ads: title', ad);
+  if (!await visible(ad, 'startNoAdsBtn')) problems.push('title: the No Ads button is missing');
+  await play(ad); await gameOver(ad);
+  await noWebStore('ads: game over', ad);
+  if (!await visible(ad, 'reviveAd')) problems.push('game over with 0 Crystals: no "watch an ad" revive');
+  if (!await visible(ad, 'reviveDawnLocked')) problems.push('game over: the locked daily revival (No Ads) is not shown');
+  await ad.screenshot({ path: path.join(__dirname, 'offline-gameover-ad.png') });
+  // An ad closed early revives nothing; one watched to the end does.
+  await ad.evaluate(() => { window.__adSkip = true; });
+  await ad.locator('#reviveAd').click();
+  await ad.locator('#reviveStatus', { hasText: 'Ad not finished' }).waitFor({ timeout: 5000 }).catch(() => problems.push('ad: closing an ad early was not reported'));
+  if (await ad.evaluate(() => state.revived)) problems.push('ad: an ad closed early still revived');
+  await ad.evaluate(() => { window.__adSkip = false; });
+  await ad.locator('#reviveAd').waitFor({ state: 'visible', timeout: 3000 }).catch(() => problems.push('ad: no new ad after one was closed early'));
+  await ad.locator('#reviveAd').click();
+  await ad.waitForFunction(() => state.revived, null, { timeout: 5000 }).catch(() => problems.push('ad: watching the ad did not revive'));
+  if (await ad.evaluate(() => BioAudio.band().adMuted)) problems.push('ad: the music stayed muted after the ad');
+  // After a game over, a new game starts with a short ad.
+  await ad.evaluate(() => { state.revivalWait = false; document.getElementById('reviveResume').hidden = true; });
+  await gameOver(ad); await newGameNow(ad);
+  if (await ad.evaluate(() => __adsShown.next) !== 1) problems.push('new game: the short ad did not play once');
+  if (await ad.evaluate(() => state.over)) problems.push('new game: the new meadow did not start after the ad');
+  // No Ads: bought through Apple, then no ads and a free revival each day.
+  await ad.evaluate(() => { state.over = false; state.paused = true; render(); });
+  await ad.evaluate(() => BioEconomy.openShop('no_ads'));
+  await ad.locator('[data-product="no_ads"]', { hasText: '$2.99' }).waitFor({ timeout: 5000 }).catch(() => problems.push('No Ads: Apple price not shown'));
+  if (await visible(ad, 'claimBtn') || await ad.locator('.crystal-pack').first().isVisible()) problems.push('No Ads shop: Crystals are mixed in');
+  if (!await visible(ad, 'restoreBtn')) problems.push('No Ads shop: no Restore purchases button');
+  await ad.screenshot({ path: path.join(__dirname, 'offline-noads.png') });
+  await ad.locator('[data-product="no_ads"]').click();
+  await ad.locator('#shopStatus', { hasText: 'No Ads is on' }).waitFor({ timeout: 5000 }).catch(() => problems.push('No Ads: purchase not confirmed'));
+  if (await ad.locator('[data-product="no_ads"]').textContent() !== 'Owned') problems.push('No Ads: button does not say Owned');
+  await ad.locator('#shopClose').click();
+  if (await ad.locator('#startNoAdsLabel').textContent() !== 'Owned') problems.push('title: No Ads not shown as owned');
+  await gameOver(ad);
+  if (!await visible(ad, 'reviveDaily') || await visible(ad, 'reviveAd') || await visible(ad, 'reviveDawnLocked')) problems.push('No Ads game over: the free daily revival is not the one offered');
+  await ad.locator('#reviveDaily').click();
+  await ad.waitForFunction(() => state.revived, null, { timeout: 5000 }).catch(() => problems.push('No Ads: the daily revival did not revive'));
+  await ad.evaluate(() => { state.revivalWait = false; document.getElementById('reviveResume').hidden = true; });
+  await gameOver(ad);
+  if (await visible(ad, 'reviveDaily')) problems.push('No Ads: the daily revival was offered twice in a day');
+  await newGameNow(ad);
+  const shownAds = await ad.evaluate(() => __adsShown);
+  if (shownAds.next !== 1 || shownAds.reward !== 2) problems.push(`No Ads: an ad still played (${JSON.stringify(shownAds)})`);
+  await ad.context().close();
+  // A reinstall: Apple says No Ads is owned, so it comes back without buying.
+  const back = await fresh();
+  await back.evaluate(() => { window.__fakeOwned = true; });
+  await back.evaluate(() => BioEconomy.openShop('no_ads'));
+  await back.locator('#restoreBtn').click();
+  await back.locator('#shopStatus', { hasText: 'No Ads restored' }).waitFor({ timeout: 5000 }).catch(() => problems.push('restore: No Ads did not come back'));
+  await back.context().close();
+
   await browser.close(); server.close();
   if (problems.length) {
     console.log([...new Set(problems)].join('\n'));
     process.exit(1);
   }
-  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links over the game, Crystals bought, kept and spent, no sign-in or web store shown, no network used`);
+  console.log(`offline check passed (${engine.name()}): ${placed} animals placed, 5 pages walked by their links over the game, Crystals bought, kept and spent, ads and No Ads played through, no sign-in or web store shown, no network used`);
 })().catch(e => { console.error(e); process.exit(1); });
